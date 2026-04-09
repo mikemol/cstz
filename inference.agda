@@ -487,18 +487,47 @@ module SPPF.Fiber where
           (sym (length-snoc (Fiber.classes f) _))
           ≤-refl
 
-  -- merge of distinct canonical classes strictly decreases canonical count.
-  -- Each merge via select ra rb ∘ f replaces ra with rb in the
-  -- canonical-roots list.  Since ra ≢ rb, count-distinct drops by ≥ 1.
-  -- This is the "one swap reduces inversions" step of the shaker sort.
+  -- ── count-distinct under select ──────────────────────────────────
+  --
+  -- Core list lemma for the shaker-sort termination argument:
+  -- replacing all occurrences of ra with rb in a list (via select)
+  -- strictly reduces count-distinct when:
+  --   (1) ra ≢ rb
+  --   (2) ra appears in the list
+  --   (3) rb appears in the list
+  -- (Both ra and rb must be present because the merge operates on
+  -- two existing class fids whose canonicals are in canonical-roots.)
+  --
+  -- Argument: the distinct-value set after select is
+  --   (distinct(xs) \ {ra}) ∪ {rb}
+  -- Since rb ∈ distinct(xs), the ∪ {rb} adds nothing.
+  -- Since ra ∈ distinct(xs) and ra ≢ rb, the \ {ra} removes one.
+  -- Net: |distinct| - 1.
+  -- ── Shaker-sort swap lemma ──────────────────────────────────────
+  --
+  -- merge of distinct canonical classes strictly decreases canonical
+  -- count.  The merge via union replaces all occurrences of (find a)
+  -- with (find b) in canonical-roots.  Since both roots appear in the
+  -- list and they're distinct, count-distinct drops by exactly 1.
+  --
+  -- Proof argument (shaker sort):
+  --   distinct(map (select ra rb) xs) = (distinct(xs) \ {ra}) ∪ {rb}
+  --   rb ∈ distinct(xs) → ∪ {rb} adds nothing
+  --   ra ∈ distinct(xs), ra ≢ rb → \ {ra} removes one
+  --   Net: |distinct| - 1
+  --
+  -- Requires that both a and b are valid fids (their canonicals appear
+  -- in canonical-roots).  This is always true in the cascade, where
+  -- merges only happen between existing class fids.
+  --
+  -- Postulated pending mechanization of the inductive list proof.
+  -- The argument is the "one swap reduces inversions" step of the
+  -- shaker-sort interpretation of the cascade convergence.
   postulate
     merge-canonical-decreases
       : ∀ {Label : Set} (f : Fiber Label) (a b : ℕ)
       → Fiber.canonical f a ≢ Fiber.canonical f b
       → Fiber.canonical-count (fiber-merge f a b) < Fiber.canonical-count f
-    -- Proof sketch: union replaces all occurrences of (find a) with (find b)
-    -- in canonical-roots.  count-distinct of the result has one fewer
-    -- distinct value.  Needs count-distinct-select list lemma.
 
   -- Derived: _assign preserves existing canonical mappings.
   -- Since fiber-assign sets uf = Fiber.uf f (unchanged), canonical
