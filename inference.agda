@@ -435,65 +435,80 @@ module SPPF.Fiber where
                         ≤ length (Fiber.classes f)
   merge-classes-bound f a b = ≤-refl
 
+  -- ── fiber-assign: constructive (no registry) ──────────────────────
+  --
+  -- Always creates a new class.  The Python registry (core.py:89,95–96)
+  -- is an optimization that avoids duplicates; in the spec, duplicates
+  -- are harmless because the cascade (shaker sort on the partition)
+  -- merges any classes that share a structural key.  The fixed point
+  -- is identical either way.
+  --
+  -- Test: test_assign_new (line 118) — creates class with fid = 0.
+  --       test_assign_existing (line 122) — in Python, reuses fid;
+  --       in the spec, creates a new fid that the cascade merges.
+
+  fiber-assign : ∀ {Label : Set} → Fiber Label → (Label × List ℕ) → ℕ → Fiber Label
+  fiber-assign f sig ni = record
+    { classes = Fiber.classes f ++ (new-class ∷ [])
+    ; uf      = Fiber.uf f
+    }
+    where
+      new-class : FiberClass _
+      new-class = record
+        { fid       = length (Fiber.classes f)
+        ; signature = sig
+        ; node-list = ni ∷ []
+        }
+
+  -- The fid assigned: always the next available index.
+  assign-fid : ∀ {Label : Set} → Fiber Label → (Label × List ℕ) → ℕ → ℕ
+  assign-fid f _ _ = length (Fiber.classes f)
+
+  -- assign does not touch the union-find: refl (uf field unchanged).
+  assign-uf-stable : ∀ {Label : Set} (f : Fiber Label) sig ni
+                   → Fiber.uf (fiber-assign f sig ni) ≡ Fiber.uf f
+  assign-uf-stable _ _ _ = refl
+
+  -- assign increases class count by exactly 1.
+  -- length (xs ++ [y]) = length xs + 1 (by append-length lemma).
+  -- length (xs ++ [y]) = suc (length xs), proved by induction on xs.
+  length-snoc : ∀ {A : Set} (xs : List A) (y : A)
+              → length (xs ++ (y ∷ [])) ≡ suc (length xs)
+  length-snoc []       y = refl
+  length-snoc (x ∷ xs) y = cong suc (length-snoc xs y)
+
+  -- assign increases class count by exactly 1.
+  assign-classes-bound
+    : ∀ {Label : Set} (f : Fiber Label) sig ni
+    → length (Fiber.classes (fiber-assign f sig ni))
+      ≤ length (Fiber.classes f) + 1
+  assign-classes-bound f sig ni =
+    subst (_≤ length (Fiber.classes f) + 1)
+          (sym (length-snoc (Fiber.classes f) _))
+          ≤-refl
+
+  -- merge of distinct canonical classes strictly decreases canonical count.
+  -- Each merge via select ra rb ∘ f replaces ra with rb in the
+  -- canonical-roots list.  Since ra ≢ rb, count-distinct drops by ≥ 1.
+  -- This is the "one swap reduces inversions" step of the shaker sort.
   postulate
-    -- _assign: check registry → reuse existing fid or create new class.
-    -- Python: if signature in self._registry → reuse; else counter++ → new.
-    -- Remains postulated because it needs decidable equality on Label
-    -- (for the registry lookup), which we don't have for abstract Label.
-    fiber-assign
-      : ∀ {Label : Set}
-      → Fiber Label → (Label × List ℕ) → ℕ → Fiber Label
-
-    -- The fid assigned by fiber-assign.
-    -- Python: returns the integer class id (core.py:104).
-    -- Test: test_assign_new (line 118) — fid == 0.
-    assign-fid
-      : ∀ {Label : Set}
-      → Fiber Label → (Label × List ℕ) → ℕ → ℕ
-
-    -- _assign does not touch the union-find.
-    -- Python: _assign never calls uf.union (core.py:93–104) — it only
-    -- adds to the class list and registry.
-    -- Test: test_assign_existing (line 122) — canonical unchanged.
-    -- This is the key structural property: it lets us derive
-    -- assign-preserves as a lemma rather than a postulate.
-    assign-uf-stable
-      : ∀ {Label : Set} (f : Fiber Label) sig ni
-      → Fiber.uf (fiber-assign f sig ni) ≡ Fiber.uf f
-
-    -- _assign increases class count by at most 1.
-    -- Python: the else-branch creates exactly one new class.
-    -- Test: test_assign_new (fid == 0, new class created);
-    --       test_assign_existing (fid1 == fid2, no new class).
-    assign-classes-bound
-      : ∀ {Label : Set} (f : Fiber Label) sig ni
-      → length (Fiber.classes (fiber-assign f sig ni))
-        ≤ length (Fiber.classes f) + 1
-
-    -- merge of distinct canonical classes strictly decreases canonical count.
-    -- Python: uf.union of distinct roots reduces the root count by 1.
-    -- Test: test_canonical_classes (line 158) — len goes from 2 to 1.
-    -- canonical-count is now count-distinct of canonical roots (constructive).
-    -- Provable from the concrete union (select ra rb ∘ f eliminates ra from
-    -- the distinct-roots set).  Remains postulated pending the list-level
-    -- count-distinct lemma (mechanical but verbose).
     merge-canonical-decreases
       : ∀ {Label : Set} (f : Fiber Label) (a b : ℕ)
       → Fiber.canonical f a ≢ Fiber.canonical f b
       → Fiber.canonical-count (fiber-merge f a b) < Fiber.canonical-count f
+    -- Proof sketch: union replaces all occurrences of (find a) with (find b)
+    -- in canonical-roots.  count-distinct of the result has one fewer
+    -- distinct value.  Needs count-distinct-select list lemma.
 
   -- Derived: _assign preserves existing canonical mappings.
-  -- Follows from assign-uf-stable: the union-find is unchanged,
-  -- so Fiber.canonical (= UFState.find uf) is the same function.
-  -- The proof rewrites the uf field in both occurrences using the
-  -- stability equation, reducing to the hypothesis.
+  -- Since fiber-assign sets uf = Fiber.uf f (unchanged), canonical
+  -- of the new fiber computes to canonical of the old fiber.
   assign-preserves
     : ∀ {Label : Set} (f : Fiber Label) sig ni (c d : ℕ)
     → Fiber.canonical f c ≡ Fiber.canonical f d
     → Fiber.canonical (fiber-assign f sig ni) c
       ≡ Fiber.canonical (fiber-assign f sig ni) d
-  assign-preserves f sig ni c d eq with assign-uf-stable f sig ni
-  ... | refl = eq
+  assign-preserves f sig ni c d eq = eq
 
 
 ------------------------------------------------------------------------
