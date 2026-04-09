@@ -11,16 +11,19 @@ Usage::
     print(sppf.summary())
 """
 
+from __future__ import annotations
+
 import ast
 import hashlib
 from pathlib import Path
+from typing import Any, Optional, Union
 
 from .core import SPPF
 
 
 # ── Type inference tables ────────────────────────────────────────────
 
-_KNOWN_TYPES = {
+_KNOWN_TYPES: dict[str, str] = {
     "Graph": "Graph", "URIRef": "URIRef", "BNode": "BNode",
     "Literal": "Literal", "Namespace": "NS",
     "RDF": "RDF", "RDFS": "RDFS", "SH": "SH", "XSD": "XSD",
@@ -34,7 +37,7 @@ _KNOWN_TYPES = {
     "hasattr": "→bool", "getattr": "→T",
 }
 
-_RECV_ATTR = {
+_RECV_ATTR: dict[tuple[str, str], str] = {
     ("RDF", "type"): "URIRef", ("RDFS", "label"): "URIRef",
     ("RDFS", "domain"): "URIRef", ("RDFS", "range"): "URIRef",
     ("RDFS", "subClassOf"): "URIRef", ("RDFS", "Class"): "URIRef",
@@ -43,7 +46,7 @@ _RECV_ATTR = {
     ("Path", "name"): "str",
 }
 
-_METHOD_RET = {
+_METHOD_RET: dict[str, str] = {
     "add": "None", "remove": "None", "append": "None", "extend": "None",
     "objects": "Iter", "subjects": "Iter", "triples": "Iter",
     "predicate_objects": "Iter", "subject_predicates": "Iter",
@@ -54,7 +57,7 @@ _METHOD_RET = {
     "glob": "Iter", "is_dir": "bool", "read_text": "str",
 }
 
-_PARAM_TYPES = {
+_PARAM_TYPES: dict[str, str] = {
     "g": "Graph", "self": "Self", "node": "AST",
     "kernel": "Kernel", "uri": "URIRef", "subj": "URIRef",
     "full": "Graph",
@@ -66,25 +69,25 @@ _PARAM_TYPES = {
 class _Env:
     __slots__ = ('_bindings', '_parent')
 
-    def __init__(self, parent=None):
-        self._bindings = {}
-        self._parent = parent
+    def __init__(self, parent: Optional[_Env] = None) -> None:
+        self._bindings: dict[str, str] = {}
+        self._parent: Optional[_Env] = parent
 
-    def bind(self, name, typ):
+    def bind(self, name: str, typ: str) -> None:
         self._bindings[name] = typ
 
-    def get(self, name):
+    def get(self, name: str) -> Optional[str]:
         if name in self._bindings:
             return self._bindings[name]
         if self._parent:
             return self._parent.get(name)
         return _KNOWN_TYPES.get(name)
 
-    def child(self):
+    def child(self) -> _Env:
         return _Env(self)
 
 
-def _infer(node, env):
+def _infer(node: ast.AST, env: _Env) -> Optional[str]:
     """Infer the dependent type of an AST node within an environment."""
     if isinstance(node, ast.Name):
         return env.get(node.id)
@@ -127,7 +130,7 @@ def _infer(node, env):
 
 # ── Categorical classification (κ = g(τ,σ)) ─────────────────────────
 
-def _receiver_domain(rt):
+def _receiver_domain(rt: Optional[str]) -> str:
     """Map a raw receiver type to a semantic domain for κ-tag qualification."""
     if rt is None:
         return "?"
@@ -154,7 +157,7 @@ def _receiver_domain(rt):
     return "object"
 
 
-def _classify_kappa(node, env):
+def _classify_kappa(node: ast.AST, env: _Env) -> str:
     """Classify an AST node by its universal construction.
 
     Returns a κ-tag that is the product τ×σ → Construction.
@@ -218,7 +221,7 @@ def _classify_kappa(node, env):
             rt = _infer(node.func.value, env)
             domain = _receiver_domain(rt)
             if attr == "add":
-                if rt and "Graph" in (rt or ""):
+                if rt and "Graph" in rt:
                     return "graph.emit"
                 if rt == "set":
                     return "powerset.insert"
@@ -288,9 +291,9 @@ def _classify_kappa(node, env):
 
 # ── AST node wrapper ─────────────────────────────────────────────────
 
-def _extract_params(node):
+def _extract_params(node: ast.AST) -> tuple[tuple[str, Any], ...]:
     """Extract the syntactic parameters of an AST node."""
-    params = {}
+    params: dict[str, Any] = {}
     if isinstance(node, ast.Name):
         params["n"] = node.id
     elif isinstance(node, ast.Attribute):
@@ -316,7 +319,8 @@ def _extract_params(node):
 
 # ── Recursive AST → SPPF ────────────────────────────────────────────
 
-def _build_sppf(tree, sppf, env, filename="<input>"):
+def _build_sppf(tree: ast.AST, sppf: SPPF, env: _Env,
+                filename: str = "<input>") -> tuple[int, int, int]:
     """Recursively factorize an AST node into the SPPF.
     Returns (sigma_id, tau_id, kappa_id).
     """
@@ -345,7 +349,7 @@ def _build_sppf(tree, sppf, env, filename="<input>"):
             if vt:
                 env.bind(tree.targets[0].id, vt)
 
-    child_results = []
+    child_results: list[tuple[int, int, int]] = []
     for child in ast.iter_child_nodes(tree):
         child_results.append(_build_sppf(child, sppf, child_env, filename))
 
@@ -364,7 +368,8 @@ def _build_sppf(tree, sppf, env, filename="<input>"):
 
 # ── Public API ───────────────────────────────────────────────────────
 
-def factorize(source, extra_types=None):
+def factorize(source: Union[str, Path, ast.Module],
+              extra_types: Optional[dict[str, str]] = None) -> SPPF:
     """Factorize Python source into a three-fiber SPPF.
 
     Parameters
@@ -392,10 +397,10 @@ def factorize(source, extra_types=None):
             _build_sppf(stmt, sppf, env)
         return sppf
 
-    source = Path(source) if not isinstance(source, Path) else source
+    source_path = Path(source) if not isinstance(source, Path) else source
 
-    if source.is_dir():
-        for pyfile in sorted(source.glob("**/*.py")):
+    if source_path.is_dir():
+        for pyfile in sorted(source_path.glob("**/*.py")):
             if pyfile.name == "__init__.py":
                 continue
             try:
@@ -407,11 +412,11 @@ def factorize(source, extra_types=None):
                 _build_sppf(stmt, sppf, file_env, pyfile.stem)
         return sppf
 
-    if source.is_file():
-        tree = ast.parse(source.read_text())
+    if source_path.is_file():
+        tree = ast.parse(source_path.read_text())
         file_env = env.child()
         for stmt in tree.body:
-            _build_sppf(stmt, sppf, file_env, source.stem)
+            _build_sppf(stmt, sppf, file_env, source_path.stem)
         return sppf
 
     # Assume it's source text

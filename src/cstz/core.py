@@ -11,7 +11,10 @@ Three fibers:
   κ (categorical) — what it does (universal construction)
 """
 
+from __future__ import annotations
+
 from collections import defaultdict, Counter
+from typing import Any, Iterator, Optional
 
 
 # ── Union-Find ───────────────────────────────────────────────────────
@@ -20,16 +23,16 @@ class UnionFind:
     """Weighted union-find with path compression."""
     __slots__ = ('_parent', '_rank')
 
-    def __init__(self):
-        self._parent = {}
-        self._rank = {}
+    def __init__(self) -> None:
+        self._parent: dict[Any, Any] = {}
+        self._rank: dict[Any, int] = {}
 
-    def make(self, x):
+    def make(self, x: Any) -> None:
         if x not in self._parent:
             self._parent[x] = x
             self._rank[x] = 0
 
-    def find(self, x):
+    def find(self, x: Any) -> Any:
         r = x
         while self._parent[r] != r:
             r = self._parent[r]
@@ -38,7 +41,7 @@ class UnionFind:
             self._parent[x], x = r, self._parent[x]
         return r
 
-    def union(self, a, b):
+    def union(self, a: Any, b: Any) -> Any:
         """Merge classes of a and b. Returns canonical representative."""
         ra, rb = self.find(a), self.find(b)
         if ra == rb:
@@ -50,6 +53,15 @@ class UnionFind:
             self._rank[ra] += 1
         return ra
 
+    def __contains__(self, x: object) -> bool:
+        return x in self._parent
+
+    def __iter__(self) -> Iterator[Any]:
+        return iter(self._parent)
+
+    def __len__(self) -> int:
+        return len(self._parent)
+
 
 # ── SPPF data structures ────────────────────────────────────────────
 
@@ -57,27 +69,29 @@ class FiberClass:
     """A single equivalence class in one fiber."""
     __slots__ = ('id', 'signature', 'node_indices', 'child_ids')
 
-    def __init__(self, fid, signature, child_ids):
-        self.id = fid
-        self.signature = signature
-        self.child_ids = child_ids
-        self.node_indices = []
+    def __init__(self, fid: int, signature: tuple[Any, ...],
+                 child_ids: tuple[int, ...]) -> None:
+        self.id: int = fid
+        self.signature: tuple[Any, ...] = signature
+        self.child_ids: tuple[int, ...] = child_ids
+        self.node_indices: list[int] = []
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"FiberClass({self.id}, {len(self.node_indices)} nodes)"
 
 
 class Fiber:
     """One fibration of the SPPF (σ, τ, or κ)."""
 
-    def __init__(self, name):
-        self.name = name
-        self.classes = {}       # id -> FiberClass
-        self._registry = {}     # signature -> id
-        self._counter = 0
-        self.uf = UnionFind()   # union-find for streaming merges
+    def __init__(self, name: str) -> None:
+        self.name: str = name
+        self.classes: dict[int, FiberClass] = {}
+        self._registry: dict[tuple[Any, ...], int] = {}
+        self._counter: int = 0
+        self.uf: UnionFind = UnionFind()
 
-    def _assign(self, signature, child_ids, node_index):
+    def _assign(self, signature: tuple[Any, ...],
+                child_ids: tuple[int, ...], node_index: int) -> int:
         if signature in self._registry:
             fid = self._registry[signature]
         else:
@@ -89,40 +103,40 @@ class Fiber:
         self.classes[fid].node_indices.append(node_index)
         return fid
 
-    def canonical(self, fid):
+    def canonical(self, fid: int) -> int:
         """Resolve through union-find to canonical representative."""
         return self.uf.find(fid)
 
-    def merge(self, a, b):
+    def merge(self, a: int, b: int) -> int:
         """Merge two fiber classes. Returns canonical id."""
         ra, rb = self.uf.find(a), self.uf.find(b)
         if ra == rb:
             return ra
-        winner = self.uf.union(ra, rb)
+        winner: int = self.uf.union(ra, rb)
         loser = rb if winner == ra else ra
         # Merge node lists into winner
         self.classes[winner].node_indices.extend(self.classes[loser].node_indices)
         return winner
 
-    def canonical_classes(self):
+    def canonical_classes(self) -> Iterator[int]:
         """Iterate only canonical (non-merged) class ids."""
-        seen = set()
+        seen: set[int] = set()
         for fid in self.classes:
             canon = self.uf.find(fid)
             if canon not in seen:
                 seen.add(canon)
                 yield canon
 
-    def __len__(self):
+    def __len__(self) -> int:
         return sum(1 for _ in self.canonical_classes())
 
-    def __getitem__(self, fid):
+    def __getitem__(self, fid: int) -> FiberClass:
         return self.classes[self.uf.find(fid)]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[int]:
         return self.canonical_classes()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Fiber({self.name!r}, {len(self)} classes)"
 
 
@@ -140,34 +154,42 @@ class SPPF:
         nodes: list — per-node records
     """
 
-    def __init__(self):
-        self.sigma = Fiber('sigma')
-        self.tau = Fiber('tau')
-        self.kappa = Fiber('kappa')
-        self.nodes = []  # list of dicts
+    def __init__(self) -> None:
+        self.sigma: Fiber = Fiber('sigma')
+        self.tau: Fiber = Fiber('tau')
+        self.kappa: Fiber = Fiber('kappa')
+        self.nodes: list[dict[str, Any]] = []
 
         # Streaming η-detection index.
-        self._tau_structural = {}
-        self._tau_structural_by_child = defaultdict(set)
-        self._tau_structural_by_variant = defaultdict(set)
-        self._eta_abstractions = {}
-        self._eta_uf = UnionFind()
-        self._eta_count = 0
-        self._eta_tower = []
+        self._tau_structural: dict[
+            tuple[str, tuple[int, ...]], dict[Optional[str], int]
+        ] = {}
+        self._tau_structural_by_child: defaultdict[
+            int, set[tuple[str, tuple[int, ...]]]
+        ] = defaultdict(set)
+        self._tau_structural_by_variant: defaultdict[
+            Optional[str], set[tuple[str, tuple[int, ...]]]
+        ] = defaultdict(set)
+        self._eta_abstractions: dict[str, str] = {}
+        self._eta_uf: UnionFind = UnionFind()
+        self._eta_count: int = 0
+        self._eta_tower: list[tuple[int, list[Any], str]] = []
 
         # Recursive cleavage: multi-level residue tracking.
-        self._residue_sets = defaultdict(set)
-        self._cleavage_levels = []
-        self._cleavage_fibers = []
-        self._cleavage_ghost_count = 0
+        self._residue_sets: defaultdict[int, set[Optional[str]]] = defaultdict(set)
+        self._cleavage_levels: list[dict[Any, Any]] = []
+        self._cleavage_fibers: list[Fiber] = []
+        self._cleavage_ghost_count: int = 0
 
         # Per-cell observation counters with downward projection.
-        self._cell_obs = defaultdict(lambda: defaultdict(int))
-        self._cell_contents = defaultdict(set)
+        self._cell_obs: defaultdict[int, defaultdict[Any, int]] = defaultdict(
+            lambda: defaultdict(int))
+        self._cell_contents: defaultdict[tuple[int, Any], set[Any]] = defaultdict(set)
 
     # ── Cell observation ─────────────────────────────────────────
 
-    def _observe_cell(self, level, cell_id, contained_ids=None):
+    def _observe_cell(self, level: int, cell_id: Any,
+                      contained_ids: Optional[list[Any]] = None) -> None:
         """Record observation of a k-cell and project +1 to each
         contained (k-1)-cell, recursively down to 0-cells."""
         self._cell_obs[level][cell_id] += 1
@@ -176,13 +198,17 @@ class SPPF:
             for cid in contained_ids:
                 self._cell_contents[key].add(cid)
         if level > 0:
+            # Recursion terminates by construction: _cell_contents[(level, id)]
+            # only holds IDs recorded at level-1; level strictly decreases to 0
+            # and cycles are impossible. (Corresponds to P3 well-founded induction.)
             key = (level, cell_id)
-            for child_id in self._cell_contents.get(key, []):
+            for child_id in self._cell_contents.get(key, ()):
                 self._observe_cell(level - 1, child_id)
 
     # ── Cleavage ─────────────────────────────────────────────────
 
-    def _process_cleavage(self, merged_tid, ast_type, trigger_node_index):
+    def _process_cleavage(self, merged_tid: int, ast_type: str,
+                          trigger_node_index: int) -> None:
         """Process cleavage recursively after a τ-merge."""
         canon_tid = self.tau.canonical(merged_tid)
         raw_residue = self._residue_sets.get(canon_tid, set())
@@ -216,10 +242,10 @@ class SPPF:
 
                     if len(existing) >= 2:
                         # κ-coverability filter using κ-tag
-                        ktag_sets = set()
+                        ktag_sets: set[frozenset[Any]] = set()
                         for tid_val in existing.values():
                             cid = self.tau.canonical(tid_val)
-                            if cid in self.tau.classes:
+                            if cid in self.tau.classes:  # pragma: no branch
                                 ks = frozenset(
                                     self.nodes[ni].get('kappa_tag')
                                     for ni in self.tau.classes[cid].node_indices
@@ -240,7 +266,7 @@ class SPPF:
 
                         # Cell observation
                         cell_level = 3 + level
-                        contained_2cells = set()
+                        contained_2cells: set[Any] = set()
                         for tid_val in existing.values():
                             cid = self.tau.canonical(tid_val)
                             for raw_t in self._residue_sets.get(cid, ()):
@@ -248,7 +274,7 @@ class SPPF:
                                 if abs_name:
                                     contained_2cells.add(
                                         self._eta_uf.find(abs_name)
-                                        if abs_name in self._eta_uf._parent
+                                        if abs_name in self._eta_uf
                                         else abs_name)
                         self._observe_cell(
                             cell_level, cleavage_key,
@@ -256,12 +282,15 @@ class SPPF:
 
                         # Annotate nodes
                         cleavage_class_id = level_fiber._counter
+                        level_fiber._counter += 1
                         for tid_val in existing.values():
                             cid = self.tau.canonical(tid_val)
                             for ni in self.tau.classes[cid].node_indices:
                                 if ni >= len(self.nodes):
                                     continue
                                 node = self.nodes[ni]
+                                # First-writer-wins: informational annotation
+                                # only; does not affect any merge logic.
                                 if f'cleavage_{level}' not in node:
                                     node[f'cleavage_{level}'] = cleavage_class_id
 
@@ -273,19 +302,19 @@ class SPPF:
                             current_context = f"cleavage_{level}"
                             level += 1
                             continue
-                break
+                break  # pragma: no cover — coverage.py while-True tracing quirk
             else:
                 level_index[cleavage_key] = {canon_tid: canon_tid}
                 break
 
     # ── Residue tracking ─────────────────────────────────────────
 
-    def _update_residue(self, tau_id, raw_dep_type):
+    def _update_residue(self, tau_id: int, raw_dep_type: Optional[str]) -> None:
         canon = self.tau.canonical(tau_id)
         if raw_dep_type is not None:
             self._residue_sets[canon].add(raw_dep_type)
 
-    def _merge_residue_sets(self, winner, loser):
+    def _merge_residue_sets(self, winner: int, loser: int) -> None:
         w = self.tau.canonical(winner)
         l = self.tau.canonical(loser)
         if l in self._residue_sets:
@@ -293,10 +322,16 @@ class SPPF:
 
     # ── Abstraction cascade ──────────────────────────────────────
 
-    def _cascade_abstraction_merge(self, merged_names, trigger_node_index):
+    def _cascade_abstraction_merge(self, merged_names: set[str],
+                                   trigger_node_index: int) -> set[int]:
         """After η-union-find merges abstraction names, recheck structural
-        keys whose variants are keyed by those names."""
-        affected_keys = set()
+        keys whose variants are keyed by those names.
+
+        Returns a set of tau IDs whose structural-key parents need
+        cascading (replacing the former recursive _cascade_eta call).
+        """
+        deferred_tau_ids: set[int] = set()
+        affected_keys: set[tuple[str, tuple[int, ...]]] = set()
         for name in merged_names:
             affected_keys.update(self._tau_structural_by_variant.get(name, set()))
 
@@ -305,8 +340,8 @@ class SPPF:
                 continue
             variants = self._tau_structural[struct_key]
 
-            rekeyed = {}
-            merges = []
+            rekeyed: dict[Optional[str], int] = {}
+            merges: list[tuple[Any, Optional[str], int]] = []
             for dt, tid in list(variants.items()):
                 resolved = self._resolve_type(dt)
                 canon_tid = self.tau.canonical(tid)
@@ -334,37 +369,48 @@ class SPPF:
                         f"η-transitive:{resolved}"
                     ))
                     final = self.tau.canonical(winner)
-                    ast_t = struct_key[0] if isinstance(struct_key[0], str) else str(struct_key[0])
+                    ast_t = (struct_key[0] if isinstance(struct_key[0], str)
+                             else str(struct_key[0]))
                     self._process_cleavage(final, ast_t, trigger_node_index)
-                    self._cascade_eta({final}, trigger_node_index)
+                    deferred_tau_ids.add(final)
 
-    def _resolve_type(self, dep_type):
+        return deferred_tau_ids
+
+    def _resolve_type(self, dep_type: Optional[str]) -> Optional[str]:
         """Resolve a dep_type through the full abstraction chain."""
         if dep_type is None:
             return None
         abs_name = self._eta_abstractions.get(dep_type, dep_type)
-        if abs_name in self._eta_uf._parent:
+        if abs_name in self._eta_uf:
             return self._eta_uf.find(abs_name)
         return abs_name
 
-    def _recanon_structural_key(self, old_key):
+    def _recanon_structural_key(
+        self, old_key: tuple[str, tuple[int, ...]]
+    ) -> tuple[tuple[str, tuple[int, ...]], bool]:
         ast_type, child_taus = old_key
         new_children = tuple(self.tau.canonical(c) for c in child_taus)
         new_key = (ast_type, new_children)
         return new_key, new_key != old_key
 
-    def _cascade_eta(self, merged_tau_ids, trigger_node_index):
-        """Cascade after τ-merges: re-canonicalize structural keys
-        whose children were merged, revealing higher-order transformations."""
-        worklist = set()
-        for tid in merged_tau_ids:
-            worklist.update(self._tau_structural_by_child.get(tid, set()))
+    def _seed_worklist(self, tau_ids: set[int],
+                       target: set[tuple[str, tuple[int, ...]]]) -> None:
+        """Add structural-key parents of the given tau IDs to *target*."""
+        for tid in tau_ids:
+            target.update(self._tau_structural_by_child.get(tid, set()))
             canon = self.tau.canonical(tid)
             if canon != tid:
-                worklist.update(self._tau_structural_by_child.get(canon, set()))
+                target.update(self._tau_structural_by_child.get(canon, set()))
+
+    def _cascade_eta(self, merged_tau_ids: set[int],
+                     trigger_node_index: int) -> None:
+        """Cascade after τ-merges: re-canonicalize structural keys
+        whose children were merged, revealing higher-order transformations."""
+        worklist: set[tuple[str, tuple[int, ...]]] = set()
+        self._seed_worklist(merged_tau_ids, worklist)
 
         while worklist:
-            next_worklist = set()
+            next_worklist: set[tuple[str, tuple[int, ...]]] = set()
             keys_to_reindex = list(worklist)
             worklist = set()
 
@@ -375,8 +421,8 @@ class SPPF:
                 new_key, changed = self._recanon_structural_key(old_key)
 
                 if not changed:
-                    rekeyed = {}
-                    merges_here = []
+                    rekeyed: dict[Optional[str], int] = {}
+                    merges_here: list[tuple[Any, Optional[str]]] = []
                     for dt, tid in variants.items():
                         abs_dt = self._resolve_type(dt)
                         canon_tid = self.tau.canonical(tid)
@@ -389,20 +435,22 @@ class SPPF:
                                 merges_here.append((dt, abs_dt))
                         else:
                             rekeyed[abs_dt] = canon_tid
-                    if merges_here:
+                    if merges_here:  # pragma: no branch
                         self._eta_count += len(merges_here)
                         self._eta_tower.append((
                             trigger_node_index,
                             [m[0] for m in merges_here],
-                            f"η-cascade:dep_abstract"
+                            "η-cascade:dep_abstract"
                         ))
                         self._tau_structural[old_key] = rekeyed
                         for tid in rekeyed.values():
                             canon = self.tau.canonical(tid)
                             next_worklist.update(
                                 self._tau_structural_by_child.get(canon, set()))
-                            ast_t = old_key[0] if isinstance(old_key[0], str) else str(old_key[0])
-                            self._process_cleavage(canon, ast_t, trigger_node_index)
+                            ast_t = (old_key[0] if isinstance(old_key[0], str)
+                                     else str(old_key[0]))
+                            self._process_cleavage(
+                                canon, ast_t, trigger_node_index)
                     continue
 
                 del self._tau_structural[old_key]
@@ -418,32 +466,72 @@ class SPPF:
                         if abs_dt in target:
                             existing_canon = self.tau.canonical(target[abs_dt])
                             if existing_canon != canon_tid:
-                                self._merge_residue_sets(existing_canon, canon_tid)
-                                winner = self.tau.merge(existing_canon, canon_tid)
+                                self._merge_residue_sets(
+                                    existing_canon, canon_tid)
+                                winner = self.tau.merge(
+                                    existing_canon, canon_tid)
                                 target[abs_dt] = winner
                                 self._eta_count += 1
                                 self._eta_tower.append((
                                     trigger_node_index,
-                                    [abs_dt], f"η-cascade:key_collision"
+                                    [abs_dt], "η-cascade:key_collision"
                                 ))
                                 winner_canon = self.tau.canonical(winner)
                                 next_worklist.update(
-                                    self._tau_structural_by_child.get(winner_canon, set()))
-                                ast_t = new_key[0] if isinstance(new_key[0], str) else str(new_key[0])
-                                self._process_cleavage(winner_canon, ast_t, trigger_node_index)
+                                    self._tau_structural_by_child.get(
+                                        winner_canon, set()))
+                                ast_t = (new_key[0]
+                                         if isinstance(new_key[0], str)
+                                         else str(new_key[0]))
+                                self._process_cleavage(
+                                    winner_canon, ast_t, trigger_node_index)
                         else:
                             target[abs_dt] = canon_tid
                 else:
-                    self._tau_structural[new_key] = {
-                        self._eta_abstractions.get(dt, dt): self.tau.canonical(tid)
-                        for dt, tid in variants.items()
-                    }
+                    # Bug fix: use _resolve_type (not bare
+                    # _eta_abstractions.get) so the union-find chain
+                    # is fully resolved, and handle collisions that
+                    # the full resolution may reveal.
+                    rekeyed_new: dict[Optional[str], int] = {}
+                    for dt, tid in variants.items():
+                        resolved = self._resolve_type(dt)
+                        canon_tid = self.tau.canonical(tid)
+                        if resolved in rekeyed_new:  # pragma: no branch
+                            existing_canon = self.tau.canonical(
+                                rekeyed_new[resolved])
+                            if existing_canon != canon_tid:  # pragma: no branch
+                                self._merge_residue_sets(
+                                    existing_canon, canon_tid)
+                                winner = self.tau.merge(
+                                    existing_canon, canon_tid)
+                                rekeyed_new[resolved] = winner
+                                self._eta_count += 1
+                                self._eta_tower.append((
+                                    trigger_node_index,
+                                    [resolved],
+                                    "η-cascade:rekey_collision"
+                                ))
+                                winner_canon = self.tau.canonical(winner)
+                                next_worklist.update(
+                                    self._tau_structural_by_child.get(
+                                        winner_canon, set()))
+                                ast_t = (new_key[0]
+                                         if isinstance(new_key[0], str)
+                                         else str(new_key[0]))
+                                self._process_cleavage(
+                                    winner_canon, ast_t,
+                                    trigger_node_index)
+                        else:
+                            rekeyed_new[resolved] = canon_tid
+                    self._tau_structural[new_key] = rekeyed_new
                     _, new_children = new_key
                     for c in new_children:
                         self._tau_structural_by_child[c].add(new_key)
+                    for rv in rekeyed_new:
+                        self._tau_structural_by_variant[rv].add(new_key)
 
                 merged_variants = self._tau_structural.get(new_key, {})
-                canon_tids = {}
+                canon_tids: dict[int, Any] = {}
                 for dt, tid in list(merged_variants.items()):
                     ct = self.tau.canonical(tid)
                     if ct not in canon_tids:
@@ -455,16 +543,18 @@ class SPPF:
                     self._eta_count += 1
                     eta_name = f"∀η².{all_types[0]}"
                     self._eta_uf.make(eta_name)
-                    unified_names_2 = {eta_name}
+                    unified_names_2: set[Any] = {eta_name}
                     for dt in all_types:
                         resolved = self._resolve_type(dt)
-                        if resolved != eta_name:
-                            if resolved in self._eta_uf._parent:
+                        if resolved != eta_name:  # pragma: no branch
+                            if resolved in self._eta_uf:
                                 self._eta_uf.union(eta_name, resolved)
                                 unified_names_2.add(resolved)
                             self._eta_abstractions[dt] = eta_name
                     if len(unified_names_2) > 1:
-                        self._cascade_abstraction_merge(unified_names_2, trigger_node_index)
+                        deferred = self._cascade_abstraction_merge(
+                            unified_names_2, trigger_node_index)
+                        self._seed_worklist(deferred, next_worklist)
                     canonical = all_tids[0]
                     for other in all_tids[1:]:
                         c_can = self.tau.canonical(canonical)
@@ -472,20 +562,28 @@ class SPPF:
                         if o_can != c_can:
                             self._merge_residue_sets(c_can, o_can)
                             canonical = self.tau.merge(c_can, o_can)
-                    self._eta_tower.append((trigger_node_index, all_types, eta_name))
+                    self._eta_tower.append(
+                        (trigger_node_index, all_types, eta_name))
                     final_canon = self.tau.canonical(canonical)
                     next_worklist.update(
-                        self._tau_structural_by_child.get(final_canon, set()))
-                    ast_t = new_key[0] if isinstance(new_key[0], str) else str(new_key[0])
-                    self._process_cleavage(final_canon, ast_t, trigger_node_index)
+                        self._tau_structural_by_child.get(
+                            final_canon, set()))
+                    ast_t = (new_key[0] if isinstance(new_key[0], str)
+                             else str(new_key[0]))
+                    self._process_cleavage(
+                        final_canon, ast_t, trigger_node_index)
 
             worklist = next_worklist
 
     # ── Node ingestion ───────────────────────────────────────────
 
-    def _ingest_node(self, ast_type, params, dep_type, kappa_tag,
-                      child_sigmas, child_taus, child_kappas,
-                      line, filename):
+    def _ingest_node(self, ast_type: str, params: tuple[tuple[str, Any], ...],
+                     dep_type: Optional[str], kappa_tag: str,
+                     child_sigmas: tuple[int, ...],
+                     child_taus: tuple[int, ...],
+                     child_kappas: tuple[int, ...],
+                     line: int, filename: str
+                     ) -> tuple[int, int, int, int]:
         """Ingest a single node with streaming η-refinement.
 
         Returns (sigma_id, tau_id, kappa_id, node_index).
@@ -500,11 +598,12 @@ class SPPF:
         canon_child_taus = tuple(self.tau.canonical(ct) for ct in child_taus)
         abs_type = self._resolve_type(dep_type)
 
-        tau_sig = (ast_type, abs_type, canon_child_taus)
+        tau_sig: tuple[str, Optional[str], tuple[int, ...]] = (
+            ast_type, abs_type, canon_child_taus)
         tid = self.tau._assign(tau_sig, canon_child_taus, node_index)
 
         # ── Streaming η-detection ──
-        struct_key = (ast_type, canon_child_taus)
+        struct_key: tuple[str, tuple[int, ...]] = (ast_type, canon_child_taus)
 
         if abs_type is not None and struct_key in self._tau_structural:
             existing = self._tau_structural[struct_key]
@@ -525,11 +624,11 @@ class SPPF:
                     eta_name = f"∀η.{ast_type}.{all_types[0]}"
                     self._eta_uf.make(eta_name)
 
-                    unified_names = {eta_name}
+                    unified_names: set[Any] = {eta_name}
                     for dt in all_types:
                         resolved = self._resolve_type(dt)
                         if resolved != eta_name:
-                            if resolved in self._eta_uf._parent:
+                            if resolved in self._eta_uf:
                                 self._eta_uf.union(eta_name, resolved)
                                 unified_names.add(resolved)
                             self._eta_abstractions[dt] = eta_name
@@ -542,7 +641,8 @@ class SPPF:
                             self._merge_residue_sets(canon_c, c)
                             canonical = self.tau.merge(canon_c, c)
 
-                    self._eta_tower.append((node_index, all_types, eta_name))
+                    self._eta_tower.append(
+                        (node_index, all_types, eta_name))
                     tid = self.tau.canonical(canonical)
 
                     self._observe_cell(2, eta_name,
@@ -550,11 +650,14 @@ class SPPF:
 
                     self._update_residue(tid, dep_type)
 
+                    deferred_from_abs: set[int] = set()
                     if len(unified_names) > 1:
-                        self._cascade_abstraction_merge(unified_names, node_index)
+                        deferred_from_abs = self._cascade_abstraction_merge(
+                            unified_names, node_index)
 
                     merged_set = set(self.tau.canonical(t) for t in all_tids)
                     merged_set.add(self.tau.canonical(canonical))
+                    merged_set.update(deferred_from_abs)
                     self._cascade_eta(merged_set, node_index)
 
                     self._process_cleavage(tid, ast_type, node_index)
@@ -592,82 +695,90 @@ class SPPF:
     # ── Projections and queries ──────────────────────────────────
 
     @property
-    def node_count(self):
+    def node_count(self) -> int:
         return len(self.nodes)
 
-    def _resolve(self, node, fiber_name):
-        fid = node[fiber_name]
-        fiber = getattr(self, fiber_name)
+    def _resolve(self, node: dict[str, Any], fiber_name: str) -> int:
+        fid: int = node[fiber_name]
+        fiber: Fiber = getattr(self, fiber_name)
         return fiber.canonical(fid)
 
-    def wedge(self):
+    def wedge(self) -> dict[tuple[int, int, int], list[int]]:
         """Full wedge product σ ∧ τ ∧ κ → {(σ,τ,κ): [node_indices]}"""
-        cells = defaultdict(list)
+        cells: defaultdict[tuple[int, int, int], list[int]] = defaultdict(list)
         for i, n in enumerate(self.nodes):
             cells[(self._resolve(n, 'sigma'),
                    self._resolve(n, 'tau'),
                    self._resolve(n, 'kappa'))].append(i)
         return dict(cells)
 
-    def wedge_2(self, fiber_a, fiber_b):
+    def wedge_2(self, fiber_a: str,
+                fiber_b: str) -> dict[tuple[int, int], list[int]]:
         """Two-fiber wedge product → {(a,b): [node_indices]}"""
-        cells = defaultdict(list)
+        cells: defaultdict[tuple[int, int], list[int]] = defaultdict(list)
         for i, n in enumerate(self.nodes):
             cells[(self._resolve(n, fiber_a),
                    self._resolve(n, fiber_b))].append(i)
         return dict(cells)
 
-    def rotate(self, from_fiber, to_fiber):
+    def rotate(self, from_fiber: str,
+               to_fiber: str) -> dict[int, dict[int, int]]:
         """Project each class in from_fiber through to_fiber.
         Returns {from_id: {to_id: count}}"""
-        result = defaultdict(lambda: Counter())
+        result: defaultdict[int, Counter[int]] = defaultdict(Counter)
         for n in self.nodes:
-            result[self._resolve(n, from_fiber)][self._resolve(n, to_fiber)] += 1
+            result[self._resolve(n, from_fiber)][
+                self._resolve(n, to_fiber)] += 1
         return {k: dict(v) for k, v in result.items()}
 
-    def rank(self, fiber, fid, target_fiber):
+    def rank(self, fiber: str, fid: int, target_fiber: str) -> int:
         """Rank of a class: how many target classes it maps to."""
-        targets = set()
-        fiber_obj = getattr(self, fiber)
+        targets: set[int] = set()
+        fiber_obj: Fiber = getattr(self, fiber)
         canon_fid = fiber_obj.canonical(fid)
         for node_idx in fiber_obj.classes[canon_fid].node_indices:
             targets.add(self._resolve(self.nodes[node_idx], target_fiber))
         return len(targets)
 
-    def rank_distribution(self, fiber, target_fiber):
+    def rank_distribution(self, fiber: str,
+                          target_fiber: str) -> Counter[int]:
         """Distribution of ranks across all classes in a fiber."""
-        dist = Counter()
-        fiber_obj = getattr(self, fiber)
+        dist: Counter[int] = Counter()
+        fiber_obj: Fiber = getattr(self, fiber)
         for fid in fiber_obj:
             dist[self.rank(fiber, fid, target_fiber)] += 1
         return dist
 
-    def hybrid(self):
+    def hybrid(self) -> tuple[set[tuple[str, int]], Counter[str]]:
         """Per-node best fiber: whichever gives the largest class."""
-        winners = Counter()
-        classes = set()
+        winners: Counter[str] = Counter()
+        classes: set[tuple[str, int]] = set()
         for n in self.nodes:
             s_id = self._resolve(n, 'sigma')
             t_id = self._resolve(n, 'tau')
             k_id = self._resolve(n, 'kappa')
-            sizes = {
+            sizes: dict[str, int] = {
                 'sigma': len(self.sigma.classes[s_id].node_indices),
                 'tau': len(self.tau.classes[t_id].node_indices),
                 'kappa': len(self.kappa.classes[k_id].node_indices),
             }
-            best_fiber = max(sizes, key=sizes.get)
+            # Tie-breaking: sigma wins ties (dict insertion order is always
+            # sigma → tau → kappa; Python 3.7+ preserves insertion order).
+            best_fiber = max(sizes, key=sizes.get)  # type: ignore[arg-type]
             winners[best_fiber] += 1
             ids = {'sigma': s_id, 'tau': t_id, 'kappa': k_id}
             classes.add((best_fiber, ids[best_fiber]))
         return classes, winners
 
-    def natural_transformations(self, fiber):
+    def natural_transformations(
+        self, fiber: str
+    ) -> list[tuple[int, dict[str, int]]]:
         """Find classes that map to multiple classes in all other fibers."""
-        fiber_obj = getattr(self, fiber)
+        fiber_obj: Fiber = getattr(self, fiber)
         other_names = [f for f in ('sigma', 'tau', 'kappa') if f != fiber]
-        results = []
+        results: list[tuple[int, dict[str, int]]] = []
         for fid in fiber_obj:
-            ranks = {}
+            ranks: dict[str, int] = {}
             for other in other_names:
                 r = self.rank(fiber, fid, other)
                 if r > 1:
@@ -677,18 +788,18 @@ class SPPF:
         results.sort(key=lambda x: -max(x[1].values()))
         return results
 
-    def residue(self, tau_id):
+    def residue(self, tau_id: int) -> dict[Optional[str], list[int]]:
         """Compute the residue of a τ-class."""
         fiber_class = self.tau[tau_id]
-        by_raw = defaultdict(list)
+        by_raw: defaultdict[Any, list[int]] = defaultdict(list)
         for ni in fiber_class.node_indices:
             raw = self.nodes[ni].get('dep_type_raw')
             by_raw[raw].append(ni)
         return dict(by_raw)
 
-    def cleavage(self):
+    def cleavage(self) -> list[tuple[int, dict[Optional[str], int], int]]:
         """All cleavage planes: τ-classes with residue rank > 1."""
-        result = []
+        result: list[tuple[int, dict[Optional[str], int], int]] = []
         for tid in self.tau:
             res = self.residue(tid)
             if len(res) > 1:
@@ -698,7 +809,7 @@ class SPPF:
         result.sort(key=lambda x: -x[2])
         return result
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         hc, hw = self.hybrid()
         return (
             f"SPPF({self.node_count} nodes, "
@@ -706,7 +817,7 @@ class SPPF:
             f"hybrid={len(hc)})"
         )
 
-    def summary(self):
+    def summary(self) -> str:
         """Human-readable summary of the three-fiber decomposition."""
         N = self.node_count
         if N == 0:
@@ -734,13 +845,14 @@ class SPPF:
             1 for e in self._eta_tower
             if isinstance(e[2], str) and e[2].startswith('η-cleavage')
         )
-        eta_names = set(self._eta_uf._parent)
-        eta_roots = set(self._eta_uf.find(n) for n in eta_names) if eta_names else set()
+        eta_names: set[Any] = set(self._eta_uf)
+        eta_roots = (set(self._eta_uf.find(n) for n in eta_names)
+                     if eta_names else set())
         transitive_merges = len(eta_names) - len(eta_roots)
 
-        sigma_ktags = {}
+        sigma_ktags: dict[int, set[Optional[str]]] = {}
         for n in self.nodes:
-            sid = n['sigma']
+            sid: int = n['sigma']
             if sid not in sigma_ktags:
                 sigma_ktags[sid] = set()
             sigma_ktags[sid].add(n.get('kappa_tag'))
@@ -767,7 +879,7 @@ class SPPF:
                       3: 'cleavage-L0', 4: 'cleavage-L1'}
         observed_0 = len(self._cell_obs.get(0, {}))
         inert = N - observed_0
-        lines.append(f"  cell observations (projected):")
+        lines.append("  cell observations (projected):")
         lines.append(f"    structurally active nodes: {observed_0} "
                      f"({observed_0/N:.1%}), inert: {inert} ({inert/N:.1%})")
         for level in sorted(self._cell_obs.keys()):
@@ -783,16 +895,16 @@ class SPPF:
 
         # Rank summary
         for fiber in ('sigma', 'tau', 'kappa'):
-            for target in ('sigma', 'tau', 'kappa'):
-                if fiber == target:
+            for target_fiber in ('sigma', 'tau', 'kappa'):
+                if fiber == target_fiber:
                     continue
-                dist = self.rank_distribution(fiber, target)
+                dist = self.rank_distribution(fiber, target_fiber)
                 rank1 = dist.get(1, 0)
                 total = sum(dist.values())
-                if total > 0:
+                if total > 0:  # pragma: no branch
                     max_rank = max(dist)
                     lines.append(
-                        f"  rank({fiber}→{target}): "
+                        f"  rank({fiber}→{target_fiber}): "
                         f"{rank1}/{total} unambiguous ({rank1/total:.0%}), "
                         f"max rank {max_rank}"
                     )

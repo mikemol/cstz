@@ -20,13 +20,18 @@ Usage::
     print(sppf.summary())
 """
 
+from __future__ import annotations
+
 import math
 from pathlib import Path
+from typing import Optional, Union
 
 from .core import SPPF
 
 
-def factorize_bytes(data, context_width=4, chunk_levels=None):
+def factorize_bytes(data: Union[bytes, bytearray, memoryview, str, Path],
+                    context_width: int = 4,
+                    chunk_levels: Optional[int] = None) -> SPPF:
     """Factorize an arbitrary bitstream into a three-fiber SPPF.
 
     Parameters
@@ -57,16 +62,16 @@ def factorize_bytes(data, context_width=4, chunk_levels=None):
     sppf = SPPF()
 
     # Level 0: individual bytes as leaf nodes.
-    prev_tids = []
-    prev_sids = []
-    prev_kids = []
+    prev_tids: list[int] = []
+    prev_sids: list[int] = []
+    prev_kids: list[int] = []
 
     for i, b in enumerate(data):
         ast_type = "byte"
         params = (("v", b),)
 
         ctx_start = max(0, i - context_width)
-        dep_type = f"ctx:{data[ctx_start:i].hex()}" if i > 0 else "ctx:^"
+        dep_type: str = f"ctx:{data[ctx_start:i].hex()}" if i > 0 else "ctx:^"
 
         kappa_tag = _classify_byte(b)
 
@@ -84,9 +89,9 @@ def factorize_bytes(data, context_width=4, chunk_levels=None):
         if len(prev_tids) < 2:
             break
 
-        next_sids = []
-        next_tids = []
-        next_kids = []
+        next_sids: list[int] = []
+        next_tids: list[int] = []
+        next_kids: list[int] = []
 
         span = 1 << level
         for j in range(0, len(prev_tids) - 1, 2):
@@ -127,7 +132,7 @@ def factorize_bytes(data, context_width=4, chunk_levels=None):
     return sppf
 
 
-def _classify_byte(b):
+def _classify_byte(b: int) -> str:
     """Classify a byte by its structural role."""
     if b == 0:
         return "null"
@@ -160,7 +165,7 @@ def _classify_byte(b):
     return "high"
 
 
-def _classify_span(pos, span, total, level):
+def _classify_span(pos: int, span: int, total: int, level: int) -> str:
     """Classify a span by its structural role."""
     if pos == 0:
         return f"head.{level}"
