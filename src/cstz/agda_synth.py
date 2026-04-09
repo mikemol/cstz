@@ -165,46 +165,76 @@ def synthesize(sppf: SPPF, module_name: str = "SPPFProof") -> str:
     w("-- ══════════════════════════════════════════════════════════")
     w("")
 
+    # Collect AST types per κ-class for naming
+    kappa_ast: dict[int, set[str]] = defaultdict(set)
+    for node in sppf.nodes:
+        kid = sppf.kappa.canonical(node['kappa'])
+        kappa_ast[kid].add(node['ast_type'])
+
+    # Collect per-(κ,τ) the dominant dep-type for naming
+    cell_dep: dict[tuple[int, int], str] = {}
+    for node in sppf.nodes:
+        k = sppf.kappa.canonical(node['kappa'])
+        t = sppf.tau.canonical(node['tau'])
+        dep = node.get('dep_type_raw')
+        if dep is not None:
+            key = (k, t)
+            if key not in cell_dep:
+                cell_dep[key] = str(dep)
+
     for k in kappa_order:
         tau_groups = hierarchy[k]
         tags = sorted(kappa_tags[k])
         tag = tags[0]
+        ast_types = sorted(kappa_ast.get(k, set()))
+        ast_str = "/".join(ast_types)
         safe_tag = _sanitize(tag)
         total = kappa_node_counts[k]
         n_taus = len(tau_groups)
         n_sigmas = len(set(s for ss in tau_groups.values() for s in ss))
 
-        w(f"-- ── {tag} ({'─' * max(1, 50 - len(tag))})")
-        w(f"-- κ={k}, {total} nodes, {n_taus} type contexts, {n_sigmas} forms")
-        if len(tags) > 1:
-            w(f"-- Also: {', '.join(tags[1:])}")
+        # Build a descriptive module name from construction + AST type
+        mod_name = f"{safe_tag}"
+        if ast_types and ast_types[0] != tag:
+            mod_name = f"{safe_tag}-{_sanitize(ast_types[0])}"
+
+        w(f"-- ── {tag} ({ast_str}) {'─' * max(1, 40 - len(tag) - len(ast_str))}")
+        w(f"-- {total} nodes, {n_taus} type contexts, {n_sigmas} forms")
         w("")
 
-        w(f"module {safe_tag}-{k} where")
+        w(f"module {mod_name}-{k} where")
         w("")
 
-        # Each τ-context becomes a record with its σ-forms
+        # Each τ-context as a named sub-section
         for tid in sorted(tau_groups.keys(),
                           key=lambda t: -len(tau_groups[t])):
             sigmas = tau_groups[tid]
             n_unique = len(set(sigmas))
-            deps = sorted(tau_deps.get(tid, {"(untyped)"}))[:5]
-            dep_str = ", ".join(deps)
+            deps = sorted(tau_deps.get(tid, set()))[:5]
 
-            w(f"  -- τ={tid}: {len(sigmas)} nodes, {n_unique} forms")
-            w(f"  -- Types: {dep_str}")
+            # Use the dominant dep-type as the τ-context name
+            dominant_dep = cell_dep.get((k, tid))
+            if dominant_dep:
+                ctx_name = _sanitize(dominant_dep)
+            elif deps:
+                ctx_name = _sanitize(deps[0])
+            else:
+                ctx_name = f"ctx-{tid}"
+
+            dep_str = ", ".join(deps) if deps else "(untyped)"
+
+            w(f"  -- {ctx_name}: {len(sigmas)} nodes, {n_unique} forms")
+            w(f"  -- [{dep_str}]")
 
             if n_unique <= 8:
-                # Small enough to enumerate
                 for s in sorted(set(sigmas)):
                     count = sigmas.count(s)
-                    w(f"  -- σ={s} ({count}×)")
-            else:
-                w(f"  -- ({n_unique} σ-forms, elided)")
+                    w(f"  --   σ={s} ({count}×)")
 
-            # Emit a proof that all nodes in this (κ,τ) cell share canonical
-            w(f"  cell-{k}-{tid} : τ {tid} ≡ τ {tid}")
-            w(f"  cell-{k}-{tid} = refl")
+            # Disambiguate within this module by appending τ-id
+            cell_name = f"{ctx_name}-τ{tid}"
+            w(f"  {cell_name} : τ {tid} ≡ τ {tid}")
+            w(f"  {cell_name} = refl")
             w("")
 
         w("")
@@ -219,22 +249,22 @@ def synthesize(sppf: SPPF, module_name: str = "SPPFProof") -> str:
         w("")
 
         for idx, (tid, counts, total) in enumerate(cleavage):
-            deps = sorted(counts.keys(), key=lambda d: -counts[d])
-            safe_deps = [_sanitize(str(d)) for d in deps]
+            # Name the cleavage by the AST type of its nodes
+            cleavage_asts = set()
+            for ni in sppf.tau[tid].node_indices[:20]:
+                if ni < len(sppf.nodes):
+                    cleavage_asts.add(sppf.nodes[ni]['ast_type'])
+            ast_label = sorted(cleavage_asts)[0] if cleavage_asts else "Split"
+            safe_label = _sanitize(ast_label)
 
-            w(f"-- Cleavage {idx}: τ={tid}, {total} nodes, {len(counts)} branches")
-            w(f"module Cleavage-{idx} where")
-            w("")
-            w(f"  -- The type context τ={tid} splits into {len(counts)} sub-proofs,")
-            w(f"  -- each parameterized by a different dep-type witness.")
+            w(f"-- Case split: {ast_label} with {len(counts)} type witnesses")
+            w(f"module {safe_label}-split-{idx} where")
             w("")
 
-            for i, (dep, cnt) in enumerate(
-                    sorted(counts.items(), key=lambda x: -x[1])):
+            for dep, cnt in sorted(counts.items(), key=lambda x: -x[1]):
                 safe_dep = _sanitize(str(dep))
-                w(f"  -- Branch {i}: {dep} ({cnt} nodes)")
-                w(f"  branch-{i} : τ {tid} ≡ τ {tid}")
-                w(f"  branch-{i} = refl  -- {safe_dep}")
+                w(f"  {safe_dep} : τ {tid} ≡ τ {tid}")
+                w(f"  {safe_dep} = refl  -- {cnt} nodes")
                 w("")
 
             w("")
