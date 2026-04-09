@@ -1,0 +1,624 @@
+"""Pathological inputs for cstz.core — targets risks R2, R7, and cascade depth.
+
+Run with:  python -m pytest tests/test_pathological.py -v
+
+Each test includes:
+  - What risk it targets
+  - What a failure would mean
+  - An inline trace of the expected execution path
+"""
+from __future__ import annotations
+
+import pytest
+from cstz.core import UnionFind, Fiber, SPPF
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# P1: Fixed-point verification
+#
+# Risk: the cascade machinery (_cascade_eta + _cascade_abstraction_merge)
+# may terminate before reaching a true fixed point.  After ingestion,
+# re-resolving every structural key should reveal no new τ-merges.
+#
+# A failure here means the SPPF is over-partitioned: τ-classes that
+# should have been merged were missed by the cascade, violating the
+# η-completeness that inference.agda's P2 postulate assumes.
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+class TestFixedPoint:
+    @staticmethod
+    def _check_fixed_point(s: SPPF) -> list[str]:
+        """Re-resolve every structural key; return descriptions of
+        any merges that WOULD be needed (empty = fixed point)."""
+        violations = []
+        for struct_key, variants in list(s._tau_structural.items()):
+            # Re-resolve all variants
+            resolved_to_tid: dict[str | None, set[int]] = {}
+            for dt, tid in variants.items():
+                resolved = s._resolve_type(dt)
+                canon = s.tau.canonical(tid)
+                resolved_to_tid.setdefault(resolved, set()).add(canon)
+            # If any resolved type maps to >1 canonical τ-id, a merge is needed
+            for resolved, canons in resolved_to_tid.items():
+                if len(canons) > 1:
+                    violations.append(
+                        f"key={struct_key}, resolved={resolved!r}, "
+                        f"distinct_canons={canons}"
+                    )
+        return violations
+
+    def test_simple_eta_fixed_point(self) -> None:
+        """Two nodes with same structure, different dep_type → η-merge.
+        After ingestion, the system should be at a fixed point."""
+        s = SPPF()
+        s._ingest_node("X", (), "int", "k1", (), (), (), 0, "f")
+        s._ingest_node("X", (), "str", "k2", (), (), (), 1, "f")
+        violations = self._check_fixed_point(s)
+        assert violations == [], f"Not at fixed point: {violations}"
+
+    def test_three_way_eta_fixed_point(self) -> None:
+        """Three nodes: same structure, three different dep_types.
+        First two merge, third joins the existing group."""
+        s = SPPF()
+        s._ingest_node("X", (), "int", "k1", (), (), (), 0, "f")
+        s._ingest_node("X", (), "str", "k2", (), (), (), 1, "f")
+        s._ingest_node("X", (), "bool", "k3", (), (), (), 2, "f")
+        violations = self._check_fixed_point(s)
+        assert violations == [], f"Not at fixed point: {violations}"
+
+    def test_cascading_eta_fixed_point(self) -> None:
+        """Children whose η-merges propagate upward to parents.
+
+        Structure:
+          C1(dep=a), C1(dep=b)  →  η-merge on C1
+          P(dep=int, child=C1_merged), P(dep=str, child=C1_merged) → η-merge on P
+
+        The parent η-merge is triggered by _ingest_node, not cascade.
+        But the fixed-point should hold."""
+        s = SPPF()
+        _, c1, _, _ = s._ingest_node("C", (), "a", "leaf", (), (), (), 0, "f")
+        _, c2, _, _ = s._ingest_node("C", (), "b", "leaf", (), (), (), 1, "f")
+        # c1 and c2 should be η-merged; use the canonical
+        c_canon = s.tau.canonical(c1)
+        s._ingest_node("P", (), "int", "k1", (), (c_canon,), (), 2, "f")
+        s._ingest_node("P", (), "str", "k2", (), (c_canon,), (), 3, "f")
+        violations = self._check_fixed_point(s)
+        assert violations == [], f"Not at fixed point: {violations}"
+
+    def test_diamond_cascade_fixed_point(self) -> None:
+        """Diamond-shaped dependency: two children merge independently,
+        then a parent over both children should still reach fixed point.
+
+        C_left(dep=a), C_left(dep=b)   → η-merge
+        C_right(dep=x), C_right(dep=y) → η-merge
+        P(dep=int, children=[C_left_canon, C_right_canon])
+        P(dep=str, children=[C_left_canon, C_right_canon]) → η-merge
+        """
+        s = SPPF()
+        _, cl1, _, _ = s._ingest_node("CL", (), "a", "leaf", (), (), (), 0, "f")
+        _, cl2, _, _ = s._ingest_node("CL", (), "b", "leaf", (), (), (), 1, "f")
+        cl = s.tau.canonical(cl1)
+
+        _, cr1, _, _ = s._ingest_node("CR", (), "x", "leaf", (), (), (), 2, "f")
+        _, cr2, _, _ = s._ingest_node("CR", (), "y", "leaf", (), (), (), 3, "f")
+        cr = s.tau.canonical(cr1)
+
+        s._ingest_node("P", (), "int", "k1", (), (cl, cr), (), 4, "f")
+        s._ingest_node("P", (), "str", "k2", (), (cl, cr), (), 5, "f")
+        violations = self._check_fixed_point(s)
+        assert violations == [], f"Not at fixed point: {violations}"
+
+    def test_deep_chain_fixed_point(self) -> None:
+        """Chain of depth 4: each level has an η-merge, and the child
+        canonical propagates upward.
+
+        L0(dep=a), L0(dep=b) → merge
+        L1(dep=c, child=L0), L1(dep=d, child=L0) → merge
+        L2(dep=e, child=L1), L2(dep=f, child=L1) → merge
+        L3(dep=g, child=L2), L3(dep=h, child=L2) → merge
+        """
+        s = SPPF()
+        line = 0
+
+        def ingest(ast, dep, ktag, children=()):
+            nonlocal line
+            result = s._ingest_node(ast, (), dep, ktag, (), children, (), line, "f")
+            line += 1
+            return result
+
+        _, t0a, _, _ = ingest("L0", "a", "k")
+        _, t0b, _, _ = ingest("L0", "b", "k")
+        c0 = s.tau.canonical(t0a)
+
+        _, t1a, _, _ = ingest("L1", "c", "k", (c0,))
+        _, t1b, _, _ = ingest("L1", "d", "k", (c0,))
+        c1 = s.tau.canonical(t1a)
+
+        _, t2a, _, _ = ingest("L2", "e", "k", (c1,))
+        _, t2b, _, _ = ingest("L2", "f", "k", (c1,))
+        c2 = s.tau.canonical(t2a)
+
+        _, t3a, _, _ = ingest("L3", "g", "k", (c2,))
+        _, t3b, _, _ = ingest("L3", "h", "k", (c2,))
+
+        violations = self._check_fixed_point(s)
+        assert violations == [], f"Not at fixed point: {violations}"
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# P2: Ingestion order independence
+#
+# Risk: the final τ-partition depends on the order nodes are fed to
+# _ingest_node.  The ABSTRACTION NAMES may differ (∀η.X.first_seen),
+# but the canonical PARTITION (which node indices share a τ-class)
+# should be identical regardless of ingestion order.
+#
+# A failure here means the SPPF is nondeterministic: two runs over
+# the same code with different traversal orders produce different
+# compression ratios or different cleavage results.
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+class TestIngestionOrderIndependence:
+    @staticmethod
+    def _partition(s: SPPF) -> set[frozenset[int]]:
+        """Extract the τ-partition as a set of frozensets of node indices."""
+        groups: dict[int, set[int]] = {}
+        for i, node in enumerate(s.nodes):
+            canon = s.tau.canonical(node['tau'])
+            groups.setdefault(canon, set()).add(i)
+        return {frozenset(v) for v in groups.values()}
+
+    @staticmethod
+    def _build(order: list[int]) -> SPPF:
+        """Ingest a fixed set of nodes in the given index order."""
+        # Fixed node specs: (ast_type, dep_type, kappa_tag)
+        specs = [
+            ("X", "int",  "k1"),    # 0
+            ("X", "str",  "k2"),    # 1
+            ("X", "bool", "k3"),    # 2
+            ("Y", "int",  "k4"),    # 3
+            ("Y", "str",  "k5"),    # 4
+        ]
+        s = SPPF()
+        for idx in order:
+            ast, dep, ktag = specs[idx]
+            s._ingest_node(ast, (), dep, ktag, (), (), (), idx, "f")
+        return s
+
+    def test_forward_vs_reverse(self) -> None:
+        fwd = self._build([0, 1, 2, 3, 4])
+        rev = self._build([4, 3, 2, 1, 0])
+        assert self._partition(fwd) == self._partition(rev)
+
+    def test_interleaved(self) -> None:
+        """Interleave X and Y nodes instead of grouping by ast_type."""
+        grouped = self._build([0, 1, 2, 3, 4])
+        interleaved = self._build([0, 3, 1, 4, 2])
+        assert self._partition(grouped) == self._partition(interleaved)
+
+    def test_reverse_within_groups(self) -> None:
+        normal = self._build([0, 1, 2, 3, 4])
+        rev_groups = self._build([2, 1, 0, 4, 3])
+        assert self._partition(normal) == self._partition(rev_groups)
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# P3: Order independence with children (cascade-sensitive)
+#
+# Risk: when children are involved, the cascade triggered by ingesting
+# a parent depends on the child's canonical τ-id at that moment.
+# If children are ingested in different orders, their canonical may
+# differ at the time the parent is ingested, causing different
+# structural keys and potentially different cascade paths.
+#
+# A failure means cascade paths are order-sensitive even when the
+# final partition should be the same.
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+class TestOrderWithChildren:
+    @staticmethod
+    def _partition(s: SPPF) -> set[frozenset[int]]:
+        groups: dict[int, set[int]] = {}
+        for i, node in enumerate(s.nodes):
+            canon = s.tau.canonical(node['tau'])
+            groups.setdefault(canon, set()).add(i)
+        return {frozenset(v) for v in groups.values()}
+
+    def test_children_then_parents_vs_mixed(self) -> None:
+        """Order A: all children first, then parents.
+        Order B: child-parent pairs interleaved."""
+        # Order A: children first
+        s_a = SPPF()
+        _, ca1, _, _ = s_a._ingest_node("C", (), "a", "leaf", (), (), (), 0, "f")
+        _, ca2, _, _ = s_a._ingest_node("C", (), "b", "leaf", (), (), (), 1, "f")
+        c_canon_a = s_a.tau.canonical(ca1)
+        s_a._ingest_node("P", (), "int", "k1", (), (c_canon_a,), (), 2, "f")
+        s_a._ingest_node("P", (), "str", "k2", (), (c_canon_a,), (), 3, "f")
+
+        # Order B: first child, first parent, second child, second parent
+        s_b = SPPF()
+        _, cb1, _, _ = s_b._ingest_node("C", (), "a", "leaf", (), (), (), 0, "f")
+        cb1_canon = s_b.tau.canonical(cb1)
+        s_b._ingest_node("P", (), "int", "k1", (), (cb1_canon,), (), 2, "f")
+        _, cb2, _, _ = s_b._ingest_node("C", (), "b", "leaf", (), (), (), 1, "f")
+        # After cb2 ingested, C's τ-classes merge; cb1's canonical changes
+        cb_canon_merged = s_b.tau.canonical(cb1)
+        s_b._ingest_node("P", (), "str", "k2", (), (cb_canon_merged,), (), 3, "f")
+
+        assert self._partition(s_a) == self._partition(s_b)
+
+    def test_parent_before_second_child(self) -> None:
+        """Parent ingested when only one child type exists, then the
+        second child type arrives and triggers a child η-merge.
+
+        The parent's structural key was built with the pre-merge child
+        canonical. _cascade_eta should update it."""
+        s = SPPF()
+        _, c1, _, _ = s._ingest_node("C", (), "alpha", "leaf", (), (), (), 0, "f")
+        c1_canon = s.tau.canonical(c1)
+        # Parent uses c1_canon as child BEFORE c2 exists
+        s._ingest_node("P", (), "int", "k1", (), (c1_canon,), (), 1, "f")
+        # Now ingest second child → child η-merge
+        s._ingest_node("C", (), "beta", "leaf", (), (), (), 2, "f")
+        # Ingest second parent with merged child canonical
+        c_merged = s.tau.canonical(c1)
+        s._ingest_node("P", (), "str", "k2", (), (c_merged,), (), 3, "f")
+
+        # Both parents should end up in the same τ-class
+        p1_tau = s.tau.canonical(s.nodes[1]['tau'])
+        p3_tau = s.tau.canonical(s.nodes[3]['tau'])
+        assert p1_tau == p3_tau, \
+            f"Parents not merged: node 1 τ={p1_tau}, node 3 τ={p3_tau}"
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# P4: R2 — ∀η² abstraction merge before τ-merge
+#
+# Risk: inside _cascade_eta's ∀η² path (lines 549-559),
+# _cascade_abstraction_merge is called BEFORE the τ-merges that
+# follow. The abstraction merge seeds the next worklist using
+# pre-merge canonical IDs. If the subsequent τ-merges invalidate
+# those canonical IDs, the seeded worklist entries may be stale.
+#
+# This test forces the ∀η² path and checks that the final state
+# is a fixed point despite the ordering.
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+class TestR2EtaSquaredOrdering:
+    @staticmethod
+    def _check_fixed_point(s: SPPF) -> list[str]:
+        violations = []
+        for struct_key, variants in list(s._tau_structural.items()):
+            resolved_to_tid: dict[str | None, set[int]] = {}
+            for dt, tid in variants.items():
+                resolved = s._resolve_type(dt)
+                canon = s.tau.canonical(tid)
+                resolved_to_tid.setdefault(resolved, set()).add(canon)
+            for resolved, canons in resolved_to_tid.items():
+                if len(canons) > 1:
+                    violations.append(
+                        f"key={struct_key}, resolved={resolved!r}, "
+                        f"distinct_canons={canons}"
+                    )
+        return violations
+
+    def test_eta_squared_via_key_collision(self) -> None:
+        """Force ∀η² by merging children so two structural keys collide,
+        each having multiple distinct canonical τ-ids.
+
+        Setup:
+          Child c1, child c2 (will merge)
+          Parents over c1: P(dep=alpha), P(dep=beta) → η-merge
+          Parents over c2: P(dep=alpha), P(dep=beta) → η-merge
+          Then merge c1 into c2 → structural keys collide →
+          _cascade_eta sees changed=True, new_key exists,
+          multiple distinct canonicals → ∀η²
+
+        After cascade, the fixed-point should hold.
+        """
+        s = SPPF()
+        line = 0
+
+        def ingest(ast, dep, ktag, child_taus=()):
+            nonlocal line
+            r = s._ingest_node(ast, (), dep, ktag, (), child_taus, (), line, "f")
+            line += 1
+            return r
+
+        # Two children that will be merged later
+        _, c1, _, _ = ingest("C", "type_c", "cl")
+        _, c2a, _, _ = ingest("D", "d1", "dl")
+        _, c2b, _, _ = ingest("D", "d2", "dl")
+        c2 = s.tau.canonical(c2a)  # c2a and c2b η-merged
+
+        # Parents over c1
+        ingest("P", "alpha", "pa", (c1,))
+        ingest("P", "beta", "pb", (c1,))
+
+        # Parents over c2
+        ingest("P", "alpha", "pa", (c2,))
+        ingest("P", "beta", "pb", (c2,))
+
+        # Now force c1 to merge into c2 → cascade
+        s._merge_residue_sets(c2, c1)
+        s.tau.merge(c2, c1)
+        s._cascade_eta({c1, c2}, line)
+
+        violations = self._check_fixed_point(s)
+        assert violations == [], f"∀η² left non-fixed-point: {violations}"
+
+    def test_eta_squared_with_pre_existing_abstractions(self) -> None:
+        """∀η² where the colliding keys' variants are already abstracted
+        (have entries in _eta_abstractions and _eta_uf), forcing the
+        unified_names_2 > 1 branch and _cascade_abstraction_merge."""
+        s = SPPF()
+        line = 0
+
+        def ingest(ast, dep, ktag, child_taus=()):
+            nonlocal line
+            r = s._ingest_node(ast, (), dep, ktag, (), child_taus, (), line, "f")
+            line += 1
+            return r
+
+        # Children
+        _, c1, _, _ = ingest("C", "ct1", "cl")
+        _, c2a, _, _ = ingest("D", "d1", "dl")
+        _, c2b, _, _ = ingest("D", "d2", "dl")
+        c2 = s.tau.canonical(c2a)
+
+        # Parents over c1 with various dep types
+        ingest("P", "alpha", "pa", (c1,))
+        ingest("P", "beta", "pb", (c1,))
+        # This η-merges alpha and beta into ∀η.P.alpha
+
+        # Parents over c2 with same dep types
+        ingest("P", "alpha", "pa", (c2,))
+        ingest("P", "beta", "pb", (c2,))
+        # This η-merges alpha and beta into another ∀η.P.alpha (or reuses)
+
+        # At this point, both structural keys have abstracted variants.
+        # Merging c1 → c2 forces key collision → ∀η² → the abstraction
+        # names from both keys get unified → _cascade_abstraction_merge
+        # is called from within _cascade_eta.
+
+        s._merge_residue_sets(c2, c1)
+        s.tau.merge(c2, c1)
+        s._cascade_eta({c1, c2}, line)
+
+        violations = self._check_fixed_point(s)
+        assert violations == [], \
+            f"∀η² with abstractions left non-fixed-point: {violations}"
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# P5: Deep cascade stress test
+#
+# Risk: cascade depth > 2 may expose worklist bugs where intermediate
+# rounds produce merges that aren't correctly propagated to later
+# rounds. Also exercises the budget concern from inference.agda's
+# Huffman module (no budget controller exists — cascade runs unbounded).
+#
+# This constructs a chain of depth N where each level's η-merge
+# depends on the level below, and the bottom level is merged manually
+# to trigger the full cascade.
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+class TestDeepCascade:
+    @staticmethod
+    def _check_fixed_point(s: SPPF) -> list[str]:
+        violations = []
+        for struct_key, variants in list(s._tau_structural.items()):
+            resolved_to_tid: dict[str | None, set[int]] = {}
+            for dt, tid in variants.items():
+                resolved = s._resolve_type(dt)
+                canon = s.tau.canonical(tid)
+                resolved_to_tid.setdefault(resolved, set()).add(canon)
+            for resolved, canons in resolved_to_tid.items():
+                if len(canons) > 1:
+                    violations.append(
+                        f"key={struct_key}, resolved={resolved!r}, "
+                        f"distinct_canons={canons}"
+                    )
+        return violations
+
+    def test_cascade_depth_6(self) -> None:
+        """6-level chain: L0 through L5, each level η-merges two dep types,
+        each level's children are the merged canonical from the level below.
+
+        After building via _ingest_node (which handles cascade automatically),
+        verify fixed-point."""
+        s = SPPF()
+        line = 0
+
+        def ingest(ast, dep, ktag, child_taus=()):
+            nonlocal line
+            r = s._ingest_node(ast, (), dep, ktag, (), child_taus, (), line, "f")
+            line += 1
+            return r
+
+        prev_canon = None
+        for depth in range(6):
+            children = (prev_canon,) if prev_canon is not None else ()
+            _, ta, _, _ = ingest(f"L{depth}", f"dep_{depth}_a", "k", children)
+            _, tb, _, _ = ingest(f"L{depth}", f"dep_{depth}_b", "k", children)
+            prev_canon = s.tau.canonical(ta)
+
+        violations = self._check_fixed_point(s)
+        assert violations == [], f"Depth-6 cascade not at fixed point: {violations}"
+
+    def test_cascade_depth_6_manual_trigger(self) -> None:
+        """Same 6-level chain, but the bottom merge is triggered manually
+        after building two separate trees, forcing _cascade_eta to
+        propagate through all 6 levels in one shot.
+
+        Tree A: each level has dep=X over its child
+        Tree B: each level has dep=X over its child
+        Then merge the bottom A and B children → cascade up 6 levels.
+        """
+        s = SPPF()
+        line = 0
+
+        def ingest(ast, dep, ktag, child_taus=()):
+            nonlocal line
+            r = s._ingest_node(ast, (), dep, ktag, (), child_taus, (), line, "f")
+            line += 1
+            return r
+
+        # Build tree A
+        _, a_bottom, _, _ = ingest("L0", "a_root", "k")
+        a_prev = s.tau.canonical(a_bottom)
+        for depth in range(1, 6):
+            _, a_t, _, _ = ingest(f"L{depth}", f"dep_{depth}", "k", (a_prev,))
+            a_prev = s.tau.canonical(a_t)
+
+        # Build tree B with same ast_types and dep_types but different L0
+        _, b_bottom, _, _ = ingest("L0", "b_root", "k")
+        b_prev = s.tau.canonical(b_bottom)
+        for depth in range(1, 6):
+            _, b_t, _, _ = ingest(f"L{depth}", f"dep_{depth}", "k", (b_prev,))
+            b_prev = s.tau.canonical(b_t)
+
+        # Now merge the two L0 roots → should cascade through all levels
+        a0 = s.tau.canonical(a_bottom)
+        b0 = s.tau.canonical(b_bottom)
+        if a0 != b0:
+            s._merge_residue_sets(a0, b0)
+            s.tau.merge(a0, b0)
+            s._cascade_eta({a0, b0}, line)
+
+        violations = self._check_fixed_point(s)
+        assert violations == [], \
+            f"Manual 6-level cascade not at fixed point: {violations}"
+
+    def test_wide_fan_fixed_point(self) -> None:
+        """Wide fan: 10 structural keys at level 1 sharing the same
+        merged child. Each key has 3 dep-type variants.
+
+        Tests that the cascade handles breadth correctly, not just depth."""
+        s = SPPF()
+        line = 0
+
+        def ingest(ast, dep, ktag, child_taus=()):
+            nonlocal line
+            r = s._ingest_node(ast, (), dep, ktag, (), child_taus, (), line, "f")
+            line += 1
+            return r
+
+        # Shared child with η-merge
+        _, c1, _, _ = ingest("C", "ca", "cl")
+        _, c2, _, _ = ingest("C", "cb", "cl")
+        c = s.tau.canonical(c1)
+
+        # 10 parent types, each with 3 dep variants
+        for i in range(10):
+            for dep in ["alpha", "beta", "gamma"]:
+                ingest(f"P{i}", dep, f"k{i}", (c,))
+
+        violations = self._check_fixed_point(s)
+        assert violations == [], \
+            f"Wide fan not at fixed point: {violations}"
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# P6: R1 correction — verify that _cascade_abstraction_merge IS
+# order-independent (correcting the review's false alarm)
+#
+# This test exercises _cascade_abstraction_merge with multiple
+# affected keys and verifies the result is the same regardless
+# of which key is processed first. If this test PASSES, it
+# confirms R1 is a false alarm. If it FAILS, R1 is real.
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+class TestR1Correction:
+    def test_shared_tid_bridges_keys(self) -> None:
+        """Two structural keys sharing a τ-id (tid_b). After all variants
+        resolve to the same type, both keys' τ-ids should be fully merged
+        regardless of iteration order — because union-find is live and
+        tid_b bridges the two keys.
+
+        This is the test from the original review (Gap 1). It should PASS,
+        confirming R1 is a false alarm."""
+        s = SPPF()
+        tid_a = s.tau._assign(("ta",), (), 0)
+        tid_b = s.tau._assign(("tb",), (), 1)
+        tid_c = s.tau._assign(("tc",), (), 2)
+        for i in range(3):
+            s.nodes.append({
+                'ast_type': 'X', 'params': (), 'dep_type': f'd{i}',
+                'dep_type_raw': f'd{i}', 'kappa_tag': f'k{i}',
+                'sigma': 0, 'tau': i, 'kappa': 0, 'line': i, 'file': 'f',
+            })
+
+        key_1 = ("P", ())  # type: tuple[str, tuple[int, ...]]
+        key_2 = ("Q", ())  # type: tuple[str, tuple[int, ...]]
+
+        s._tau_structural[key_1] = {"v1": tid_a, "v2": tid_b}
+        s._tau_structural[key_2] = {"v2": tid_b, "v3": tid_c}
+        s._tau_structural_by_variant["v1"] = {key_1}
+        s._tau_structural_by_variant["v2"] = {key_1, key_2}
+        s._tau_structural_by_variant["v3"] = {key_2}
+
+        s._eta_abstractions["v1"] = "unified"
+        s._eta_abstractions["v2"] = "unified"
+        s._eta_abstractions["v3"] = "unified"
+        s._eta_uf.make("unified")
+
+        s._cascade_abstraction_merge({"v1", "v2", "v3", "unified"}, 0)
+
+        # All three should be merged (tid_b bridges the two keys)
+        assert s.tau.canonical(tid_a) == s.tau.canonical(tid_b)
+        assert s.tau.canonical(tid_b) == s.tau.canonical(tid_c)
+
+    def test_no_shared_tid_keys_stay_independent(self) -> None:
+        """Two structural keys with NO shared τ-id. Each key merges its
+        own pair internally, but the two winners are NOT merged — and
+        this is CORRECT because different structural keys represent
+        different structures.
+
+        This confirms that cross-key independence is a feature, not a bug."""
+        s = SPPF()
+        tid_a = s.tau._assign(("ta",), (), 0)
+        tid_b = s.tau._assign(("tb",), (), 1)
+        tid_c = s.tau._assign(("tc",), (), 2)
+        tid_d = s.tau._assign(("td",), (), 3)
+        for i in range(4):
+            s.nodes.append({
+                'ast_type': 'X', 'params': (), 'dep_type': f'd{i}',
+                'dep_type_raw': f'd{i}', 'kappa_tag': f'k{i}',
+                'sigma': 0, 'tau': i, 'kappa': 0, 'line': i, 'file': 'f',
+            })
+
+        key_P = ("P", ())  # type: tuple[str, tuple[int, ...]]
+        key_Q = ("Q", ())  # type: tuple[str, tuple[int, ...]]
+
+        s._tau_structural[key_P] = {"v_a": tid_a, "v_b": tid_b}
+        s._tau_structural[key_Q] = {"v_c": tid_c, "v_d": tid_d}
+        s._tau_structural_by_variant["v_a"] = {key_P}
+        s._tau_structural_by_variant["v_b"] = {key_P}
+        s._tau_structural_by_variant["v_c"] = {key_Q}
+        s._tau_structural_by_variant["v_d"] = {key_Q}
+
+        s._eta_abstractions["v_a"] = "unified"
+        s._eta_abstractions["v_b"] = "unified"
+        s._eta_abstractions["v_c"] = "unified"
+        s._eta_abstractions["v_d"] = "unified"
+        s._eta_uf.make("unified")
+
+        s._cascade_abstraction_merge({"v_a", "v_b", "v_c", "v_d", "unified"}, 0)
+
+        # Intra-key merges happen
+        assert s.tau.canonical(tid_a) == s.tau.canonical(tid_b)
+        assert s.tau.canonical(tid_c) == s.tau.canonical(tid_d)
+        # Cross-key: NOT merged (correct — different structural keys)
+        assert s.tau.canonical(tid_a) != s.tau.canonical(tid_c), \
+            "Cross-key merge happened but shouldn't — different structures"
+Summary of what these test:
+
+Test class	Count	Risk targeted	What failure means
+TestFixedPoint	5	P2 postulate, cascade completeness	SPPF over-partitioned; cascade stopped early
+TestIngestionOrderIndependence	3	Nondeterminism	Different traversal orders → different compression
+TestOrderWithChildren	2	Cascade propagation through children	Parent η-merge missed when child merges after parent ingestion
+TestR2EtaSquaredOrdering	2	R2: ∀η² abstraction-before-τ-merge	Stale worklist after ∀η² leaves non-fixed-point
+TestDeepCascade	3	Cascade depth + breadth	Worklist loses merges in deep/wide topologies
+TestR1Correction	2	R1 false-alarm confirmation	If shared_tid_bridges_keys fails, R1 is real after all
+R1 correction: After tracing the code more carefully, _cascade_abstraction_merge never modifies _eta_abstractions or _eta_uf — it only reads them via _resolve_type. This means variant resolution is stable throughout iteration, making scan order irrelevant for intra-key merges. Cross-key merging is not needed because different structural keys represent genuinely different structures. The TestR1Correction class confirms this. The review's R1 should be downgraded from "Medium" to "False alarm" and R6/R8 adjusted accordingly.
