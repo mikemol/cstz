@@ -6,3 +6,25 @@ build-backend = "setuptools.build_meta"
 name = "cstz"
 version = "0.1.0"
 requires-python = ">=3.8"
+
+[project.optional-dependencies]
+test = ["pytest>=7", "pytest-cov>=4"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=cstz --cov-branch --cov-report=term-missing"
+
+[tool.coverage.run]
+branch = true
+source = ["cstz"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 100
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__",
+]
+partial_branches = [
+    "pragma: no branch",
+]
