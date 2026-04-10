@@ -1,0 +1,332 @@
+@prefix pff: <https://example.org/pff/1.0/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+pff:DocumentShape
+  a sh:NodeShape ;
+  sh:targetClass pff:Document ;
+  sh:property [
+    sh:path pff:identifierScope ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:hasValue "document-local" ;
+  ] ;
+  sh:property [
+    sh:path pff:hasRank ;
+    sh:minCount 1 ;
+    sh:node pff:RankShape ;
+  ] ;
+  sh:property [
+    sh:path pff:hasAddr0 ;
+    sh:node pff:Addr0Shape ;
+  ] ;
+  sh:property [
+    sh:path pff:hasClassView ;
+    sh:node pff:ClassViewShape ;
+  ] ;
+  sh:property [
+    sh:path pff:hasShadow ;
+    sh:node pff:ShadowShape ;
+  ] .
+
+pff:RankShape
+  a sh:NodeShape ;
+  sh:targetClass pff:Rank ;
+  sh:property [
+    sh:path pff:ordinal ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:minInclusive 0 ;
+  ] .
+
+pff:PatchShape
+  a sh:NodeShape ;
+  sh:targetClass pff:Patch ;
+  sh:property [
+    sh:path pff:patchRank ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:class pff:Rank ;
+  ] ;
+  sh:property [
+    sh:path pff:phase ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+  ] .
+
+pff:ChartShape
+  a sh:NodeShape ;
+  sh:targetClass pff:Chart ;
+  sh:property [
+    sh:path pff:chartRoot ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+  ] .
+
+pff:Addr0Shape
+  a sh:NodeShape ;
+  sh:targetClass pff:Addr0 ;
+  sh:property [
+    sh:path pff:hasSegment ;
+    sh:minCount 1 ;
+    sh:node pff:SegmentShape ;
+  ] .
+
+pff:SegmentShape
+  a sh:NodeShape ;
+  sh:targetClass pff:Segment ;
+  sh:property [
+    sh:path pff:segmentRank ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:class pff:Rank ;
+  ] ;
+  sh:property [
+    sh:path pff:segmentPatch ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:class pff:Patch ;
+  ] ;
+  sh:property [
+    sh:path pff:phase ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+  ] ;
+  sh:property [
+    sh:path pff:hasPair ;
+    sh:minCount 1 ;
+    sh:node pff:PairShape ;
+  ] .
+
+pff:PairShape
+  a sh:NodeShape ;
+  sh:targetClass pff:Pair ;
+  sh:property [
+    sh:path pff:pairChart ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:class pff:Chart ;
+  ] ;
+  sh:property [
+    sh:path pff:pairRoot ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+  ] ;
+  sh:property [
+    sh:path pff:pairRole ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:in ("principal" "aux") ;
+  ] ;
+  sh:property [
+    sh:path pff:hasStep ;
+    sh:node pff:StepShape ;
+  ] ;
+  sh:property [
+    sh:path pff:hasHop ;
+    sh:node pff:HopShape ;
+  ] .
+
+pff:StepShape
+  a sh:NodeShape ;
+  sh:targetClass pff:Step ;
+  sh:property [
+    sh:path pff:stepIndex ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+  ] ;
+  sh:property [
+    sh:path pff:stepKind ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:in ("child" "field" "pack" "share" "port") ;
+  ] .
+
+pff:HopShape
+  a sh:NodeShape ;
+  sh:targetClass pff:Hop ;
+  sh:property [
+    sh:path pff:hopBoundary ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:class pff:Boundary ;
+  ] ;
+  sh:property [
+    sh:path pff:hopSide ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:in ("left" "right" "both") ;
+  ] ;
+  sh:property [
+    sh:path pff:hopPort ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+  ] .
+
+pff:Addr1Shape
+  a sh:NodeShape ;
+  sh:targetClass pff:Addr1 ;
+  sh:property [
+    sh:path pff:ctor ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:in ("refl" "glue" "transport" "pack" "compose" "inverse" "named") ;
+  ] ;
+  sh:property [ sh:path pff:src ; sh:minCount 1 ; sh:maxCount 1 ] ;
+  sh:property [ sh:path pff:dst ; sh:minCount 1 ; sh:maxCount 1 ] .
+
+pff:Addr2Shape
+  a sh:NodeShape ;
+  sh:targetClass pff:Addr2 ;
+  sh:property [
+    sh:path pff:ctor ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:in ("coh" "vcomp" "hcomp" "whisker" "named2") ;
+  ] ;
+  sh:property [ sh:path pff:src ; sh:minCount 1 ; sh:maxCount 1 ] ;
+  sh:property [ sh:path pff:dst ; sh:minCount 1 ; sh:maxCount 1 ] .
+
+pff:ClassMemberShape
+  a sh:NodeShape ;
+  sh:targetClass pff:ClassMember ;
+  sh:property [
+    sh:path pff:memberClassId ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+  ] ;
+  sh:property [
+    sh:path pff:memberAddr0 ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:class pff:Addr0 ;
+  ] .
+
+pff:ClassViewShape
+  a sh:NodeShape ;
+  sh:targetClass pff:ClassView ;
+  sh:property [
+    sh:path pff:viewRank ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:class pff:Rank ;
+  ] ;
+  sh:property [
+    sh:path pff:phase ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+  ] ;
+  sh:property [
+    sh:path pff:truncation ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+  ] ;
+  sh:property [
+    sh:path pff:congruence ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+  ] ;
+  sh:property [
+    sh:path pff:isAuthoritative ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:hasValue false ;
+  ] ;
+  sh:property [
+    sh:path pff:hasMember ;
+    sh:node pff:ClassMemberShape ;
+  ] .
+
+pff:ShadowShape
+  a sh:NodeShape ;
+  sh:targetClass pff:Shadow ;
+  sh:property [
+    sh:path pff:shadowRank ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:class pff:Rank ;
+  ] ;
+  sh:property [
+    sh:path pff:phase ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+  ] ;
+  sh:property [
+    sh:path pff:truncation ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+  ] ;
+  sh:property [
+    sh:path pff:congruence ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+  ] ;
+  sh:property [
+    sh:path pff:isAuthoritative ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+    sh:hasValue false ;
+  ] ;
+  sh:property [
+    sh:path pff:hasShadowNode ;
+    sh:nodeKind sh:IRIOrLiteral ;
+  ] .
+
+# SPARQL: nextSegment must strictly increase in rank ordinal
+pff:MonotoneSegmentChainShape
+  a sh:NodeShape ;
+  sh:targetClass pff:Segment ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:message "nextSegment must have a strictly greater rank ordinal." ;
+    sh:select """
+      SELECT $this WHERE {
+        $this pff:nextSegment ?next ;
+              pff:segmentRank ?r1 .
+        ?next pff:segmentRank ?r2 .
+        ?r1 pff:ordinal ?o1 .
+        ?r2 pff:ordinal ?o2 .
+        FILTER (?o2 <= ?o1)
+      }
+    """ ;
+  ] .
+
+# SPARQL: stepIndex values within a pair must be unique
+pff:UniqueStepIndexShape
+  a sh:NodeShape ;
+  sh:targetClass pff:Pair ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:message "stepIndex values must be unique within a pair." ;
+    sh:select """
+      SELECT $this WHERE {
+        $this pff:hasStep ?s1, ?s2 .
+        FILTER (?s1 != ?s2)
+        ?s1 pff:stepIndex ?i .
+        ?s2 pff:stepIndex ?i .
+      }
+    """ ;
+  ] .
+
+# SPARQL: every hopPort must name a port on its hopBoundary
+pff:BoundaryPortCompatibilityShape
+  a sh:NodeShape ;
+  sh:targetClass pff:Hop ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:message "hopPort must exist on the referenced boundary." ;
+    sh:select """
+      SELECT $this WHERE {
+        $this pff:hopBoundary ?b ;
+              pff:hopPort ?p .
+        FILTER NOT EXISTS {
+          ?b pff:hasPort ?port .
+          ?port pff:portName ?p .
+        }
+      }
+    """ ;
+  ] .
+
+# SPARQL: an addr0 must not contain two segments with the same rank
+pff:UniqueSegmentRankPerAddr0Shape
+  a sh:NodeShape ;
+  sh:targetClass pff:Addr0 ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:message "An addr0 must not contain two segments with the same rank." ;
+    sh:select """
+      SELECT $this WHERE {
+        $this pff:hasSegment ?s1, ?s2 .
+        FILTER (?s1 != ?s2)
+        ?s1 pff:segmentRank ?r .
+        ?s2 pff:segmentRank ?r .
+      }
+    """ ;
+  ] .

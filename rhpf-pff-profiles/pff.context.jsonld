@@ -1,0 +1,99 @@
+{
+  "@context": {
+    "pff": "https://example.org/pff/1.0/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "type": "@type",
+    "id": "@id",
+
+    "Document": "pff:Document",
+    "Rank": "pff:Rank",
+    "Patch": "pff:Patch",
+    "Boundary": "pff:Boundary",
+    "Port": "pff:Port",
+    "Chart": "pff:Chart",
+    "Addr0": "pff:Addr0",
+    "Segment": "pff:Segment",
+    "Pair": "pff:Pair",
+    "Step": "pff:Step",
+    "Hop": "pff:Hop",
+    "Addr1": "pff:Addr1",
+    "Addr2": "pff:Addr2",
+    "ClassView": "pff:ClassView",
+    "ClassMember": "pff:ClassMember",
+    "Shadow": "pff:Shadow",
+    "ShadowNode": "pff:ShadowNode",
+    "ShadowEdge": "pff:ShadowEdge",
+
+    "baseIri": "pff:baseIri",
+    "identifierScope": "pff:identifierScope",
+
+    "hasRank": { "@id": "pff:hasRank", "@type": "@id" },
+    "hasPatch": { "@id": "pff:hasPatch", "@type": "@id" },
+    "hasBoundary": { "@id": "pff:hasBoundary", "@type": "@id" },
+    "hasChart": { "@id": "pff:hasChart", "@type": "@id" },
+    "hasAddr0": { "@id": "pff:hasAddr0", "@type": "@id" },
+    "hasAddr1": { "@id": "pff:hasAddr1", "@type": "@id" },
+    "hasAddr2": { "@id": "pff:hasAddr2", "@type": "@id" },
+    "hasClassView": { "@id": "pff:hasClassView", "@type": "@id" },
+    "hasShadow": { "@id": "pff:hasShadow", "@type": "@id" },
+
+    "ordinal": "pff:ordinal",
+    "phase": "pff:phase",
+    "label": "pff:label",
+    "sort": "pff:sort",
+    "policy": "pff:policy",
+    "truncation": "pff:truncation",
+    "congruence": "pff:congruence",
+    "isAuthoritative": "pff:isAuthoritative",
+
+    "patchRank": { "@id": "pff:patchRank", "@type": "@id" },
+    "leftBoundary": { "@id": "pff:leftBoundary", "@type": "@id" },
+    "rightBoundary": { "@id": "pff:rightBoundary", "@type": "@id" },
+
+    "hasPort": { "@id": "pff:hasPort", "@type": "@id" },
+    "portName": "pff:portName",
+    "portRole": "pff:portRole",
+
+    "chartPatch": { "@id": "pff:chartPatch", "@type": "@id" },
+    "chartRoot": "pff:chartRoot",
+    "chartKind": "pff:chartKind",
+
+    "discoveryRank": { "@id": "pff:discoveryRank", "@type": "@id" },
+    "hasSegment": { "@id": "pff:hasSegment", "@type": "@id" },
+    "nextSegment": { "@id": "pff:nextSegment", "@type": "@id" },
+    "segmentRank": { "@id": "pff:segmentRank", "@type": "@id" },
+    "segmentPatch": { "@id": "pff:segmentPatch", "@type": "@id" },
+
+    "hasPair": { "@id": "pff:hasPair", "@type": "@id" },
+    "pairChart": { "@id": "pff:pairChart", "@type": "@id" },
+    "pairRoot": "pff:pairRoot",
+    "pairRole": "pff:pairRole",
+
+    "hasStep": { "@id": "pff:hasStep", "@type": "@id" },
+    "stepIndex": "pff:stepIndex",
+    "stepKind": "pff:stepKind",
+    "stepArg": "pff:stepArg",
+
+    "hasHop": { "@id": "pff:hasHop", "@type": "@id" },
+    "hopBoundary": { "@id": "pff:hopBoundary", "@type": "@id" },
+    "hopSide": "pff:hopSide",
+    "hopPort": "pff:hopPort",
+
+    "ctor": "pff:ctor",
+    "src": { "@id": "pff:src", "@type": "@id" },
+    "dst": { "@id": "pff:dst", "@type": "@id" },
+    "premise": { "@id": "pff:premise", "@type": "@id" },
+    "boundary": { "@id": "pff:boundary", "@type": "@id" },
+
+    "viewRank": { "@id": "pff:viewRank", "@type": "@id" },
+    "hasMember": { "@id": "pff:hasMember", "@type": "@id" },
+    "memberClassId": "pff:memberClassId",
+    "memberAddr0": { "@id": "pff:memberAddr0", "@type": "@id" },
+
+    "shadowRank": { "@id": "pff:shadowRank", "@type": "@id" },
+    "hasShadowNode": { "@id": "pff:hasShadowNode", "@type": "@id" },
+    "hasShadowEdge": { "@id": "pff:hasShadowEdge", "@type": "@id" },
+    "shadowKind": "pff:shadowKind",
+    "backing": { "@id": "pff:backing", "@type": "@id" }
+  }
+}

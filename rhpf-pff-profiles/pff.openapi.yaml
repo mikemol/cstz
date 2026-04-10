@@ -1,0 +1,196 @@
+openapi: 3.1.0
+info:
+  title: PFF API
+  version: 1.1.0-draft
+  summary: HTTP surface for Ranked Higher Path Forest / Path Forest Format documents
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+servers:
+  - url: https://api.example.org
+paths:
+  /documents:
+    post:
+      summary: Create a PFF document
+      operationId: putDocument
+      requestBody:
+        required: true
+        content:
+          application/pff+json:
+            schema:
+              $ref: '#/components/schemas/PffDocument'
+      responses:
+        '201':
+          description: Document stored and well-formed under the declared validation profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentReceipt'
+        '422':
+          description: Document rejected because fatal well-formedness violations prevented storage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentReceipt'
+  /documents/{documentId}:
+    get:
+      summary: Retrieve a stored PFF document
+      operationId: getDocument
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: Stored document
+          content:
+            application/pff+json:
+              schema:
+                $ref: '#/components/schemas/PffDocument'
+  /documents/{documentId}/merge:
+    post:
+      summary: Merge a patch or patch-bundle into an existing document
+      operationId: mergePatch
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      requestBody:
+        required: true
+        content:
+          application/pff+json:
+            schema:
+              $ref: '#/components/schemas/PatchBundle'
+      responses:
+        '200':
+          description: Merge stored and well-formed under the declared validation profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentReceipt'
+        '207':
+          description: Merge stored, but one or more non-fatal well-formedness violations were recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentReceipt'
+        '422':
+          description: Merge rejected because fatal well-formedness violations prevented storage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentReceipt'
+  /documents/{documentId}/shadow:
+    get:
+      summary: Materialize an SPPF-like shadow view
+      operationId: getShadow
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+        - name: rank
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: phase
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: truncation
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Requested derived shadow
+          headers:
+            X-PFF-Authoritative:
+              description: Always false for shadow materializations because shadows are derived views.
+              schema:
+                type: string
+                enum: ['false']
+          content:
+            application/pff+json:
+              schema:
+                $ref: '#/components/schemas/Shadow'
+components:
+  parameters:
+    DocumentId:
+      name: documentId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+  schemas:
+    PffDocument:
+      $ref: './pff.schema.json'
+    PatchBundle:
+      type: object
+      description: Flat, document-scoped bundle. Patch bundles do not own charts or addresses; they contribute them to document scope.
+      required: [version, identifierScope, patches]
+      properties:
+        version:
+          const: '1.0'
+        identifierScope:
+          const: document-local
+        patches:
+          type: array
+          items:
+            $ref: './pff.schema.json#/$defs/Patch'
+        boundaries:
+          type: array
+          items:
+            $ref: './pff.schema.json#/$defs/Boundary'
+        charts:
+          type: array
+          items:
+            $ref: './pff.schema.json#/$defs/Chart'
+        addresses0:
+          type: array
+          items:
+            $ref: './pff.schema.json#/$defs/Addr0'
+        paths1:
+          type: array
+          items:
+            $ref: './pff.schema.json#/$defs/Addr1'
+        paths2:
+          type: array
+          items:
+            $ref: './pff.schema.json#/$defs/Addr2'
+      unevaluatedProperties: false
+    Shadow:
+      $ref: './pff.schema.json#/$defs/Shadow'
+    ValidationIssue:
+      type: object
+      required: [rule, location, severity, message]
+      properties:
+        rule:
+          type: string
+          description: Well-formedness rule identifier, such as WF-1.
+        location:
+          type: string
+          description: JSON Pointer, CURIE, SQL key, or other machine-resolvable location string.
+        severity:
+          type: string
+          enum: [info, warning, error, fatal]
+        message:
+          type: string
+      unevaluatedProperties: false
+    DocumentReceipt:
+      type: object
+      required: [documentId, accepted, wfStatus, violations]
+      properties:
+        documentId:
+          type: string
+        accepted:
+          type: boolean
+        wfStatus:
+          type: string
+          enum: [clean, stored-with-violations, rejected]
+        rank:
+          type: string
+        violations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationIssue'
+        warnings:
+          type: array
+          items:
+            type: string
+      unevaluatedProperties: false

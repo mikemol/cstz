@@ -1,0 +1,667 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/pff/1.0/schema",
+  "title": "Path Forest Format (PFF/1)",
+  "description": "Lossless flat, document-scoped interchange syntax for Ranked Higher Path Forest documents. All local identifiers are document-local; baseIri is used only to mint global IRIs in derived views.",
+  "type": "object",
+  "required": [
+    "version",
+    "documentId",
+    "identifierScope",
+    "ranks",
+    "patches",
+    "charts",
+    "addresses0"
+  ],
+  "properties": {
+    "version": {
+      "const": "1.0"
+    },
+    "documentId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "baseIri": {
+      "type": "string",
+      "format": "uri-reference",
+      "description": "Optional base IRI used when minting global IRIs for RDF/JSON-LD exports. It does not change local identifier equality."
+    },
+    "namespaces": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "format": "uri"
+      }
+    },
+    "ranks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Rank"
+      },
+      "minItems": 1
+    },
+    "patches": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Patch"
+      },
+      "default": [],
+      "description": "Flat, document-scoped patch collection. Patches are not ownership containers for charts or addresses."
+    },
+    "boundaries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Boundary"
+      },
+      "default": []
+    },
+    "charts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Chart"
+      },
+      "default": [],
+      "description": "Flat, document-scoped chart collection."
+    },
+    "addresses0": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Addr0"
+      },
+      "default": [],
+      "description": "Flat, document-scoped order-0 address collection."
+    },
+    "paths1": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Addr1"
+      },
+      "default": [],
+      "description": "Flat, document-scoped order-1 path collection."
+    },
+    "paths2": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Addr2"
+      },
+      "default": [],
+      "description": "Flat, document-scoped order-2 path collection."
+    },
+    "classViews": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ClassView"
+      },
+      "default": []
+    },
+    "shadows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Shadow"
+      },
+      "default": []
+    },
+    "identifierScope": {
+      "const": "document-local",
+      "description": "Normative identifier scope for rank IDs and all other local IDs in this document."
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z][A-Za-z0-9._:/#-]*$"
+    },
+    "QNameOrIri": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Rank": {
+      "type": "object",
+      "required": [
+        "id",
+        "ordinal"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "ordinal": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "label": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "unevaluatedProperties": false,
+      "description": "Document-local rank identifier plus strictly ordered ordinal."
+    },
+    "Patch": {
+      "type": "object",
+      "required": [
+        "id",
+        "rank",
+        "phase"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "rank": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "phase": {
+          "$ref": "#/$defs/QNameOrIri"
+        },
+        "leftBoundary": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "rightBoundary": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "label": {
+          "type": "string"
+        },
+        "meta": {
+          "type": "object"
+        }
+      },
+      "unevaluatedProperties": false,
+      "description": "Document-scoped patch. Flat model is normative."
+    },
+    "Boundary": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "ports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Port"
+          },
+          "default": []
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "Port": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string"
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "Chart": {
+      "type": "object",
+      "required": [
+        "id",
+        "root"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "patch": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "root": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string"
+        },
+        "payload": {}
+      },
+      "unevaluatedProperties": false
+    },
+    "Addr0": {
+      "type": "object",
+      "required": [
+        "id",
+        "segments"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "sort": {
+          "$ref": "#/$defs/QNameOrIri"
+        },
+        "discoveryRank": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "segments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Segment"
+          },
+          "minItems": 1
+        },
+        "payload": {},
+        "meta": {
+          "type": "object"
+        }
+      },
+      "unevaluatedProperties": false,
+      "description": "Absolute order-0 address. Segment ranks must be strictly increasing within one address."
+    },
+    "Segment": {
+      "type": "object",
+      "required": [
+        "rank",
+        "phase",
+        "patch",
+        "pairs"
+      ],
+      "properties": {
+        "rank": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "phase": {
+          "$ref": "#/$defs/QNameOrIri"
+        },
+        "patch": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "pairs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Pair"
+          },
+          "minItems": 1
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "Pair": {
+      "type": "object",
+      "required": [
+        "chart",
+        "root",
+        "route",
+        "role"
+      ],
+      "properties": {
+        "chart": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "root": {
+          "type": "string",
+          "minLength": 1
+        },
+        "route": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Step"
+          },
+          "default": []
+        },
+        "boundary": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Hop"
+          },
+          "default": []
+        },
+        "role": {
+          "enum": [
+            "principal",
+            "aux"
+          ]
+        }
+      },
+      "unevaluatedProperties": false,
+      "description": "Canonical route carrier. The structured route array is normative; dotted route text is only a derived serialization profile."
+    },
+    "Step": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "child",
+            "field",
+            "pack",
+            "share",
+            "port"
+          ]
+        },
+        "arg": {
+          "type": [
+            "string",
+            "integer"
+          ]
+        }
+      },
+      "unevaluatedProperties": false,
+      "description": "Structured canonical route step. A dotted route string such as child(2).field(lhs) is a derived text serialization, not the canonical JSON form."
+    },
+    "Hop": {
+      "type": "object",
+      "required": [
+        "boundary",
+        "side",
+        "port"
+      ],
+      "properties": {
+        "boundary": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "side": {
+          "enum": [
+            "left",
+            "right",
+            "both"
+          ]
+        },
+        "port": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "Addr1": {
+      "type": "object",
+      "required": [
+        "id",
+        "rank",
+        "ctor",
+        "src",
+        "dst"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "rank": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "patch": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "ctor": {
+          "enum": [
+            "refl",
+            "glue",
+            "transport",
+            "pack",
+            "compose",
+            "inverse",
+            "named"
+          ]
+        },
+        "src": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "dst": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "boundary": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "premises": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "default": []
+        },
+        "label": {
+          "type": "string"
+        },
+        "args": {
+          "type": "object"
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "Addr2": {
+      "type": "object",
+      "required": [
+        "id",
+        "rank",
+        "ctor",
+        "src",
+        "dst"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "rank": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "patch": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "ctor": {
+          "enum": [
+            "coh",
+            "vcomp",
+            "hcomp",
+            "whisker",
+            "named2"
+          ]
+        },
+        "src": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "dst": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "label": {
+          "type": "string"
+        },
+        "args": {
+          "type": "object"
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "ClassView": {
+      "type": "object",
+      "required": [
+        "id",
+        "rank",
+        "phase",
+        "truncation",
+        "congruence",
+        "members",
+        "isAuthoritative"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "rank": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "phase": {
+          "$ref": "#/$defs/QNameOrIri"
+        },
+        "truncation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy": {
+          "type": "string",
+          "format": "uri-reference",
+          "description": "Optional URI for the policy document that defines the derivation procedure."
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ClassMember"
+          },
+          "default": []
+        },
+        "congruence": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared congruence / equality regime used to derive this class view."
+        },
+        "isAuthoritative": {
+          "const": false,
+          "description": "Derived class views are never authoritative."
+        }
+      },
+      "unevaluatedProperties": false,
+      "description": "Derived equivalence-class view. Non-authoritative."
+    },
+    "ClassMember": {
+      "type": "object",
+      "required": [
+        "classId",
+        "address0"
+      ],
+      "properties": {
+        "classId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "address0": {
+          "$ref": "#/$defs/Identifier"
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "Shadow": {
+      "type": "object",
+      "required": [
+        "id",
+        "rank",
+        "phase",
+        "truncation",
+        "congruence",
+        "isAuthoritative",
+        "nodes"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "rank": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "phase": {
+          "$ref": "#/$defs/QNameOrIri"
+        },
+        "truncation": {
+          "type": "string"
+        },
+        "policy": {
+          "type": "string",
+          "format": "uri-reference",
+          "description": "Optional URI for the policy document that defines the shadow derivation procedure."
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ShadowNode"
+          },
+          "default": []
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ShadowEdge"
+          },
+          "default": []
+        },
+        "congruence": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared congruence / equality regime used to derive this shadow."
+        },
+        "isAuthoritative": {
+          "const": false,
+          "description": "Shadows are derived views and MUST NOT be treated as authoritative."
+        }
+      },
+      "unevaluatedProperties": false,
+      "description": "Derived SPPF-like shadow. Non-authoritative by definition."
+    },
+    "ShadowNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "kind": {
+          "enum": [
+            "semantic",
+            "packed",
+            "intermediate"
+          ]
+        },
+        "label": {
+          "type": "string"
+        },
+        "backing": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "default": []
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "ShadowEdge": {
+      "type": "object",
+      "required": [
+        "src",
+        "dst",
+        "kind"
+      ],
+      "properties": {
+        "src": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "dst": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "kind": {
+          "enum": [
+            "contains",
+            "premise",
+            "projectsTo"
+          ]
+        },
+        "ordinal": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "unevaluatedProperties": false
+    }
+  }
+}

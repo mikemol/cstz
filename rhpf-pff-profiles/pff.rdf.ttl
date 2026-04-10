@@ -1,0 +1,97 @@
+@prefix pff: <https://example.org/pff/1.0/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+pff:Document a rdfs:Class .
+pff:Rank a rdfs:Class .
+pff:Patch a rdfs:Class .
+pff:Boundary a rdfs:Class .
+pff:Port a rdfs:Class .
+pff:Chart a rdfs:Class .
+pff:Addr0 a rdfs:Class .
+pff:Segment a rdfs:Class .
+pff:Pair a rdfs:Class .
+pff:Step a rdfs:Class .
+pff:Hop a rdfs:Class .
+pff:Addr1 a rdfs:Class .
+pff:Addr2 a rdfs:Class .
+pff:ClassView a rdfs:Class .
+pff:ClassMember a rdfs:Class .
+pff:Shadow a rdfs:Class .
+pff:ShadowNode a rdfs:Class .
+pff:ShadowEdge a rdfs:Class .
+
+pff:hasRank a rdf:Property ; rdfs:domain pff:Document ; rdfs:range pff:Rank .
+pff:hasPatch a rdf:Property ; rdfs:domain pff:Document ; rdfs:range pff:Patch .
+pff:hasBoundary a rdf:Property ; rdfs:domain pff:Document ; rdfs:range pff:Boundary .
+pff:hasChart a rdf:Property ; rdfs:domain pff:Document ; rdfs:range pff:Chart .
+pff:hasAddr0 a rdf:Property ; rdfs:domain pff:Document ; rdfs:range pff:Addr0 .
+pff:hasAddr1 a rdf:Property ; rdfs:domain pff:Document ; rdfs:range pff:Addr1 .
+pff:hasAddr2 a rdf:Property ; rdfs:domain pff:Document ; rdfs:range pff:Addr2 .
+pff:hasClassView a rdf:Property ; rdfs:domain pff:Document ; rdfs:range pff:ClassView .
+pff:hasShadow a rdf:Property ; rdfs:domain pff:Document ; rdfs:range pff:Shadow .
+
+pff:baseIri a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Document ; rdfs:range xsd:anyURI .
+pff:identifierScope a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Document ; rdfs:range xsd:string .
+pff:ordinal a rdf:Property, owl:FunctionalProperty ; rdfs:range xsd:integer .
+pff:phase a rdf:Property, owl:FunctionalProperty ; rdfs:range xsd:string .
+pff:sort a rdf:Property, owl:FunctionalProperty ; rdfs:range xsd:string .
+pff:policy a rdf:Property ; rdfs:range xsd:anyURI .
+pff:truncation a rdf:Property, owl:FunctionalProperty ; rdfs:range xsd:string .
+pff:congruence a rdf:Property, owl:FunctionalProperty ; rdfs:range xsd:string .
+pff:isAuthoritative a rdf:Property, owl:FunctionalProperty ; rdfs:range xsd:boolean .
+pff:label a rdf:Property ; rdfs:range xsd:string .
+
+pff:patchRank a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Patch ; rdfs:range pff:Rank .
+pff:leftBoundary a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Patch ; rdfs:range pff:Boundary .
+pff:rightBoundary a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Patch ; rdfs:range pff:Boundary .
+
+pff:hasPort a rdf:Property ; rdfs:domain pff:Boundary ; rdfs:range pff:Port .
+pff:portName a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Port ; rdfs:range xsd:string .
+pff:portRole a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Port ; rdfs:range xsd:string .
+
+pff:chartRoot a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Chart ; rdfs:range xsd:string .
+pff:chartPatch a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Chart ; rdfs:range pff:Patch .
+pff:chartKind a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Chart ; rdfs:range xsd:string .
+pff:chartPayload a rdf:Property .
+
+pff:discoveryRank a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Addr0 ; rdfs:range pff:Rank .
+pff:hasSegment a rdf:Property ; rdfs:domain pff:Addr0 ; rdfs:range pff:Segment .
+pff:nextSegment a rdf:Property ; rdfs:domain pff:Segment ; rdfs:range pff:Segment .
+
+pff:segmentRank a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Segment ; rdfs:range pff:Rank .
+pff:segmentPatch a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Segment ; rdfs:range pff:Patch .
+pff:hasPair a rdf:Property ; rdfs:domain pff:Segment ; rdfs:range pff:Pair .
+
+pff:pairChart a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Pair ; rdfs:range pff:Chart .
+pff:pairRoot a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Pair ; rdfs:range xsd:string .
+pff:pairRole a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Pair ; rdfs:range xsd:string .
+pff:hasStep a rdf:Property ; rdfs:domain pff:Pair ; rdfs:range pff:Step .
+pff:hasHop a rdf:Property ; rdfs:domain pff:Pair ; rdfs:range pff:Hop .
+
+pff:stepIndex a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Step ; rdfs:range xsd:integer .
+pff:stepKind a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Step ; rdfs:range xsd:string .
+pff:stepArg a rdf:Property .
+
+pff:hopBoundary a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Hop ; rdfs:range pff:Boundary .
+pff:hopSide a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Hop ; rdfs:range xsd:string .
+pff:hopPort a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Hop ; rdfs:range xsd:string .
+
+pff:ctor a rdf:Property, owl:FunctionalProperty ; rdfs:range xsd:string .
+pff:src a rdf:Property .
+pff:dst a rdf:Property .
+pff:premise a rdf:Property .
+pff:boundary a rdf:Property ; rdfs:range pff:Boundary .
+
+pff:viewRank a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:ClassView ; rdfs:range pff:Rank .
+pff:hasMember a rdf:Property ; rdfs:domain pff:ClassView ; rdfs:range pff:ClassMember .
+pff:memberClassId a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:ClassMember ; rdfs:range xsd:string .
+pff:memberAddr0 a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:ClassMember ; rdfs:range pff:Addr0 .
+
+pff:shadowRank a rdf:Property, owl:FunctionalProperty ; rdfs:domain pff:Shadow ; rdfs:range pff:Rank .
+pff:hasShadowNode a rdf:Property ; rdfs:domain pff:Shadow ; rdfs:range pff:ShadowNode .
+pff:hasShadowEdge a rdf:Property ; rdfs:domain pff:Shadow ; rdfs:range pff:ShadowEdge .
+pff:shadowKind a rdf:Property, owl:FunctionalProperty ; rdfs:range xsd:string .
+pff:backing a rdf:Property .
