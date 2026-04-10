@@ -110,7 +110,7 @@ data ℕ : Set where
 -- ── load (Load) ────────────────────────────────
 -- 2366 nodes, 1 type contexts, 1 forms
 
-module load-Load-8 where
+module load-Load-τ8 where
 
   -- ctx-8: 2366 nodes, 1 forms
   -- [(untyped)]
@@ -122,7 +122,7 @@ module load-Load-8 where
 -- ── var (Name) ─────────────────────────────────
 -- 1497 nodes, 2 type contexts, 200 forms
 
-module var-Name-13 where
+module var-Name-τ16 where
 
   -- ctx-16: 757 nodes, 175 forms
   -- [(untyped)]
@@ -138,7 +138,7 @@ module var-Name-13 where
 -- ── store (Store) ──────────────────────────────
 -- 365 nodes, 1 type contexts, 1 forms
 
-module store-Store-6 where
+module store-Store-τ6 where
 
   -- ctx-6: 365 nodes, 1 forms
   -- [(untyped)]
@@ -150,7 +150,7 @@ module store-Store-6 where
 -- ── terminal (Constant) ────────────────────────
 -- 295 nodes, 2 type contexts, 125 forms
 
-module terminal-Constant-0 where
+module terminal-Constant-str where
 
   -- str: 273 nodes, 124 forms
   -- [NoneType, bool, float, int, str]
@@ -167,7 +167,7 @@ module terminal-Constant-0 where
 -- ── bind (Name) ────────────────────────────────
 -- 275 nodes, 2 type contexts, 153 forms
 
-module bind-Name-7 where
+module bind-Name-τ44 where
 
   -- ctx-44: 245 nodes, 134 forms
   -- [(untyped)]
@@ -183,7 +183,7 @@ module bind-Name-7 where
 -- ── morphism@state (Attribute) ─────────────────
 -- 243 nodes, 1 type contexts, 44 forms
 
-module morphism-at-state-Attribute-24 where
+module morphism-at-state-Attribute-Self-_parent-0 where
 
   -- Self-_parent: 243 nodes, 44 forms
   -- [Self._cascade_abstraction_merge, Self._cascade_eta, Self._cell_contents, Self._cell_obs, Self._cleavage_fibers]
@@ -194,7 +194,7 @@ module morphism-at-state-Attribute-24 where
 -- ── index (Index) ──────────────────────────────
 -- 130 nodes, 2 type contexts, 43 forms
 
-module index-Index-26 where
+module index-Index-τ36 where
 
   -- ctx-36: 84 nodes, 38 forms
   -- [(untyped)]
@@ -216,7 +216,7 @@ module index-Index-26 where
 -- ── morphism@state (Attribute) ─────────────────
 -- 68 nodes, 1 type contexts, 14 forms
 
-module morphism-at-state-Attribute-105 where
+module morphism-at-state-Attribute-Self-uf-make where
 
   -- Self-uf-make: 68 nodes, 14 forms
   -- [Self._cell_contents.get, Self._cell_obs.get, Self._cell_obs.keys, Self._cleavage_fibers.append, Self._cleavage_levels.append]
@@ -227,7 +227,7 @@ module morphism-at-state-Attribute-105 where
 -- ── subscript (Subscript) ──────────────────────
 -- 58 nodes, 4 type contexts, 21 forms
 
-module subscript-Subscript-67 where
+module subscript-Subscript-τ195 where
 
   -- ctx-195: 25 nodes, 5 forms
   -- [(untyped)]
@@ -274,7 +274,7 @@ module subscript-Subscript-67 where
 -- ── arrow (Name) ───────────────────────────────
 -- 55 nodes, 1 type contexts, 4 forms
 
-module arrow-Name-69 where
+module arrow-Name-toint where
 
   -- toint: 55 nodes, 4 forms
   -- [AST, Self, Self._counter, Self.node_count, T]
@@ -289,7 +289,7 @@ module arrow-Name-69 where
 -- ── apply (Call) ───────────────────────────────
 -- 46 nodes, 2 type contexts, 19 forms
 
-module apply-Call-106 where
+module apply-Call-τ165 where
 
   -- ctx-165: 41 nodes, 16 forms
   -- [(untyped)]
@@ -308,7 +308,7 @@ module apply-Call-106 where
 -- ── arg (arg) ──────────────────────────────────
 -- 45 nodes, 1 type contexts, 2 forms
 
-module arg-11 where
+module arg-arg-τ11 where
 
   -- ctx-11: 45 nodes, 2 forms
   -- [(untyped)]
@@ -321,7 +321,7 @@ module arg-11 where
 -- ── arg (arg) ──────────────────────────────────
 -- 38 nodes, 2 type contexts, 27 forms
 
-module arg-21 where
+module arg-arg-τ93 where
 
   -- ctx-93: 32 nodes, 22 forms
   -- [(untyped)]
@@ -342,7 +342,7 @@ module arg-21 where
 -- ── morphism@state (Attribute) ─────────────────
 -- 36 nodes, 1 type contexts, 28 forms
 
-module morphism-at-state-Attribute-14 where
+module morphism-at-state-Attribute-Self-_parent-1 where
 
   -- Self-_parent: 36 nodes, 28 forms
   -- [Self._cell_contents, Self._cell_obs, Self._cleavage_fibers, Self._cleavage_ghost_count, Self._cleavage_levels]
@@ -353,7 +353,7 @@ module morphism-at-state-Attribute-14 where
 -- ── subscript (Subscript) ──────────────────────
 -- 36 nodes, 2 type contexts, 25 forms
 
-module subscript-Subscript-33 where
+module subscript-Subscript-τ47 where
 
   -- ctx-47: 32 nodes, 21 forms
   -- [(untyped)]
@@ -373,7 +373,7 @@ module subscript-Subscript-33 where
 -- ── product (Tuple) ────────────────────────────
 -- 30 nodes, 4 type contexts, 17 forms
 
-module product-Tuple-15 where
+module product-Tuple-tuple-0 where
 
   -- tuple: 12 nodes, 10 forms
   -- [tuple]
@@ -406,7 +406,7 @@ module product-Tuple-15 where
 -- ── let (Assign) ───────────────────────────────
 -- 27 nodes, 1 type contexts, 19 forms
 
-module let-k-Assign-127 where
+module let-k-Assign-τ186 where
 
   -- ctx-186: 27 nodes, 19 forms
   -- [(untyped)]
@@ -417,7 +417,7 @@ module let-k-Assign-127 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 26 nodes, 1 type contexts, 26 forms
 
-module effect-seq-Expr-1 where
+module effect-seq-Expr-τ1 where
 
   -- ctx-1: 26 nodes, 26 forms
   -- [(untyped)]
@@ -428,7 +428,7 @@ module effect-seq-Expr-1 where
 -- ── index (Index) ──────────────────────────────
 -- 26 nodes, 1 type contexts, 4 forms
 
-module index-Index-371 where
+module index-Index-τ492 where
 
   -- ctx-492: 26 nodes, 4 forms
   -- [(untyped)]
@@ -443,7 +443,7 @@ module index-Index-371 where
 -- ── subscript (Subscript) ──────────────────────
 -- 26 nodes, 1 type contexts, 10 forms
 
-module subscript-Subscript-372 where
+module subscript-Subscript-τ493 where
 
   -- ctx-493: 26 nodes, 10 forms
   -- [(untyped)]
@@ -454,7 +454,7 @@ module subscript-Subscript-372 where
 -- ── coerce (FormattedValue) ────────────────────
 -- 24 nodes, 2 type contexts, 18 forms
 
-module coerce-FormattedValue-275 where
+module coerce-FormattedValue-τ486 where
 
   -- ctx-486: 15 nodes, 14 forms
   -- [(untyped)]
@@ -475,7 +475,7 @@ module coerce-FormattedValue-275 where
 -- ── cardinality (Call) ─────────────────────────
 -- 23 nodes, 2 type contexts, 17 forms
 
-module cardinality-Call-149 where
+module cardinality-Call-int-0 where
 
   -- int: 22 nodes, 16 forms
   -- [int]
@@ -492,7 +492,7 @@ module cardinality-Call-149 where
 -- ── powerset (Call) ────────────────────────────
 -- 22 nodes, 1 type contexts, 1 forms
 
-module powerset-Call-125 where
+module powerset-Call-τ184 where
 
   -- ctx-184: 22 nodes, 1 forms
   -- [(untyped)]
@@ -504,7 +504,7 @@ module powerset-Call-125 where
 -- ── product (Tuple) ────────────────────────────
 -- 21 nodes, 2 type contexts, 2 forms
 
-module product-Tuple-76 where
+module product-Tuple-tuple-1 where
 
   -- tuple: 17 nodes, 1 forms
   -- [tuple]
@@ -522,7 +522,7 @@ module product-Tuple-76 where
 -- ── index (Index) ──────────────────────────────
 -- 21 nodes, 2 type contexts, 2 forms
 
-module index-Index-77 where
+module index-Index-τ101 where
 
   -- ctx-101: 17 nodes, 1 forms
   -- [(untyped)]
@@ -540,7 +540,7 @@ module index-Index-77 where
 -- ── subscript (Subscript) ──────────────────────
 -- 21 nodes, 2 type contexts, 2 forms
 
-module subscript-Subscript-78 where
+module subscript-Subscript-τ102 where
 
   -- ctx-102: 17 nodes, 1 forms
   -- [(untyped)]
@@ -558,7 +558,7 @@ module subscript-Subscript-78 where
 -- ── index (Index) ──────────────────────────────
 -- 20 nodes, 4 type contexts, 8 forms
 
-module index-Index-16 where
+module index-Index-τ251 where
 
   -- ctx-251: 10 nodes, 3 forms
   -- [(untyped)]
@@ -592,7 +592,7 @@ module index-Index-16 where
 -- ── subscript (Subscript) ──────────────────────
 -- 20 nodes, 5 type contexts, 13 forms
 
-module subscript-Subscript-17 where
+module subscript-Subscript-τ252 where
 
   -- ctx-252: 10 nodes, 5 forms
   -- [(untyped)]
@@ -636,7 +636,7 @@ module subscript-Subscript-17 where
 -- ── projection@? (Attribute) ───────────────────
 -- 20 nodes, 1 type contexts, 11 forms
 
-module projection-at-x3f-Attribute-258 where
+module projection-at-x3f-Attribute-τ188 where
 
   -- ctx-188: 20 nodes, 11 forms
   -- [(untyped)]
@@ -647,7 +647,7 @@ module projection-at-x3f-Attribute-258 where
 -- ── projection.compute@? (Call) ────────────────
 -- 20 nodes, 1 type contexts, 11 forms
 
-module projection-compute-at-x3f-Call-259 where
+module projection-compute-at-x3f-Call-τ361 where
 
   -- ctx-361: 20 nodes, 11 forms
   -- [(untyped)]
@@ -658,7 +658,7 @@ module projection-compute-at-x3f-Call-259 where
 -- ── product.unpack (Tuple) ─────────────────────
 -- 19 nodes, 1 type contexts, 10 forms
 
-module product-unpack-Tuple-45 where
+module product-unpack-Tuple-tuple-0 where
 
   -- tuple: 19 nodes, 10 forms
   -- [tuple]
@@ -669,7 +669,7 @@ module product-unpack-Tuple-45 where
 -- ── arguments (arguments) ──────────────────────
 -- 18 nodes, 1 type contexts, 2 forms
 
-module arguments-12 where
+module arguments-arguments-τ12 where
 
   -- ctx-12: 18 nodes, 2 forms
   -- [(untyped)]
@@ -682,7 +682,7 @@ module arguments-12 where
 -- ── apply (Call) ───────────────────────────────
 -- 18 nodes, 2 type contexts, 14 forms
 
-module apply-Call-353 where
+module apply-Call-τ473 where
 
   -- ctx-473: 16 nodes, 12 forms
   -- [(untyped)]
@@ -700,7 +700,7 @@ module apply-Call-353 where
 -- ── add (Add) ──────────────────────────────────
 -- 17 nodes, 1 type contexts, 1 forms
 
-module add-Add-57 where
+module add-Add-τ73 where
 
   -- ctx-73: 17 nodes, 1 forms
   -- [(untyped)]
@@ -712,7 +712,7 @@ module add-Add-57 where
 -- ── exponential.literal (Dict) ─────────────────
 -- 15 nodes, 1 type contexts, 1 forms
 
-module exponential-literal-Dict-18 where
+module exponential-literal-Dict-dict-0 where
 
   -- dict: 15 nodes, 1 forms
   -- [dict]
@@ -724,7 +724,7 @@ module exponential-literal-Dict-18 where
 -- ── in (In) ────────────────────────────────────
 -- 15 nodes, 1 type contexts, 1 forms
 
-module in-k-In-61 where
+module in-k-In-τ77 where
 
   -- ctx-77: 15 nodes, 1 forms
   -- [(untyped)]
@@ -736,7 +736,7 @@ module in-k-In-61 where
 -- ── cardinality (Call) ─────────────────────────
 -- 15 nodes, 1 type contexts, 8 forms
 
-module cardinality-Call-70 where
+module cardinality-Call-int-1 where
 
   -- int: 15 nodes, 8 forms
   -- [int]
@@ -755,7 +755,7 @@ module cardinality-Call-70 where
 -- ── partial@state (Attribute) ──────────────────
 -- 15 nodes, 1 type contexts, 7 forms
 
-module partial-at-state-Attribute-217 where
+module partial-at-state-Attribute-Self-_cell_contents-get where
 
   -- Self-_cell_contents-get: 15 nodes, 7 forms
   -- [Self._cell_contents.get, Self._cell_obs.get, Self._cell_obs.keys, Self._cleavage_fibers.append, Self._cleavage_levels.append]
@@ -773,7 +773,7 @@ module partial-at-state-Attribute-217 where
 -- ── subscript (Subscript) ──────────────────────
 -- 15 nodes, 2 type contexts, 11 forms
 
-module subscript-Subscript-254 where
+module subscript-Subscript-τ355 where
 
   -- ctx-355: 14 nodes, 10 forms
   -- [(untyped)]
@@ -790,7 +790,7 @@ module subscript-Subscript-254 where
 -- ── morphism@? (Attribute) ─────────────────────
 -- 15 nodes, 1 type contexts, 11 forms
 
-module morphism-at-x3f-Attribute-300 where
+module morphism-at-x3f-Attribute-τ188 where
 
   -- ctx-188: 15 nodes, 11 forms
   -- [(untyped)]
@@ -801,7 +801,7 @@ module morphism-at-x3f-Attribute-300 where
 -- ── noteq (NotEq) ──────────────────────────────
 -- 14 nodes, 1 type contexts, 1 forms
 
-module noteq-NotEq-34 where
+module noteq-NotEq-τ48 where
 
   -- ctx-48: 14 nodes, 1 forms
   -- [(untyped)]
@@ -813,7 +813,7 @@ module noteq-NotEq-34 where
 -- ── subscript (Subscript) ──────────────────────
 -- 13 nodes, 2 type contexts, 10 forms
 
-module subscript-Subscript-27 where
+module subscript-Subscript-τ37 where
 
   -- ctx-37: 12 nodes, 9 forms
   -- [(untyped)]
@@ -830,7 +830,7 @@ module subscript-Subscript-27 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 13 nodes, 1 type contexts, 4 forms
 
-module free_monoid-fold-JoinedStr-673 where
+module free_monoid-fold-JoinedStr-str-0 where
 
   -- str: 13 nodes, 4 forms
   -- [str]
@@ -845,7 +845,7 @@ module free_monoid-fold-JoinedStr-673 where
 -- ── apply (Call) ───────────────────────────────
 -- 12 nodes, 1 type contexts, 7 forms
 
-module apply-Call-46 where
+module apply-Call-τ61 where
 
   -- ctx-61: 12 nodes, 7 forms
   -- [(untyped)]
@@ -863,7 +863,7 @@ module apply-Call-46 where
 -- ── let (Assign) ───────────────────────────────
 -- 12 nodes, 1 type contexts, 12 forms
 
-module let-k-Assign-255 where
+module let-k-Assign-τ356 where
 
   -- ctx-356: 12 nodes, 12 forms
   -- [(untyped)]
@@ -874,7 +874,7 @@ module let-k-Assign-255 where
 -- ── let (Assign) ───────────────────────────────
 -- 11 nodes, 2 type contexts, 11 forms
 
-module let-k-Assign-36 where
+module let-k-Assign-τ50 where
 
   -- ctx-50: 9 nodes, 9 forms
   -- [(untyped)]
@@ -892,7 +892,7 @@ module let-k-Assign-36 where
 -- ── terminal.map (Return) ──────────────────────
 -- 11 nodes, 2 type contexts, 9 forms
 
-module terminal-map-Return-42 where
+module terminal-map-Return-τ56 where
 
   -- ctx-56: 9 nodes, 7 forms
   -- [(untyped)]
@@ -917,7 +917,7 @@ module terminal-map-Return-42 where
 -- ── equalizer (Compare) ────────────────────────
 -- 11 nodes, 3 type contexts, 7 forms
 
-module equalizer-Compare-352 where
+module equalizer-Compare-τ471 where
 
   -- ctx-471: 8 nodes, 5 forms
   -- [(untyped)]
@@ -945,7 +945,7 @@ module equalizer-Compare-352 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 11 nodes, 2 type contexts, 7 forms
 
-module effect-seq-Expr-354 where
+module effect-seq-Expr-τ474 where
 
   -- ctx-474: 10 nodes, 6 forms
   -- [(untyped)]
@@ -968,7 +968,7 @@ module effect-seq-Expr-354 where
 -- ── product (Tuple) ────────────────────────────
 -- 10 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-160 where
+module product-Tuple-tuple-2 where
 
   -- tuple: 10 nodes, 1 forms
   -- [tuple]
@@ -980,7 +980,7 @@ module product-Tuple-160 where
 -- ── index (Index) ──────────────────────────────
 -- 10 nodes, 1 type contexts, 1 forms
 
-module index-Index-161 where
+module index-Index-τ227 where
 
   -- ctx-227: 10 nodes, 1 forms
   -- [(untyped)]
@@ -992,7 +992,7 @@ module index-Index-161 where
 -- ── subscript (Subscript) ──────────────────────
 -- 10 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-162 where
+module subscript-Subscript-τ228 where
 
   -- ctx-228: 10 nodes, 1 forms
   -- [(untyped)]
@@ -1004,7 +1004,7 @@ module subscript-Subscript-162 where
 -- ── apply (Call) ───────────────────────────────
 -- 10 nodes, 2 type contexts, 5 forms
 
-module apply-Call-175 where
+module apply-Call-τ242 where
 
   -- ctx-242: 8 nodes, 3 forms
   -- [(untyped)]
@@ -1025,7 +1025,7 @@ module apply-Call-175 where
 -- ── free_monoid.op@state (Attribute) ───────────
 -- 10 nodes, 1 type contexts, 4 forms
 
-module free_monoid-op-at-state-Attribute-243 where
+module free_monoid-op-at-state-Attribute-Self-_cleavage_levels-append where
 
   -- Self-_cleavage_levels-append: 10 nodes, 4 forms
   -- [Self._cell_contents.get, Self._cell_obs.get, Self._cell_obs.keys, Self._cleavage_fibers.append, Self._cleavage_levels.append]
@@ -1040,7 +1040,7 @@ module free_monoid-op-at-state-Attribute-243 where
 -- ── notin (NotIn) ──────────────────────────────
 -- 9 nodes, 1 type contexts, 1 forms
 
-module notin-NotIn-23 where
+module notin-NotIn-τ33 where
 
   -- ctx-33: 9 nodes, 1 forms
   -- [(untyped)]
@@ -1052,7 +1052,7 @@ module notin-NotIn-23 where
 -- ── equalizer (Compare) ────────────────────────
 -- 9 nodes, 2 type contexts, 7 forms
 
-module equalizer-Compare-62 where
+module equalizer-Compare-τ78 where
 
   -- ctx-78: 7 nodes, 6 forms
   -- [(untyped)]
@@ -1075,7 +1075,7 @@ module equalizer-Compare-62 where
 -- ── free_monoid.literal (List) ─────────────────
 -- 9 nodes, 1 type contexts, 1 forms
 
-module free_monoid-literal-List-83 where
+module free_monoid-literal-List-list-0 where
 
   -- list: 9 nodes, 1 forms
   -- [list]
@@ -1087,7 +1087,7 @@ module free_monoid-literal-List-83 where
 -- ── apply (Call) ───────────────────────────────
 -- 9 nodes, 2 type contexts, 5 forms
 
-module apply-Call-118 where
+module apply-Call-τ174 where
 
   -- ctx-174: 7 nodes, 4 forms
   -- [(untyped)]
@@ -1108,7 +1108,7 @@ module apply-Call-118 where
 -- ── monoid.op@? (Attribute) ────────────────────
 -- 9 nodes, 1 type contexts, 9 forms
 
-module monoid-op-at-x3f-Attribute-129 where
+module monoid-op-at-x3f-Attribute-τ188 where
 
   -- ctx-188: 9 nodes, 9 forms
   -- [(untyped)]
@@ -1119,7 +1119,7 @@ module monoid-op-at-x3f-Attribute-129 where
 -- ── gt (Gt) ────────────────────────────────────
 -- 9 nodes, 1 type contexts, 1 forms
 
-module gt-Gt-215 where
+module gt-Gt-τ307 where
 
   -- ctx-307: 9 nodes, 1 forms
   -- [(untyped)]
@@ -1131,7 +1131,7 @@ module gt-Gt-215 where
 -- ── partial.apply@state (Call) ─────────────────
 -- 9 nodes, 1 type contexts, 7 forms
 
-module partial-apply-at-state-Call-228 where
+module partial-apply-at-state-Call-T-0 where
 
   -- T: 9 nodes, 7 forms
   -- [T]
@@ -1149,7 +1149,7 @@ module partial-apply-at-state-Call-228 where
 -- ── arguments (arguments) ──────────────────────
 -- 8 nodes, 2 type contexts, 6 forms
 
-module arguments-22 where
+module arguments-arguments-τ124 where
 
   -- ctx-124: 5 nodes, 4 forms
   -- [(untyped)]
@@ -1171,7 +1171,7 @@ module arguments-22 where
 -- ── let (Assign) ───────────────────────────────
 -- 8 nodes, 2 type contexts, 7 forms
 
-module let-k-Assign-28 where
+module let-k-Assign-τ38 where
 
   -- ctx-38: 5 nodes, 5 forms
   -- [(untyped)]
@@ -1194,7 +1194,7 @@ module let-k-Assign-28 where
 -- ── monoid.op@? (Attribute) ────────────────────
 -- 8 nodes, 2 type contexts, 6 forms
 
-module monoid-op-at-x3f-Attribute-210 where
+module monoid-op-at-x3f-Attribute-τ178 where
 
   -- ctx-178: 7 nodes, 5 forms
   -- [(untyped)]
@@ -1216,7 +1216,7 @@ module monoid-op-at-x3f-Attribute-210 where
 -- ── monoid.op@? (Call) ─────────────────────────
 -- 8 nodes, 2 type contexts, 7 forms
 
-module monoid-op-at-x3f-Call-211 where
+module monoid-op-at-x3f-Call-τ444 where
 
   -- ctx-444: 7 nodes, 6 forms
   -- [(untyped)]
@@ -1239,7 +1239,7 @@ module monoid-op-at-x3f-Call-211 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 8 nodes, 2 type contexts, 7 forms
 
-module effect-seq-Expr-212 where
+module effect-seq-Expr-τ445-0 where
 
   -- ctx-445: 7 nodes, 6 forms
   -- [(untyped)]
@@ -1262,7 +1262,7 @@ module effect-seq-Expr-212 where
 -- ── sub (Sub) ──────────────────────────────────
 -- 8 nodes, 1 type contexts, 1 forms
 
-module sub-Sub-220 where
+module sub-Sub-τ313 where
 
   -- ctx-313: 8 nodes, 1 forms
   -- [(untyped)]
@@ -1274,7 +1274,7 @@ module sub-Sub-220 where
 -- ── let (Assign) ───────────────────────────────
 -- 8 nodes, 1 type contexts, 4 forms
 
-module let-k-Assign-349 where
+module let-k-Assign-τ467 where
 
   -- ctx-467: 8 nodes, 4 forms
   -- [(untyped)]
@@ -1289,7 +1289,7 @@ module let-k-Assign-349 where
 -- ── product (Tuple) ────────────────────────────
 -- 8 nodes, 4 type contexts, 7 forms
 
-module product-Tuple-357 where
+module product-Tuple-tuple-3 where
 
   -- tuple: 4 nodes, 4 forms
   -- [tuple]
@@ -1322,7 +1322,7 @@ module product-Tuple-357 where
 -- ── apply (Call) ───────────────────────────────
 -- 8 nodes, 2 type contexts, 7 forms
 
-module apply-Call-377 where
+module apply-Call-τ499 where
 
   -- ctx-499: 7 nodes, 6 forms
   -- [(untyped)]
@@ -1345,7 +1345,7 @@ module apply-Call-377 where
 -- ── div (Div) ──────────────────────────────────
 -- 8 nodes, 1 type contexts, 1 forms
 
-module div-Div-675 where
+module div-Div-τ852 where
 
   -- ctx-852: 8 nodes, 1 forms
   -- [(untyped)]
@@ -1357,7 +1357,7 @@ module div-Div-675 where
 -- ── free_monoid.op@sequence (Attribute) ────────
 -- 8 nodes, 1 type contexts, 1 forms
 
-module free_monoid-op-at-sequence-Attribute-715 where
+module free_monoid-op-at-sequence-Attribute-list-append where
 
   -- list-append: 8 nodes, 1 forms
   -- [Self._cascade_abstraction_merge, Self._cascade_eta, Self._cell_contents, Self._cell_obs, Self._cleavage_fibers]
@@ -1369,7 +1369,7 @@ module free_monoid-op-at-sequence-Attribute-715 where
 -- ── arg (arg) ──────────────────────────────────
 -- 7 nodes, 2 type contexts, 5 forms
 
-module arg-79 where
+module arg-arg-τ103 where
 
   -- ctx-103: 5 nodes, 4 forms
   -- [(untyped)]
@@ -1390,7 +1390,7 @@ module arg-79 where
 -- ── monoid.accum (AugAssign) ───────────────────
 -- 7 nodes, 1 type contexts, 3 forms
 
-module monoid-accum-AugAssign-102 where
+module monoid-accum-AugAssign-τ148 where
 
   -- ctx-148: 7 nodes, 3 forms
   -- [(untyped)]
@@ -1404,7 +1404,7 @@ module monoid-accum-AugAssign-102 where
 -- ── comprehension (comprehension) ──────────────
 -- 7 nodes, 2 type contexts, 6 forms
 
-module comprehension-232 where
+module comprehension-comprehension-τ518 where
 
   -- ctx-518: 6 nodes, 5 forms
   -- [(untyped)]
@@ -1426,7 +1426,7 @@ module comprehension-232 where
 -- ── fixpoint.next (Continue) ───────────────────
 -- 7 nodes, 1 type contexts, 1 forms
 
-module fixpoint-next-Continue-304 where
+module fixpoint-next-Continue-τ412 where
 
   -- ctx-412: 7 nodes, 1 forms
   -- [(untyped)]
@@ -1438,7 +1438,7 @@ module fixpoint-next-Continue-304 where
 -- ── apply (Call) ───────────────────────────────
 -- 7 nodes, 1 type contexts, 6 forms
 
-module apply-Call-343 where
+module apply-Call-τ456 where
 
   -- ctx-456: 7 nodes, 6 forms
   -- [(untyped)]
@@ -1455,7 +1455,7 @@ module apply-Call-343 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 7 nodes, 1 type contexts, 6 forms
 
-module effect-seq-Expr-344 where
+module effect-seq-Expr-τ457 where
 
   -- ctx-457: 7 nodes, 6 forms
   -- [(untyped)]
@@ -1472,7 +1472,7 @@ module effect-seq-Expr-344 where
 -- ── alias (alias) ──────────────────────────────
 -- 6 nodes, 1 type contexts, 6 forms
 
-module alias-2 where
+module alias-alias-τ2 where
 
   -- ctx-2: 6 nodes, 6 forms
   -- [(untyped)]
@@ -1489,7 +1489,7 @@ module alias-2 where
 -- ── let (Assign) ───────────────────────────────
 -- 6 nodes, 1 type contexts, 6 forms
 
-module let-k-Assign-32 where
+module let-k-Assign-τ45 where
 
   -- ctx-45: 6 nodes, 6 forms
   -- [(untyped)]
@@ -1506,7 +1506,7 @@ module let-k-Assign-32 where
 -- ── arguments (arguments) ──────────────────────
 -- 6 nodes, 2 type contexts, 6 forms
 
-module arguments-44 where
+module arguments-arguments-τ168 where
 
   -- ctx-168: 5 nodes, 5 forms
   -- [(untyped)]
@@ -1528,7 +1528,7 @@ module arguments-44 where
 -- ── eq (Eq) ────────────────────────────────────
 -- 6 nodes, 1 type contexts, 1 forms
 
-module eq-Eq-49 where
+module eq-Eq-τ65 where
 
   -- ctx-65: 6 nodes, 1 forms
   -- [(untyped)]
@@ -1540,7 +1540,7 @@ module eq-Eq-49 where
 -- ── coerce (FormattedValue) ────────────────────
 -- 6 nodes, 1 type contexts, 6 forms
 
-module coerce-FormattedValue-87 where
+module coerce-FormattedValue-τ119 where
 
   -- ctx-119: 6 nodes, 6 forms
   -- [(untyped)]
@@ -1557,7 +1557,7 @@ module coerce-FormattedValue-87 where
 -- ── product (Tuple) ────────────────────────────
 -- 6 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-163 where
+module product-Tuple-tuple-4 where
 
   -- tuple: 6 nodes, 1 forms
   -- [tuple]
@@ -1569,7 +1569,7 @@ module product-Tuple-163 where
 -- ── index (Index) ──────────────────────────────
 -- 6 nodes, 1 type contexts, 1 forms
 
-module index-Index-164 where
+module index-Index-τ230 where
 
   -- ctx-230: 6 nodes, 1 forms
   -- [(untyped)]
@@ -1581,7 +1581,7 @@ module index-Index-164 where
 -- ── subscript (Subscript) ──────────────────────
 -- 6 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-165 where
+module subscript-Subscript-τ231 where
 
   -- ctx-231: 6 nodes, 1 forms
   -- [(untyped)]
@@ -1593,7 +1593,7 @@ module subscript-Subscript-165 where
 -- ── index (Index) ──────────────────────────────
 -- 6 nodes, 1 type contexts, 1 forms
 
-module index-Index-170 where
+module index-Index-τ237 where
 
   -- ctx-237: 6 nodes, 1 forms
   -- [(untyped)]
@@ -1605,7 +1605,7 @@ module index-Index-170 where
 -- ── subscript (Subscript) ──────────────────────
 -- 6 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-171 where
+module subscript-Subscript-τ238 where
 
   -- ctx-238: 6 nodes, 1 forms
   -- [(untyped)]
@@ -1617,7 +1617,7 @@ module subscript-Subscript-171 where
 -- ── arg (arg) ──────────────────────────────────
 -- 6 nodes, 2 type contexts, 5 forms
 
-module arg-331 where
+module arg-arg-τ440 where
 
   -- ctx-440: 3 nodes, 2 forms
   -- [(untyped)]
@@ -1638,7 +1638,7 @@ module arg-331 where
 -- ── let (Assign) ───────────────────────────────
 -- 6 nodes, 1 type contexts, 3 forms
 
-module let-k-Assign-355 where
+module let-k-Assign-τ476 where
 
   -- ctx-476: 6 nodes, 3 forms
   -- [(untyped)]
@@ -1652,7 +1652,7 @@ module let-k-Assign-355 where
 -- ── fiber (Call) ───────────────────────────────
 -- 6 nodes, 1 type contexts, 4 forms
 
-module fiber-Call-373 where
+module fiber-Call-bool where
 
   -- bool: 6 nodes, 4 forms
   -- [bool]
@@ -1667,7 +1667,7 @@ module fiber-Call-373 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 6 nodes, 2 type contexts, 5 forms
 
-module effect-seq-Expr-378 where
+module effect-seq-Expr-τ500 where
 
   -- ctx-500: 5 nodes, 4 forms
   -- [(untyped)]
@@ -1688,7 +1688,7 @@ module effect-seq-Expr-378 where
 -- ── apply (Call) ───────────────────────────────
 -- 6 nodes, 1 type contexts, 3 forms
 
-module apply-Call-550 where
+module apply-Call-τ701 where
 
   -- ctx-701: 6 nodes, 3 forms
   -- [(untyped)]
@@ -1702,7 +1702,7 @@ module apply-Call-550 where
 -- ── bimap (BinOp) ──────────────────────────────
 -- 6 nodes, 3 type contexts, 6 forms
 
-module bimap-BinOp-676 where
+module bimap-BinOp-τ853 where
 
   -- ctx-853: 4 nodes, 4 forms
   -- [(untyped)]
@@ -1729,7 +1729,7 @@ module bimap-BinOp-676 where
 -- ── coerce (FormattedValue) ────────────────────
 -- 5 nodes, 1 type contexts, 5 forms
 
-module coerce-FormattedValue-86 where
+module coerce-FormattedValue-τ118 where
 
   -- ctx-118: 5 nodes, 5 forms
   -- [(untyped)]
@@ -1745,7 +1745,7 @@ module coerce-FormattedValue-86 where
 -- ── morphism@? (Attribute) ─────────────────────
 -- 5 nodes, 2 type contexts, 5 forms
 
-module morphism-at-x3f-Attribute-109 where
+module morphism-at-x3f-Attribute-τ178 where
 
   -- ctx-178: 4 nodes, 4 forms
   -- [(untyped)]
@@ -1766,7 +1766,7 @@ module morphism-at-x3f-Attribute-109 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 5 nodes, 2 type contexts, 5 forms
 
-module annassign-AnnAssign-126 where
+module annassign-AnnAssign-τ185 where
 
   -- ctx-185: 4 nodes, 4 forms
   -- [(untyped)]
@@ -1787,7 +1787,7 @@ module annassign-AnnAssign-126 where
 -- ── equalizer (Compare) ────────────────────────
 -- 5 nodes, 1 type contexts, 5 forms
 
-module equalizer-Compare-128 where
+module equalizer-Compare-τ187 where
 
   -- ctx-187: 5 nodes, 5 forms
   -- [(untyped)]
@@ -1803,7 +1803,7 @@ module equalizer-Compare-128 where
 -- ── monoid.op@? (Call) ─────────────────────────
 -- 5 nodes, 1 type contexts, 5 forms
 
-module monoid-op-at-x3f-Call-130 where
+module monoid-op-at-x3f-Call-τ189 where
 
   -- ctx-189: 5 nodes, 5 forms
   -- [(untyped)]
@@ -1819,7 +1819,7 @@ module monoid-op-at-x3f-Call-130 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 5 nodes, 1 type contexts, 5 forms
 
-module effect-seq-Expr-131 where
+module effect-seq-Expr-τ190-0 where
 
   -- ctx-190: 5 nodes, 5 forms
   -- [(untyped)]
@@ -1835,7 +1835,7 @@ module effect-seq-Expr-131 where
 -- ── apply (Call) ───────────────────────────────
 -- 5 nodes, 1 type contexts, 3 forms
 
-module apply-Call-137 where
+module apply-Call-τ198 where
 
   -- ctx-198: 5 nodes, 3 forms
   -- [(untyped)]
@@ -1849,7 +1849,7 @@ module apply-Call-137 where
 -- ── coerce (FormattedValue) ────────────────────
 -- 5 nodes, 2 type contexts, 5 forms
 
-module coerce-FormattedValue-150 where
+module coerce-FormattedValue-τ840 where
 
   -- ctx-840: 4 nodes, 4 forms
   -- [(untyped)]
@@ -1870,7 +1870,7 @@ module coerce-FormattedValue-150 where
 -- ── let (Assign) ───────────────────────────────
 -- 5 nodes, 1 type contexts, 4 forms
 
-module let-k-Assign-209 where
+module let-k-Assign-τ302 where
 
   -- ctx-302: 5 nodes, 4 forms
   -- [(untyped)]
@@ -1885,7 +1885,7 @@ module let-k-Assign-209 where
 -- ── fold (For) ─────────────────────────────────
 -- 5 nodes, 2 type contexts, 5 forms
 
-module fold-For-213 where
+module fold-For-τ483-0 where
 
   -- ctx-483: 4 nodes, 4 forms
   -- [(untyped)]
@@ -1906,7 +1906,7 @@ module fold-For-213 where
 -- ── equalizer (Compare) ────────────────────────
 -- 5 nodes, 2 type contexts, 5 forms
 
-module equalizer-Compare-252 where
+module equalizer-Compare-τ468 where
 
   -- ctx-468: 4 nodes, 4 forms
   -- [(untyped)]
@@ -1927,7 +1927,7 @@ module equalizer-Compare-252 where
 -- ── subscript (Subscript) ──────────────────────
 -- 5 nodes, 1 type contexts, 4 forms
 
-module subscript-Subscript-263 where
+module subscript-Subscript-τ365 where
 
   -- ctx-365: 5 nodes, 4 forms
   -- [(untyped)]
@@ -1942,7 +1942,7 @@ module subscript-Subscript-263 where
 -- ── morphism@? (Attribute) ─────────────────────
 -- 5 nodes, 1 type contexts, 4 forms
 
-module morphism-at-x3f-Attribute-264 where
+module morphism-at-x3f-Attribute-τ366 where
 
   -- ctx-366: 5 nodes, 4 forms
   -- [(untyped)]
@@ -1957,7 +1957,7 @@ module morphism-at-x3f-Attribute-264 where
 -- ── slice (Slice) ──────────────────────────────
 -- 5 nodes, 1 type contexts, 3 forms
 
-module slice-Slice-276 where
+module slice-Slice-τ378 where
 
   -- ctx-378: 5 nodes, 3 forms
   -- [(untyped)]
@@ -1971,7 +1971,7 @@ module slice-Slice-276 where
 -- ── free_monoid.op@? (Attribute) ───────────────
 -- 5 nodes, 1 type contexts, 5 forms
 
-module free_monoid-op-at-x3f-Attribute-356 where
+module free_monoid-op-at-x3f-Attribute-τ188 where
 
   -- ctx-188: 5 nodes, 5 forms
   -- [(untyped)]
@@ -1987,7 +1987,7 @@ module free_monoid-op-at-x3f-Attribute-356 where
 -- ── coerce (Call) ──────────────────────────────
 -- 5 nodes, 1 type contexts, 3 forms
 
-module coerce-Call-374 where
+module coerce-Call-τ495 where
 
   -- ctx-495: 5 nodes, 3 forms
   -- [(untyped)]
@@ -2001,7 +2001,7 @@ module coerce-Call-374 where
 -- ── ifexp (IfExp) ──────────────────────────────
 -- 5 nodes, 1 type contexts, 3 forms
 
-module ifexp-IfExp-375 where
+module ifexp-IfExp-τ496 where
 
   -- ctx-496: 5 nodes, 3 forms
   -- [(untyped)]
@@ -2015,7 +2015,7 @@ module ifexp-IfExp-375 where
 -- ── let (Assign) ───────────────────────────────
 -- 5 nodes, 1 type contexts, 3 forms
 
-module let-k-Assign-376 where
+module let-k-Assign-τ497 where
 
   -- ctx-497: 5 nodes, 3 forms
   -- [(untyped)]
@@ -2029,7 +2029,7 @@ module let-k-Assign-376 where
 -- ── equalizer (Compare) ────────────────────────
 -- 5 nodes, 1 type contexts, 5 forms
 
-module equalizer-Compare-456 where
+module equalizer-Compare-τ585 where
 
   -- ctx-585: 5 nodes, 5 forms
   -- [(untyped)]
@@ -2045,7 +2045,7 @@ module equalizer-Compare-456 where
 -- ── exponential (Call) ─────────────────────────
 -- 5 nodes, 1 type contexts, 4 forms
 
-module exponential-Call-558 where
+module exponential-Call-τ404 where
 
   -- ctx-404: 5 nodes, 4 forms
   -- [(untyped)]
@@ -2060,7 +2060,7 @@ module exponential-Call-558 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 4 nodes, 4 type contexts, 4 forms
 
-module annassign-AnnAssign-19 where
+module annassign-AnnAssign-τ21 where
 
   -- ctx-21: 1 nodes, 1 forms
   -- [(untyped)]
@@ -2090,7 +2090,7 @@ module annassign-AnnAssign-19 where
 -- ── equalizer (Compare) ────────────────────────
 -- 4 nodes, 1 type contexts, 3 forms
 
-module equalizer-Compare-50 where
+module equalizer-Compare-τ66 where
 
   -- ctx-66: 4 nodes, 3 forms
   -- [(untyped)]
@@ -2104,7 +2104,7 @@ module equalizer-Compare-50 where
 -- ── apply (Call) ───────────────────────────────
 -- 4 nodes, 1 type contexts, 2 forms
 
-module apply-Call-97 where
+module apply-Call-τ140 where
 
   -- ctx-140: 4 nodes, 2 forms
   -- [(untyped)]
@@ -2117,7 +2117,7 @@ module apply-Call-97 where
 -- ── index (Index) ──────────────────────────────
 -- 4 nodes, 3 type contexts, 3 forms
 
-module index-Index-157 where
+module index-Index-τ758 where
 
   -- ctx-758: 2 nodes, 1 forms
   -- [(untyped)]
@@ -2141,7 +2141,7 @@ module index-Index-157 where
 -- ── subscript (Subscript) ──────────────────────
 -- 4 nodes, 3 type contexts, 3 forms
 
-module subscript-Subscript-158 where
+module subscript-Subscript-τ759 where
 
   -- ctx-759: 2 nodes, 1 forms
   -- [(untyped)]
@@ -2165,7 +2165,7 @@ module subscript-Subscript-158 where
 -- ── index (Index) ──────────────────────────────
 -- 4 nodes, 3 type contexts, 3 forms
 
-module index-Index-187 where
+module index-Index-τ265 where
 
   -- ctx-265: 2 nodes, 1 forms
   -- [(untyped)]
@@ -2189,7 +2189,7 @@ module index-Index-187 where
 -- ── subscript (Subscript) ──────────────────────
 -- 4 nodes, 3 type contexts, 3 forms
 
-module subscript-Subscript-188 where
+module subscript-Subscript-τ266 where
 
   -- ctx-266: 2 nodes, 1 forms
   -- [(untyped)]
@@ -2213,7 +2213,7 @@ module subscript-Subscript-188 where
 -- ── product (Tuple) ────────────────────────────
 -- 4 nodes, 2 type contexts, 3 forms
 
-module product-Tuple-193 where
+module product-Tuple-tuple-5 where
 
   -- tuple: 3 nodes, 2 forms
   -- [tuple]
@@ -2232,7 +2232,7 @@ module product-Tuple-193 where
 -- ── index (Index) ──────────────────────────────
 -- 4 nodes, 2 type contexts, 3 forms
 
-module index-Index-194 where
+module index-Index-τ739 where
 
   -- ctx-739: 3 nodes, 2 forms
   -- [(untyped)]
@@ -2251,7 +2251,7 @@ module index-Index-194 where
 -- ── subscript (Subscript) ──────────────────────
 -- 4 nodes, 2 type contexts, 3 forms
 
-module subscript-Subscript-195 where
+module subscript-Subscript-τ740 where
 
   -- ctx-740: 3 nodes, 2 forms
   -- [(untyped)]
@@ -2270,7 +2270,7 @@ module subscript-Subscript-195 where
 -- ── gte (GtE) ──────────────────────────────────
 -- 4 nodes, 1 type contexts, 1 forms
 
-module gte-GtE-241 where
+module gte-GtE-τ340 where
 
   -- ctx-340: 4 nodes, 1 forms
   -- [(untyped)]
@@ -2282,7 +2282,7 @@ module gte-GtE-241 where
 -- ── subscript (Subscript) ──────────────────────
 -- 4 nodes, 1 type contexts, 2 forms
 
-module subscript-Subscript-277 where
+module subscript-Subscript-τ379 where
 
   -- ctx-379: 4 nodes, 2 forms
   -- [(untyped)]
@@ -2295,7 +2295,7 @@ module subscript-Subscript-277 where
 -- ── free_monoid (Call) ─────────────────────────
 -- 4 nodes, 1 type contexts, 3 forms
 
-module free_monoid-Call-282 where
+module free_monoid-Call-τ385 where
 
   -- ctx-385: 4 nodes, 3 forms
   -- [(untyped)]
@@ -2309,7 +2309,7 @@ module free_monoid-Call-282 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 4 nodes, 2 type contexts, 2 forms
 
-module free_monoid-fold-JoinedStr-306 where
+module free_monoid-fold-JoinedStr-str-1 where
 
   -- str: 3 nodes, 1 forms
   -- [str]
@@ -2327,7 +2327,7 @@ module free_monoid-fold-JoinedStr-306 where
 -- ── apply (Call) ───────────────────────────────
 -- 4 nodes, 1 type contexts, 4 forms
 
-module apply-Call-350 where
+module apply-Call-τ469 where
 
   -- ctx-469: 4 nodes, 4 forms
   -- [(untyped)]
@@ -2342,7 +2342,7 @@ module apply-Call-350 where
 -- ── let (Assign) ───────────────────────────────
 -- 4 nodes, 1 type contexts, 4 forms
 
-module let-k-Assign-351 where
+module let-k-Assign-τ470 where
 
   -- ctx-470: 4 nodes, 4 forms
   -- [(untyped)]
@@ -2357,7 +2357,7 @@ module let-k-Assign-351 where
 -- ── lazy_fold (GeneratorExp) ───────────────────
 -- 4 nodes, 1 type contexts, 4 forms
 
-module lazy_fold-GeneratorExp-395 where
+module lazy_fold-GeneratorExp-τ519 where
 
   -- ctx-519: 4 nodes, 4 forms
   -- [(untyped)]
@@ -2372,7 +2372,7 @@ module lazy_fold-GeneratorExp-395 where
 -- ── product (Tuple) ────────────────────────────
 -- 4 nodes, 4 type contexts, 4 forms
 
-module product-Tuple-414 where
+module product-Tuple-tuple-6 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -2402,7 +2402,7 @@ module product-Tuple-414 where
 -- ── let (Assign) ───────────────────────────────
 -- 4 nodes, 1 type contexts, 4 forms
 
-module let-k-Assign-484 where
+module let-k-Assign-τ620 where
 
   -- ctx-620: 4 nodes, 4 forms
   -- [(untyped)]
@@ -2417,7 +2417,7 @@ module let-k-Assign-484 where
 -- ── eval (Call) ────────────────────────────────
 -- 4 nodes, 1 type contexts, 2 forms
 
-module eval-Call-540 where
+module eval-Call-T where
 
   -- T: 4 nodes, 2 forms
   -- [T]
@@ -2430,7 +2430,7 @@ module eval-Call-540 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 4 nodes, 1 type contexts, 2 forms
 
-module annassign-AnnAssign-541 where
+module annassign-AnnAssign-τ690 where
 
   -- ctx-690: 4 nodes, 2 forms
   -- [(untyped)]
@@ -2443,7 +2443,7 @@ module annassign-AnnAssign-541 where
 -- ── equalizer (Compare) ────────────────────────
 -- 3 nodes, 1 type contexts, 3 forms
 
-module equalizer-Compare-25 where
+module equalizer-Compare-τ35 where
 
   -- ctx-35: 3 nodes, 3 forms
   -- [(untyped)]
@@ -2457,7 +2457,7 @@ module equalizer-Compare-25 where
 -- ── lt (Lt) ────────────────────────────────────
 -- 3 nodes, 1 type contexts, 1 forms
 
-module lt-Lt-52 where
+module lt-Lt-τ68 where
 
   -- ctx-68: 3 nodes, 1 forms
   -- [(untyped)]
@@ -2469,7 +2469,7 @@ module lt-Lt-52 where
 -- ── apply (Call) ───────────────────────────────
 -- 3 nodes, 1 type contexts, 2 forms
 
-module apply-Call-65 where
+module apply-Call-τ82 where
 
   -- ctx-82: 3 nodes, 2 forms
   -- [(untyped)]
@@ -2482,7 +2482,7 @@ module apply-Call-65 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 3 nodes, 1 type contexts, 3 forms
 
-module annassign-AnnAssign-96 where
+module annassign-AnnAssign-τ138 where
 
   -- ctx-138: 3 nodes, 3 forms
   -- [(untyped)]
@@ -2496,7 +2496,7 @@ module annassign-AnnAssign-96 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 3 nodes, 1 type contexts, 2 forms
 
-module effect-seq-Expr-107 where
+module effect-seq-Expr-τ155 where
 
   -- ctx-155: 3 nodes, 2 forms
   -- [(untyped)]
@@ -2509,7 +2509,7 @@ module effect-seq-Expr-107 where
 -- ── apply (Call) ───────────────────────────────
 -- 3 nodes, 1 type contexts, 3 forms
 
-module apply-Call-155 where
+module apply-Call-τ217 where
 
   -- ctx-217: 3 nodes, 3 forms
   -- [(untyped)]
@@ -2523,7 +2523,7 @@ module apply-Call-155 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 3 nodes, 1 type contexts, 3 forms
 
-module annassign-AnnAssign-156 where
+module annassign-AnnAssign-τ218 where
 
   -- ctx-218: 3 nodes, 3 forms
   -- [(untyped)]
@@ -2537,7 +2537,7 @@ module annassign-AnnAssign-156 where
 -- ── product (Tuple) ────────────────────────────
 -- 3 nodes, 2 type contexts, 2 forms
 
-module product-Tuple-200 where
+module product-Tuple-tuple-7 where
 
   -- tuple: 2 nodes, 1 forms
   -- [tuple]
@@ -2555,7 +2555,7 @@ module product-Tuple-200 where
 -- ── index (Index) ──────────────────────────────
 -- 3 nodes, 2 type contexts, 2 forms
 
-module index-Index-201 where
+module index-Index-τ713 where
 
   -- ctx-713: 2 nodes, 1 forms
   -- [(untyped)]
@@ -2573,7 +2573,7 @@ module index-Index-201 where
 -- ── subscript (Subscript) ──────────────────────
 -- 3 nodes, 3 type contexts, 3 forms
 
-module subscript-Subscript-202 where
+module subscript-Subscript-τ292 where
 
   -- ctx-292: 1 nodes, 1 forms
   -- [(untyped)]
@@ -2597,7 +2597,7 @@ module subscript-Subscript-202 where
 -- ── equalizer (Compare) ────────────────────────
 -- 3 nodes, 1 type contexts, 3 forms
 
-module equalizer-Compare-216 where
+module equalizer-Compare-τ308 where
 
   -- ctx-308: 3 nodes, 3 forms
   -- [(untyped)]
@@ -2611,7 +2611,7 @@ module equalizer-Compare-216 where
 -- ── comprehension (comprehension) ──────────────
 -- 3 nodes, 1 type contexts, 2 forms
 
-module comprehension-314 where
+module comprehension-comprehension-τ422 where
 
   -- ctx-422: 3 nodes, 2 forms
   -- [(untyped)]
@@ -2624,7 +2624,7 @@ module comprehension-314 where
 -- ── isnot (IsNot) ──────────────────────────────
 -- 3 nodes, 1 type contexts, 1 forms
 
-module isnot-IsNot-333 where
+module isnot-IsNot-τ442 where
 
   -- ctx-442: 3 nodes, 1 forms
   -- [(untyped)]
@@ -2636,7 +2636,7 @@ module isnot-IsNot-333 where
 -- ── equalizer (Compare) ────────────────────────
 -- 3 nodes, 1 type contexts, 2 forms
 
-module equalizer-Compare-334 where
+module equalizer-Compare-τ443 where
 
   -- ctx-443: 3 nodes, 2 forms
   -- [(untyped)]
@@ -2649,7 +2649,7 @@ module equalizer-Compare-334 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 3 nodes, 1 type contexts, 3 forms
 
-module annassign-AnnAssign-342 where
+module annassign-AnnAssign-τ454 where
 
   -- ctx-454: 3 nodes, 3 forms
   -- [(untyped)]
@@ -2663,7 +2663,7 @@ module annassign-AnnAssign-342 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 3 nodes, 1 type contexts, 2 forms
 
-module annassign-AnnAssign-347 where
+module annassign-AnnAssign-τ460 where
 
   -- ctx-460: 3 nodes, 2 forms
   -- [(untyped)]
@@ -2676,7 +2676,7 @@ module annassign-AnnAssign-347 where
 -- ── let (Assign) ───────────────────────────────
 -- 3 nodes, 1 type contexts, 3 forms
 
-module let-k-Assign-394 where
+module let-k-Assign-τ517 where
 
   -- ctx-517: 3 nodes, 3 forms
   -- [(untyped)]
@@ -2690,7 +2690,7 @@ module let-k-Assign-394 where
 -- ── index (Index) ──────────────────────────────
 -- 3 nodes, 3 type contexts, 3 forms
 
-module index-Index-415 where
+module index-Index-τ543 where
 
   -- ctx-543: 1 nodes, 1 forms
   -- [(untyped)]
@@ -2714,7 +2714,7 @@ module index-Index-415 where
 -- ── subscript (Subscript) ──────────────────────
 -- 3 nodes, 3 type contexts, 3 forms
 
-module subscript-Subscript-416 where
+module subscript-Subscript-τ544 where
 
   -- ctx-544: 1 nodes, 1 forms
   -- [(untyped)]
@@ -2738,7 +2738,7 @@ module subscript-Subscript-416 where
 -- ── free_monoid.literal (List) ─────────────────
 -- 3 nodes, 1 type contexts, 3 forms
 
-module free_monoid-literal-List-440 where
+module free_monoid-literal-List-list-1 where
 
   -- list: 3 nodes, 3 forms
   -- [list]
@@ -2752,7 +2752,7 @@ module free_monoid-literal-List-440 where
 -- ── let (Assign) ───────────────────────────────
 -- 3 nodes, 2 type contexts, 3 forms
 
-module let-k-Assign-468 where
+module let-k-Assign-τ603 where
 
   -- ctx-603: 2 nodes, 2 forms
   -- [(untyped)]
@@ -2771,7 +2771,7 @@ module let-k-Assign-468 where
 -- ── apply (Call) ───────────────────────────────
 -- 3 nodes, 2 type contexts, 3 forms
 
-module apply-Call-486 where
+module apply-Call-τ623 where
 
   -- ctx-623: 2 nodes, 2 forms
   -- [(untyped)]
@@ -2790,7 +2790,7 @@ module apply-Call-486 where
 -- ── let (Assign) ───────────────────────────────
 -- 3 nodes, 2 type contexts, 3 forms
 
-module let-k-Assign-487 where
+module let-k-Assign-τ624 where
 
   -- ctx-624: 2 nodes, 2 forms
   -- [(untyped)]
@@ -2809,7 +2809,7 @@ module let-k-Assign-487 where
 -- ── apply (Call) ───────────────────────────────
 -- 3 nodes, 1 type contexts, 3 forms
 
-module apply-Call-515 where
+module apply-Call-τ189 where
 
   -- ctx-189: 3 nodes, 3 forms
   -- [(untyped)]
@@ -2823,7 +2823,7 @@ module apply-Call-515 where
 -- ── terminal.map (Return) ──────────────────────
 -- 3 nodes, 1 type contexts, 2 forms
 
-module terminal-map-Return-559 where
+module terminal-map-Return-τ709 where
 
   -- ctx-709: 3 nodes, 2 forms
   -- [(untyped)]
@@ -2836,7 +2836,7 @@ module terminal-map-Return-559 where
 -- ── let (Assign) ───────────────────────────────
 -- 3 nodes, 1 type contexts, 3 forms
 
-module let-k-Assign-596 where
+module let-k-Assign-τ761 where
 
   -- ctx-761: 3 nodes, 3 forms
   -- [(untyped)]
@@ -2850,7 +2850,7 @@ module let-k-Assign-596 where
 -- ── cardinality (Call) ─────────────────────────
 -- 3 nodes, 1 type contexts, 3 forms
 
-module cardinality-Call-597 where
+module cardinality-Call-int-2 where
 
   -- int: 3 nodes, 3 forms
   -- [int]
@@ -2864,7 +2864,7 @@ module cardinality-Call-597 where
 -- ── partial@? (Attribute) ──────────────────────
 -- 3 nodes, 1 type contexts, 3 forms
 
-module partial-at-x3f-Attribute-600 where
+module partial-at-x3f-Attribute-τ188 where
 
   -- ctx-188: 3 nodes, 3 forms
   -- [(untyped)]
@@ -2878,7 +2878,7 @@ module partial-at-x3f-Attribute-600 where
 -- ── product (Tuple) ────────────────────────────
 -- 3 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-615 where
+module product-Tuple-tuple-8 where
 
   -- tuple: 3 nodes, 1 forms
   -- [tuple]
@@ -2890,7 +2890,7 @@ module product-Tuple-615 where
 -- ── coerce (FormattedValue) ────────────────────
 -- 3 nodes, 1 type contexts, 3 forms
 
-module coerce-FormattedValue-674 where
+module coerce-FormattedValue-τ851 where
 
   -- ctx-851: 3 nodes, 3 forms
   -- [(untyped)]
@@ -2904,7 +2904,7 @@ module coerce-FormattedValue-674 where
 -- ── bimap (BinOp) ──────────────────────────────
 -- 3 nodes, 1 type contexts, 3 forms
 
-module bimap-BinOp-677 where
+module bimap-BinOp-τ854 where
 
   -- ctx-854: 3 nodes, 3 forms
   -- [(untyped)]
@@ -2918,7 +2918,7 @@ module bimap-BinOp-677 where
 -- ── coerce (FormattedValue) ────────────────────
 -- 3 nodes, 1 type contexts, 3 forms
 
-module coerce-FormattedValue-678 where
+module coerce-FormattedValue-τ855 where
 
   -- ctx-855: 3 nodes, 3 forms
   -- [(untyped)]
@@ -2932,7 +2932,7 @@ module coerce-FormattedValue-678 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 3 nodes, 1 type contexts, 3 forms
 
-module free_monoid-fold-JoinedStr-679 where
+module free_monoid-fold-JoinedStr-str-2 where
 
   -- str: 3 nodes, 3 forms
   -- [str]
@@ -2946,7 +2946,7 @@ module free_monoid-fold-JoinedStr-679 where
 -- ── coerce (FormattedValue) ────────────────────
 -- 3 nodes, 3 type contexts, 3 forms
 
-module coerce-FormattedValue-742 where
+module coerce-FormattedValue-τ920 where
 
   -- ctx-920: 1 nodes, 1 forms
   -- [(untyped)]
@@ -2970,7 +2970,7 @@ module coerce-FormattedValue-742 where
 -- ── equalizer (Compare) ────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module equalizer-Compare-35 where
+module equalizer-Compare-τ49 where
 
   -- ctx-49: 2 nodes, 2 forms
   -- [(untyped)]
@@ -2983,7 +2983,7 @@ module equalizer-Compare-35 where
 -- ── equalizer (If) ─────────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-51 where
+module equalizer-If-τ67 where
 
   -- ctx-67: 2 nodes, 1 forms
   -- [(untyped)]
@@ -2995,7 +2995,7 @@ module equalizer-If-51 where
 -- ── terminal.map (Return) ──────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module terminal-map-Return-71 where
+module terminal-map-Return-τ88 where
 
   -- ctx-88: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3008,7 +3008,7 @@ module terminal-map-Return-71 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module annassign-AnnAssign-81 where
+module annassign-AnnAssign-τ106 where
 
   -- ctx-106: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3021,7 +3021,7 @@ module annassign-AnnAssign-81 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module annassign-AnnAssign-82 where
+module annassign-AnnAssign-τ108 where
 
   -- ctx-108: 1 nodes, 1 forms
   -- [(untyped)]
@@ -3039,7 +3039,7 @@ module annassign-AnnAssign-82 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module annassign-AnnAssign-84 where
+module annassign-AnnAssign-τ116 where
 
   -- ctx-116: 1 nodes, 1 forms
   -- [(untyped)]
@@ -3057,7 +3057,7 @@ module annassign-AnnAssign-84 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module annassign-AnnAssign-98 where
+module annassign-AnnAssign-τ141 where
 
   -- ctx-141: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3070,7 +3070,7 @@ module annassign-AnnAssign-98 where
 -- ── let (Assign) ───────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module let-k-Assign-101 where
+module let-k-Assign-τ146 where
 
   -- ctx-146: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3083,7 +3083,7 @@ module let-k-Assign-101 where
 -- ── free_monoid.op@? (Attribute) ───────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module free_monoid-op-at-x3f-Attribute-110 where
+module free_monoid-op-at-x3f-Attribute-τ159 where
 
   -- ctx-159: 1 nodes, 1 forms
   -- [(untyped)]
@@ -3101,7 +3101,7 @@ module free_monoid-op-at-x3f-Attribute-110 where
 -- ── terminal.map (Return) ──────────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module terminal-map-Return-114 where
+module terminal-map-Return-τ166 where
 
   -- ctx-166: 1 nodes, 1 forms
   -- [(untyped)]
@@ -3119,7 +3119,7 @@ module terminal-map-Return-114 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module annassign-AnnAssign-159 where
+module annassign-AnnAssign-τ224 where
 
   -- ctx-224: 1 nodes, 1 forms
   -- [(untyped)]
@@ -3137,7 +3137,7 @@ module annassign-AnnAssign-159 where
 -- ── product (Tuple) ────────────────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module product-Tuple-181 where
+module product-Tuple-tuple-9 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -3155,7 +3155,7 @@ module product-Tuple-181 where
 -- ── index (Index) ──────────────────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module index-Index-182 where
+module index-Index-τ259 where
 
   -- ctx-259: 1 nodes, 1 forms
   -- [(untyped)]
@@ -3173,7 +3173,7 @@ module index-Index-182 where
 -- ── subscript (Subscript) ──────────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module subscript-Subscript-183 where
+module subscript-Subscript-τ260 where
 
   -- ctx-260: 1 nodes, 1 forms
   -- [(untyped)]
@@ -3191,7 +3191,7 @@ module subscript-Subscript-183 where
 -- ── index (Index) ──────────────────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module index-Index-184 where
+module index-Index-τ261 where
 
   -- ctx-261: 1 nodes, 1 forms
   -- [(untyped)]
@@ -3209,7 +3209,7 @@ module index-Index-184 where
 -- ── subscript (Subscript) ──────────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module subscript-Subscript-185 where
+module subscript-Subscript-τ262 where
 
   -- ctx-262: 1 nodes, 1 forms
   -- [(untyped)]
@@ -3227,7 +3227,7 @@ module subscript-Subscript-185 where
 -- ── product (Tuple) ────────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-189 where
+module product-Tuple-tuple-10 where
 
   -- tuple: 2 nodes, 1 forms
   -- [tuple]
@@ -3239,7 +3239,7 @@ module product-Tuple-189 where
 -- ── index (Index) ──────────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module index-Index-190 where
+module index-Index-τ268 where
 
   -- ctx-268: 2 nodes, 1 forms
   -- [(untyped)]
@@ -3251,7 +3251,7 @@ module index-Index-190 where
 -- ── subscript (Subscript) ──────────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module subscript-Subscript-191 where
+module subscript-Subscript-τ269 where
 
   -- ctx-269: 1 nodes, 1 forms
   -- [(untyped)]
@@ -3269,7 +3269,7 @@ module subscript-Subscript-191 where
 -- ── product (Tuple) ────────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-218 where
+module product-Tuple-tuple-11 where
 
   -- tuple: 2 nodes, 1 forms
   -- [tuple]
@@ -3281,7 +3281,7 @@ module product-Tuple-218 where
 -- ── partial.apply@state (Call) ─────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module partial-apply-at-state-Call-219 where
+module partial-apply-at-state-Call-T-1 where
 
   -- T: 1 nodes, 1 forms
   -- [T]
@@ -3299,7 +3299,7 @@ module partial-apply-at-state-Call-219 where
 -- ── arguments (arguments) ──────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module arguments-227 where
+module arguments-arguments-τ320 where
 
   -- ctx-320: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3312,7 +3312,7 @@ module arguments-227 where
 -- ── equalizer (Compare) ────────────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module equalizer-Compare-242 where
+module equalizer-Compare-τ341 where
 
   -- ctx-341: 1 nodes, 1 forms
   -- [(untyped)]
@@ -3330,7 +3330,7 @@ module equalizer-Compare-242 where
 -- ── equalizer (Compare) ────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module equalizer-Compare-256 where
+module equalizer-Compare-τ357 where
 
   -- ctx-357: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3343,7 +3343,7 @@ module equalizer-Compare-256 where
 -- ── partial@? (Attribute) ──────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module partial-at-x3f-Attribute-261 where
+module partial-at-x3f-Attribute-τ178 where
 
   -- ctx-178: 2 nodes, 1 forms
   -- [(untyped)]
@@ -3355,7 +3355,7 @@ module partial-at-x3f-Attribute-261 where
 -- ── partial.apply@? (Call) ─────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module partial-apply-at-x3f-Call-262 where
+module partial-apply-at-x3f-Call-τ364 where
 
   -- ctx-364: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3368,7 +3368,7 @@ module partial-apply-at-x3f-Call-262 where
 -- ── coerce (FormattedValue) ────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module coerce-FormattedValue-278 where
+module coerce-FormattedValue-τ380 where
 
   -- ctx-380: 2 nodes, 1 forms
   -- [(untyped)]
@@ -3380,7 +3380,7 @@ module coerce-FormattedValue-278 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module free_monoid-fold-JoinedStr-279 where
+module free_monoid-fold-JoinedStr-str-3 where
 
   -- str: 2 nodes, 2 forms
   -- [str]
@@ -3393,7 +3393,7 @@ module free_monoid-fold-JoinedStr-279 where
 -- ── let (Assign) ───────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module let-k-Assign-280 where
+module let-k-Assign-τ382 where
 
   -- ctx-382: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3406,7 +3406,7 @@ module let-k-Assign-280 where
 -- ── free_monoid (Call) ─────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module free_monoid-Call-296 where
+module free_monoid-Call-τ404 where
 
   -- ctx-404: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3419,7 +3419,7 @@ module free_monoid-Call-296 where
 -- ── fixpoint.halt (Break) ──────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module fixpoint-halt-Break-325 where
+module fixpoint-halt-Break-τ433 where
 
   -- ctx-433: 2 nodes, 1 forms
   -- [(untyped)]
@@ -3431,7 +3431,7 @@ module fixpoint-halt-Break-325 where
 -- ── exponential.literal (Dict) ─────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module exponential-literal-Dict-326 where
+module exponential-literal-Dict-dict-1 where
 
   -- dict: 2 nodes, 2 forms
   -- [dict]
@@ -3444,7 +3444,7 @@ module exponential-literal-Dict-326 where
 -- ── arguments (arguments) ──────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module arguments-341 where
+module arguments-arguments-τ453 where
 
   -- ctx-453: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3457,7 +3457,7 @@ module arguments-341 where
 -- ── equalizer (If) ─────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module equalizer-If-346 where
+module equalizer-If-τ459 where
 
   -- ctx-459: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3470,7 +3470,7 @@ module equalizer-If-346 where
 -- ── free_monoid.snoc@? (Call) ──────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module free_monoid-snoc-at-x3f-Call-358 where
+module free_monoid-snoc-at-x3f-Call-τ478 where
 
   -- ctx-478: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3483,7 +3483,7 @@ module free_monoid-snoc-at-x3f-Call-358 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module effect-seq-Expr-359 where
+module effect-seq-Expr-τ479 where
 
   -- ctx-479: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3496,7 +3496,7 @@ module effect-seq-Expr-359 where
 -- ── terminal.map (Return) ──────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module terminal-map-Return-386 where
+module terminal-map-Return-τ508 where
 
   -- ctx-508: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3509,7 +3509,7 @@ module terminal-map-Return-386 where
 -- ── apply (Call) ───────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module apply-Call-396 where
+module apply-Call-τ520 where
 
   -- ctx-520: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3522,7 +3522,7 @@ module apply-Call-396 where
 -- ── let (Assign) ───────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module let-k-Assign-397 where
+module let-k-Assign-τ521-0 where
 
   -- ctx-521: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3535,7 +3535,7 @@ module let-k-Assign-397 where
 -- ── not (Not) ──────────────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module not-Not-412 where
+module not-Not-τ540 where
 
   -- ctx-540: 2 nodes, 1 forms
   -- [(untyped)]
@@ -3547,7 +3547,7 @@ module not-Not-412 where
 -- ── complement (UnaryOp) ───────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module complement-UnaryOp-413 where
+module complement-UnaryOp-τ541 where
 
   -- ctx-541: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3560,7 +3560,7 @@ module complement-UnaryOp-413 where
 -- ── free_monoid.snoc@? (Call) ──────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module free_monoid-snoc-at-x3f-Call-420 where
+module free_monoid-snoc-at-x3f-Call-τ548 where
 
   -- ctx-548: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3573,7 +3573,7 @@ module free_monoid-snoc-at-x3f-Call-420 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module effect-seq-Expr-421 where
+module effect-seq-Expr-τ549 where
 
   -- ctx-549: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3586,7 +3586,7 @@ module effect-seq-Expr-421 where
 -- ── product (Tuple) ────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module product-Tuple-441 where
+module product-Tuple-tuple-12 where
 
   -- tuple: 2 nodes, 2 forms
   -- [tuple]
@@ -3599,7 +3599,7 @@ module product-Tuple-441 where
 -- ── free_monoid.snoc@state (Call) ──────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module free_monoid-snoc-at-state-Call-442 where
+module free_monoid-snoc-at-state-Call-None-0 where
 
   -- None: 2 nodes, 2 forms
   -- [None]
@@ -3612,7 +3612,7 @@ module free_monoid-snoc-at-state-Call-442 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module effect-seq-Expr-443 where
+module effect-seq-Expr-τ571 where
 
   -- ctx-571: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3625,7 +3625,7 @@ module effect-seq-Expr-443 where
 -- ── equalizer (If) ─────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module equalizer-If-444 where
+module equalizer-If-τ572 where
 
   -- ctx-572: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3638,7 +3638,7 @@ module equalizer-If-444 where
 -- ── equalizer (If) ─────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module equalizer-If-445 where
+module equalizer-If-τ573 where
 
   -- ctx-573: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3651,7 +3651,7 @@ module equalizer-If-445 where
 -- ── fold (For) ─────────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module fold-For-446 where
+module fold-For-τ574 where
 
   -- ctx-574: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3664,7 +3664,7 @@ module fold-For-446 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module annassign-AnnAssign-450 where
+module annassign-AnnAssign-τ579 where
 
   -- ctx-579: 1 nodes, 1 forms
   -- [(untyped)]
@@ -3682,7 +3682,7 @@ module annassign-AnnAssign-450 where
 -- ── projection@object (Attribute) ──────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module projection-at-object-Attribute-451 where
+module projection-at-object-Attribute-T-items where
 
   -- T-items: 2 nodes, 2 forms
   -- [Self._cascade_abstraction_merge, Self._cascade_eta, Self._cell_contents, Self._cell_obs, Self._cleavage_fibers]
@@ -3695,7 +3695,7 @@ module projection-at-object-Attribute-451 where
 -- ── projection.compute@object (Call) ───────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module projection-compute-at-object-Call-452 where
+module projection-compute-at-object-Call-Iter where
 
   -- Iter: 2 nodes, 2 forms
   -- [Iter]
@@ -3708,7 +3708,7 @@ module projection-compute-at-object-Call-452 where
 -- ── free_monoid (Call) ─────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module free_monoid-Call-453 where
+module free_monoid-Call-τ582 where
 
   -- ctx-582: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3721,7 +3721,7 @@ module free_monoid-Call-453 where
 -- ── coerce (FormattedValue) ────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module coerce-FormattedValue-459 where
+module coerce-FormattedValue-τ589 where
 
   -- ctx-589: 2 nodes, 1 forms
   -- [(untyped)]
@@ -3733,7 +3733,7 @@ module coerce-FormattedValue-459 where
 -- ── powerset.literal (Set) ─────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module powerset-literal-Set-k-462 where
+module powerset-literal-Set-k-set where
 
   -- set: 2 nodes, 1 forms
   -- [set]
@@ -3745,7 +3745,7 @@ module powerset-literal-Set-k-462 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module annassign-AnnAssign-463 where
+module annassign-AnnAssign-τ594 where
 
   -- ctx-594: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3758,7 +3758,7 @@ module annassign-AnnAssign-463 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-464 where
+module effect-seq-Expr-τ598 where
 
   -- ctx-598: 2 nodes, 1 forms
   -- [(untyped)]
@@ -3770,7 +3770,7 @@ module effect-seq-Expr-464 where
 -- ── equalizer (If) ─────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module equalizer-If-465 where
+module equalizer-If-τ599 where
 
   -- ctx-599: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3783,7 +3783,7 @@ module equalizer-If-465 where
 -- ── equalizer (If) ─────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module equalizer-If-466 where
+module equalizer-If-τ600 where
 
   -- ctx-600: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3796,7 +3796,7 @@ module equalizer-If-466 where
 -- ── fold (For) ─────────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module fold-For-467 where
+module fold-For-τ601 where
 
   -- ctx-601: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3809,7 +3809,7 @@ module fold-For-467 where
 -- ── let (Assign) ───────────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-470 where
+module let-k-Assign-τ605 where
 
   -- ctx-605: 2 nodes, 1 forms
   -- [(untyped)]
@@ -3821,7 +3821,7 @@ module let-k-Assign-470 where
 -- ── equalizer (If) ─────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module equalizer-If-471 where
+module equalizer-If-τ606 where
 
   -- ctx-606: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3834,7 +3834,7 @@ module equalizer-If-471 where
 -- ── fold (For) ─────────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module fold-For-472 where
+module fold-For-τ607 where
 
   -- ctx-607: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3847,7 +3847,7 @@ module fold-For-472 where
 -- ── free_monoid.snoc@state (Call) ──────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module free_monoid-snoc-at-state-Call-473 where
+module free_monoid-snoc-at-state-Call-None-1 where
 
   -- None: 1 nodes, 1 forms
   -- [None]
@@ -3865,7 +3865,7 @@ module free_monoid-snoc-at-state-Call-473 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module effect-seq-Expr-474 where
+module effect-seq-Expr-τ610 where
 
   -- ctx-610: 1 nodes, 1 forms
   -- [(untyped)]
@@ -3883,7 +3883,7 @@ module effect-seq-Expr-474 where
 -- ── and (And) ──────────────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module and-And-493 where
+module and-And-τ634 where
 
   -- ctx-634: 2 nodes, 1 forms
   -- [(untyped)]
@@ -3895,7 +3895,7 @@ module and-And-493 where
 -- ── powerset (Call) ────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module powerset-Call-511 where
+module powerset-Call-τ520 where
 
   -- ctx-520: 2 nodes, 2 forms
   -- [(untyped)]
@@ -3908,7 +3908,7 @@ module powerset-Call-511 where
 -- ── product (Tuple) ────────────────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module product-Tuple-531 where
+module product-Tuple-tuple-13 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -3926,7 +3926,7 @@ module product-Tuple-531 where
 -- ── index (Index) ──────────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module index-Index-544 where
+module index-Index-τ694 where
 
   -- ctx-694: 2 nodes, 1 forms
   -- [(untyped)]
@@ -3938,7 +3938,7 @@ module index-Index-544 where
 -- ── subscript (Subscript) ──────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-545 where
+module subscript-Subscript-τ695 where
 
   -- ctx-695: 2 nodes, 1 forms
   -- [(untyped)]
@@ -3950,7 +3950,7 @@ module subscript-Subscript-545 where
 -- ── product (Tuple) ────────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-546 where
+module product-Tuple-tuple-14 where
 
   -- tuple: 2 nodes, 1 forms
   -- [tuple]
@@ -3962,7 +3962,7 @@ module product-Tuple-546 where
 -- ── index (Index) ──────────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module index-Index-547 where
+module index-Index-τ697 where
 
   -- ctx-697: 2 nodes, 1 forms
   -- [(untyped)]
@@ -3974,7 +3974,7 @@ module index-Index-547 where
 -- ── subscript (Subscript) ──────────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module subscript-Subscript-548 where
+module subscript-Subscript-τ698 where
 
   -- ctx-698: 1 nodes, 1 forms
   -- [(untyped)]
@@ -3992,7 +3992,7 @@ module subscript-Subscript-548 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module annassign-AnnAssign-570 where
+module annassign-AnnAssign-τ729 where
 
   -- ctx-729: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4010,7 +4010,7 @@ module annassign-AnnAssign-570 where
 -- ── index (Index) ──────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module index-Index-571 where
+module index-Index-τ730 where
 
   -- ctx-730: 2 nodes, 2 forms
   -- [(untyped)]
@@ -4023,7 +4023,7 @@ module index-Index-571 where
 -- ── comprehension (comprehension) ──────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module comprehension-576 where
+module comprehension-comprehension-τ735 where
 
   -- ctx-735: 2 nodes, 2 forms
   -- [(untyped)]
@@ -4036,7 +4036,7 @@ module comprehension-576 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module annassign-AnnAssign-589 where
+module annassign-AnnAssign-τ751 where
 
   -- ctx-751: 2 nodes, 2 forms
   -- [(untyped)]
@@ -4049,7 +4049,7 @@ module annassign-AnnAssign-589 where
 -- ── index (Index) ──────────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module index-Index-619 where
+module index-Index-τ786 where
 
   -- ctx-786: 2 nodes, 1 forms
   -- [(untyped)]
@@ -4061,7 +4061,7 @@ module index-Index-619 where
 -- ── subscript (Subscript) ──────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-620 where
+module subscript-Subscript-τ787 where
 
   -- ctx-787: 2 nodes, 1 forms
   -- [(untyped)]
@@ -4073,7 +4073,7 @@ module subscript-Subscript-620 where
 -- ── usub (USub) ────────────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module usub-USub-627 where
+module usub-USub-τ795 where
 
   -- ctx-795: 2 nodes, 1 forms
   -- [(untyped)]
@@ -4085,7 +4085,7 @@ module usub-USub-627 where
 -- ── product (Tuple) ────────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-646 where
+module product-Tuple-tuple-15 where
 
   -- tuple: 2 nodes, 1 forms
   -- [tuple]
@@ -4097,7 +4097,7 @@ module product-Tuple-646 where
 -- ── index (Index) ──────────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module index-Index-647 where
+module index-Index-τ819 where
 
   -- ctx-819: 2 nodes, 1 forms
   -- [(untyped)]
@@ -4109,7 +4109,7 @@ module index-Index-647 where
 -- ── subscript (Subscript) ──────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-648 where
+module subscript-Subscript-τ820 where
 
   -- ctx-820: 2 nodes, 1 forms
   -- [(untyped)]
@@ -4121,7 +4121,7 @@ module subscript-Subscript-648 where
 -- ── index (Index) ──────────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module index-Index-649 where
+module index-Index-τ821 where
 
   -- ctx-821: 2 nodes, 1 forms
   -- [(untyped)]
@@ -4133,7 +4133,7 @@ module index-Index-649 where
 -- ── subscript (Subscript) ──────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-650 where
+module subscript-Subscript-τ822 where
 
   -- ctx-822: 2 nodes, 1 forms
   -- [(untyped)]
@@ -4145,7 +4145,7 @@ module subscript-Subscript-650 where
 -- ── apply (Call) ───────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module apply-Call-654 where
+module apply-Call-τ827 where
 
   -- ctx-827: 2 nodes, 2 forms
   -- [(untyped)]
@@ -4158,7 +4158,7 @@ module apply-Call-654 where
 -- ── let (Assign) ───────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module let-k-Assign-655 where
+module let-k-Assign-τ828 where
 
   -- ctx-828: 2 nodes, 2 forms
   -- [(untyped)]
@@ -4171,7 +4171,7 @@ module let-k-Assign-655 where
 -- ── let (Assign) ───────────────────────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-664 where
+module let-k-Assign-τ838 where
 
   -- ctx-838: 2 nodes, 1 forms
   -- [(untyped)]
@@ -4183,7 +4183,7 @@ module let-k-Assign-664 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 2 nodes, 2 type contexts, 2 forms
 
-module free_monoid-fold-JoinedStr-671 where
+module free_monoid-fold-JoinedStr-str-4 where
 
   -- str: 1 nodes, 1 forms
   -- [str]
@@ -4201,7 +4201,7 @@ module free_monoid-fold-JoinedStr-671 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 2 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-672 where
+module free_monoid-fold-JoinedStr-str-5 where
 
   -- str: 2 nodes, 1 forms
   -- [str]
@@ -4213,7 +4213,7 @@ module free_monoid-fold-JoinedStr-672 where
 -- ── coerce (FormattedValue) ────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module coerce-FormattedValue-680 where
+module coerce-FormattedValue-τ857 where
 
   -- ctx-857: 2 nodes, 2 forms
   -- [(untyped)]
@@ -4226,7 +4226,7 @@ module coerce-FormattedValue-680 where
 -- ── bimap (BinOp) ──────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module bimap-BinOp-681 where
+module bimap-BinOp-τ858 where
 
   -- ctx-858: 2 nodes, 2 forms
   -- [(untyped)]
@@ -4239,7 +4239,7 @@ module bimap-BinOp-681 where
 -- ── bimap (BinOp) ──────────────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module bimap-BinOp-682 where
+module bimap-BinOp-τ859 where
 
   -- ctx-859: 2 nodes, 2 forms
   -- [(untyped)]
@@ -4252,7 +4252,7 @@ module bimap-BinOp-682 where
 -- ── coerce (FormattedValue) ────────────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module coerce-FormattedValue-683 where
+module coerce-FormattedValue-τ860 where
 
   -- ctx-860: 2 nodes, 2 forms
   -- [(untyped)]
@@ -4265,7 +4265,7 @@ module coerce-FormattedValue-683 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 2 nodes, 1 type contexts, 2 forms
 
-module free_monoid-fold-JoinedStr-684 where
+module free_monoid-fold-JoinedStr-str-6 where
 
   -- str: 2 nodes, 2 forms
   -- [str]
@@ -4278,7 +4278,7 @@ module free_monoid-fold-JoinedStr-684 where
 -- ── pullback.import (ImportFrom) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module pullback-import-ImportFrom-3 where
+module pullback-import-ImportFrom-τ3 where
 
   -- ctx-3: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4290,7 +4290,7 @@ module pullback-import-ImportFrom-3 where
 -- ── pullback.import (ImportFrom) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module pullback-import-ImportFrom-4 where
+module pullback-import-ImportFrom-τ4 where
 
   -- ctx-4: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4302,7 +4302,7 @@ module pullback-import-ImportFrom-4 where
 -- ── pullback.import (ImportFrom) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module pullback-import-ImportFrom-5 where
+module pullback-import-ImportFrom-τ5 where
 
   -- ctx-5: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4314,7 +4314,7 @@ module pullback-import-ImportFrom-5 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-9 where
+module product-Tuple-tuple-16 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -4326,7 +4326,7 @@ module product-Tuple-9 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-10 where
+module let-k-Assign-τ10 where
 
   -- ctx-10: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4338,7 +4338,7 @@ module let-k-Assign-10 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-20 where
+module exponential-intro-FunctionDef-τ30 where
 
   -- ctx-30: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4350,7 +4350,7 @@ module exponential-intro-FunctionDef-20 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-29 where
+module let-k-Assign-τ40 where
 
   -- ctx-40: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4362,7 +4362,7 @@ module let-k-Assign-29 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-30 where
+module equalizer-If-τ41 where
 
   -- ctx-41: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4374,7 +4374,7 @@ module equalizer-If-30 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-31 where
+module exponential-intro-FunctionDef-τ43 where
 
   -- ctx-43: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4386,7 +4386,7 @@ module exponential-intro-FunctionDef-31 where
 -- ── fixpoint (While) ───────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fixpoint-While-37 where
+module fixpoint-While-τ51 where
 
   -- ctx-51: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4398,7 +4398,7 @@ module fixpoint-While-37 where
 -- ── product.unpack (Tuple) ─────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-unpack-Tuple-38 where
+module product-unpack-Tuple-tuple-1 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -4410,7 +4410,7 @@ module product-unpack-Tuple-38 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-39 where
+module product-Tuple-tuple-17 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -4422,7 +4422,7 @@ module product-Tuple-39 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-40 where
+module let-k-Assign-τ54 where
 
   -- ctx-54: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4434,7 +4434,7 @@ module let-k-Assign-40 where
 -- ── fixpoint (While) ───────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fixpoint-While-41 where
+module fixpoint-While-τ55 where
 
   -- ctx-55: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4446,7 +4446,7 @@ module fixpoint-While-41 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-43 where
+module exponential-intro-FunctionDef-τ57 where
 
   -- ctx-57: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4458,7 +4458,7 @@ module exponential-intro-FunctionDef-43 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-47 where
+module product-Tuple-tuple-18 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -4470,7 +4470,7 @@ module product-Tuple-47 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-48 where
+module let-k-Assign-τ64 where
 
   -- ctx-64: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4482,7 +4482,7 @@ module let-k-Assign-48 where
 -- ── equalizer (Compare) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-Compare-53 where
+module equalizer-Compare-τ69 where
 
   -- ctx-69: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4494,7 +4494,7 @@ module equalizer-Compare-53 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-54 where
+module let-k-Assign-τ70 where
 
   -- ctx-70: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4506,7 +4506,7 @@ module let-k-Assign-54 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-55 where
+module equalizer-If-τ71 where
 
   -- ctx-71: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4518,7 +4518,7 @@ module equalizer-If-55 where
 -- ── equalizer (Compare) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-Compare-56 where
+module equalizer-Compare-τ72 where
 
   -- ctx-72: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4530,7 +4530,7 @@ module equalizer-Compare-56 where
 -- ── monoid.accum (AugAssign) ───────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-accum-AugAssign-58 where
+module monoid-accum-AugAssign-τ74 where
 
   -- ctx-74: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4542,7 +4542,7 @@ module monoid-accum-AugAssign-58 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-59 where
+module equalizer-If-τ75 where
 
   -- ctx-75: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4554,7 +4554,7 @@ module equalizer-If-59 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-60 where
+module exponential-intro-FunctionDef-τ76 where
 
   -- ctx-76: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4566,7 +4566,7 @@ module exponential-intro-FunctionDef-60 where
 -- ── terminal.map (Return) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-63 where
+module terminal-map-Return-τ79 where
 
   -- ctx-79: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4578,7 +4578,7 @@ module terminal-map-Return-63 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-64 where
+module exponential-intro-FunctionDef-τ81 where
 
   -- ctx-81: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4590,7 +4590,7 @@ module exponential-intro-FunctionDef-64 where
 -- ── terminal.map (Return) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-66 where
+module terminal-map-Return-τ83 where
 
   -- ctx-83: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4602,7 +4602,7 @@ module terminal-map-Return-66 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-68 where
+module exponential-intro-FunctionDef-τ85 where
 
   -- ctx-85: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4614,7 +4614,7 @@ module exponential-intro-FunctionDef-68 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-72 where
+module exponential-intro-FunctionDef-τ89 where
 
   -- ctx-89: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4626,7 +4626,7 @@ module exponential-intro-FunctionDef-72 where
 -- ── classifier.intro (ClassDef) ────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module classifier-intro-ClassDef-73 where
+module classifier-intro-ClassDef-τ90 where
 
   -- ctx-90: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4638,7 +4638,7 @@ module classifier-intro-ClassDef-73 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-74 where
+module product-Tuple-tuple-19 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -4650,7 +4650,7 @@ module product-Tuple-74 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-75 where
+module let-k-Assign-τ92 where
 
   -- ctx-92: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4662,7 +4662,7 @@ module let-k-Assign-75 where
 -- ── arguments (arguments) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module arguments-80 where
+module arguments-arguments-τ104 where
 
   -- ctx-104: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4674,7 +4674,7 @@ module arguments-80 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-85 where
+module exponential-intro-FunctionDef-τ117 where
 
   -- ctx-117: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4686,7 +4686,7 @@ module exponential-intro-FunctionDef-85 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-88 where
+module free_monoid-fold-JoinedStr-str-7 where
 
   -- str: 1 nodes, 1 forms
   -- [str]
@@ -4698,7 +4698,7 @@ module free_monoid-fold-JoinedStr-88 where
 -- ── terminal.map (Return) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-89 where
+module terminal-map-Return-τ121 where
 
   -- ctx-121: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4710,7 +4710,7 @@ module terminal-map-Return-89 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-90 where
+module exponential-intro-FunctionDef-τ122 where
 
   -- ctx-122: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4722,7 +4722,7 @@ module exponential-intro-FunctionDef-90 where
 -- ── classifier.intro (ClassDef) ────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module classifier-intro-ClassDef-91 where
+module classifier-intro-ClassDef-τ123 where
 
   -- ctx-123: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4734,7 +4734,7 @@ module classifier-intro-ClassDef-91 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-92 where
+module product-Tuple-tuple-20 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -4746,7 +4746,7 @@ module product-Tuple-92 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-93 where
+module index-Index-τ134 where
 
   -- ctx-134: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4758,7 +4758,7 @@ module index-Index-93 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-94 where
+module subscript-Subscript-τ135 where
 
   -- ctx-135: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4770,7 +4770,7 @@ module subscript-Subscript-94 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-95 where
+module annassign-AnnAssign-τ136 where
 
   -- ctx-136: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4782,7 +4782,7 @@ module annassign-AnnAssign-95 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-99 where
+module exponential-intro-FunctionDef-τ142 where
 
   -- ctx-142: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4794,7 +4794,7 @@ module exponential-intro-FunctionDef-99 where
 -- ── arguments (arguments) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module arguments-100 where
+module arguments-arguments-τ143 where
 
   -- ctx-143: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4806,7 +4806,7 @@ module arguments-100 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-103 where
+module apply-Call-τ151 where
 
   -- ctx-151: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4818,7 +4818,7 @@ module apply-Call-103 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-104 where
+module let-k-Assign-τ152 where
 
   -- ctx-152: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4830,7 +4830,7 @@ module let-k-Assign-104 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-108 where
+module equalizer-If-τ156 where
 
   -- ctx-156: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4842,7 +4842,7 @@ module equalizer-If-108 where
 -- ── free_monoid.snoc@? (Call) ──────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-x3f-Call-111 where
+module free_monoid-snoc-at-x3f-Call-τ160 where
 
   -- ctx-160: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4854,7 +4854,7 @@ module free_monoid-snoc-at-x3f-Call-111 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-112 where
+module effect-seq-Expr-τ161 where
 
   -- ctx-161: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4866,7 +4866,7 @@ module effect-seq-Expr-112 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-113 where
+module exponential-intro-FunctionDef-τ163 where
 
   -- ctx-163: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4878,7 +4878,7 @@ module exponential-intro-FunctionDef-113 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-115 where
+module exponential-intro-FunctionDef-τ167 where
 
   -- ctx-167: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4890,7 +4890,7 @@ module exponential-intro-FunctionDef-115 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-116 where
+module product-Tuple-tuple-21 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -4902,7 +4902,7 @@ module product-Tuple-116 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-117 where
+module let-k-Assign-τ172 where
 
   -- ctx-172: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4914,7 +4914,7 @@ module let-k-Assign-117 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-119 where
+module annassign-AnnAssign-τ175 where
 
   -- ctx-175: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4926,7 +4926,7 @@ module annassign-AnnAssign-119 where
 -- ── ifexp (IfExp) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module ifexp-IfExp-120 where
+module ifexp-IfExp-τ176 where
 
   -- ctx-176: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4938,7 +4938,7 @@ module ifexp-IfExp-120 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-121 where
+module let-k-Assign-τ177 where
 
   -- ctx-177: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4950,7 +4950,7 @@ module let-k-Assign-121 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-122 where
+module apply-Call-τ180 where
 
   -- ctx-180: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4962,7 +4962,7 @@ module apply-Call-122 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-123 where
+module effect-seq-Expr-τ181 where
 
   -- ctx-181: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4974,7 +4974,7 @@ module effect-seq-Expr-123 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-124 where
+module exponential-intro-FunctionDef-τ182 where
 
   -- ctx-182: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4986,7 +4986,7 @@ module exponential-intro-FunctionDef-124 where
 -- ── cofree (Yield) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module cofree-Yield-132 where
+module cofree-Yield-τ191 where
 
   -- ctx-191: 1 nodes, 1 forms
   -- [(untyped)]
@@ -4998,7 +4998,7 @@ module cofree-Yield-132 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-133 where
+module effect-seq-Expr-τ192 where
 
   -- ctx-192: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5010,7 +5010,7 @@ module effect-seq-Expr-133 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-134 where
+module equalizer-If-τ193 where
 
   -- ctx-193: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5022,7 +5022,7 @@ module equalizer-If-134 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-135 where
+module fold-For-τ194 where
 
   -- ctx-194: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5034,7 +5034,7 @@ module fold-For-135 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-136 where
+module exponential-intro-FunctionDef-τ196 where
 
   -- ctx-196: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5046,7 +5046,7 @@ module exponential-intro-FunctionDef-136 where
 -- ── comprehension (comprehension) ──────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module comprehension-138 where
+module comprehension-comprehension-τ199 where
 
   -- ctx-199: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5058,7 +5058,7 @@ module comprehension-138 where
 -- ── lazy_fold (GeneratorExp) ───────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module lazy_fold-GeneratorExp-139 where
+module lazy_fold-GeneratorExp-τ200 where
 
   -- ctx-200: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5070,7 +5070,7 @@ module lazy_fold-GeneratorExp-139 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-140 where
+module apply-Call-τ201 where
 
   -- ctx-201: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5082,7 +5082,7 @@ module apply-Call-140 where
 -- ── terminal.map (Return) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-141 where
+module terminal-map-Return-τ202 where
 
   -- ctx-202: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5094,7 +5094,7 @@ module terminal-map-Return-141 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-142 where
+module exponential-intro-FunctionDef-τ203 where
 
   -- ctx-203: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5106,7 +5106,7 @@ module exponential-intro-FunctionDef-142 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-143 where
+module index-Index-τ204 where
 
   -- ctx-204: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5118,7 +5118,7 @@ module index-Index-143 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-144 where
+module subscript-Subscript-τ205 where
 
   -- ctx-205: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5130,7 +5130,7 @@ module subscript-Subscript-144 where
 -- ── terminal.map (Return) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-145 where
+module terminal-map-Return-τ206 where
 
   -- ctx-206: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5142,7 +5142,7 @@ module terminal-map-Return-145 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-146 where
+module exponential-intro-FunctionDef-τ207 where
 
   -- ctx-207: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5154,7 +5154,7 @@ module exponential-intro-FunctionDef-146 where
 -- ── terminal.map (Return) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-147 where
+module terminal-map-Return-τ208 where
 
   -- ctx-208: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5166,7 +5166,7 @@ module terminal-map-Return-147 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-148 where
+module exponential-intro-FunctionDef-τ209 where
 
   -- ctx-209: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5178,7 +5178,7 @@ module exponential-intro-FunctionDef-148 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-151 where
+module free_monoid-fold-JoinedStr-str-8 where
 
   -- str: 1 nodes, 1 forms
   -- [str]
@@ -5190,7 +5190,7 @@ module free_monoid-fold-JoinedStr-151 where
 -- ── terminal.map (Return) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-152 where
+module terminal-map-Return-τ213 where
 
   -- ctx-213: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5202,7 +5202,7 @@ module terminal-map-Return-152 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-153 where
+module exponential-intro-FunctionDef-τ214 where
 
   -- ctx-214: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5214,7 +5214,7 @@ module exponential-intro-FunctionDef-153 where
 -- ── classifier.intro (ClassDef) ────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module classifier-intro-ClassDef-154 where
+module classifier-intro-ClassDef-τ215 where
 
   -- ctx-215: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5226,7 +5226,7 @@ module classifier-intro-ClassDef-154 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-166 where
+module product-Tuple-tuple-22 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -5238,7 +5238,7 @@ module product-Tuple-166 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-167 where
+module index-Index-τ233 where
 
   -- ctx-233: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5250,7 +5250,7 @@ module index-Index-167 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-168 where
+module subscript-Subscript-τ234 where
 
   -- ctx-234: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5262,7 +5262,7 @@ module subscript-Subscript-168 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-169 where
+module annassign-AnnAssign-τ235 where
 
   -- ctx-235: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5274,7 +5274,7 @@ module annassign-AnnAssign-169 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-172 where
+module product-Tuple-tuple-23 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -5286,7 +5286,7 @@ module product-Tuple-172 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-173 where
+module index-Index-τ240 where
 
   -- ctx-240: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5298,7 +5298,7 @@ module index-Index-173 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-174 where
+module subscript-Subscript-τ241 where
 
   -- ctx-241: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5310,7 +5310,7 @@ module subscript-Subscript-174 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-176 where
+module annassign-AnnAssign-τ243 where
 
   -- ctx-243: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5322,7 +5322,7 @@ module annassign-AnnAssign-176 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-177 where
+module product-Tuple-tuple-24 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -5334,7 +5334,7 @@ module product-Tuple-177 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-178 where
+module index-Index-τ246 where
 
   -- ctx-246: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5346,7 +5346,7 @@ module index-Index-178 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-179 where
+module subscript-Subscript-τ247 where
 
   -- ctx-247: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5358,7 +5358,7 @@ module subscript-Subscript-179 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-180 where
+module annassign-AnnAssign-τ248 where
 
   -- ctx-248: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5370,7 +5370,7 @@ module annassign-AnnAssign-180 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-186 where
+module annassign-AnnAssign-τ263 where
 
   -- ctx-263: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5382,7 +5382,7 @@ module annassign-AnnAssign-186 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-192 where
+module annassign-AnnAssign-τ270 where
 
   -- ctx-270: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5394,7 +5394,7 @@ module annassign-AnnAssign-192 where
 -- ── arguments (arguments) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module arguments-196 where
+module arguments-arguments-τ285 where
 
   -- ctx-285: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5406,7 +5406,7 @@ module arguments-196 where
 -- ── lambda (Lambda) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module lambda-Lambda-197 where
+module lambda-Lambda-τ286 where
 
   -- ctx-286: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5418,7 +5418,7 @@ module lambda-Lambda-197 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-198 where
+module apply-Call-τ287 where
 
   -- ctx-287: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5430,7 +5430,7 @@ module apply-Call-198 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-199 where
+module annassign-AnnAssign-τ288 where
 
   -- ctx-288: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5442,7 +5442,7 @@ module annassign-AnnAssign-199 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-203 where
+module annassign-AnnAssign-τ293 where
 
   -- ctx-293: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5454,7 +5454,7 @@ module annassign-AnnAssign-203 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-204 where
+module exponential-intro-FunctionDef-τ294 where
 
   -- ctx-294: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5466,7 +5466,7 @@ module exponential-intro-FunctionDef-204 where
 -- ── arg (arg) ──────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module arg-205 where
+module arg-arg-τ297 where
 
   -- ctx-297: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5478,7 +5478,7 @@ module arg-205 where
 -- ── arguments (arguments) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module arguments-206 where
+module arguments-arguments-τ298 where
 
   -- ctx-298: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5490,7 +5490,7 @@ module arguments-206 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-207 where
+module subscript-Subscript-τ299 where
 
   -- ctx-299: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5502,7 +5502,7 @@ module subscript-Subscript-207 where
 -- ── monoid.accum (AugAssign) ───────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-accum-AugAssign-208 where
+module monoid-accum-AugAssign-τ300 where
 
   -- ctx-300: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5514,7 +5514,7 @@ module monoid-accum-AugAssign-208 where
 -- ── coproduct.elim (If) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module coproduct-elim-If-214 where
+module coproduct-elim-If-τ306 where
 
   -- ctx-306: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5526,7 +5526,7 @@ module coproduct-elim-If-214 where
 -- ── bimap (BinOp) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module bimap-BinOp-221 where
+module bimap-BinOp-τ314 where
 
   -- ctx-314: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5538,7 +5538,7 @@ module bimap-BinOp-221 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-222 where
+module apply-Call-τ315 where
 
   -- ctx-315: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5550,7 +5550,7 @@ module apply-Call-222 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-223 where
+module effect-seq-Expr-τ316 where
 
   -- ctx-316: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5562,7 +5562,7 @@ module effect-seq-Expr-223 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-224 where
+module fold-For-τ317 where
 
   -- ctx-317: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5574,7 +5574,7 @@ module fold-For-224 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-225 where
+module equalizer-If-τ318 where
 
   -- ctx-318: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5586,7 +5586,7 @@ module equalizer-If-225 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-226 where
+module exponential-intro-FunctionDef-τ319 where
 
   -- ctx-319: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5598,7 +5598,7 @@ module exponential-intro-FunctionDef-226 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-229 where
+module let-k-Assign-τ325 where
 
   -- ctx-325: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5610,7 +5610,7 @@ module let-k-Assign-229 where
 -- ── or (Or) ────────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module or-Or-230 where
+module or-Or-τ327 where
 
   -- ctx-327: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5622,7 +5622,7 @@ module or-Or-230 where
 -- ── join (BoolOp) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module join-BoolOp-231 where
+module join-BoolOp-τ329 where
 
   -- ctx-329: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5634,7 +5634,7 @@ module join-BoolOp-231 where
 -- ── lazy_fold (GeneratorExp) ───────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module lazy_fold-GeneratorExp-233 where
+module lazy_fold-GeneratorExp-τ331 where
 
   -- ctx-331: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5646,7 +5646,7 @@ module lazy_fold-GeneratorExp-233 where
 -- ── total_order (Call) ─────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module total_order-Call-234 where
+module total_order-Call-list-0 where
 
   -- list: 1 nodes, 1 forms
   -- [list]
@@ -5658,7 +5658,7 @@ module total_order-Call-234 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-235 where
+module apply-Call-τ333 where
 
   -- ctx-333: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5670,7 +5670,7 @@ module apply-Call-235 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-236 where
+module let-k-Assign-τ334 where
 
   -- ctx-334: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5682,7 +5682,7 @@ module let-k-Assign-236 where
 -- ── equalizer (Compare) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-Compare-237 where
+module equalizer-Compare-τ336 where
 
   -- ctx-336: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5694,7 +5694,7 @@ module equalizer-Compare-237 where
 -- ── terminal.map (Return) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-238 where
+module terminal-map-Return-τ337 where
 
   -- ctx-337: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5706,7 +5706,7 @@ module terminal-map-Return-238 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-239 where
+module equalizer-If-τ338 where
 
   -- ctx-338: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5718,7 +5718,7 @@ module equalizer-If-239 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-240 where
+module let-k-Assign-τ339 where
 
   -- ctx-339: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5730,7 +5730,7 @@ module let-k-Assign-240 where
 -- ── free_monoid.snoc@state (Call) ──────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-state-Call-244 where
+module free_monoid-snoc-at-state-Call-None-2 where
 
   -- None: 1 nodes, 1 forms
   -- [None]
@@ -5742,7 +5742,7 @@ module free_monoid-snoc-at-state-Call-244 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-245 where
+module effect-seq-Expr-τ344 where
 
   -- ctx-344: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5754,7 +5754,7 @@ module effect-seq-Expr-245 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-246 where
+module free_monoid-fold-JoinedStr-str-9 where
 
   -- str: 1 nodes, 1 forms
   -- [str]
@@ -5766,7 +5766,7 @@ module free_monoid-fold-JoinedStr-246 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-247 where
+module apply-Call-τ346 where
 
   -- ctx-346: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5778,7 +5778,7 @@ module apply-Call-247 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-248 where
+module let-k-Assign-τ347 where
 
   -- ctx-347: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5790,7 +5790,7 @@ module let-k-Assign-248 where
 -- ── free_monoid.snoc@state (Call) ──────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-state-Call-249 where
+module free_monoid-snoc-at-state-Call-None-3 where
 
   -- None: 1 nodes, 1 forms
   -- [None, T]
@@ -5802,7 +5802,7 @@ module free_monoid-snoc-at-state-Call-249 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-250 where
+module effect-seq-Expr-τ350 where
 
   -- ctx-350: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5814,7 +5814,7 @@ module effect-seq-Expr-250 where
 -- ── fixpoint (While) ───────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fixpoint-While-251 where
+module fixpoint-While-τ351 where
 
   -- ctx-351: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5826,7 +5826,7 @@ module fixpoint-While-251 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-253 where
+module let-k-Assign-τ354 where
 
   -- ctx-354: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5838,7 +5838,7 @@ module let-k-Assign-253 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-257 where
+module annassign-AnnAssign-τ360 where
 
   -- ctx-360: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5850,7 +5850,7 @@ module annassign-AnnAssign-257 where
 -- ── equalizer (Compare) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-Compare-260 where
+module equalizer-Compare-τ363 where
 
   -- ctx-363: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5862,7 +5862,7 @@ module equalizer-Compare-260 where
 -- ── equalizer (Compare) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-Compare-265 where
+module equalizer-Compare-τ367 where
 
   -- ctx-367: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5874,7 +5874,7 @@ module equalizer-Compare-265 where
 -- ── comprehension (comprehension) ──────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module comprehension-266 where
+module comprehension-comprehension-τ368 where
 
   -- ctx-368: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5886,7 +5886,7 @@ module comprehension-266 where
 -- ── lazy_fold (GeneratorExp) ───────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module lazy_fold-GeneratorExp-267 where
+module lazy_fold-GeneratorExp-τ369 where
 
   -- ctx-369: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5898,7 +5898,7 @@ module lazy_fold-GeneratorExp-267 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-268 where
+module apply-Call-τ370 where
 
   -- ctx-370: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5910,7 +5910,7 @@ module apply-Call-268 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-269 where
+module let-k-Assign-τ371 where
 
   -- ctx-371: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5922,7 +5922,7 @@ module let-k-Assign-269 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-270 where
+module equalizer-If-τ372 where
 
   -- ctx-372: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5934,7 +5934,7 @@ module equalizer-If-270 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-271 where
+module fold-For-τ373 where
 
   -- ctx-373: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5946,7 +5946,7 @@ module fold-For-271 where
 -- ── lte (LtE) ──────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module lte-LtE-272 where
+module lte-LtE-τ374 where
 
   -- ctx-374: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5958,7 +5958,7 @@ module lte-LtE-272 where
 -- ── equalizer (Compare) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-Compare-273 where
+module equalizer-Compare-τ375 where
 
   -- ctx-375: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5970,7 +5970,7 @@ module equalizer-Compare-273 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-274 where
+module let-k-Assign-τ376 where
 
   -- ctx-376: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5982,7 +5982,7 @@ module let-k-Assign-274 where
 -- ── coproduct.elim (If) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module coproduct-elim-If-281 where
+module coproduct-elim-If-τ383 where
 
   -- ctx-383: 1 nodes, 1 forms
   -- [(untyped)]
@@ -5994,7 +5994,7 @@ module coproduct-elim-If-281 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-283 where
+module product-Tuple-tuple-25 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -6006,7 +6006,7 @@ module product-Tuple-283 where
 -- ── free_monoid.snoc@state (Call) ──────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-state-Call-284 where
+module free_monoid-snoc-at-state-Call-None-4 where
 
   -- None: 1 nodes, 1 forms
   -- [None]
@@ -6018,7 +6018,7 @@ module free_monoid-snoc-at-state-Call-284 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-285 where
+module effect-seq-Expr-τ388 where
 
   -- ctx-388: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6030,7 +6030,7 @@ module effect-seq-Expr-285 where
 -- ── monoid.op (BinOp) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-op-BinOp-286 where
+module monoid-op-BinOp-τ389 where
 
   -- ctx-389: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6042,7 +6042,7 @@ module monoid-op-BinOp-286 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-287 where
+module let-k-Assign-τ390 where
 
   -- ctx-390: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6054,7 +6054,7 @@ module let-k-Assign-287 where
 -- ── partial.apply@state (Call) ─────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module partial-apply-at-state-Call-288 where
+module partial-apply-at-state-Call-T-2 where
 
   -- T: 1 nodes, 1 forms
   -- [None, T]
@@ -6066,7 +6066,7 @@ module partial-apply-at-state-Call-288 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-289 where
+module let-k-Assign-τ395 where
 
   -- ctx-395: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6078,7 +6078,7 @@ module let-k-Assign-289 where
 -- ── ifexp (IfExp) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module ifexp-IfExp-290 where
+module ifexp-IfExp-τ398 where
 
   -- ctx-398: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6090,7 +6090,7 @@ module ifexp-IfExp-290 where
 -- ── monoid.op@? (Call) ─────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-op-at-x3f-Call-291 where
+module monoid-op-at-x3f-Call-τ399 where
 
   -- ctx-399: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6102,7 +6102,7 @@ module monoid-op-at-x3f-Call-291 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-292 where
+module effect-seq-Expr-τ400 where
 
   -- ctx-400: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6114,7 +6114,7 @@ module effect-seq-Expr-292 where
 -- ── coproduct.elim (If) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module coproduct-elim-If-293 where
+module coproduct-elim-If-τ401 where
 
   -- ctx-401: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6126,7 +6126,7 @@ module coproduct-elim-If-293 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-294 where
+module fold-For-τ402 where
 
   -- ctx-402: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6138,7 +6138,7 @@ module fold-For-294 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-295 where
+module fold-For-τ403 where
 
   -- ctx-403: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6150,7 +6150,7 @@ module fold-For-295 where
 -- ── ifexp (IfExp) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module ifexp-IfExp-297 where
+module ifexp-IfExp-τ405 where
 
   -- ctx-405: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6162,7 +6162,7 @@ module ifexp-IfExp-297 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-298 where
+module apply-Call-τ406 where
 
   -- ctx-406: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6174,7 +6174,7 @@ module apply-Call-298 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-299 where
+module effect-seq-Expr-τ407 where
 
   -- ctx-407: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6186,7 +6186,7 @@ module effect-seq-Expr-299 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-301 where
+module let-k-Assign-τ408 where
 
   -- ctx-408: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6198,7 +6198,7 @@ module let-k-Assign-301 where
 -- ── morphism@? (Attribute) ─────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module morphism-at-x3f-Attribute-302 where
+module morphism-at-x3f-Attribute-τ409 where
 
   -- ctx-409: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6210,7 +6210,7 @@ module morphism-at-x3f-Attribute-302 where
 -- ── monoid.accum (AugAssign) ───────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-accum-AugAssign-303 where
+module monoid-accum-AugAssign-τ410 where
 
   -- ctx-410: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6222,7 +6222,7 @@ module monoid-accum-AugAssign-303 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-305 where
+module equalizer-If-τ413 where
 
   -- ctx-413: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6234,7 +6234,7 @@ module equalizer-If-305 where
 -- ── equalizer (Compare) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-Compare-307 where
+module equalizer-Compare-τ415 where
 
   -- ctx-415: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6246,7 +6246,7 @@ module equalizer-Compare-307 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-308 where
+module index-Index-τ416 where
 
   -- ctx-416: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6258,7 +6258,7 @@ module index-Index-308 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-309 where
+module subscript-Subscript-τ417 where
 
   -- ctx-417: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6270,7 +6270,7 @@ module subscript-Subscript-309 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-310 where
+module let-k-Assign-τ418 where
 
   -- ctx-418: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6282,7 +6282,7 @@ module let-k-Assign-310 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-311 where
+module equalizer-If-τ419 where
 
   -- ctx-419: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6294,7 +6294,7 @@ module equalizer-If-311 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-312 where
+module fold-For-τ420 where
 
   -- ctx-420: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6306,7 +6306,7 @@ module fold-For-312 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-313 where
+module fold-For-τ421 where
 
   -- ctx-421: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6318,7 +6318,7 @@ module fold-For-313 where
 -- ── lazy_fold (GeneratorExp) ───────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module lazy_fold-GeneratorExp-315 where
+module lazy_fold-GeneratorExp-τ423 where
 
   -- ctx-423: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6330,7 +6330,7 @@ module lazy_fold-GeneratorExp-315 where
 -- ── powerset (Call) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module powerset-Call-316 where
+module powerset-Call-τ424 where
 
   -- ctx-424: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6342,7 +6342,7 @@ module powerset-Call-316 where
 -- ── total_order (Call) ─────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module total_order-Call-317 where
+module total_order-Call-list-1 where
 
   -- list: 1 nodes, 1 forms
   -- [list]
@@ -6354,7 +6354,7 @@ module total_order-Call-317 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-318 where
+module apply-Call-τ426 where
 
   -- ctx-426: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6366,7 +6366,7 @@ module apply-Call-318 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-319 where
+module let-k-Assign-τ427 where
 
   -- ctx-427: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6378,7 +6378,7 @@ module let-k-Assign-319 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-320 where
+module let-k-Assign-τ428 where
 
   -- ctx-428: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6390,7 +6390,7 @@ module let-k-Assign-320 where
 -- ── monoid.accum (AugAssign) ───────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-accum-AugAssign-321 where
+module monoid-accum-AugAssign-τ429 where
 
   -- ctx-429: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6402,7 +6402,7 @@ module monoid-accum-AugAssign-321 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-322 where
+module equalizer-If-τ430 where
 
   -- ctx-430: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6414,7 +6414,7 @@ module equalizer-If-322 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-323 where
+module equalizer-If-τ431 where
 
   -- ctx-431: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6426,7 +6426,7 @@ module equalizer-If-323 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-324 where
+module equalizer-If-τ432 where
 
   -- ctx-432: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6438,7 +6438,7 @@ module equalizer-If-324 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-327 where
+module let-k-Assign-τ436 where
 
   -- ctx-436: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6450,7 +6450,7 @@ module let-k-Assign-327 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-328 where
+module equalizer-If-τ437 where
 
   -- ctx-437: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6462,7 +6462,7 @@ module equalizer-If-328 where
 -- ── fixpoint (While) ───────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fixpoint-While-329 where
+module fixpoint-While-τ438 where
 
   -- ctx-438: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6474,7 +6474,7 @@ module fixpoint-While-329 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-330 where
+module exponential-intro-FunctionDef-τ439 where
 
   -- ctx-439: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6486,7 +6486,7 @@ module exponential-intro-FunctionDef-330 where
 -- ── arguments (arguments) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module arguments-332 where
+module arguments-arguments-τ441 where
 
   -- ctx-441: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6498,7 +6498,7 @@ module arguments-332 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-335 where
+module equalizer-If-τ446 where
 
   -- ctx-446: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6510,7 +6510,7 @@ module equalizer-If-335 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-336 where
+module exponential-intro-FunctionDef-τ447 where
 
   -- ctx-447: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6522,7 +6522,7 @@ module exponential-intro-FunctionDef-336 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-337 where
+module apply-Call-τ448 where
 
   -- ctx-448: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6534,7 +6534,7 @@ module apply-Call-337 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-338 where
+module effect-seq-Expr-τ449 where
 
   -- ctx-449: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6546,7 +6546,7 @@ module effect-seq-Expr-338 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-339 where
+module equalizer-If-τ450 where
 
   -- ctx-450: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6558,7 +6558,7 @@ module equalizer-If-339 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-340 where
+module exponential-intro-FunctionDef-τ451 where
 
   -- ctx-451: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6570,7 +6570,7 @@ module exponential-intro-FunctionDef-340 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-345 where
+module fold-For-τ458 where
 
   -- ctx-458: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6582,7 +6582,7 @@ module fold-For-345 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-348 where
+module annassign-AnnAssign-τ466 where
 
   -- ctx-466: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6594,7 +6594,7 @@ module annassign-AnnAssign-348 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-360 where
+module equalizer-If-τ480 where
 
   -- ctx-480: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6606,7 +6606,7 @@ module equalizer-If-360 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-361 where
+module equalizer-If-τ481 where
 
   -- ctx-481: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6618,7 +6618,7 @@ module equalizer-If-361 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-362 where
+module fold-For-τ482 where
 
   -- ctx-482: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6630,7 +6630,7 @@ module fold-For-362 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-363 where
+module apply-Call-τ444 where
 
   -- ctx-444: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6642,7 +6642,7 @@ module apply-Call-363 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-364 where
+module effect-seq-Expr-τ445-1 where
 
   -- ctx-445: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6654,7 +6654,7 @@ module effect-seq-Expr-364 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-365 where
+module fold-For-τ483-1 where
 
   -- ctx-483: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6666,7 +6666,7 @@ module fold-For-365 where
 -- ── product.unpack (Tuple) ─────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-unpack-Tuple-366 where
+module product-unpack-Tuple-tuple-2 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -6678,7 +6678,7 @@ module product-unpack-Tuple-366 where
 -- ── free_monoid.literal (List) ─────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-literal-List-367 where
+module free_monoid-literal-List-list-2 where
 
   -- list: 1 nodes, 1 forms
   -- [list]
@@ -6690,7 +6690,7 @@ module free_monoid-literal-List-367 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-368 where
+module product-Tuple-tuple-26 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -6702,7 +6702,7 @@ module product-Tuple-368 where
 -- ── free_monoid.snoc@state (Call) ──────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-state-Call-369 where
+module free_monoid-snoc-at-state-Call-None-5 where
 
   -- None: 1 nodes, 1 forms
   -- [None]
@@ -6714,7 +6714,7 @@ module free_monoid-snoc-at-state-Call-369 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-370 where
+module effect-seq-Expr-τ490 where
 
   -- ctx-490: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6726,7 +6726,7 @@ module effect-seq-Expr-370 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-379 where
+module fold-For-τ501 where
 
   -- ctx-501: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6738,7 +6738,7 @@ module fold-For-379 where
 -- ── coproduct.elim (If) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module coproduct-elim-If-380 where
+module coproduct-elim-If-τ502 where
 
   -- ctx-502: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6750,7 +6750,7 @@ module coproduct-elim-If-380 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-381 where
+module fold-For-τ503 where
 
   -- ctx-503: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6762,7 +6762,7 @@ module fold-For-381 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-382 where
+module exponential-intro-FunctionDef-τ504 where
 
   -- ctx-504: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6774,7 +6774,7 @@ module exponential-intro-FunctionDef-382 where
 -- ── arguments (arguments) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module arguments-383 where
+module arguments-arguments-τ505 where
 
   -- ctx-505: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6786,7 +6786,7 @@ module arguments-383 where
 -- ── is (Is) ────────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module is-Is-384 where
+module is-Is-τ506 where
 
   -- ctx-506: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6798,7 +6798,7 @@ module is-Is-384 where
 -- ── equalizer (Compare) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-Compare-385 where
+module equalizer-Compare-τ507 where
 
   -- ctx-507: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6810,7 +6810,7 @@ module equalizer-Compare-385 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-387 where
+module equalizer-If-τ509 where
 
   -- ctx-509: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6822,7 +6822,7 @@ module equalizer-If-387 where
 -- ── partial.apply@state (Call) ─────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module partial-apply-at-state-Call-388 where
+module partial-apply-at-state-Call-T-3 where
 
   -- T: 1 nodes, 1 forms
   -- [T]
@@ -6834,7 +6834,7 @@ module partial-apply-at-state-Call-388 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-389 where
+module let-k-Assign-τ511 where
 
   -- ctx-511: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6846,7 +6846,7 @@ module let-k-Assign-389 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-390 where
+module equalizer-If-τ513 where
 
   -- ctx-513: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6858,7 +6858,7 @@ module equalizer-If-390 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-391 where
+module exponential-intro-FunctionDef-τ514 where
 
   -- ctx-514: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6870,7 +6870,7 @@ module exponential-intro-FunctionDef-391 where
 -- ── arg (arg) ──────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module arg-392 where
+module arg-arg-τ515 where
 
   -- ctx-515: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6882,7 +6882,7 @@ module arg-392 where
 -- ── arguments (arguments) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module arguments-393 where
+module arguments-arguments-τ516 where
 
   -- ctx-516: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6894,7 +6894,7 @@ module arguments-393 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-398 where
+module product-Tuple-tuple-27 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -6906,7 +6906,7 @@ module product-Tuple-398 where
 -- ── terminal.map (Return) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-399 where
+module terminal-map-Return-τ524 where
 
   -- ctx-524: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6918,7 +6918,7 @@ module terminal-map-Return-399 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-400 where
+module product-Tuple-tuple-28 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -6930,7 +6930,7 @@ module product-Tuple-400 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-401 where
+module index-Index-τ526 where
 
   -- ctx-526: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6942,7 +6942,7 @@ module index-Index-401 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-402 where
+module subscript-Subscript-τ527 where
 
   -- ctx-527: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6954,7 +6954,7 @@ module subscript-Subscript-402 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-403 where
+module exponential-intro-FunctionDef-τ528 where
 
   -- ctx-528: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6966,7 +6966,7 @@ module exponential-intro-FunctionDef-403 where
 -- ── arg (arg) ──────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module arg-404 where
+module arg-arg-τ529 where
 
   -- ctx-529: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6978,7 +6978,7 @@ module arg-404 where
 -- ── arguments (arguments) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module arguments-405 where
+module arguments-arguments-τ530 where
 
   -- ctx-530: 1 nodes, 1 forms
   -- [(untyped)]
@@ -6990,7 +6990,7 @@ module arguments-405 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-406 where
+module equalizer-If-τ532 where
 
   -- ctx-532: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7002,7 +7002,7 @@ module equalizer-If-406 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-407 where
+module fold-For-τ533 where
 
   -- ctx-533: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7014,7 +7014,7 @@ module fold-For-407 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-408 where
+module exponential-intro-FunctionDef-τ534 where
 
   -- ctx-534: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7026,7 +7026,7 @@ module exponential-intro-FunctionDef-408 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-409 where
+module let-k-Assign-τ536 where
 
   -- ctx-536: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7038,7 +7038,7 @@ module let-k-Assign-409 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-410 where
+module let-k-Assign-τ537 where
 
   -- ctx-537: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7050,7 +7050,7 @@ module let-k-Assign-410 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-411 where
+module let-k-Assign-τ539 where
 
   -- ctx-539: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7062,7 +7062,7 @@ module let-k-Assign-411 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-417 where
+module index-Index-τ545 where
 
   -- ctx-545: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7074,7 +7074,7 @@ module index-Index-417 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-418 where
+module subscript-Subscript-τ546 where
 
   -- ctx-546: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7086,7 +7086,7 @@ module subscript-Subscript-418 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-419 where
+module annassign-AnnAssign-τ547 where
 
   -- ctx-547: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7098,7 +7098,7 @@ module annassign-AnnAssign-419 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-422 where
+module equalizer-If-τ550 where
 
   -- ctx-550: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7110,7 +7110,7 @@ module equalizer-If-422 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-423 where
+module equalizer-If-τ551 where
 
   -- ctx-551: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7122,7 +7122,7 @@ module equalizer-If-423 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-424 where
+module fold-For-τ552 where
 
   -- ctx-552: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7134,7 +7134,7 @@ module fold-For-424 where
 -- ── monoid.accum (AugAssign) ───────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-accum-AugAssign-425 where
+module monoid-accum-AugAssign-τ553 where
 
   -- ctx-553: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7146,7 +7146,7 @@ module monoid-accum-AugAssign-425 where
 -- ── free_monoid.map (ListComp) ─────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-map-ListComp-426 where
+module free_monoid-map-ListComp-τ554 where
 
   -- ctx-554: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7158,7 +7158,7 @@ module free_monoid-map-ListComp-426 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-427 where
+module product-Tuple-tuple-29 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -7170,7 +7170,7 @@ module product-Tuple-427 where
 -- ── free_monoid.snoc@state (Call) ──────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-state-Call-428 where
+module free_monoid-snoc-at-state-Call-None-6 where
 
   -- None: 1 nodes, 1 forms
   -- [None]
@@ -7182,7 +7182,7 @@ module free_monoid-snoc-at-state-Call-428 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-429 where
+module effect-seq-Expr-τ557 where
 
   -- ctx-557: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7194,7 +7194,7 @@ module effect-seq-Expr-429 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-430 where
+module fold-For-τ558 where
 
   -- ctx-558: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7206,7 +7206,7 @@ module fold-For-430 where
 -- ── coproduct.elim (If) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module coproduct-elim-If-431 where
+module coproduct-elim-If-τ559 where
 
   -- ctx-559: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7218,7 +7218,7 @@ module coproduct-elim-If-431 where
 -- ── complement (If) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module complement-If-432 where
+module complement-If-τ560 where
 
   -- ctx-560: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7230,7 +7230,7 @@ module complement-If-432 where
 -- ── del (Del) ──────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module del-Del-433 where
+module del-Del-τ561 where
 
   -- ctx-561: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7242,7 +7242,7 @@ module del-Del-433 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-434 where
+module subscript-Subscript-τ562 where
 
   -- ctx-562: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7254,7 +7254,7 @@ module subscript-Subscript-434 where
 -- ── delete (Delete) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module delete-Delete-435 where
+module delete-Delete-τ563 where
 
   -- ctx-563: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7266,7 +7266,7 @@ module delete-Delete-435 where
 -- ── morphism@object (Attribute) ────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module morphism-at-object-Attribute-436 where
+module morphism-at-object-Attribute-T-discard where
 
   -- T-discard: 1 nodes, 1 forms
   -- [T.discard]
@@ -7278,7 +7278,7 @@ module morphism-at-object-Attribute-436 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-437 where
+module apply-Call-τ565 where
 
   -- ctx-565: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7290,7 +7290,7 @@ module apply-Call-437 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-438 where
+module effect-seq-Expr-τ566 where
 
   -- ctx-566: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7302,7 +7302,7 @@ module effect-seq-Expr-438 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-439 where
+module fold-For-τ567 where
 
   -- ctx-567: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7314,7 +7314,7 @@ module fold-For-439 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-447 where
+module equalizer-If-τ575 where
 
   -- ctx-575: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7326,7 +7326,7 @@ module equalizer-If-447 where
 -- ── partial.apply@state (Call) ─────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module partial-apply-at-state-Call-448 where
+module partial-apply-at-state-Call-T-4 where
 
   -- T: 1 nodes, 1 forms
   -- [T]
@@ -7338,7 +7338,7 @@ module partial-apply-at-state-Call-448 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-449 where
+module let-k-Assign-τ578 where
 
   -- ctx-578: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7350,7 +7350,7 @@ module let-k-Assign-449 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-454 where
+module equalizer-If-τ583 where
 
   -- ctx-583: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7362,7 +7362,7 @@ module equalizer-If-454 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-455 where
+module fold-For-τ584 where
 
   -- ctx-584: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7374,7 +7374,7 @@ module fold-For-455 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-457 where
+module let-k-Assign-τ586 where
 
   -- ctx-586: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7386,7 +7386,7 @@ module let-k-Assign-457 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-458 where
+module let-k-Assign-τ588 where
 
   -- ctx-588: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7398,7 +7398,7 @@ module let-k-Assign-458 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-460 where
+module free_monoid-fold-JoinedStr-str-10 where
 
   -- str: 1 nodes, 1 forms
   -- [str]
@@ -7410,7 +7410,7 @@ module free_monoid-fold-JoinedStr-460 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-461 where
+module let-k-Assign-τ591 where
 
   -- ctx-591: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7422,7 +7422,7 @@ module let-k-Assign-461 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-469 where
+module equalizer-If-τ604 where
 
   -- ctx-604: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7434,7 +7434,7 @@ module equalizer-If-469 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-475 where
+module equalizer-If-τ611 where
 
   -- ctx-611: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7446,7 +7446,7 @@ module equalizer-If-475 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-476 where
+module fold-For-τ612 where
 
   -- ctx-612: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7458,7 +7458,7 @@ module fold-For-476 where
 -- ── fixpoint (While) ───────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fixpoint-While-477 where
+module fixpoint-While-τ613 where
 
   -- ctx-613: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7470,7 +7470,7 @@ module fixpoint-While-477 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-478 where
+module exponential-intro-FunctionDef-τ614 where
 
   -- ctx-614: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7482,7 +7482,7 @@ module exponential-intro-FunctionDef-478 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-479 where
+module product-Tuple-tuple-30 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -7494,7 +7494,7 @@ module product-Tuple-479 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-480 where
+module index-Index-τ616 where
 
   -- ctx-616: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7506,7 +7506,7 @@ module index-Index-480 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-481 where
+module subscript-Subscript-τ617 where
 
   -- ctx-617: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7518,7 +7518,7 @@ module subscript-Subscript-481 where
 -- ── arg (arg) ──────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module arg-482 where
+module arg-arg-τ618 where
 
   -- ctx-618: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7530,7 +7530,7 @@ module arg-482 where
 -- ── arguments (arguments) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module arguments-483 where
+module arguments-arguments-τ619 where
 
   -- ctx-619: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7542,7 +7542,7 @@ module arguments-483 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-485 where
+module let-k-Assign-τ621 where
 
   -- ctx-621: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7554,7 +7554,7 @@ module let-k-Assign-485 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-488 where
+module product-Tuple-tuple-31 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -7566,7 +7566,7 @@ module product-Tuple-488 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-489 where
+module index-Index-τ627 where
 
   -- ctx-627: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7578,7 +7578,7 @@ module index-Index-489 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-490 where
+module subscript-Subscript-τ628 where
 
   -- ctx-628: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7590,7 +7590,7 @@ module subscript-Subscript-490 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-491 where
+module annassign-AnnAssign-τ629 where
 
   -- ctx-629: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7602,7 +7602,7 @@ module annassign-AnnAssign-491 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-492 where
+module annassign-AnnAssign-τ633 where
 
   -- ctx-633: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7614,7 +7614,7 @@ module annassign-AnnAssign-492 where
 -- ── meet (BoolOp) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module meet-BoolOp-494 where
+module meet-BoolOp-τ635 where
 
   -- ctx-635: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7626,7 +7626,7 @@ module meet-BoolOp-494 where
 -- ── equalizer (Compare) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-Compare-495 where
+module equalizer-Compare-τ636 where
 
   -- ctx-636: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7638,7 +7638,7 @@ module equalizer-Compare-495 where
 -- ── lazy_fold (GeneratorExp) ───────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module lazy_fold-GeneratorExp-496 where
+module lazy_fold-GeneratorExp-τ637 where
 
   -- ctx-637: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7650,7 +7650,7 @@ module lazy_fold-GeneratorExp-496 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-497 where
+module apply-Call-τ638 where
 
   -- ctx-638: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7662,7 +7662,7 @@ module apply-Call-497 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-498 where
+module let-k-Assign-τ639 where
 
   -- ctx-639: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7674,7 +7674,7 @@ module let-k-Assign-498 where
 -- ── free_monoid.map (ListComp) ─────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-map-ListComp-499 where
+module free_monoid-map-ListComp-τ640 where
 
   -- ctx-640: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7686,7 +7686,7 @@ module free_monoid-map-ListComp-499 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-500 where
+module let-k-Assign-τ641 where
 
   -- ctx-641: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7698,7 +7698,7 @@ module let-k-Assign-500 where
 -- ── free_monoid.snoc@? (Call) ──────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-x3f-Call-501 where
+module free_monoid-snoc-at-x3f-Call-τ189 where
 
   -- ctx-189: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7710,7 +7710,7 @@ module free_monoid-snoc-at-x3f-Call-501 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-502 where
+module effect-seq-Expr-τ190-1 where
 
   -- ctx-190: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7722,7 +7722,7 @@ module effect-seq-Expr-502 where
 -- ── monoid.op (BinOp) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-op-BinOp-503 where
+module monoid-op-BinOp-τ642 where
 
   -- ctx-642: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7734,7 +7734,7 @@ module monoid-op-BinOp-503 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-504 where
+module let-k-Assign-τ643 where
 
   -- ctx-643: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7746,7 +7746,7 @@ module let-k-Assign-504 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-505 where
+module free_monoid-fold-JoinedStr-str-11 where
 
   -- str: 1 nodes, 1 forms
   -- [str]
@@ -7758,7 +7758,7 @@ module free_monoid-fold-JoinedStr-505 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-506 where
+module let-k-Assign-τ645 where
 
   -- ctx-645: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7770,7 +7770,7 @@ module let-k-Assign-506 where
 -- ── free_monoid.map (ListComp) ─────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-map-ListComp-507 where
+module free_monoid-map-ListComp-τ649 where
 
   -- ctx-649: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7782,7 +7782,7 @@ module free_monoid-map-ListComp-507 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-508 where
+module apply-Call-τ650 where
 
   -- ctx-650: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7794,7 +7794,7 @@ module apply-Call-508 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-509 where
+module effect-seq-Expr-τ651 where
 
   -- ctx-651: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7806,7 +7806,7 @@ module effect-seq-Expr-509 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-510 where
+module equalizer-If-τ655 where
 
   -- ctx-655: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7818,7 +7818,7 @@ module equalizer-If-510 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-512 where
+module let-k-Assign-τ521-1 where
 
   -- ctx-521: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7830,7 +7830,7 @@ module let-k-Assign-512 where
 -- ── monoid.op@? (Call) ─────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-op-at-x3f-Call-513 where
+module monoid-op-at-x3f-Call-τ656 where
 
   -- ctx-656: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7842,7 +7842,7 @@ module monoid-op-at-x3f-Call-513 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-514 where
+module effect-seq-Expr-τ657 where
 
   -- ctx-657: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7854,7 +7854,7 @@ module effect-seq-Expr-514 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-516 where
+module effect-seq-Expr-τ190-2 where
 
   -- ctx-190: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7866,7 +7866,7 @@ module effect-seq-Expr-516 where
 -- ── coproduct.elim (If) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module coproduct-elim-If-517 where
+module coproduct-elim-If-τ662 where
 
   -- ctx-662: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7878,7 +7878,7 @@ module coproduct-elim-If-517 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-518 where
+module equalizer-If-τ663 where
 
   -- ctx-663: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7890,7 +7890,7 @@ module equalizer-If-518 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-519 where
+module let-k-Assign-τ664 where
 
   -- ctx-664: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7902,7 +7902,7 @@ module let-k-Assign-519 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-520 where
+module equalizer-If-τ665 where
 
   -- ctx-665: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7914,7 +7914,7 @@ module equalizer-If-520 where
 -- ── coproduct.elim (If) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module coproduct-elim-If-521 where
+module coproduct-elim-If-τ666 where
 
   -- ctx-666: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7926,7 +7926,7 @@ module coproduct-elim-If-521 where
 -- ── exponential.literal (Dict) ─────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-literal-Dict-522 where
+module exponential-literal-Dict-dict-2 where
 
   -- dict: 1 nodes, 1 forms
   -- [dict]
@@ -7938,7 +7938,7 @@ module exponential-literal-Dict-522 where
 -- ── free_monoid.snoc@state (Call) ──────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-state-Call-523 where
+module free_monoid-snoc-at-state-Call-None-7 where
 
   -- None: 1 nodes, 1 forms
   -- [None]
@@ -7950,7 +7950,7 @@ module free_monoid-snoc-at-state-Call-523 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-524 where
+module effect-seq-Expr-τ670 where
 
   -- ctx-670: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7962,7 +7962,7 @@ module effect-seq-Expr-524 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-525 where
+module product-Tuple-tuple-32 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -7974,7 +7974,7 @@ module product-Tuple-525 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-526 where
+module index-Index-τ672 where
 
   -- ctx-672: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7986,7 +7986,7 @@ module index-Index-526 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-527 where
+module subscript-Subscript-τ673 where
 
   -- ctx-673: 1 nodes, 1 forms
   -- [(untyped)]
@@ -7998,7 +7998,7 @@ module subscript-Subscript-527 where
 -- ── monoid.op@? (Attribute) ────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-op-at-x3f-Attribute-528 where
+module monoid-op-at-x3f-Attribute-τ674 where
 
   -- ctx-674: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8010,7 +8010,7 @@ module monoid-op-at-x3f-Attribute-528 where
 -- ── monoid.op@? (Call) ─────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-op-at-x3f-Call-529 where
+module monoid-op-at-x3f-Call-τ675 where
 
   -- ctx-675: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8022,7 +8022,7 @@ module monoid-op-at-x3f-Call-529 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-530 where
+module effect-seq-Expr-τ676 where
 
   -- ctx-676: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8034,7 +8034,7 @@ module effect-seq-Expr-530 where
 -- ── terminal.map (Return) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-532 where
+module terminal-map-Return-τ678 where
 
   -- ctx-678: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8046,7 +8046,7 @@ module terminal-map-Return-532 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-533 where
+module index-Index-τ680 where
 
   -- ctx-680: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8058,7 +8058,7 @@ module index-Index-533 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-534 where
+module subscript-Subscript-τ681 where
 
   -- ctx-681: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8070,7 +8070,7 @@ module subscript-Subscript-534 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-535 where
+module exponential-intro-FunctionDef-τ682 where
 
   -- ctx-682: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8082,7 +8082,7 @@ module exponential-intro-FunctionDef-535 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-536 where
+module exponential-intro-FunctionDef-τ683 where
 
   -- ctx-683: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8094,7 +8094,7 @@ module exponential-intro-FunctionDef-536 where
 -- ── arg (arg) ──────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module arg-537 where
+module arg-arg-τ684 where
 
   -- ctx-684: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8106,7 +8106,7 @@ module arg-537 where
 -- ── arguments (arguments) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module arguments-538 where
+module arguments-arguments-τ685 where
 
   -- ctx-685: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8118,7 +8118,7 @@ module arguments-538 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-539 where
+module annassign-AnnAssign-τ687 where
 
   -- ctx-687: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8130,7 +8130,7 @@ module annassign-AnnAssign-539 where
 -- ── terminal.map (Return) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-542 where
+module terminal-map-Return-τ691 where
 
   -- ctx-691: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8142,7 +8142,7 @@ module terminal-map-Return-542 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-543 where
+module exponential-intro-FunctionDef-τ692 where
 
   -- ctx-692: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8154,7 +8154,7 @@ module exponential-intro-FunctionDef-543 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-549 where
+module annassign-AnnAssign-τ699 where
 
   -- ctx-699: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8166,7 +8166,7 @@ module annassign-AnnAssign-549 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-551 where
+module product-Tuple-tuple-33 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -8178,7 +8178,7 @@ module product-Tuple-551 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-552 where
+module index-Index-τ703 where
 
   -- ctx-703: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8190,7 +8190,7 @@ module index-Index-552 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-553 where
+module subscript-Subscript-τ704 where
 
   -- ctx-704: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8202,7 +8202,7 @@ module subscript-Subscript-553 where
 -- ── free_monoid.op@? (Attribute) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-op-at-x3f-Attribute-554 where
+module free_monoid-op-at-x3f-Attribute-τ705 where
 
   -- ctx-705: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8214,7 +8214,7 @@ module free_monoid-op-at-x3f-Attribute-554 where
 -- ── free_monoid.snoc@? (Call) ──────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-x3f-Call-555 where
+module free_monoid-snoc-at-x3f-Call-τ706 where
 
   -- ctx-706: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8226,7 +8226,7 @@ module free_monoid-snoc-at-x3f-Call-555 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-556 where
+module effect-seq-Expr-τ707 where
 
   -- ctx-707: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8238,7 +8238,7 @@ module effect-seq-Expr-556 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-557 where
+module fold-For-τ708 where
 
   -- ctx-708: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8250,7 +8250,7 @@ module fold-For-557 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-560 where
+module exponential-intro-FunctionDef-τ711 where
 
   -- ctx-711: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8262,7 +8262,7 @@ module exponential-intro-FunctionDef-560 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-561 where
+module annassign-AnnAssign-τ715 where
 
   -- ctx-715: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8274,7 +8274,7 @@ module annassign-AnnAssign-561 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-562 where
+module product-Tuple-tuple-34 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -8286,7 +8286,7 @@ module product-Tuple-562 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-563 where
+module index-Index-τ717 where
 
   -- ctx-717: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8298,7 +8298,7 @@ module index-Index-563 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-564 where
+module subscript-Subscript-τ718 where
 
   -- ctx-718: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8310,7 +8310,7 @@ module subscript-Subscript-564 where
 -- ── free_monoid.op@? (Attribute) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-op-at-x3f-Attribute-565 where
+module free_monoid-op-at-x3f-Attribute-τ719 where
 
   -- ctx-719: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8322,7 +8322,7 @@ module free_monoid-op-at-x3f-Attribute-565 where
 -- ── free_monoid.snoc@? (Call) ──────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-x3f-Call-566 where
+module free_monoid-snoc-at-x3f-Call-τ720 where
 
   -- ctx-720: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8334,7 +8334,7 @@ module free_monoid-snoc-at-x3f-Call-566 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-567 where
+module effect-seq-Expr-τ721 where
 
   -- ctx-721: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8346,7 +8346,7 @@ module effect-seq-Expr-567 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-568 where
+module fold-For-τ722 where
 
   -- ctx-722: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8358,7 +8358,7 @@ module fold-For-568 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-569 where
+module exponential-intro-FunctionDef-τ724 where
 
   -- ctx-724: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8370,7 +8370,7 @@ module exponential-intro-FunctionDef-569 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-572 where
+module subscript-Subscript-τ731 where
 
   -- ctx-731: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8382,7 +8382,7 @@ module subscript-Subscript-572 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-573 where
+module subscript-Subscript-τ732 where
 
   -- ctx-732: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8394,7 +8394,7 @@ module subscript-Subscript-573 where
 -- ── monoid.accum (AugAssign) ───────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-accum-AugAssign-574 where
+module monoid-accum-AugAssign-τ733 where
 
   -- ctx-733: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8406,7 +8406,7 @@ module monoid-accum-AugAssign-574 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-575 where
+module fold-For-τ734 where
 
   -- ctx-734: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8418,7 +8418,7 @@ module fold-For-575 where
 -- ── exponential.map (DictComp) ─────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-map-DictComp-577 where
+module exponential-map-DictComp-τ736 where
 
   -- ctx-736: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8430,7 +8430,7 @@ module exponential-map-DictComp-577 where
 -- ── terminal.map (Return) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-578 where
+module terminal-map-Return-τ737 where
 
   -- ctx-737: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8442,7 +8442,7 @@ module terminal-map-Return-578 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-579 where
+module exponential-intro-FunctionDef-τ741 where
 
   -- ctx-741: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8454,7 +8454,7 @@ module exponential-intro-FunctionDef-579 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-580 where
+module let-k-Assign-τ742 where
 
   -- ctx-742: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8466,7 +8466,7 @@ module let-k-Assign-580 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-581 where
+module subscript-Subscript-τ743 where
 
   -- ctx-743: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8478,7 +8478,7 @@ module subscript-Subscript-581 where
 -- ── morphism@? (Attribute) ─────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module morphism-at-x3f-Attribute-582 where
+module morphism-at-x3f-Attribute-τ744 where
 
   -- ctx-744: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8490,7 +8490,7 @@ module morphism-at-x3f-Attribute-582 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-583 where
+module apply-Call-τ745 where
 
   -- ctx-745: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8502,7 +8502,7 @@ module apply-Call-583 where
 -- ── monoid.op@? (Call) ─────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-op-at-x3f-Call-584 where
+module monoid-op-at-x3f-Call-τ746 where
 
   -- ctx-746: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8514,7 +8514,7 @@ module monoid-op-at-x3f-Call-584 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-585 where
+module effect-seq-Expr-τ747 where
 
   -- ctx-747: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8526,7 +8526,7 @@ module effect-seq-Expr-585 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-586 where
+module fold-For-τ748 where
 
   -- ctx-748: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8538,7 +8538,7 @@ module fold-For-586 where
 -- ── terminal.map (Return) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-587 where
+module terminal-map-Return-τ749 where
 
   -- ctx-749: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8550,7 +8550,7 @@ module terminal-map-Return-587 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-588 where
+module exponential-intro-FunctionDef-τ750 where
 
   -- ctx-750: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8562,7 +8562,7 @@ module exponential-intro-FunctionDef-588 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-590 where
+module index-Index-τ753 where
 
   -- ctx-753: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8574,7 +8574,7 @@ module index-Index-590 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-591 where
+module subscript-Subscript-τ754 where
 
   -- ctx-754: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8586,7 +8586,7 @@ module subscript-Subscript-591 where
 -- ── monoid.accum (AugAssign) ───────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-accum-AugAssign-592 where
+module monoid-accum-AugAssign-τ755 where
 
   -- ctx-755: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8598,7 +8598,7 @@ module monoid-accum-AugAssign-592 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-593 where
+module fold-For-τ756 where
 
   -- ctx-756: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8610,7 +8610,7 @@ module fold-For-593 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-594 where
+module exponential-intro-FunctionDef-τ757 where
 
   -- ctx-757: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8622,7 +8622,7 @@ module exponential-intro-FunctionDef-594 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-595 where
+module annassign-AnnAssign-τ760 where
 
   -- ctx-760: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8634,7 +8634,7 @@ module annassign-AnnAssign-595 where
 -- ── exponential.literal (Dict) ─────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-literal-Dict-598 where
+module exponential-literal-Dict-dict-3 where
 
   -- dict: 1 nodes, 1 forms
   -- [dict]
@@ -8646,7 +8646,7 @@ module exponential-literal-Dict-598 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-599 where
+module annassign-AnnAssign-τ766 where
 
   -- ctx-766: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8658,7 +8658,7 @@ module annassign-AnnAssign-599 where
 -- ── keyword (keyword) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module keyword-601 where
+module keyword-keyword-τ767 where
 
   -- ctx-767: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8670,7 +8670,7 @@ module keyword-601 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-602 where
+module apply-Call-τ768 where
 
   -- ctx-768: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8682,7 +8682,7 @@ module apply-Call-602 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-603 where
+module let-k-Assign-τ769 where
 
   -- ctx-769: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8694,7 +8694,7 @@ module let-k-Assign-603 where
 -- ── monoid.accum (AugAssign) ───────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-accum-AugAssign-604 where
+module monoid-accum-AugAssign-τ770 where
 
   -- ctx-770: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8706,7 +8706,7 @@ module monoid-accum-AugAssign-604 where
 -- ── exponential.literal (Dict) ─────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-literal-Dict-605 where
+module exponential-literal-Dict-dict-4 where
 
   -- dict: 1 nodes, 1 forms
   -- [dict]
@@ -8718,7 +8718,7 @@ module exponential-literal-Dict-605 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-606 where
+module let-k-Assign-τ772 where
 
   -- ctx-772: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8730,7 +8730,7 @@ module let-k-Assign-606 where
 -- ── monoid.op@? (Call) ─────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-op-at-x3f-Call-607 where
+module monoid-op-at-x3f-Call-τ774 where
 
   -- ctx-774: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8742,7 +8742,7 @@ module monoid-op-at-x3f-Call-607 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-608 where
+module effect-seq-Expr-τ775 where
 
   -- ctx-775: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8754,7 +8754,7 @@ module effect-seq-Expr-608 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-609 where
+module fold-For-τ776 where
 
   -- ctx-776: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8766,7 +8766,7 @@ module fold-For-609 where
 -- ── terminal.map (Return) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-610 where
+module terminal-map-Return-τ777 where
 
   -- ctx-777: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8778,7 +8778,7 @@ module terminal-map-Return-610 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-611 where
+module product-Tuple-tuple-35 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -8790,7 +8790,7 @@ module product-Tuple-611 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-612 where
+module index-Index-τ779 where
 
   -- ctx-779: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8802,7 +8802,7 @@ module index-Index-612 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-613 where
+module subscript-Subscript-τ780 where
 
   -- ctx-780: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8814,7 +8814,7 @@ module subscript-Subscript-613 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-614 where
+module exponential-intro-FunctionDef-τ781 where
 
   -- ctx-781: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8826,7 +8826,7 @@ module exponential-intro-FunctionDef-614 where
 -- ── comprehension (comprehension) ──────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module comprehension-616 where
+module comprehension-comprehension-τ783 where
 
   -- ctx-783: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8838,7 +8838,7 @@ module comprehension-616 where
 -- ── free_monoid.map (ListComp) ─────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-map-ListComp-617 where
+module free_monoid-map-ListComp-τ784 where
 
   -- ctx-784: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8850,7 +8850,7 @@ module free_monoid-map-ListComp-617 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-618 where
+module let-k-Assign-τ785 where
 
   -- ctx-785: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8862,7 +8862,7 @@ module let-k-Assign-618 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-621 where
+module annassign-AnnAssign-τ788 where
 
   -- ctx-788: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8874,7 +8874,7 @@ module annassign-AnnAssign-621 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-622 where
+module let-k-Assign-τ790 where
 
   -- ctx-790: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8886,7 +8886,7 @@ module let-k-Assign-622 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-623 where
+module equalizer-If-τ791 where
 
   -- ctx-791: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8898,7 +8898,7 @@ module equalizer-If-623 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-624 where
+module fold-For-τ792 where
 
   -- ctx-792: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8910,7 +8910,7 @@ module fold-For-624 where
 -- ── coproduct.elim (If) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module coproduct-elim-If-625 where
+module coproduct-elim-If-τ793 where
 
   -- ctx-793: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8922,7 +8922,7 @@ module coproduct-elim-If-625 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-626 where
+module fold-For-τ794 where
 
   -- ctx-794: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8934,7 +8934,7 @@ module fold-For-626 where
 -- ── projection@? (Attribute) ───────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module projection-at-x3f-Attribute-628 where
+module projection-at-x3f-Attribute-τ796 where
 
   -- ctx-796: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8946,7 +8946,7 @@ module projection-at-x3f-Attribute-628 where
 -- ── projection.compute@? (Call) ────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module projection-compute-at-x3f-Call-629 where
+module projection-compute-at-x3f-Call-τ797 where
 
   -- ctx-797: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8958,7 +8958,7 @@ module projection-compute-at-x3f-Call-629 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-630 where
+module apply-Call-τ798 where
 
   -- ctx-798: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8970,7 +8970,7 @@ module apply-Call-630 where
 -- ── endomorphism (UnaryOp) ─────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module endomorphism-UnaryOp-631 where
+module endomorphism-UnaryOp-τ799 where
 
   -- ctx-799: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8982,7 +8982,7 @@ module endomorphism-UnaryOp-631 where
 -- ── lambda (Lambda) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module lambda-Lambda-632 where
+module lambda-Lambda-τ800 where
 
   -- ctx-800: 1 nodes, 1 forms
   -- [(untyped)]
@@ -8994,7 +8994,7 @@ module lambda-Lambda-632 where
 -- ── keyword (keyword) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module keyword-633 where
+module keyword-keyword-τ801 where
 
   -- ctx-801: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9006,7 +9006,7 @@ module keyword-633 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-634 where
+module apply-Call-τ802 where
 
   -- ctx-802: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9018,7 +9018,7 @@ module apply-Call-634 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-635 where
+module effect-seq-Expr-τ803 where
 
   -- ctx-803: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9030,7 +9030,7 @@ module effect-seq-Expr-635 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-636 where
+module exponential-intro-FunctionDef-τ804 where
 
   -- ctx-804: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9042,7 +9042,7 @@ module exponential-intro-FunctionDef-636 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-637 where
+module let-k-Assign-τ809 where
 
   -- ctx-809: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9054,7 +9054,7 @@ module let-k-Assign-637 where
 -- ── free_monoid.op@? (Attribute) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-op-at-x3f-Attribute-638 where
+module free_monoid-op-at-x3f-Attribute-τ810 where
 
   -- ctx-810: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9066,7 +9066,7 @@ module free_monoid-op-at-x3f-Attribute-638 where
 -- ── free_monoid.snoc@? (Call) ──────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-x3f-Call-639 where
+module free_monoid-snoc-at-x3f-Call-τ811 where
 
   -- ctx-811: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9078,7 +9078,7 @@ module free_monoid-snoc-at-x3f-Call-639 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-640 where
+module effect-seq-Expr-τ812 where
 
   -- ctx-812: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9090,7 +9090,7 @@ module effect-seq-Expr-640 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-641 where
+module fold-For-τ813 where
 
   -- ctx-813: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9102,7 +9102,7 @@ module fold-For-641 where
 -- ── product (Tuple) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-642 where
+module product-Tuple-tuple-36 where
 
   -- tuple: 1 nodes, 1 forms
   -- [tuple]
@@ -9114,7 +9114,7 @@ module product-Tuple-642 where
 -- ── index (Index) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-643 where
+module index-Index-τ815 where
 
   -- ctx-815: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9126,7 +9126,7 @@ module index-Index-643 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-644 where
+module subscript-Subscript-τ816 where
 
   -- ctx-816: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9138,7 +9138,7 @@ module subscript-Subscript-644 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-645 where
+module exponential-intro-FunctionDef-τ817 where
 
   -- ctx-817: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9150,7 +9150,7 @@ module exponential-intro-FunctionDef-645 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-651 where
+module annassign-AnnAssign-τ823 where
 
   -- ctx-823: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9162,7 +9162,7 @@ module annassign-AnnAssign-651 where
 -- ── exponential.map (DictComp) ─────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-map-DictComp-652 where
+module exponential-map-DictComp-τ825 where
 
   -- ctx-825: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9174,7 +9174,7 @@ module exponential-map-DictComp-652 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-653 where
+module let-k-Assign-τ826 where
 
   -- ctx-826: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9186,7 +9186,7 @@ module let-k-Assign-653 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-656 where
+module equalizer-If-τ829 where
 
   -- ctx-829: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9198,7 +9198,7 @@ module equalizer-If-656 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-657 where
+module fold-For-τ830 where
 
   -- ctx-830: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9210,7 +9210,7 @@ module fold-For-657 where
 -- ── endomorphism (UnaryOp) ─────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module endomorphism-UnaryOp-658 where
+module endomorphism-UnaryOp-τ831 where
 
   -- ctx-831: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9222,7 +9222,7 @@ module endomorphism-UnaryOp-658 where
 -- ── lambda (Lambda) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module lambda-Lambda-659 where
+module lambda-Lambda-τ832 where
 
   -- ctx-832: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9234,7 +9234,7 @@ module lambda-Lambda-659 where
 -- ── keyword (keyword) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module keyword-660 where
+module keyword-keyword-τ833 where
 
   -- ctx-833: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9246,7 +9246,7 @@ module keyword-660 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-661 where
+module apply-Call-τ834 where
 
   -- ctx-834: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9258,7 +9258,7 @@ module apply-Call-661 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-662 where
+module effect-seq-Expr-τ835 where
 
   -- ctx-835: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9270,7 +9270,7 @@ module effect-seq-Expr-662 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-663 where
+module exponential-intro-FunctionDef-τ836 where
 
   -- ctx-836: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9282,7 +9282,7 @@ module exponential-intro-FunctionDef-663 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-665 where
+module free_monoid-fold-JoinedStr-str-12 where
 
   -- str: 1 nodes, 1 forms
   -- [str]
@@ -9294,7 +9294,7 @@ module free_monoid-fold-JoinedStr-665 where
 -- ── terminal.map (Return) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-666 where
+module terminal-map-Return-τ842 where
 
   -- ctx-842: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9306,7 +9306,7 @@ module terminal-map-Return-666 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-667 where
+module exponential-intro-FunctionDef-τ843 where
 
   -- ctx-843: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9318,7 +9318,7 @@ module exponential-intro-FunctionDef-667 where
 -- ── equalizer (Compare) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-Compare-668 where
+module equalizer-Compare-τ844 where
 
   -- ctx-844: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9330,7 +9330,7 @@ module equalizer-Compare-668 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-669 where
+module equalizer-If-τ845 where
 
   -- ctx-845: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9342,7 +9342,7 @@ module equalizer-If-669 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-670 where
+module let-k-Assign-τ847 where
 
   -- ctx-847: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9354,7 +9354,7 @@ module let-k-Assign-670 where
 -- ── coerce (FormattedValue) ────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module coerce-FormattedValue-685 where
+module coerce-FormattedValue-τ862 where
 
   -- ctx-862: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9366,7 +9366,7 @@ module coerce-FormattedValue-685 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-686 where
+module free_monoid-fold-JoinedStr-str-13 where
 
   -- str: 1 nodes, 1 forms
   -- [str]
@@ -9378,7 +9378,7 @@ module free_monoid-fold-JoinedStr-686 where
 -- ── free_monoid.literal (List) ─────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-literal-List-687 where
+module free_monoid-literal-List-list-3 where
 
   -- list: 1 nodes, 1 forms
   -- [list]
@@ -9390,7 +9390,7 @@ module free_monoid-literal-List-687 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-688 where
+module let-k-Assign-τ865 where
 
   -- ctx-865: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9402,7 +9402,7 @@ module let-k-Assign-688 where
 -- ── subobject (Attribute) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subobject-Attribute-689 where
+module subobject-Attribute-τ796 where
 
   -- ctx-796: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9414,7 +9414,7 @@ module subobject-Attribute-689 where
 -- ── subobject.test (Call) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subobject-test-Call-690 where
+module subobject-test-Call-τ866 where
 
   -- ctx-866: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9426,7 +9426,7 @@ module subobject-test-Call-690 where
 -- ── meet (BoolOp) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module meet-BoolOp-691 where
+module meet-BoolOp-τ867 where
 
   -- ctx-867: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9438,7 +9438,7 @@ module meet-BoolOp-691 where
 -- ── comprehension (comprehension) ──────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module comprehension-692 where
+module comprehension-comprehension-τ868 where
 
   -- ctx-868: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9450,7 +9450,7 @@ module comprehension-692 where
 -- ── lazy_fold (GeneratorExp) ───────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module lazy_fold-GeneratorExp-693 where
+module lazy_fold-GeneratorExp-τ869 where
 
   -- ctx-869: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9462,7 +9462,7 @@ module lazy_fold-GeneratorExp-693 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-694 where
+module apply-Call-τ870 where
 
   -- ctx-870: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9474,7 +9474,7 @@ module apply-Call-694 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-695 where
+module let-k-Assign-τ871 where
 
   -- ctx-871: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9486,7 +9486,7 @@ module let-k-Assign-695 where
 -- ── powerset (Call) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module powerset-Call-696 where
+module powerset-Call-τ872 where
 
   -- ctx-872: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9498,7 +9498,7 @@ module powerset-Call-696 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-697 where
+module annassign-AnnAssign-τ873 where
 
   -- ctx-873: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9510,7 +9510,7 @@ module annassign-AnnAssign-697 where
 -- ── ifexp (IfExp) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module ifexp-IfExp-698 where
+module ifexp-IfExp-τ874 where
 
   -- ctx-874: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9522,7 +9522,7 @@ module ifexp-IfExp-698 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-699 where
+module let-k-Assign-τ875 where
 
   -- ctx-875: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9534,7 +9534,7 @@ module let-k-Assign-699 where
 -- ── bimap (BinOp) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module bimap-BinOp-700 where
+module bimap-BinOp-τ876 where
 
   -- ctx-876: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9546,7 +9546,7 @@ module bimap-BinOp-700 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-701 where
+module let-k-Assign-τ877 where
 
   -- ctx-877: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9558,7 +9558,7 @@ module let-k-Assign-701 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-702 where
+module annassign-AnnAssign-τ879 where
 
   -- ctx-879: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9570,7 +9570,7 @@ module annassign-AnnAssign-702 where
 -- ── annassign (AnnAssign) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-703 where
+module annassign-AnnAssign-τ880 where
 
   -- ctx-880: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9582,7 +9582,7 @@ module annassign-AnnAssign-703 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-704 where
+module let-k-Assign-τ881 where
 
   -- ctx-881: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9594,7 +9594,7 @@ module let-k-Assign-704 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-705 where
+module equalizer-If-τ882 where
 
   -- ctx-882: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9606,7 +9606,7 @@ module equalizer-If-705 where
 -- ── monoid.op@? (Attribute) ────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-op-at-x3f-Attribute-706 where
+module monoid-op-at-x3f-Attribute-τ810 where
 
   -- ctx-810: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9618,7 +9618,7 @@ module monoid-op-at-x3f-Attribute-706 where
 -- ── partial.apply@? (Call) ─────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module partial-apply-at-x3f-Call-707 where
+module partial-apply-at-x3f-Call-τ883 where
 
   -- ctx-883: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9630,7 +9630,7 @@ module partial-apply-at-x3f-Call-707 where
 -- ── monoid.op@? (Call) ─────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-op-at-x3f-Call-708 where
+module monoid-op-at-x3f-Call-τ884 where
 
   -- ctx-884: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9642,7 +9642,7 @@ module monoid-op-at-x3f-Call-708 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-709 where
+module effect-seq-Expr-τ885 where
 
   -- ctx-885: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9654,7 +9654,7 @@ module effect-seq-Expr-709 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-710 where
+module fold-For-τ886 where
 
   -- ctx-886: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9666,7 +9666,7 @@ module fold-For-710 where
 -- ── comprehension (comprehension) ──────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module comprehension-711 where
+module comprehension-comprehension-τ887 where
 
   -- ctx-887: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9678,7 +9678,7 @@ module comprehension-711 where
 -- ── lazy_fold (GeneratorExp) ───────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module lazy_fold-GeneratorExp-712 where
+module lazy_fold-GeneratorExp-τ888 where
 
   -- ctx-888: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9690,7 +9690,7 @@ module lazy_fold-GeneratorExp-712 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-713 where
+module apply-Call-τ889 where
 
   -- ctx-889: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9702,7 +9702,7 @@ module apply-Call-713 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-714 where
+module let-k-Assign-τ890 where
 
   -- ctx-890: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9714,7 +9714,7 @@ module let-k-Assign-714 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-716 where
+module free_monoid-fold-JoinedStr-str-14 where
 
   -- str: 1 nodes, 1 forms
   -- [str]
@@ -9726,7 +9726,7 @@ module free_monoid-fold-JoinedStr-716 where
 -- ── free_monoid.snoc@sequence (Call) ───────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-sequence-Call-717 where
+module free_monoid-snoc-at-sequence-Call-None-0 where
 
   -- None: 1 nodes, 1 forms
   -- [None]
@@ -9738,7 +9738,7 @@ module free_monoid-snoc-at-sequence-Call-717 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-718 where
+module effect-seq-Expr-τ894 where
 
   -- ctx-894: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9750,7 +9750,7 @@ module effect-seq-Expr-718 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-719 where
+module free_monoid-fold-JoinedStr-str-15 where
 
   -- str: 1 nodes, 1 forms
   -- [str]
@@ -9762,7 +9762,7 @@ module free_monoid-fold-JoinedStr-719 where
 -- ── free_monoid.snoc@sequence (Call) ───────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-sequence-Call-720 where
+module free_monoid-snoc-at-sequence-Call-None-1 where
 
   -- None: 1 nodes, 1 forms
   -- [None]
@@ -9774,7 +9774,7 @@ module free_monoid-snoc-at-sequence-Call-720 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-721 where
+module effect-seq-Expr-τ897 where
 
   -- ctx-897: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9786,7 +9786,7 @@ module effect-seq-Expr-721 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-722 where
+module free_monoid-fold-JoinedStr-str-16 where
 
   -- str: 1 nodes, 1 forms
   -- [str]
@@ -9798,7 +9798,7 @@ module free_monoid-fold-JoinedStr-722 where
 -- ── free_monoid.snoc@sequence (Call) ───────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-sequence-Call-723 where
+module free_monoid-snoc-at-sequence-Call-None-2 where
 
   -- None: 1 nodes, 1 forms
   -- [None]
@@ -9810,7 +9810,7 @@ module free_monoid-snoc-at-sequence-Call-723 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-724 where
+module effect-seq-Expr-τ900 where
 
   -- ctx-900: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9822,7 +9822,7 @@ module effect-seq-Expr-724 where
 -- ── mult (Mult) ────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module mult-Mult-725 where
+module mult-Mult-τ901 where
 
   -- ctx-901: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9834,7 +9834,7 @@ module mult-Mult-725 where
 -- ── bimap (BinOp) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module bimap-BinOp-726 where
+module bimap-BinOp-τ903 where
 
   -- ctx-903: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9846,7 +9846,7 @@ module bimap-BinOp-726 where
 -- ── equalizer (Compare) ────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-Compare-727 where
+module equalizer-Compare-τ904 where
 
   -- ctx-904: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9858,7 +9858,7 @@ module equalizer-Compare-727 where
 -- ── ifexp (IfExp) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module ifexp-IfExp-728 where
+module ifexp-IfExp-τ905 where
 
   -- ctx-905: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9870,7 +9870,7 @@ module ifexp-IfExp-728 where
 -- ── coerce (FormattedValue) ────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module coerce-FormattedValue-729 where
+module coerce-FormattedValue-τ906 where
 
   -- ctx-906: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9882,7 +9882,7 @@ module coerce-FormattedValue-729 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-730 where
+module free_monoid-fold-JoinedStr-str-17 where
 
   -- str: 1 nodes, 1 forms
   -- [str]
@@ -9894,7 +9894,7 @@ module free_monoid-fold-JoinedStr-730 where
 -- ── free_monoid.snoc@sequence (Call) ───────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-sequence-Call-731 where
+module free_monoid-snoc-at-sequence-Call-None-3 where
 
   -- None: 1 nodes, 1 forms
   -- [None]
@@ -9906,7 +9906,7 @@ module free_monoid-snoc-at-sequence-Call-731 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-732 where
+module effect-seq-Expr-τ909 where
 
   -- ctx-909: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9918,7 +9918,7 @@ module effect-seq-Expr-732 where
 -- ── exponential.literal (Dict) ─────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-literal-Dict-733 where
+module exponential-literal-Dict-dict-5 where
 
   -- dict: 1 nodes, 1 forms
   -- [dict]
@@ -9930,7 +9930,7 @@ module exponential-literal-Dict-733 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-734 where
+module let-k-Assign-τ911 where
 
   -- ctx-911: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9942,7 +9942,7 @@ module let-k-Assign-734 where
 -- ── partial.apply@state (Call) ─────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module partial-apply-at-state-Call-735 where
+module partial-apply-at-state-Call-T-5 where
 
   -- T: 1 nodes, 1 forms
   -- [T]
@@ -9954,7 +9954,7 @@ module partial-apply-at-state-Call-735 where
 -- ── cardinality (Call) ─────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module cardinality-Call-736 where
+module cardinality-Call-int-3 where
 
   -- int: 1 nodes, 1 forms
   -- [int]
@@ -9966,7 +9966,7 @@ module cardinality-Call-736 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-737 where
+module let-k-Assign-τ915 where
 
   -- ctx-915: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9978,7 +9978,7 @@ module let-k-Assign-737 where
 -- ── bimap (BinOp) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module bimap-BinOp-738 where
+module bimap-BinOp-τ916 where
 
   -- ctx-916: 1 nodes, 1 forms
   -- [(untyped)]
@@ -9990,7 +9990,7 @@ module bimap-BinOp-738 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-739 where
+module let-k-Assign-τ917 where
 
   -- ctx-917: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10002,7 +10002,7 @@ module let-k-Assign-739 where
 -- ── free_monoid.snoc@sequence (Call) ───────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-sequence-Call-740 where
+module free_monoid-snoc-at-sequence-Call-None-4 where
 
   -- None: 1 nodes, 1 forms
   -- [None]
@@ -10014,7 +10014,7 @@ module free_monoid-snoc-at-sequence-Call-740 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-741 where
+module effect-seq-Expr-τ919 where
 
   -- ctx-919: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10026,7 +10026,7 @@ module effect-seq-Expr-741 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-743 where
+module free_monoid-fold-JoinedStr-str-18 where
 
   -- str: 1 nodes, 1 forms
   -- [str]
@@ -10038,7 +10038,7 @@ module free_monoid-fold-JoinedStr-743 where
 -- ── free_monoid.snoc@sequence (Call) ───────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-sequence-Call-744 where
+module free_monoid-snoc-at-sequence-Call-None-5 where
 
   -- None: 1 nodes, 1 forms
   -- [None]
@@ -10050,7 +10050,7 @@ module free_monoid-snoc-at-sequence-Call-744 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-745 where
+module effect-seq-Expr-τ925 where
 
   -- ctx-925: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10062,7 +10062,7 @@ module effect-seq-Expr-745 where
 -- ── projection@state (Attribute) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module projection-at-state-Attribute-746 where
+module projection-at-state-Attribute-Self-_cell_obs-keys where
 
   -- Self-_cell_obs-keys: 1 nodes, 1 forms
   -- [Self._cell_contents.get, Self._cell_obs.get, Self._cell_obs.keys, Self._cleavage_fibers.append, Self._cleavage_levels.append]
@@ -10074,7 +10074,7 @@ module projection-at-state-Attribute-746 where
 -- ── projection.compute@state (Call) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module projection-compute-at-state-Call-747 where
+module projection-compute-at-state-Call-Iter where
 
   -- Iter: 1 nodes, 1 forms
   -- [Iter]
@@ -10086,7 +10086,7 @@ module projection-compute-at-state-Call-747 where
 -- ── total_order (Call) ─────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module total_order-Call-748 where
+module total_order-Call-list-2 where
 
   -- list: 1 nodes, 1 forms
   -- [list]
@@ -10098,7 +10098,7 @@ module total_order-Call-748 where
 -- ── complement (If) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module complement-If-749 where
+module complement-If-τ929 where
 
   -- ctx-929: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10110,7 +10110,7 @@ module complement-If-749 where
 -- ── partial@mapping (Attribute) ────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module partial-at-mapping-Attribute-750 where
+module partial-at-mapping-Attribute-dict-get where
 
   -- dict-get: 1 nodes, 1 forms
   -- [Self._cascade_abstraction_merge, Self._cascade_eta, Self._cell_contents, Self._cell_obs, Self._cleavage_fibers]
@@ -10122,7 +10122,7 @@ module partial-at-mapping-Attribute-750 where
 -- ── partial.apply@mapping (Call) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module partial-apply-at-mapping-Call-751 where
+module partial-apply-at-mapping-Call-T where
 
   -- T: 1 nodes, 1 forms
   -- [T]
@@ -10134,7 +10134,7 @@ module partial-apply-at-mapping-Call-751 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-752 where
+module let-k-Assign-τ933 where
 
   -- ctx-933: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10146,7 +10146,7 @@ module let-k-Assign-752 where
 -- ── lambda (Lambda) ────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module lambda-Lambda-753 where
+module lambda-Lambda-τ934 where
 
   -- ctx-934: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10158,7 +10158,7 @@ module lambda-Lambda-753 where
 -- ── keyword (keyword) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module keyword-754 where
+module keyword-keyword-τ935 where
 
   -- ctx-935: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10170,7 +10170,7 @@ module keyword-754 where
 -- ── apply (Call) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-755 where
+module apply-Call-τ936 where
 
   -- ctx-936: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10182,7 +10182,7 @@ module apply-Call-755 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-756 where
+module let-k-Assign-τ937 where
 
   -- ctx-937: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10194,7 +10194,7 @@ module let-k-Assign-756 where
 -- ── coerce (Call) ──────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module coerce-Call-757 where
+module coerce-Call-τ404 where
 
   -- ctx-404: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10206,7 +10206,7 @@ module coerce-Call-757 where
 -- ── subscript (Subscript) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-758 where
+module subscript-Subscript-τ938 where
 
   -- ctx-938: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10218,7 +10218,7 @@ module subscript-Subscript-758 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-759 where
+module let-k-Assign-τ939 where
 
   -- ctx-939: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10230,7 +10230,7 @@ module let-k-Assign-759 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-760 where
+module free_monoid-fold-JoinedStr-str-19 where
 
   -- str: 1 nodes, 1 forms
   -- [str]
@@ -10242,7 +10242,7 @@ module free_monoid-fold-JoinedStr-760 where
 -- ── free_monoid.snoc@sequence (Call) ───────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-sequence-Call-761 where
+module free_monoid-snoc-at-sequence-Call-None-6 where
 
   -- None: 1 nodes, 1 forms
   -- [None]
@@ -10254,7 +10254,7 @@ module free_monoid-snoc-at-sequence-Call-761 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-762 where
+module effect-seq-Expr-τ942 where
 
   -- ctx-942: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10266,7 +10266,7 @@ module effect-seq-Expr-762 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-763 where
+module fold-For-τ943 where
 
   -- ctx-943: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10278,7 +10278,7 @@ module fold-For-763 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-764 where
+module equalizer-If-τ944 where
 
   -- ctx-944: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10290,7 +10290,7 @@ module equalizer-If-764 where
 -- ── partial.apply@? (Call) ─────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module partial-apply-at-x3f-Call-765 where
+module partial-apply-at-x3f-Call-τ946 where
 
   -- ctx-946: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10302,7 +10302,7 @@ module partial-apply-at-x3f-Call-765 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-766 where
+module let-k-Assign-τ947 where
 
   -- ctx-947: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10314,7 +10314,7 @@ module let-k-Assign-766 where
 -- ── let (Assign) ───────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-767 where
+module let-k-Assign-τ948 where
 
   -- ctx-948: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10326,7 +10326,7 @@ module let-k-Assign-767 where
 -- ── free_monoid.fold (JoinedStr) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-768 where
+module free_monoid-fold-JoinedStr-str-20 where
 
   -- str: 1 nodes, 1 forms
   -- [str]
@@ -10338,7 +10338,7 @@ module free_monoid-fold-JoinedStr-768 where
 -- ── free_monoid.snoc@sequence (Call) ───────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-sequence-Call-769 where
+module free_monoid-snoc-at-sequence-Call-None-7 where
 
   -- None: 1 nodes, 1 forms
   -- [None]
@@ -10350,7 +10350,7 @@ module free_monoid-snoc-at-sequence-Call-769 where
 -- ── effect.seq (Expr) ──────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-770 where
+module effect-seq-Expr-τ953 where
 
   -- ctx-953: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10362,7 +10362,7 @@ module effect-seq-Expr-770 where
 -- ── equalizer (If) ─────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-771 where
+module equalizer-If-τ954 where
 
   -- ctx-954: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10374,7 +10374,7 @@ module equalizer-If-771 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-772 where
+module fold-For-τ955 where
 
   -- ctx-955: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10386,7 +10386,7 @@ module fold-For-772 where
 -- ── fold (For) ─────────────────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-773 where
+module fold-For-τ956 where
 
   -- ctx-956: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10398,7 +10398,7 @@ module fold-For-773 where
 -- ── free_monoid.fold (Attribute) ───────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-Attribute-774 where
+module free_monoid-fold-Attribute-str-join where
 
   -- str-join: 1 nodes, 1 forms
   -- [str.join]
@@ -10410,7 +10410,7 @@ module free_monoid-fold-Attribute-774 where
 -- ── free_monoid.fold (Call) ────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-Call-775 where
+module free_monoid-fold-Call-str where
 
   -- str: 1 nodes, 1 forms
   -- [str]
@@ -10422,7 +10422,7 @@ module free_monoid-fold-Call-775 where
 -- ── terminal.map (Return) ──────────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-776 where
+module terminal-map-Return-τ959 where
 
   -- ctx-959: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10434,7 +10434,7 @@ module terminal-map-Return-776 where
 -- ── exponential.intro (FunctionDef) ────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-777 where
+module exponential-intro-FunctionDef-τ960 where
 
   -- ctx-960: 1 nodes, 1 forms
   -- [(untyped)]
@@ -10446,7 +10446,7 @@ module exponential-intro-FunctionDef-777 where
 -- ── classifier.intro (ClassDef) ────────────────
 -- 1 nodes, 1 type contexts, 1 forms
 
-module classifier-intro-ClassDef-778 where
+module classifier-intro-ClassDef-τ961 where
 
   -- ctx-961: 1 nodes, 1 forms
   -- [(untyped)]

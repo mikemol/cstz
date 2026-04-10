@@ -89,6 +89,11 @@ def synthesize(sppf: SPPF, module_name: str = "SPPFProof") -> str:
     kappa_order = sorted(hierarchy.keys(),
                          key=lambda k: -kappa_node_counts[k])
 
+    # Pre-compute module names per κ-class, handling collisions
+    # by appending a per-collision-group counter (only when needed).
+    kappa_module_name: dict[int, str] = {}
+    name_collisions: dict[str, list[int]] = defaultdict(list)
+
     # Collect τ → dep_type info for readable names
     tau_deps: dict[int, set[str]] = defaultdict(set)
     for node in sppf.nodes:
@@ -182,27 +187,54 @@ def synthesize(sppf: SPPF, module_name: str = "SPPFProof") -> str:
             if key not in cell_dep:
                 cell_dep[key] = str(dep)
 
+    # First pass: compute module names + detect collisions
+    raw_name: dict[int, str] = {}
+    for k in kappa_order:
+        tau_groups = hierarchy[k]
+        tags = sorted(kappa_tags[k])
+        tag = tags[0]
+        ast_types = sorted(kappa_ast.get(k, set()))
+        safe_tag = _sanitize(tag)
+
+        dominant_tau = max(tau_groups.keys(),
+                           key=lambda t: len(tau_groups[t]))
+        dom_dep = cell_dep.get((k, dominant_tau))
+        if dom_dep:
+            disambig = _sanitize(dom_dep)
+        else:
+            disambig = f"τ{dominant_tau}"
+
+        ast_label = _sanitize(ast_types[0]) if ast_types else "node"
+        base = f"{safe_tag}-{ast_label}-{disambig}"
+        raw_name[k] = base
+        name_collisions[base].append(k)
+
+    # Second pass: assign final names, appending a numeric suffix
+    # only for the κ-classes whose base name collides.
+    for base, kids in name_collisions.items():
+        if len(kids) == 1:
+            kappa_module_name[kids[0]] = base
+        else:
+            for i, k in enumerate(kids):
+                kappa_module_name[k] = f"{base}-{i}"
+
     for k in kappa_order:
         tau_groups = hierarchy[k]
         tags = sorted(kappa_tags[k])
         tag = tags[0]
         ast_types = sorted(kappa_ast.get(k, set()))
         ast_str = "/".join(ast_types)
-        safe_tag = _sanitize(tag)
         total = kappa_node_counts[k]
         n_taus = len(tau_groups)
         n_sigmas = len(set(s for ss in tau_groups.values() for s in ss))
 
-        # Build a descriptive module name from construction + AST type
-        mod_name = f"{safe_tag}"
-        if ast_types and ast_types[0] != tag:
-            mod_name = f"{safe_tag}-{_sanitize(ast_types[0])}"
+        mod_name = kappa_module_name[k]
 
         w(f"-- ── {tag} ({ast_str}) {'─' * max(1, 40 - len(tag) - len(ast_str))}")
         w(f"-- {total} nodes, {n_taus} type contexts, {n_sigmas} forms")
         w("")
 
-        w(f"module {mod_name}-{k} where")
+        w(f"module {mod_name} where")
         w("")
 
         # Each τ-context as a named sub-section
