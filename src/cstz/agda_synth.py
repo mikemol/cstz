@@ -1,13 +1,6 @@
 """Synthesize a self-contained, human-readable .agda file from an SPPF.
 
 The generated file type-checks without any stdlib dependency.
-It encodes the SPPF's proof structure as a hierarchy of parameterized
-modules, where:
-  - Each κ-class (categorical construction) becomes a module
-  - Each τ-class within a κ-class becomes a type parameter
-  - Each σ-class within a (κ,τ) pair becomes a concrete proof term
-  - Cleavage planes become module boundaries
-  - η-merges become inter-module equivalences
 
 Usage::
 
@@ -15,7 +8,21 @@ Usage::
     from cstz.agda_synth import synthesize
 
     sppf = factorize("src/cstz/core.py")
+
+    # Default rotation: κ → τ → σ at depth 2 (κ outermost, τ submodules)
     agda_source = synthesize(sppf, module_name="CoreProof")
+
+    # Custom: rotate so τ leads, depth 1 (only τ-grouped, no nesting)
+    agda_source = synthesize(
+        sppf,
+        rotation=("tau", "kappa", "sigma"),
+        depth=1,
+    )
+
+The rotation tuple selects which fiber is the primary grouping axis,
+secondary, and tertiary.  The depth controls how many axes become
+nested module boundaries (depth=1: only primary; depth=2: primary +
+secondary; depth=3: full nesting through all three).
 """
 
 from __future__ import annotations
@@ -65,49 +72,132 @@ def _sanitize(name: str) -> str:
     return s
 
 
-def synthesize(sppf: SPPF, module_name: str = "SPPFProof") -> str:
-    """Synthesize a hierarchical Agda module from an SPPF."""
+# Fiber axis metadata: name → (Greek symbol, Python attr on SPPF, label)
+_AXIS_INFO = {
+    'kappa': ('κ', 'kappa', 'kappa'),
+    'tau':   ('τ', 'tau',   'tau'),
+    'sigma': ('σ', 'sigma', 'sigma'),
+}
+
+_VALID_AXES = set(_AXIS_INFO.keys())
+
+
+def _axis_id(sppf: SPPF, node: dict, axis: str) -> int:
+    """Get the canonical class id of `node` along the given axis."""
+    fiber = getattr(sppf, _AXIS_INFO[axis][1])
+    return fiber.canonical(node[axis])
+
+
+def _axis_name_for_class(sppf: SPPF, axis: str, class_id: int) -> str:
+    """Build a readable label for a (axis, class_id) pair.
+
+    For κ: use the kappa_tag of any node in the class plus its AST type.
+    For τ: use the dominant dep_type_raw.
+    For σ: use the ast_type plus params.
+    """
+    nodes = []
+    fiber = getattr(sppf, _AXIS_INFO[axis][1])
+    for node in sppf.nodes:
+        if fiber.canonical(node[axis]) == class_id:
+            nodes.append(node)
+            if len(nodes) >= 30:
+                break
+
+    if axis == 'kappa':
+        tags = sorted({n['kappa_tag'] for n in nodes})
+        asts = sorted({n['ast_type'] for n in nodes})
+        return f"{_sanitize(tags[0])}-{_sanitize(asts[0])}"
+    elif axis == 'tau':
+        deps = [str(n.get('dep_type_raw'))
+                for n in nodes if n.get('dep_type_raw') is not None]
+        if deps:
+            # dominant dep
+            from collections import Counter
+            dom = Counter(deps).most_common(1)[0][0]
+            return _sanitize(dom)
+        return f"τ{class_id}"
+    elif axis == 'sigma':
+        asts = sorted({n['ast_type'] for n in nodes})
+        return f"{_sanitize(asts[0])}-σ{class_id}"
+    return f"{axis}-{class_id}"
+
+
+def synthesize(sppf: SPPF,
+               module_name: str = "SPPFProof",
+               rotation: tuple[str, ...] = ("kappa", "tau", "sigma"),
+               depth: int = 2) -> str:
+    """Synthesize a hierarchical Agda module from an SPPF.
+
+    Parameters
+    ----------
+    sppf : SPPF
+        The factorized SPPF to convert.
+    module_name : str
+        Top-level Agda module name (must match the output filename).
+    rotation : tuple[str, ...]
+        Order of fiber axes from primary (outermost) to tertiary (innermost).
+        Each element is one of "kappa", "tau", "sigma".  The default
+        ("kappa", "tau", "sigma") makes construction modules outermost,
+        with type contexts as nested submodules.
+    depth : int
+        How many axes become nested module boundaries.  1 = only primary;
+        2 = primary modules with secondary submodules; 3 = full nesting.
+        Cells beyond `depth` are emitted as definitions inside the
+        innermost module.
+
+    Returns
+    -------
+    str : the Agda source.
+    """
+    if depth < 1 or depth > 3:
+        raise ValueError(f"depth must be 1, 2, or 3 (got {depth})")
+    if len(rotation) < 3:
+        raise ValueError(f"rotation must have 3 axes (got {rotation})")
+    for axis in rotation:
+        if axis not in _VALID_AXES:
+            raise ValueError(f"unknown axis {axis!r}; expected one of {_VALID_AXES}")
+    if len(set(rotation)) != 3:
+        raise ValueError(f"rotation axes must be distinct (got {rotation})")
+
+    primary, secondary, tertiary = rotation
+    primary_sym = _AXIS_INFO[primary][0]
+    secondary_sym = _AXIS_INFO[secondary][0]
+    tertiary_sym = _AXIS_INFO[tertiary][0]
+
     lines: list[str] = []
     w = lines.append
 
-    # ── Collect structural data ──────────────────────────────────
+    # ── Build n-axis hierarchy ────────────────────────────────────
+    #
+    # Group all nodes by (primary_id, secondary_id, tertiary_id).
+    # The dict structure mirrors the rotation order.
 
-    # Build κ → τ → [σ] hierarchy
-    hierarchy: dict[int, dict[int, list[int]]] = defaultdict(lambda: defaultdict(list))
-    kappa_tags: dict[int, set[str]] = defaultdict(set)
-    kappa_node_counts: dict[int, int] = defaultdict(int)
+    # nested[primary][secondary][tertiary] → list of node indices
+    nested: dict[int, dict[int, dict[int, list[int]]]] = (
+        defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+    )
+    for i, node in enumerate(sppf.nodes):
+        p = _axis_id(sppf, node, primary)
+        s = _axis_id(sppf, node, secondary)
+        t = _axis_id(sppf, node, tertiary)
+        nested[p][s][t].append(i)
 
-    for node in sppf.nodes:
-        s = sppf.sigma.canonical(node['sigma'])
-        t = sppf.tau.canonical(node['tau'])
-        k = sppf.kappa.canonical(node['kappa'])
-        hierarchy[k][t].append(s)
-        kappa_tags[k].add(node['kappa_tag'])
-        kappa_node_counts[k] += 1
+    # Sort each level by size (largest first)
+    primary_order = sorted(
+        nested.keys(),
+        key=lambda p: -sum(
+            len(t_dict)
+            for s_dict in [nested[p]]
+            for t_dict in s_dict.values()
+        )
+    )
 
-    # Sort κ-classes by size (largest first)
-    kappa_order = sorted(hierarchy.keys(),
-                         key=lambda k: -kappa_node_counts[k])
-
-    # Pre-compute module names per κ-class, handling collisions
-    # by appending a per-collision-group counter (only when needed).
-    kappa_module_name: dict[int, str] = {}
-    name_collisions: dict[str, list[int]] = defaultdict(list)
-
-    # Collect τ → dep_type info for readable names
-    tau_deps: dict[int, set[str]] = defaultdict(set)
-    for node in sppf.nodes:
-        tid = sppf.tau.canonical(node['tau'])
-        dep = node.get('dep_type_raw')
-        if dep is not None:
-            tau_deps[tid].add(str(dep)[:40])
-
-    # ── Emit module ──────────────────────────────────────────────
+    # ── Header ───────────────────────────────────────────────────
 
     w(f"module {module_name} where")
     w("")
     w("-- ══════════════════════════════════════════════════════════")
-    w(f"-- SPPF proof of src/cstz/core.py")
+    w(f"-- SPPF proof, rotation = ({primary_sym} → {secondary_sym} → {tertiary_sym}), depth = {depth}")
     w(f"-- {sppf.node_count} AST nodes → {len(sppf.wedge())} proof cells")
     w(f"-- σ={len(sppf.sigma)} τ={len(sppf.tau)} κ={len(sppf.kappa)}")
     w(f"-- {sppf._eta_count} η-merges, {len(sppf.cleavage())} case splits")
@@ -135,14 +225,16 @@ def synthesize(sppf: SPPF, module_name: str = "SPPFProof") -> str:
     w("")
 
     # ── Canonical maps ───────────────────────────────────────────
+    # Always emit all three so equality proofs can reference them.
 
-    for fiber_name, fn_name in [("sigma", "σ"), ("tau", "τ"), ("kappa", "κ")]:
-        _emit_canonical_map(w, sppf, fiber_name, fn_name)
+    for axis_name in ('sigma', 'tau', 'kappa'):
+        sym = _AXIS_INFO[axis_name][0]
+        _emit_canonical_map(w, sppf, axis_name, sym)
 
     # ── η-equivalences ───────────────────────────────────────────
 
     w("-- ── η-equivalences ────────────────────────────────────────")
-    w(f"-- {sppf._eta_count} type-erasure steps; each is refl after reduction.")
+    w(f"-- {sppf._eta_count} type-erasure steps")
     w("")
 
     eta_count = 0
@@ -163,111 +255,75 @@ def synthesize(sppf: SPPF, module_name: str = "SPPFProof") -> str:
             w("")
             eta_count += 1
 
-    # ── Construction modules ─────────────────────────────────────
+    # ── Construction modules (rotation-driven) ───────────────────
 
     w("-- ══════════════════════════════════════════════════════════")
-    w("-- Construction modules (one per κ-class)")
+    w(f"-- Hierarchy: {primary_sym} → {secondary_sym} → {tertiary_sym} (depth={depth})")
     w("-- ══════════════════════════════════════════════════════════")
     w("")
 
-    # Collect AST types per κ-class for naming
-    kappa_ast: dict[int, set[str]] = defaultdict(set)
-    for node in sppf.nodes:
-        kid = sppf.kappa.canonical(node['kappa'])
-        kappa_ast[kid].add(node['ast_type'])
+    # Pre-compute names with collision-aware disambiguation
+    primary_names = _build_axis_names(sppf, primary, primary_order)
 
-    # Collect per-(κ,τ) the dominant dep-type for naming
-    cell_dep: dict[tuple[int, int], str] = {}
-    for node in sppf.nodes:
-        k = sppf.kappa.canonical(node['kappa'])
-        t = sppf.tau.canonical(node['tau'])
-        dep = node.get('dep_type_raw')
-        if dep is not None:
-            key = (k, t)
-            if key not in cell_dep:
-                cell_dep[key] = str(dep)
+    for p in primary_order:
+        sec_dict = nested[p]
+        sec_order = sorted(sec_dict.keys(),
+                           key=lambda s: -sum(len(v) for v in sec_dict[s].values()))
 
-    # First pass: compute module names + detect collisions
-    raw_name: dict[int, str] = {}
-    for k in kappa_order:
-        tau_groups = hierarchy[k]
-        tags = sorted(kappa_tags[k])
-        tag = tags[0]
-        ast_types = sorted(kappa_ast.get(k, set()))
-        safe_tag = _sanitize(tag)
+        total = sum(len(v) for s_dict in sec_dict.values() for v in s_dict.values())
+        n_sec = len(sec_dict)
+        n_tert = len({t for s_dict in sec_dict.values() for t in s_dict})
 
-        dominant_tau = max(tau_groups.keys(),
-                           key=lambda t: len(tau_groups[t]))
-        dom_dep = cell_dep.get((k, dominant_tau))
-        if dom_dep:
-            disambig = _sanitize(dom_dep)
-        else:
-            disambig = f"τ{dominant_tau}"
-
-        ast_label = _sanitize(ast_types[0]) if ast_types else "node"
-        base = f"{safe_tag}-{ast_label}-{disambig}"
-        raw_name[k] = base
-        name_collisions[base].append(k)
-
-    # Second pass: assign final names, appending a numeric suffix
-    # only for the κ-classes whose base name collides.
-    for base, kids in name_collisions.items():
-        if len(kids) == 1:
-            kappa_module_name[kids[0]] = base
-        else:
-            for i, k in enumerate(kids):
-                kappa_module_name[k] = f"{base}-{i}"
-
-    for k in kappa_order:
-        tau_groups = hierarchy[k]
-        tags = sorted(kappa_tags[k])
-        tag = tags[0]
-        ast_types = sorted(kappa_ast.get(k, set()))
-        ast_str = "/".join(ast_types)
-        total = kappa_node_counts[k]
-        n_taus = len(tau_groups)
-        n_sigmas = len(set(s for ss in tau_groups.values() for s in ss))
-
-        mod_name = kappa_module_name[k]
-
-        w(f"-- ── {tag} ({ast_str}) {'─' * max(1, 40 - len(tag) - len(ast_str))}")
-        w(f"-- {total} nodes, {n_taus} type contexts, {n_sigmas} forms")
+        prim_name = primary_names[p]
+        w(f"-- {primary_sym}={p}: {total} nodes, {n_sec} {secondary_sym}-classes, {n_tert} {tertiary_sym}-classes")
+        w(f"module {prim_name} where")
         w("")
 
-        w(f"module {mod_name} where")
-        w("")
+        if depth == 1:
+            # All cells flat under primary
+            cell_idx = 0
+            for s in sec_order:
+                for t in sorted(sec_dict[s].keys()):
+                    cell_idx += 1
+                    nodes = sec_dict[s][t]
+                    w(f"  -- {secondary_sym}={s} {tertiary_sym}={t} ({len(nodes)} nodes)")
+                    w(f"  cell-{cell_idx} : {primary_sym} {p} ≡ {primary_sym} {p}")
+                    w(f"  cell-{cell_idx} = refl")
+                    w("")
+        else:
+            # depth ≥ 2: nest secondary as submodules
+            sec_names = _build_axis_names(sppf, secondary, sec_order, prefix='  ')
+            for s in sec_order:
+                t_dict = sec_dict[s]
+                t_order = sorted(t_dict.keys(), key=lambda t: -len(t_dict[t]))
+                sec_total = sum(len(v) for v in t_dict.values())
+                sec_name = sec_names[s]
 
-        # Each τ-context as a named sub-section
-        for tid in sorted(tau_groups.keys(),
-                          key=lambda t: -len(tau_groups[t])):
-            sigmas = tau_groups[tid]
-            n_unique = len(set(sigmas))
-            deps = sorted(tau_deps.get(tid, set()))[:5]
+                w(f"  -- {secondary_sym}={s}: {sec_total} nodes, {len(t_dict)} {tertiary_sym}-classes")
+                w(f"  module {sec_name} where")
+                w("")
 
-            # Use the dominant dep-type as the τ-context name
-            dominant_dep = cell_dep.get((k, tid))
-            if dominant_dep:
-                ctx_name = _sanitize(dominant_dep)
-            elif deps:
-                ctx_name = _sanitize(deps[0])
-            else:
-                ctx_name = f"ctx-{tid}"
+                if depth == 2:
+                    # Tertiary as flat cells inside secondary
+                    for i, t in enumerate(t_order):
+                        nodes = t_dict[t]
+                        w(f"    -- {tertiary_sym}={t} ({len(nodes)} nodes)")
+                        w(f"    cell-{i} : {primary_sym} {p} ≡ {primary_sym} {p}")
+                        w(f"    cell-{i} = refl")
+                        w("")
+                else:
+                    # depth = 3: full nesting
+                    tert_names = _build_axis_names(sppf, tertiary, t_order, prefix='    ')
+                    for t in t_order:
+                        nodes = t_dict[t]
+                        tert_name = tert_names[t]
+                        w(f"    -- {tertiary_sym}={t} ({len(nodes)} nodes)")
+                        w(f"    module {tert_name} where")
+                        w(f"      cell : {primary_sym} {p} ≡ {primary_sym} {p}")
+                        w(f"      cell = refl")
+                        w("")
 
-            dep_str = ", ".join(deps) if deps else "(untyped)"
-
-            w(f"  -- {ctx_name}: {len(sigmas)} nodes, {n_unique} forms")
-            w(f"  -- [{dep_str}]")
-
-            if n_unique <= 8:
-                for s in sorted(set(sigmas)):
-                    count = sigmas.count(s)
-                    w(f"  --   σ={s} ({count}×)")
-
-            # Disambiguate within this module by appending τ-id
-            cell_name = f"{ctx_name}-τ{tid}"
-            w(f"  {cell_name} : τ {tid} ≡ τ {tid}")
-            w(f"  {cell_name} = refl")
-            w("")
+                w("")
 
         w("")
 
@@ -276,12 +332,11 @@ def synthesize(sppf: SPPF, module_name: str = "SPPFProof") -> str:
     cleavage = sppf.cleavage()
     if cleavage:
         w("-- ══════════════════════════════════════════════════════════")
-        w("-- Cleavage planes (module boundaries / case splits)")
+        w("-- Cleavage planes (forced case splits)")
         w("-- ══════════════════════════════════════════════════════════")
         w("")
 
         for idx, (tid, counts, total) in enumerate(cleavage):
-            # Name the cleavage by the AST type of its nodes
             cleavage_asts = set()
             for ni in sppf.tau[tid].node_indices[:20]:
                 if ni < len(sppf.nodes):
@@ -298,7 +353,6 @@ def synthesize(sppf: SPPF, module_name: str = "SPPFProof") -> str:
                 w(f"  {safe_dep} : τ {tid} ≡ τ {tid}")
                 w(f"  {safe_dep} = refl  -- {cnt} nodes")
                 w("")
-
             w("")
 
     # ── Summary ──────────────────────────────────────────────────
@@ -306,13 +360,34 @@ def synthesize(sppf: SPPF, module_name: str = "SPPFProof") -> str:
     w("-- ══════════════════════════════════════════════════════════")
     w(f"-- Summary:")
     w(f"--   {sppf.node_count} AST nodes → {len(sppf.wedge())} proof cells")
-    w(f"--   {len(kappa_order)} construction modules")
+    w(f"--   Rotation: ({primary_sym} → {secondary_sym} → {tertiary_sym}) depth={depth}")
+    w(f"--   {len(primary_order)} top-level modules")
     w(f"--   {eta_count} η-proofs")
     w(f"--   {len(cleavage)} cleavage planes")
-    w(f"--   Compression: {100*(1-len(sppf.wedge())/max(sppf.node_count,1)):.1f}%")
     w("-- ══════════════════════════════════════════════════════════")
 
     return '\n'.join(lines) + '\n'
+
+
+def _build_axis_names(sppf: SPPF, axis: str, class_ids: list[int],
+                      prefix: str = '') -> dict[int, str]:
+    """Compute readable, collision-disambiguated names for a list of class IDs."""
+    raw: dict[int, str] = {}
+    collisions: dict[str, list[int]] = defaultdict(list)
+
+    for cid in class_ids:
+        name = _axis_name_for_class(sppf, axis, cid)
+        raw[cid] = name
+        collisions[name].append(cid)
+
+    final: dict[int, str] = {}
+    for base, ids in collisions.items():
+        if len(ids) == 1:
+            final[ids[0]] = base
+        else:
+            for i, cid in enumerate(ids):
+                final[cid] = f"{base}-{i}"
+    return final
 
 
 def _emit_canonical_map(w, sppf: SPPF, fiber_name: str, symbol: str) -> None:

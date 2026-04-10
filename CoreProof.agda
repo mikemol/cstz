@@ -1,7 +1,7 @@
 module CoreProof where
 
 -- ══════════════════════════════════════════════════════════
--- SPPF proof of src/cstz/core.py
+-- SPPF proof, rotation = (κ → τ → σ), depth = 2
 -- 7500 AST nodes → 2109 proof cells
 -- σ=2096 τ=859 κ=779
 -- 103 η-merges, 7 case splits
@@ -49,7 +49,7 @@ data ℕ : Set where
 κ-idem n = refl
 
 -- ── η-equivalences ────────────────────────────────────────
--- 103 type-erasure steps; each is refl after reduction.
+-- 103 type-erasure steps
 
 -- Self, dict all resolve to τ=13
 η-allη-Name-Self : τ 13 ≡ τ 13
@@ -104,10359 +104,15111 @@ data ℕ : Set where
 η-allη-Call-None = refl
 
 -- ══════════════════════════════════════════════════════════
--- Construction modules (one per κ-class)
+-- Hierarchy: κ → τ → σ (depth=2)
 -- ══════════════════════════════════════════════════════════
 
--- ── load (Load) ────────────────────────────────
--- 2366 nodes, 1 type contexts, 1 forms
+-- κ=13: 1497 nodes, 2 τ-classes, 200 σ-classes
+module var-Name where
 
-module load-Load-τ8 where
+  -- τ=16: 757 nodes, 175 σ-classes
+  module τ16 where
+
+    -- σ=25 (34 nodes)
+    cell-0 : κ 13 ≡ κ 13
+    cell-0 = refl
+
+    -- σ=484 (23 nodes)
+    cell-1 : κ 13 ≡ κ 13
+    cell-1 = refl
+
+    -- σ=356 (20 nodes)
+    cell-2 : κ 13 ≡ κ 13
+    cell-2 = refl
+
+    -- σ=794 (20 nodes)
+    cell-3 : κ 13 ≡ κ 13
+    cell-3 = refl
+
+    -- σ=797 (20 nodes)
+    cell-4 : κ 13 ≡ κ 13
+    cell-4 = refl
+
+    -- σ=345 (18 nodes)
+    cell-5 : κ 13 ≡ κ 13
+    cell-5 = refl
+
+    -- σ=904 (16 nodes)
+    cell-6 : κ 13 ≡ κ 13
+    cell-6 = refl
+
+    -- σ=766 (14 nodes)
+    cell-7 : κ 13 ≡ κ 13
+    cell-7 = refl
+
+    -- σ=791 (14 nodes)
+    cell-8 : κ 13 ≡ κ 13
+    cell-8 = refl
+
+    -- σ=87 (13 nodes)
+    cell-9 : κ 13 ≡ κ 13
+    cell-9 = refl
+
+    -- σ=556 (13 nodes)
+    cell-10 : κ 13 ≡ κ 13
+    cell-10 = refl
+
+    -- σ=1440 (13 nodes)
+    cell-11 : κ 13 ≡ κ 13
+    cell-11 = refl
+
+    -- σ=41 (12 nodes)
+    cell-12 : κ 13 ≡ κ 13
+    cell-12 = refl
+
+    -- σ=257 (12 nodes)
+    cell-13 : κ 13 ≡ κ 13
+    cell-13 = refl
+
+    -- σ=322 (12 nodes)
+    cell-14 : κ 13 ≡ κ 13
+    cell-14 = refl
+
+    -- σ=625 (12 nodes)
+    cell-15 : κ 13 ≡ κ 13
+    cell-15 = refl
+
+    -- σ=798 (12 nodes)
+    cell-16 : κ 13 ≡ κ 13
+    cell-16 = refl
+
+    -- σ=805 (12 nodes)
+    cell-17 : κ 13 ≡ κ 13
+    cell-17 = refl
+
+    -- σ=889 (12 nodes)
+    cell-18 : κ 13 ≡ κ 13
+    cell-18 = refl
+
+    -- σ=531 (11 nodes)
+    cell-19 : κ 13 ≡ κ 13
+    cell-19 = refl
+
+    -- σ=974 (10 nodes)
+    cell-20 : κ 13 ≡ κ 13
+    cell-20 = refl
+
+    -- σ=1264 (10 nodes)
+    cell-21 : κ 13 ≡ κ 13
+    cell-21 = refl
+
+    -- σ=152 (9 nodes)
+    cell-22 : κ 13 ≡ κ 13
+    cell-22 = refl
+
+    -- σ=432 (9 nodes)
+    cell-23 : κ 13 ≡ κ 13
+    cell-23 = refl
+
+    -- σ=56 (8 nodes)
+    cell-24 : κ 13 ≡ κ 13
+    cell-24 = refl
+
+    -- σ=89 (8 nodes)
+    cell-25 : κ 13 ≡ κ 13
+    cell-25 = refl
+
+    -- σ=282 (8 nodes)
+    cell-26 : κ 13 ≡ κ 13
+    cell-26 = refl
+
+    -- σ=510 (8 nodes)
+    cell-27 : κ 13 ≡ κ 13
+    cell-27 = refl
+
+    -- σ=1487 (8 nodes)
+    cell-28 : κ 13 ≡ κ 13
+    cell-28 = refl
+
+    -- σ=873 (7 nodes)
+    cell-29 : κ 13 ≡ κ 13
+    cell-29 = refl
+
+    -- σ=892 (7 nodes)
+    cell-30 : κ 13 ≡ κ 13
+    cell-30 = refl
+
+    -- σ=1174 (7 nodes)
+    cell-31 : κ 13 ≡ κ 13
+    cell-31 = refl
+
+    -- σ=1438 (7 nodes)
+    cell-32 : κ 13 ≡ κ 13
+    cell-32 = refl
+
+    -- σ=491 (6 nodes)
+    cell-33 : κ 13 ≡ κ 13
+    cell-33 = refl
+
+    -- σ=579 (6 nodes)
+    cell-34 : κ 13 ≡ κ 13
+    cell-34 = refl
+
+    -- σ=918 (6 nodes)
+    cell-35 : κ 13 ≡ κ 13
+    cell-35 = refl
+
+    -- σ=1006 (6 nodes)
+    cell-36 : κ 13 ≡ κ 13
+    cell-36 = refl
+
+    -- σ=1067 (6 nodes)
+    cell-37 : κ 13 ≡ κ 13
+    cell-37 = refl
+
+    -- σ=1137 (6 nodes)
+    cell-38 : κ 13 ≡ κ 13
+    cell-38 = refl
+
+    -- σ=155 (5 nodes)
+    cell-39 : κ 13 ≡ κ 13
+    cell-39 = refl
+
+    -- σ=294 (5 nodes)
+    cell-40 : κ 13 ≡ κ 13
+    cell-40 = refl
+
+    -- σ=449 (5 nodes)
+    cell-41 : κ 13 ≡ κ 13
+    cell-41 = refl
+
+    -- σ=786 (5 nodes)
+    cell-42 : κ 13 ≡ κ 13
+    cell-42 = refl
+
+    -- σ=857 (5 nodes)
+    cell-43 : κ 13 ≡ κ 13
+    cell-43 = refl
+
+    -- σ=1181 (5 nodes)
+    cell-44 : κ 13 ≡ κ 13
+    cell-44 = refl
+
+    -- σ=1383 (5 nodes)
+    cell-45 : κ 13 ≡ κ 13
+    cell-45 = refl
+
+    -- σ=1494 (5 nodes)
+    cell-46 : κ 13 ≡ κ 13
+    cell-46 = refl
+
+    -- σ=1547 (5 nodes)
+    cell-47 : κ 13 ≡ κ 13
+    cell-47 = refl
+
+    -- σ=1561 (5 nodes)
+    cell-48 : κ 13 ≡ κ 13
+    cell-48 = refl
+
+    -- σ=201 (4 nodes)
+    cell-49 : κ 13 ≡ κ 13
+    cell-49 = refl
+
+    -- σ=982 (4 nodes)
+    cell-50 : κ 13 ≡ κ 13
+    cell-50 = refl
+
+    -- σ=1050 (4 nodes)
+    cell-51 : κ 13 ≡ κ 13
+    cell-51 = refl
+
+    -- σ=1116 (4 nodes)
+    cell-52 : κ 13 ≡ κ 13
+    cell-52 = refl
+
+    -- σ=1185 (4 nodes)
+    cell-53 : κ 13 ≡ κ 13
+    cell-53 = refl
+
+    -- σ=1265 (4 nodes)
+    cell-54 : κ 13 ≡ κ 13
+    cell-54 = refl
+
+    -- σ=1532 (4 nodes)
+    cell-55 : κ 13 ≡ κ 13
+    cell-55 = refl
+
+    -- σ=1610 (4 nodes)
+    cell-56 : κ 13 ≡ κ 13
+    cell-56 = refl
+
+    -- σ=1751 (4 nodes)
+    cell-57 : κ 13 ≡ κ 13
+    cell-57 = refl
+
+    -- σ=1885 (4 nodes)
+    cell-58 : κ 13 ≡ κ 13
+    cell-58 = refl
+
+    -- σ=1904 (4 nodes)
+    cell-59 : κ 13 ≡ κ 13
+    cell-59 = refl
+
+    -- σ=122 (3 nodes)
+    cell-60 : κ 13 ≡ κ 13
+    cell-60 = refl
+
+    -- σ=188 (3 nodes)
+    cell-61 : κ 13 ≡ κ 13
+    cell-61 = refl
+
+    -- σ=435 (3 nodes)
+    cell-62 : κ 13 ≡ κ 13
+    cell-62 = refl
+
+    -- σ=543 (3 nodes)
+    cell-63 : κ 13 ≡ κ 13
+    cell-63 = refl
+
+    -- σ=547 (3 nodes)
+    cell-64 : κ 13 ≡ κ 13
+    cell-64 = refl
+
+    -- σ=572 (3 nodes)
+    cell-65 : κ 13 ≡ κ 13
+    cell-65 = refl
+
+    -- σ=647 (3 nodes)
+    cell-66 : κ 13 ≡ κ 13
+    cell-66 = refl
+
+    -- σ=736 (3 nodes)
+    cell-67 : κ 13 ≡ κ 13
+    cell-67 = refl
+
+    -- σ=815 (3 nodes)
+    cell-68 : κ 13 ≡ κ 13
+    cell-68 = refl
+
+    -- σ=941 (3 nodes)
+    cell-69 : κ 13 ≡ κ 13
+    cell-69 = refl
+
+    -- σ=1115 (3 nodes)
+    cell-70 : κ 13 ≡ κ 13
+    cell-70 = refl
+
+    -- σ=1154 (3 nodes)
+    cell-71 : κ 13 ≡ κ 13
+    cell-71 = refl
+
+    -- σ=1188 (3 nodes)
+    cell-72 : κ 13 ≡ κ 13
+    cell-72 = refl
+
+    -- σ=1189 (3 nodes)
+    cell-73 : κ 13 ≡ κ 13
+    cell-73 = refl
+
+    -- σ=1306 (3 nodes)
+    cell-74 : κ 13 ≡ κ 13
+    cell-74 = refl
+
+    -- σ=1316 (3 nodes)
+    cell-75 : κ 13 ≡ κ 13
+    cell-75 = refl
+
+    -- σ=1346 (3 nodes)
+    cell-76 : κ 13 ≡ κ 13
+    cell-76 = refl
+
+    -- σ=1506 (3 nodes)
+    cell-77 : κ 13 ≡ κ 13
+    cell-77 = refl
+
+    -- σ=1617 (3 nodes)
+    cell-78 : κ 13 ≡ κ 13
+    cell-78 = refl
+
+    -- σ=1662 (3 nodes)
+    cell-79 : κ 13 ≡ κ 13
+    cell-79 = refl
+
+    -- σ=1668 (3 nodes)
+    cell-80 : κ 13 ≡ κ 13
+    cell-80 = refl
+
+    -- σ=1786 (3 nodes)
+    cell-81 : κ 13 ≡ κ 13
+    cell-81 = refl
+
+    -- σ=81 (2 nodes)
+    cell-82 : κ 13 ≡ κ 13
+    cell-82 = refl
+
+    -- σ=83 (2 nodes)
+    cell-83 : κ 13 ≡ κ 13
+    cell-83 = refl
+
+    -- σ=158 (2 nodes)
+    cell-84 : κ 13 ≡ κ 13
+    cell-84 = refl
+
+    -- σ=185 (2 nodes)
+    cell-85 : κ 13 ≡ κ 13
+    cell-85 = refl
+
+    -- σ=265 (2 nodes)
+    cell-86 : κ 13 ≡ κ 13
+    cell-86 = refl
+
+    -- σ=283 (2 nodes)
+    cell-87 : κ 13 ≡ κ 13
+    cell-87 = refl
+
+    -- σ=439 (2 nodes)
+    cell-88 : κ 13 ≡ κ 13
+    cell-88 = refl
+
+    -- σ=501 (2 nodes)
+    cell-89 : κ 13 ≡ κ 13
+    cell-89 = refl
+
+    -- σ=555 (2 nodes)
+    cell-90 : κ 13 ≡ κ 13
+    cell-90 = refl
+
+    -- σ=564 (2 nodes)
+    cell-91 : κ 13 ≡ κ 13
+    cell-91 = refl
+
+    -- σ=595 (2 nodes)
+    cell-92 : κ 13 ≡ κ 13
+    cell-92 = refl
+
+    -- σ=665 (2 nodes)
+    cell-93 : κ 13 ≡ κ 13
+    cell-93 = refl
+
+    -- σ=676 (2 nodes)
+    cell-94 : κ 13 ≡ κ 13
+    cell-94 = refl
+
+    -- σ=693 (2 nodes)
+    cell-95 : κ 13 ≡ κ 13
+    cell-95 = refl
+
+    -- σ=712 (2 nodes)
+    cell-96 : κ 13 ≡ κ 13
+    cell-96 = refl
+
+    -- σ=715 (2 nodes)
+    cell-97 : κ 13 ≡ κ 13
+    cell-97 = refl
+
+    -- σ=734 (2 nodes)
+    cell-98 : κ 13 ≡ κ 13
+    cell-98 = refl
+
+    -- σ=757 (2 nodes)
+    cell-99 : κ 13 ≡ κ 13
+    cell-99 = refl
+
+    -- σ=856 (2 nodes)
+    cell-100 : κ 13 ≡ κ 13
+    cell-100 = refl
+
+    -- σ=860 (2 nodes)
+    cell-101 : κ 13 ≡ κ 13
+    cell-101 = refl
+
+    -- σ=895 (2 nodes)
+    cell-102 : κ 13 ≡ κ 13
+    cell-102 = refl
+
+    -- σ=901 (2 nodes)
+    cell-103 : κ 13 ≡ κ 13
+    cell-103 = refl
+
+    -- σ=1202 (2 nodes)
+    cell-104 : κ 13 ≡ κ 13
+    cell-104 = refl
+
+    -- σ=1230 (2 nodes)
+    cell-105 : κ 13 ≡ κ 13
+    cell-105 = refl
+
+    -- σ=1231 (2 nodes)
+    cell-106 : κ 13 ≡ κ 13
+    cell-106 = refl
+
+    -- σ=1235 (2 nodes)
+    cell-107 : κ 13 ≡ κ 13
+    cell-107 = refl
+
+    -- σ=1236 (2 nodes)
+    cell-108 : κ 13 ≡ κ 13
+    cell-108 = refl
+
+    -- σ=1384 (2 nodes)
+    cell-109 : κ 13 ≡ κ 13
+    cell-109 = refl
+
+    -- σ=1392 (2 nodes)
+    cell-110 : κ 13 ≡ κ 13
+    cell-110 = refl
+
+    -- σ=1411 (2 nodes)
+    cell-111 : κ 13 ≡ κ 13
+    cell-111 = refl
+
+    -- σ=1436 (2 nodes)
+    cell-112 : κ 13 ≡ κ 13
+    cell-112 = refl
+
+    -- σ=1448 (2 nodes)
+    cell-113 : κ 13 ≡ κ 13
+    cell-113 = refl
+
+    -- σ=1505 (2 nodes)
+    cell-114 : κ 13 ≡ κ 13
+    cell-114 = refl
+
+    -- σ=1542 (2 nodes)
+    cell-115 : κ 13 ≡ κ 13
+    cell-115 = refl
+
+    -- σ=1591 (2 nodes)
+    cell-116 : κ 13 ≡ κ 13
+    cell-116 = refl
+
+    -- σ=1596 (2 nodes)
+    cell-117 : κ 13 ≡ κ 13
+    cell-117 = refl
+
+    -- σ=1602 (2 nodes)
+    cell-118 : κ 13 ≡ κ 13
+    cell-118 = refl
+
+    -- σ=1611 (2 nodes)
+    cell-119 : κ 13 ≡ κ 13
+    cell-119 = refl
+
+    -- σ=1616 (2 nodes)
+    cell-120 : κ 13 ≡ κ 13
+    cell-120 = refl
+
+    -- σ=1624 (2 nodes)
+    cell-121 : κ 13 ≡ κ 13
+    cell-121 = refl
+
+    -- σ=1642 (2 nodes)
+    cell-122 : κ 13 ≡ κ 13
+    cell-122 = refl
+
+    -- σ=1708 (2 nodes)
+    cell-123 : κ 13 ≡ κ 13
+    cell-123 = refl
+
+    -- σ=1734 (2 nodes)
+    cell-124 : κ 13 ≡ κ 13
+    cell-124 = refl
+
+    -- σ=1745 (2 nodes)
+    cell-125 : κ 13 ≡ κ 13
+    cell-125 = refl
+
+    -- σ=1870 (2 nodes)
+    cell-126 : κ 13 ≡ κ 13
+    cell-126 = refl
+
+    -- σ=1894 (2 nodes)
+    cell-127 : κ 13 ≡ κ 13
+    cell-127 = refl
+
+    -- σ=1956 (2 nodes)
+    cell-128 : κ 13 ≡ κ 13
+    cell-128 = refl
+
+    -- σ=1999 (2 nodes)
+    cell-129 : κ 13 ≡ κ 13
+    cell-129 = refl
+
+    -- σ=2073 (2 nodes)
+    cell-130 : κ 13 ≡ κ 13
+    cell-130 = refl
+
+    -- σ=111 (1 nodes)
+    cell-131 : κ 13 ≡ κ 13
+    cell-131 = refl
+
+    -- σ=119 (1 nodes)
+    cell-132 : κ 13 ≡ κ 13
+    cell-132 = refl
+
+    -- σ=231 (1 nodes)
+    cell-133 : κ 13 ≡ κ 13
+    cell-133 = refl
+
+    -- σ=463 (1 nodes)
+    cell-134 : κ 13 ≡ κ 13
+    cell-134 = refl
+
+    -- σ=478 (1 nodes)
+    cell-135 : κ 13 ≡ κ 13
+    cell-135 = refl
+
+    -- σ=542 (1 nodes)
+    cell-136 : κ 13 ≡ κ 13
+    cell-136 = refl
+
+    -- σ=597 (1 nodes)
+    cell-137 : κ 13 ≡ κ 13
+    cell-137 = refl
+
+    -- σ=607 (1 nodes)
+    cell-138 : κ 13 ≡ κ 13
+    cell-138 = refl
+
+    -- σ=643 (1 nodes)
+    cell-139 : κ 13 ≡ κ 13
+    cell-139 = refl
+
+    -- σ=659 (1 nodes)
+    cell-140 : κ 13 ≡ κ 13
+    cell-140 = refl
+
+    -- σ=680 (1 nodes)
+    cell-141 : κ 13 ≡ κ 13
+    cell-141 = refl
+
+    -- σ=756 (1 nodes)
+    cell-142 : κ 13 ≡ κ 13
+    cell-142 = refl
+
+    -- σ=917 (1 nodes)
+    cell-143 : κ 13 ≡ κ 13
+    cell-143 = refl
+
+    -- σ=940 (1 nodes)
+    cell-144 : κ 13 ≡ κ 13
+    cell-144 = refl
+
+    -- σ=951 (1 nodes)
+    cell-145 : κ 13 ≡ κ 13
+    cell-145 = refl
+
+    -- σ=963 (1 nodes)
+    cell-146 : κ 13 ≡ κ 13
+    cell-146 = refl
+
+    -- σ=993 (1 nodes)
+    cell-147 : κ 13 ≡ κ 13
+    cell-147 = refl
+
+    -- σ=1026 (1 nodes)
+    cell-148 : κ 13 ≡ κ 13
+    cell-148 = refl
+
+    -- σ=1094 (1 nodes)
+    cell-149 : κ 13 ≡ κ 13
+    cell-149 = refl
+
+    -- σ=1169 (1 nodes)
+    cell-150 : κ 13 ≡ κ 13
+    cell-150 = refl
 
-  -- ctx-8: 2366 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=17 (2366×)
-  ctx-8-τ8 : τ 8 ≡ τ 8
-  ctx-8-τ8 = refl
+    -- σ=1269 (1 nodes)
+    cell-151 : κ 13 ≡ κ 13
+    cell-151 = refl
 
+    -- σ=1281 (1 nodes)
+    cell-152 : κ 13 ≡ κ 13
+    cell-152 = refl
 
--- ── var (Name) ─────────────────────────────────
--- 1497 nodes, 2 type contexts, 200 forms
+    -- σ=1282 (1 nodes)
+    cell-153 : κ 13 ≡ κ 13
+    cell-153 = refl
 
-module var-Name-τ16 where
+    -- σ=1290 (1 nodes)
+    cell-154 : κ 13 ≡ κ 13
+    cell-154 = refl
 
-  -- ctx-16: 757 nodes, 175 forms
-  -- [(untyped)]
-  ctx-16-τ16 : τ 16 ≡ τ 16
-  ctx-16-τ16 = refl
+    -- σ=1351 (1 nodes)
+    cell-155 : κ 13 ≡ κ 13
+    cell-155 = refl
 
-  -- Self: 740 nodes, 31 forms
-  -- [AST, Self, Self._counter, Self.node_count, T]
-  Self-τ13 : τ 13 ≡ τ 13
-  Self-τ13 = refl
+    -- σ=1385 (1 nodes)
+    cell-156 : κ 13 ≡ κ 13
+    cell-156 = refl
 
+    -- σ=1386 (1 nodes)
+    cell-157 : κ 13 ≡ κ 13
+    cell-157 = refl
 
--- ── store (Store) ──────────────────────────────
--- 365 nodes, 1 type contexts, 1 forms
+    -- σ=1406 (1 nodes)
+    cell-158 : κ 13 ≡ κ 13
+    cell-158 = refl
 
-module store-Store-τ6 where
+    -- σ=1468 (1 nodes)
+    cell-159 : κ 13 ≡ κ 13
+    cell-159 = refl
 
-  -- ctx-6: 365 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=13 (365×)
-  ctx-6-τ6 : τ 6 ≡ τ 6
-  ctx-6-τ6 = refl
+    -- σ=1470 (1 nodes)
+    cell-160 : κ 13 ≡ κ 13
+    cell-160 = refl
 
+    -- σ=1495 (1 nodes)
+    cell-161 : κ 13 ≡ κ 13
+    cell-161 = refl
 
--- ── terminal (Constant) ────────────────────────
--- 295 nodes, 2 type contexts, 125 forms
+    -- σ=1499 (1 nodes)
+    cell-162 : κ 13 ≡ κ 13
+    cell-162 = refl
 
-module terminal-Constant-str where
+    -- σ=1538 (1 nodes)
+    cell-163 : κ 13 ≡ κ 13
+    cell-163 = refl
 
-  -- str: 273 nodes, 124 forms
-  -- [NoneType, bool, float, int, str]
-  str-τ0 : τ 0 ≡ τ 0
-  str-τ0 = refl
+    -- σ=1544 (1 nodes)
+    cell-164 : κ 13 ≡ κ 13
+    cell-164 = refl
 
-  -- ctx-95: 22 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=141 (22×)
-  ctx-95-τ95 : τ 95 ≡ τ 95
-  ctx-95-τ95 = refl
+    -- σ=1658 (1 nodes)
+    cell-165 : κ 13 ≡ κ 13
+    cell-165 = refl
 
+    -- σ=1703 (1 nodes)
+    cell-166 : κ 13 ≡ κ 13
+    cell-166 = refl
 
--- ── bind (Name) ────────────────────────────────
--- 275 nodes, 2 type contexts, 153 forms
+    -- σ=1709 (1 nodes)
+    cell-167 : κ 13 ≡ κ 13
+    cell-167 = refl
 
-module bind-Name-τ44 where
+    -- σ=1862 (1 nodes)
+    cell-168 : κ 13 ≡ κ 13
+    cell-168 = refl
 
-  -- ctx-44: 245 nodes, 134 forms
-  -- [(untyped)]
-  ctx-44-τ44 : τ 44 ≡ τ 44
-  ctx-44-τ44 = refl
+    -- σ=1934 (1 nodes)
+    cell-169 : κ 13 ≡ κ 13
+    cell-169 = refl
 
-  -- tuple: 30 nodes, 24 forms
-  -- [Self._counter, Self.node_count, T, dict, int]
-  tuple-τ7 : τ 7 ≡ τ 7
-  tuple-τ7 = refl
+    -- σ=1944 (1 nodes)
+    cell-170 : κ 13 ≡ κ 13
+    cell-170 = refl
 
+    -- σ=2029 (1 nodes)
+    cell-171 : κ 13 ≡ κ 13
+    cell-171 = refl
 
--- ── morphism@state (Attribute) ─────────────────
--- 243 nodes, 1 type contexts, 44 forms
+    -- σ=2042 (1 nodes)
+    cell-172 : κ 13 ≡ κ 13
+    cell-172 = refl
 
-module morphism-at-state-Attribute-Self-_parent-0 where
+    -- σ=2045 (1 nodes)
+    cell-173 : κ 13 ≡ κ 13
+    cell-173 = refl
 
-  -- Self-_parent: 243 nodes, 44 forms
-  -- [Self._cascade_abstraction_merge, Self._cascade_eta, Self._cell_contents, Self._cell_obs, Self._cleavage_fibers]
-  Self-_parent-τ34 : τ 34 ≡ τ 34
-  Self-_parent-τ34 = refl
+    -- σ=2082 (1 nodes)
+    cell-174 : κ 13 ≡ κ 13
+    cell-174 = refl
 
 
--- ── index (Index) ──────────────────────────────
--- 130 nodes, 2 type contexts, 43 forms
+  -- τ=13: 740 nodes, 31 σ-classes
+  module Self where
 
-module index-Index-τ36 where
+    -- σ=22 (284 nodes)
+    cell-0 : κ 13 ≡ κ 13
+    cell-0 = refl
 
-  -- ctx-36: 84 nodes, 38 forms
-  -- [(untyped)]
-  ctx-36-τ36 : τ 36 ≡ τ 36
-  ctx-36-τ36 = refl
+    -- σ=32 (117 nodes)
+    cell-1 : κ 13 ≡ κ 13
+    cell-1 = refl
 
-  -- ctx-113: 46 nodes, 6 forms
-  -- [(untyped)]
-  --   σ=162 (19×)
-  --   σ=219 (2×)
-  --   σ=346 (20×)
-  --   σ=433 (2×)
-  --   σ=446 (1×)
-  --   σ=550 (2×)
-  ctx-113-τ113 : τ 113 ≡ τ 113
-  ctx-113-τ113 = refl
-
-
--- ── morphism@state (Attribute) ─────────────────
--- 68 nodes, 1 type contexts, 14 forms
-
-module morphism-at-state-Attribute-Self-uf-make where
-
-  -- Self-uf-make: 68 nodes, 14 forms
-  -- [Self._cell_contents.get, Self._cell_obs.get, Self._cell_obs.keys, Self._cleavage_fibers.append, Self._cleavage_levels.append]
-  Self-uf-make-τ153 : τ 153 ≡ τ 153
-  Self-uf-make-τ153 = refl
-
-
--- ── subscript (Subscript) ──────────────────────
--- 58 nodes, 4 type contexts, 21 forms
-
-module subscript-Subscript-τ195 where
-
-  -- ctx-195: 25 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=292 (2×)
-  --   σ=347 (17×)
-  --   σ=551 (1×)
-  --   σ=1488 (3×)
-  --   σ=1573 (2×)
-  ctx-195-τ195 : τ 195 ≡ τ 195
-  ctx-195-τ195 = refl
-
-  -- ctx-114: 15 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=163 (7×)
-  --   σ=277 (7×)
-  --   σ=746 (1×)
-  ctx-114-τ114 : τ 114 ≡ τ 114
-  ctx-114-τ114 = refl
-
-  -- ctx-257: 10 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=379 (2×)
-  --   σ=399 (1×)
-  --   σ=417 (5×)
-  --   σ=1413 (1×)
-  --   σ=1627 (1×)
-  ctx-257-τ257 : τ 257 ≡ τ 257
-  ctx-257-τ257 = refl
-
-  -- ctx-84: 8 nodes, 8 forms
-  -- [(untyped)]
-  --   σ=124 (1×)
-  --   σ=565 (1×)
-  --   σ=802 (1×)
-  --   σ=977 (1×)
-  --   σ=1038 (1×)
-  --   σ=1069 (1×)
-  --   σ=1711 (1×)
-  --   σ=1910 (1×)
-  ctx-84-τ84 : τ 84 ≡ τ 84
-  ctx-84-τ84 = refl
-
-
--- ── arrow (Name) ───────────────────────────────
--- 55 nodes, 1 type contexts, 4 forms
-
-module arrow-Name-toint where
+    -- σ=177 (75 nodes)
+    cell-2 : κ 13 ≡ κ 13
+    cell-2 = refl
 
-  -- toint: 55 nodes, 4 forms
-  -- [AST, Self, Self._counter, Self.node_count, T]
-  --   σ=126 (42×)
-  --   σ=488 (3×)
-  --   σ=848 (6×)
-  --   σ=1415 (4×)
-  toint-τ13 : τ 13 ≡ τ 13
-  toint-τ13 = refl
-
-
--- ── apply (Call) ───────────────────────────────
--- 46 nodes, 2 type contexts, 19 forms
-
-module apply-Call-τ165 where
-
-  -- ctx-165: 41 nodes, 16 forms
-  -- [(untyped)]
-  ctx-165-τ165 : τ 165 ≡ τ 165
-  ctx-165-τ165 = refl
-
-  -- ctx-154: 5 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=225 (1×)
-  --   σ=652 (2×)
-  --   σ=1144 (2×)
-  ctx-154-τ154 : τ 154 ≡ τ 154
-  ctx-154-τ154 = refl
-
-
--- ── arg (arg) ──────────────────────────────────
--- 45 nodes, 1 type contexts, 2 forms
-
-module arg-arg-τ11 where
-
-  -- ctx-11: 45 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=20 (42×)
-  --   σ=1676 (3×)
-  ctx-11-τ11 : τ 11 ≡ τ 11
-  ctx-11-τ11 = refl
-
-
--- ── arg (arg) ──────────────────────────────────
--- 38 nodes, 2 type contexts, 27 forms
-
-module arg-arg-τ93 where
-
-  -- ctx-93: 32 nodes, 22 forms
-  -- [(untyped)]
-  ctx-93-τ93 : τ 93 ≡ τ 93
-  ctx-93-τ93 = refl
+    -- σ=140 (55 nodes)
+    cell-3 : κ 13 ≡ κ 13
+    cell-3 = refl
 
-  -- ctx-31: 6 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=39 (2×)
-  --   σ=72 (1×)
-  --   σ=73 (1×)
-  --   σ=112 (1×)
-  --   σ=424 (1×)
-  ctx-31-τ31 : τ 31 ≡ τ 31
-  ctx-31-τ31 = refl
-
-
--- ── morphism@state (Attribute) ─────────────────
--- 36 nodes, 1 type contexts, 28 forms
+    -- σ=276 (54 nodes)
+    cell-4 : κ 13 ≡ κ 13
+    cell-4 = refl
 
-module morphism-at-state-Attribute-Self-_parent-1 where
+    -- σ=24 (31 nodes)
+    cell-5 : κ 13 ≡ κ 13
+    cell-5 = refl
 
-  -- Self-_parent: 36 nodes, 28 forms
-  -- [Self._cell_contents, Self._cell_obs, Self._cleavage_fibers, Self._cleavage_ghost_count, Self._cleavage_levels]
-  Self-_parent-τ14 : τ 14 ≡ τ 14
-  Self-_parent-τ14 = refl
+    -- σ=161 (30 nodes)
+    cell-6 : κ 13 ≡ κ 13
+    cell-6 = refl
 
+    -- σ=1143 (13 nodes)
+    cell-7 : κ 13 ≡ κ 13
+    cell-7 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 36 nodes, 2 type contexts, 25 forms
+    -- σ=1797 (10 nodes)
+    cell-8 : κ 13 ≡ κ 13
+    cell-8 = refl
 
-module subscript-Subscript-τ47 where
+    -- σ=432 (9 nodes)
+    cell-9 : κ 13 ≡ κ 13
+    cell-9 = refl
 
-  -- ctx-47: 32 nodes, 21 forms
-  -- [(untyped)]
-  ctx-47-τ47 : τ 47 ≡ τ 47
-  ctx-47-τ47 = refl
+    -- σ=231 (9 nodes)
+    cell-10 : κ 13 ≡ κ 13
+    cell-10 = refl
 
-  -- ctx-157: 4 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=228 (1×)
-  --   σ=447 (1×)
-  --   σ=536 (1×)
-  --   σ=539 (1×)
-  ctx-157-τ157 : τ 157 ≡ τ 157
-  ctx-157-τ157 = refl
+    -- σ=1925 (9 nodes)
+    cell-11 : κ 13 ≡ κ 13
+    cell-11 = refl
 
+    -- σ=646 (7 nodes)
+    cell-12 : κ 13 ≡ κ 13
+    cell-12 = refl
 
--- ── product (Tuple) ────────────────────────────
--- 30 nodes, 4 type contexts, 17 forms
+    -- σ=152 (6 nodes)
+    cell-13 : κ 13 ≡ κ 13
+    cell-13 = refl
 
-module product-Tuple-tuple-0 where
+    -- σ=546 (4 nodes)
+    cell-14 : κ 13 ≡ κ 13
+    cell-14 = refl
 
-  -- tuple: 12 nodes, 10 forms
-  -- [tuple]
-  tuple-τ17 : τ 17 ≡ τ 17
-  tuple-τ17 = refl
+    -- σ=1818 (4 nodes)
+    cell-15 : κ 13 ≡ κ 13
+    cell-15 = refl
 
-  -- tuple: 10 nodes, 3 forms
-  -- [tuple]
-  --   σ=370 (1×)
-  --   σ=1461 (3×)
-  --   σ=1576 (6×)
-  tuple-τ250 : τ 250 ≡ τ 250
-  tuple-τ250 = refl
+    -- σ=1987 (3 nodes)
+    cell-16 : κ 13 ≡ κ 13
+    cell-16 = refl
 
-  -- tuple: 6 nodes, 3 forms
-  -- [tuple]
-  --   σ=189 (1×)
-  --   σ=335 (3×)
-  --   σ=414 (2×)
-  tuple-τ127 : τ 127 ≡ τ 127
-  tuple-τ127 = refl
+    -- σ=117 (2 nodes)
+    cell-17 : κ 13 ≡ κ 13
+    cell-17 = refl
 
-  -- tuple: 2 nodes, 1 forms
-  -- [tuple]
-  --   σ=33 (2×)
-  tuple-τ25 : τ 25 ≡ τ 25
-  tuple-τ25 = refl
+    -- σ=445 (2 nodes)
+    cell-18 : κ 13 ≡ κ 13
+    cell-18 = refl
 
+    -- σ=904 (2 nodes)
+    cell-19 : κ 13 ≡ κ 13
+    cell-19 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 27 nodes, 1 type contexts, 19 forms
+    -- σ=1109 (2 nodes)
+    cell-20 : κ 13 ≡ κ 13
+    cell-20 = refl
 
-module let-k-Assign-τ186 where
+    -- σ=1832 (2 nodes)
+    cell-21 : κ 13 ≡ κ 13
+    cell-21 = refl
 
-  -- ctx-186: 27 nodes, 19 forms
-  -- [(untyped)]
-  ctx-186-τ186 : τ 186 ≡ τ 186
-  ctx-186-τ186 = refl
+    -- σ=1839 (2 nodes)
+    cell-22 : κ 13 ≡ κ 13
+    cell-22 = refl
 
+    -- σ=495 (1 nodes)
+    cell-23 : κ 13 ≡ κ 13
+    cell-23 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 26 nodes, 1 type contexts, 26 forms
+    -- σ=629 (1 nodes)
+    cell-24 : κ 13 ≡ κ 13
+    cell-24 = refl
 
-module effect-seq-Expr-τ1 where
+    -- σ=1242 (1 nodes)
+    cell-25 : κ 13 ≡ κ 13
+    cell-25 = refl
 
-  -- ctx-1: 26 nodes, 26 forms
-  -- [(untyped)]
-  ctx-1-τ1 : τ 1 ≡ τ 1
-  ctx-1-τ1 = refl
+    -- σ=1248 (1 nodes)
+    cell-26 : κ 13 ≡ κ 13
+    cell-26 = refl
 
+    -- σ=676 (1 nodes)
+    cell-27 : κ 13 ≡ κ 13
+    cell-27 = refl
 
--- ── index (Index) ──────────────────────────────
--- 26 nodes, 1 type contexts, 4 forms
+    -- σ=1626 (1 nodes)
+    cell-28 : κ 13 ≡ κ 13
+    cell-28 = refl
 
-module index-Index-τ492 where
+    -- σ=2012 (1 nodes)
+    cell-29 : κ 13 ≡ κ 13
+    cell-29 = refl
 
-  -- ctx-492: 26 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=849 (20×)
-  --   σ=1679 (2×)
-  --   σ=1758 (3×)
-  --   σ=1901 (1×)
-  ctx-492-τ492 : τ 492 ≡ τ 492
-  ctx-492-τ492 = refl
+    -- σ=185 (1 nodes)
+    cell-30 : κ 13 ≡ κ 13
+    cell-30 = refl
 
 
--- ── subscript (Subscript) ──────────────────────
--- 26 nodes, 1 type contexts, 10 forms
 
-module subscript-Subscript-τ493 where
+-- κ=7: 275 nodes, 2 τ-classes, 153 σ-classes
+module bind-Name where
 
-  -- ctx-493: 26 nodes, 10 forms
-  -- [(untyped)]
-  ctx-493-τ493 : τ 493 ≡ τ 493
-  ctx-493-τ493 = refl
+  -- τ=44: 245 nodes, 134 σ-classes
+  module τ44 where
 
+    -- σ=784 (11 nodes)
+    cell-0 : κ 7 ≡ κ 7
+    cell-0 = refl
 
--- ── coerce (FormattedValue) ────────────────────
--- 24 nodes, 2 type contexts, 18 forms
+    -- σ=783 (10 nodes)
+    cell-1 : κ 7 ≡ κ 7
+    cell-1 = refl
 
-module coerce-FormattedValue-τ486 where
+    -- σ=252 (6 nodes)
+    cell-2 : κ 7 ≡ κ 7
+    cell-2 = refl
 
-  -- ctx-486: 15 nodes, 14 forms
-  -- [(untyped)]
-  ctx-486-τ486 : τ 486 ≡ τ 486
-  ctx-486-τ486 = refl
+    -- σ=475 (6 nodes)
+    cell-3 : κ 7 ≡ κ 7
+    cell-3 = refl
 
-  -- ctx-377: 9 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=611 (5×)
-  --   σ=1813 (1×)
-  --   σ=1959 (1×)
-  --   σ=1994 (1×)
-  --   σ=2037 (1×)
-  ctx-377-τ377 : τ 377 ≡ τ 377
-  ctx-377-τ377 = refl
+    -- σ=1434 (6 nodes)
+    cell-4 : κ 7 ≡ κ 7
+    cell-4 = refl
 
+    -- σ=209 (5 nodes)
+    cell-5 : κ 7 ≡ κ 7
+    cell-5 = refl
 
--- ── cardinality (Call) ─────────────────────────
--- 23 nodes, 2 type contexts, 17 forms
+    -- σ=494 (5 nodes)
+    cell-6 : κ 7 ≡ κ 7
+    cell-6 = refl
 
-module cardinality-Call-int-0 where
+    -- σ=790 (5 nodes)
+    cell-7 : κ 7 ≡ κ 7
+    cell-7 = refl
 
-  -- int: 22 nodes, 16 forms
-  -- [int]
-  int-τ335 : τ 335 ≡ τ 335
-  int-τ335 = refl
+    -- σ=847 (5 nodes)
+    cell-8 : κ 7 ≡ κ 7
+    cell-8 = refl
 
-  -- int: 1 nodes, 1 forms
-  -- [int]
-  --   σ=312 (1×)
-  int-τ210 : τ 210 ≡ τ 210
-  int-τ210 = refl
+    -- σ=894 (5 nodes)
+    cell-9 : κ 7 ≡ κ 7
+    cell-9 = refl
 
+    -- σ=280 (4 nodes)
+    cell-10 : κ 7 ≡ κ 7
+    cell-10 = refl
 
--- ── powerset (Call) ────────────────────────────
--- 22 nodes, 1 type contexts, 1 forms
+    -- σ=443 (4 nodes)
+    cell-11 : κ 7 ≡ κ 7
+    cell-11 = refl
 
-module powerset-Call-τ184 where
+    -- σ=800 (4 nodes)
+    cell-12 : κ 7 ≡ κ 7
+    cell-12 = refl
 
-  -- ctx-184: 22 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=278 (22×)
-  ctx-184-τ184 : τ 184 ≡ τ 184
-  ctx-184-τ184 = refl
+    -- σ=1173 (4 nodes)
+    cell-13 : κ 7 ≡ κ 7
+    cell-13 = refl
 
+    -- σ=54 (3 nodes)
+    cell-14 : κ 7 ≡ κ 7
+    cell-14 = refl
 
--- ── product (Tuple) ────────────────────────────
--- 21 nodes, 2 type contexts, 2 forms
+    -- σ=77 (3 nodes)
+    cell-15 : κ 7 ≡ κ 7
+    cell-15 = refl
 
-module product-Tuple-tuple-1 where
+    -- σ=78 (3 nodes)
+    cell-16 : κ 7 ≡ κ 7
+    cell-16 = refl
 
-  -- tuple: 17 nodes, 1 forms
-  -- [tuple]
-  --   σ=146 (17×)
-  tuple-τ100 : τ 100 ≡ τ 100
-  tuple-τ100 = refl
+    -- σ=295 (3 nodes)
+    cell-17 : κ 7 ≡ κ 7
+    cell-17 = refl
 
-  -- tuple: 4 nodes, 1 forms
-  -- [tuple]
-  --   σ=142 (4×)
-  tuple-τ96 : τ 96 ≡ τ 96
-  tuple-τ96 = refl
+    -- σ=522 (3 nodes)
+    cell-18 : κ 7 ≡ κ 7
+    cell-18 = refl
 
+    -- σ=569 (3 nodes)
+    cell-19 : κ 7 ≡ κ 7
+    cell-19 = refl
 
--- ── index (Index) ──────────────────────────────
--- 21 nodes, 2 type contexts, 2 forms
+    -- σ=585 (3 nodes)
+    cell-20 : κ 7 ≡ κ 7
+    cell-20 = refl
 
-module index-Index-τ101 where
+    -- σ=937 (3 nodes)
+    cell-21 : κ 7 ≡ κ 7
+    cell-21 = refl
 
-  -- ctx-101: 17 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=147 (17×)
-  ctx-101-τ101 : τ 101 ≡ τ 101
-  ctx-101-τ101 = refl
-
-  -- ctx-97: 4 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=143 (4×)
-  ctx-97-τ97 : τ 97 ≡ τ 97
-  ctx-97-τ97 = refl
+    -- σ=1177 (3 nodes)
+    cell-22 : κ 7 ≡ κ 7
+    cell-22 = refl
 
+    -- σ=1424 (3 nodes)
+    cell-23 : κ 7 ≡ κ 7
+    cell-23 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 21 nodes, 2 type contexts, 2 forms
+    -- σ=1509 (3 nodes)
+    cell-24 : κ 7 ≡ κ 7
+    cell-24 = refl
 
-module subscript-Subscript-τ102 where
+    -- σ=1528 (3 nodes)
+    cell-25 : κ 7 ≡ κ 7
+    cell-25 = refl
 
-  -- ctx-102: 17 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=148 (17×)
-  ctx-102-τ102 : τ 102 ≡ τ 102
-  ctx-102-τ102 = refl
+    -- σ=507 (2 nodes)
+    cell-26 : κ 7 ≡ κ 7
+    cell-26 = refl
 
-  -- ctx-98: 4 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=144 (4×)
-  ctx-98-τ98 : τ 98 ≡ τ 98
-  ctx-98-τ98 = refl
+    -- σ=549 (2 nodes)
+    cell-27 : κ 7 ≡ κ 7
+    cell-27 = refl
 
+    -- σ=728 (2 nodes)
+    cell-28 : κ 7 ≡ κ 7
+    cell-28 = refl
 
--- ── index (Index) ──────────────────────────────
--- 20 nodes, 4 type contexts, 8 forms
+    -- σ=765 (2 nodes)
+    cell-29 : κ 7 ≡ κ 7
+    cell-29 = refl
 
-module index-Index-τ251 where
+    -- σ=770 (2 nodes)
+    cell-30 : κ 7 ≡ κ 7
+    cell-30 = refl
 
-  -- ctx-251: 10 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=371 (1×)
-  --   σ=1462 (3×)
-  --   σ=1577 (6×)
-  ctx-251-τ251 : τ 251 ≡ τ 251
-  ctx-251-τ251 = refl
+    -- σ=774 (2 nodes)
+    cell-31 : κ 7 ≡ κ 7
+    cell-31 = refl
 
-  -- ctx-128: 6 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=190 (1×)
-  --   σ=336 (3×)
-  --   σ=415 (2×)
-  ctx-128-τ128 : τ 128 ≡ τ 128
-  ctx-128-τ128 = refl
+    -- σ=891 (2 nodes)
+    cell-32 : κ 7 ≡ κ 7
+    cell-32 = refl
 
-  -- ctx-18: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=27 (2×)
-  ctx-18-τ18 : τ 18 ≡ τ 18
-  ctx-18-τ18 = refl
+    -- σ=972 (2 nodes)
+    cell-33 : κ 7 ≡ κ 7
+    cell-33 = refl
 
-  -- ctx-26: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=34 (2×)
-  ctx-26-τ26 : τ 26 ≡ τ 26
-  ctx-26-τ26 = refl
+    -- σ=1048 (2 nodes)
+    cell-34 : κ 7 ≡ κ 7
+    cell-34 = refl
 
+    -- σ=1113 (2 nodes)
+    cell-35 : κ 7 ≡ κ 7
+    cell-35 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 20 nodes, 5 type contexts, 13 forms
+    -- σ=1125 (2 nodes)
+    cell-36 : κ 7 ≡ κ 7
+    cell-36 = refl
 
-module subscript-Subscript-τ252 where
+    -- σ=1130 (2 nodes)
+    cell-37 : κ 7 ≡ κ 7
+    cell-37 = refl
 
-  -- ctx-252: 10 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=372 (1×)
-  --   σ=1463 (2×)
-  --   σ=1516 (1×)
-  --   σ=1578 (2×)
-  --   σ=1589 (4×)
-  ctx-252-τ252 : τ 252 ≡ τ 252
-  ctx-252-τ252 = refl
+    -- σ=1239 (2 nodes)
+    cell-38 : κ 7 ≡ κ 7
+    cell-38 = refl
 
-  -- ctx-129: 6 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=191 (1×)
-  --   σ=337 (2×)
-  --   σ=416 (1×)
-  --   σ=1107 (1×)
-  --   σ=1213 (1×)
-  ctx-129-τ129 : τ 129 ≡ τ 129
-  ctx-129-τ129 = refl
+    -- σ=1335 (2 nodes)
+    cell-39 : κ 7 ≡ κ 7
+    cell-39 = refl
 
-  -- ctx-19: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=28 (2×)
-  ctx-19-τ19 : τ 19 ≡ τ 19
-  ctx-19-τ19 = refl
+    -- σ=1433 (2 nodes)
+    cell-40 : κ 7 ≡ κ 7
+    cell-40 = refl
 
-  -- ctx-27: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=35 (1×)
-  ctx-27-τ27 : τ 27 ≡ τ 27
-  ctx-27-τ27 = refl
+    -- σ=1486 (2 nodes)
+    cell-41 : κ 7 ≡ κ 7
+    cell-41 = refl
 
-  -- ctx-281: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=404 (1×)
-  ctx-281-τ281 : τ 281 ≡ τ 281
-  ctx-281-τ281 = refl
+    -- σ=1508 (2 nodes)
+    cell-42 : κ 7 ≡ κ 7
+    cell-42 = refl
 
+    -- σ=1558 (2 nodes)
+    cell-43 : κ 7 ≡ κ 7
+    cell-43 = refl
 
--- ── projection@? (Attribute) ───────────────────
--- 20 nodes, 1 type contexts, 11 forms
+    -- σ=1744 (2 nodes)
+    cell-44 : κ 7 ≡ κ 7
+    cell-44 = refl
 
-module projection-at-x3f-Attribute-τ188 where
+    -- σ=1767 (2 nodes)
+    cell-45 : κ 7 ≡ κ 7
+    cell-45 = refl
 
-  -- ctx-188: 20 nodes, 11 forms
-  -- [(untyped)]
-  ctx-188-τ188 : τ 188 ≡ τ 188
-  ctx-188-τ188 = refl
+    -- σ=1768 (2 nodes)
+    cell-46 : κ 7 ≡ κ 7
+    cell-46 = refl
 
+    -- σ=65 (1 nodes)
+    cell-47 : κ 7 ≡ κ 7
+    cell-47 = refl
 
--- ── projection.compute@? (Call) ────────────────
--- 20 nodes, 1 type contexts, 11 forms
+    -- σ=256 (1 nodes)
+    cell-48 : κ 7 ≡ κ 7
+    cell-48 = refl
 
-module projection-compute-at-x3f-Call-τ361 where
+    -- σ=275 (1 nodes)
+    cell-49 : κ 7 ≡ κ 7
+    cell-49 = refl
 
-  -- ctx-361: 20 nodes, 11 forms
-  -- [(untyped)]
-  ctx-361-τ361 : τ 361 ≡ τ 361
-  ctx-361-τ361 = refl
+    -- σ=456 (1 nodes)
+    cell-50 : κ 7 ≡ κ 7
+    cell-50 = refl
 
+    -- σ=487 (1 nodes)
+    cell-51 : κ 7 ≡ κ 7
+    cell-51 = refl
 
--- ── product.unpack (Tuple) ─────────────────────
--- 19 nodes, 1 type contexts, 10 forms
+    -- σ=509 (1 nodes)
+    cell-52 : κ 7 ≡ κ 7
+    cell-52 = refl
 
-module product-unpack-Tuple-tuple-0 where
+    -- σ=535 (1 nodes)
+    cell-53 : κ 7 ≡ κ 7
+    cell-53 = refl
 
-  -- tuple: 19 nodes, 10 forms
-  -- [tuple]
-  tuple-τ59 : τ 59 ≡ τ 59
-  tuple-τ59 = refl
+    -- σ=538 (1 nodes)
+    cell-54 : κ 7 ≡ κ 7
+    cell-54 = refl
 
+    -- σ=553 (1 nodes)
+    cell-55 : κ 7 ≡ κ 7
+    cell-55 = refl
 
--- ── arguments (arguments) ──────────────────────
--- 18 nodes, 1 type contexts, 2 forms
+    -- σ=563 (1 nodes)
+    cell-56 : κ 7 ≡ κ 7
+    cell-56 = refl
 
-module arguments-arguments-τ12 where
+    -- σ=577 (1 nodes)
+    cell-57 : κ 7 ≡ κ 7
+    cell-57 = refl
 
-  -- ctx-12: 18 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=21 (15×)
-  --   σ=1677 (3×)
-  ctx-12-τ12 : τ 12 ≡ τ 12
-  ctx-12-τ12 = refl
+    -- σ=602 (1 nodes)
+    cell-58 : κ 7 ≡ κ 7
+    cell-58 = refl
 
+    -- σ=633 (1 nodes)
+    cell-59 : κ 7 ≡ κ 7
+    cell-59 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 18 nodes, 2 type contexts, 14 forms
+    -- σ=636 (1 nodes)
+    cell-60 : κ 7 ≡ κ 7
+    cell-60 = refl
 
-module apply-Call-τ473 where
+    -- σ=638 (1 nodes)
+    cell-61 : κ 7 ≡ κ 7
+    cell-61 = refl
 
-  -- ctx-473: 16 nodes, 12 forms
-  -- [(untyped)]
-  ctx-473-τ473 : τ 473 ≡ τ 473
-  ctx-473-τ473 = refl
+    -- σ=664 (1 nodes)
+    cell-62 : κ 7 ≡ κ 7
+    cell-62 = refl
 
-  -- ctx-653: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1339 (1×)
-  --   σ=1355 (1×)
-  ctx-653-τ653 : τ 653 ≡ τ 653
-  ctx-653-τ653 = refl
+    -- σ=673 (1 nodes)
+    cell-63 : κ 7 ≡ κ 7
+    cell-63 = refl
 
+    -- σ=685 (1 nodes)
+    cell-64 : κ 7 ≡ κ 7
+    cell-64 = refl
 
--- ── add (Add) ──────────────────────────────────
--- 17 nodes, 1 type contexts, 1 forms
+    -- σ=731 (1 nodes)
+    cell-65 : κ 7 ≡ κ 7
+    cell-65 = refl
 
-module add-Add-τ73 where
+    -- σ=751 (1 nodes)
+    cell-66 : κ 7 ≡ κ 7
+    cell-66 = refl
 
-  -- ctx-73: 17 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=106 (17×)
-  ctx-73-τ73 : τ 73 ≡ τ 73
-  ctx-73-τ73 = refl
+    -- σ=753 (1 nodes)
+    cell-67 : κ 7 ≡ κ 7
+    cell-67 = refl
 
+    -- σ=755 (1 nodes)
+    cell-68 : κ 7 ≡ κ 7
+    cell-68 = refl
 
--- ── exponential.literal (Dict) ─────────────────
--- 15 nodes, 1 type contexts, 1 forms
+    -- σ=776 (1 nodes)
+    cell-69 : κ 7 ≡ κ 7
+    cell-69 = refl
 
-module exponential-literal-Dict-dict-0 where
+    -- σ=845 (1 nodes)
+    cell-70 : κ 7 ≡ κ 7
+    cell-70 = refl
 
-  -- dict: 15 nodes, 1 forms
-  -- [dict]
-  --   σ=29 (15×)
-  dict-τ20 : τ 20 ≡ τ 20
-  dict-τ20 = refl
+    -- σ=886 (1 nodes)
+    cell-71 : κ 7 ≡ κ 7
+    cell-71 = refl
 
+    -- σ=887 (1 nodes)
+    cell-72 : κ 7 ≡ κ 7
+    cell-72 = refl
 
--- ── in (In) ────────────────────────────────────
--- 15 nodes, 1 type contexts, 1 forms
+    -- σ=944 (1 nodes)
+    cell-73 : κ 7 ≡ κ 7
+    cell-73 = refl
 
-module in-k-In-τ77 where
+    -- σ=946 (1 nodes)
+    cell-74 : κ 7 ≡ κ 7
+    cell-74 = refl
 
-  -- ctx-77: 15 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=114 (15×)
-  ctx-77-τ77 : τ 77 ≡ τ 77
-  ctx-77-τ77 = refl
+    -- σ=950 (1 nodes)
+    cell-75 : κ 7 ≡ κ 7
+    cell-75 = refl
 
+    -- σ=900 (1 nodes)
+    cell-76 : κ 7 ≡ κ 7
+    cell-76 = refl
 
--- ── cardinality (Call) ─────────────────────────
--- 15 nodes, 1 type contexts, 8 forms
+    -- σ=957 (1 nodes)
+    cell-77 : κ 7 ≡ κ 7
+    cell-77 = refl
 
-module cardinality-Call-int-1 where
+    -- σ=965 (1 nodes)
+    cell-78 : κ 7 ≡ κ 7
+    cell-78 = refl
 
-  -- int: 15 nodes, 8 forms
-  -- [int]
-  --   σ=127 (1×)
-  --   σ=172 (1×)
-  --   σ=517 (2×)
-  --   σ=525 (1×)
-  --   σ=589 (4×)
-  --   σ=1777 (2×)
-  --   σ=1780 (2×)
-  --   σ=1783 (2×)
-  int-τ87 : τ 87 ≡ τ 87
-  int-τ87 = refl
+    -- σ=995 (1 nodes)
+    cell-79 : κ 7 ≡ κ 7
+    cell-79 = refl
 
+    -- σ=1023 (1 nodes)
+    cell-80 : κ 7 ≡ κ 7
+    cell-80 = refl
 
--- ── partial@state (Attribute) ──────────────────
--- 15 nodes, 1 type contexts, 7 forms
+    -- σ=1033 (1 nodes)
+    cell-81 : κ 7 ≡ κ 7
+    cell-81 = refl
 
-module partial-at-state-Attribute-Self-_cell_contents-get where
+    -- σ=1065 (1 nodes)
+    cell-82 : κ 7 ≡ κ 7
+    cell-82 = refl
 
-  -- Self-_cell_contents-get: 15 nodes, 7 forms
-  -- [Self._cell_contents.get, Self._cell_obs.get, Self._cell_obs.keys, Self._cleavage_fibers.append, Self._cleavage_levels.append]
-  --   σ=457 (1×)
-  --   σ=483 (2×)
-  --   σ=642 (2×)
-  --   σ=760 (1×)
-  --   σ=921 (7×)
-  --   σ=1103 (1×)
-  --   σ=1982 (1×)
-  Self-_cell_contents-get-τ153 : τ 153 ≡ τ 153
-  Self-_cell_contents-get-τ153 = refl
+    -- σ=1093 (1 nodes)
+    cell-83 : κ 7 ≡ κ 7
+    cell-83 = refl
 
+    -- σ=1106 (1 nodes)
+    cell-84 : κ 7 ≡ κ 7
+    cell-84 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 15 nodes, 2 type contexts, 11 forms
+    -- σ=1146 (1 nodes)
+    cell-85 : κ 7 ≡ κ 7
+    cell-85 = refl
 
-module subscript-Subscript-τ355 where
+    -- σ=1165 (1 nodes)
+    cell-86 : κ 7 ≡ κ 7
+    cell-86 = refl
 
-  -- ctx-355: 14 nodes, 10 forms
-  -- [(untyped)]
-  ctx-355-τ355 : τ 355 ≡ τ 355
-  ctx-355-τ355 = refl
+    -- σ=1180 (1 nodes)
+    cell-87 : κ 7 ≡ κ 7
+    cell-87 = refl
 
-  -- ctx-434: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=703 (1×)
-  ctx-434-τ434 : τ 434 ≡ τ 434
-  ctx-434-τ434 = refl
+    -- σ=1184 (1 nodes)
+    cell-88 : κ 7 ≡ κ 7
+    cell-88 = refl
 
+    -- σ=1200 (1 nodes)
+    cell-89 : κ 7 ≡ κ 7
+    cell-89 = refl
 
--- ── morphism@? (Attribute) ─────────────────────
--- 15 nodes, 1 type contexts, 11 forms
+    -- σ=1245 (1 nodes)
+    cell-90 : κ 7 ≡ κ 7
+    cell-90 = refl
 
-module morphism-at-x3f-Attribute-τ188 where
+    -- σ=1251 (1 nodes)
+    cell-91 : κ 7 ≡ κ 7
+    cell-91 = refl
 
-  -- ctx-188: 15 nodes, 11 forms
-  -- [(untyped)]
-  ctx-188-τ188 : τ 188 ≡ τ 188
-  ctx-188-τ188 = refl
+    -- σ=1257 (1 nodes)
+    cell-92 : κ 7 ≡ κ 7
+    cell-92 = refl
 
+    -- σ=1260 (1 nodes)
+    cell-93 : κ 7 ≡ κ 7
+    cell-93 = refl
 
--- ── noteq (NotEq) ──────────────────────────────
--- 14 nodes, 1 type contexts, 1 forms
+    -- σ=1280 (1 nodes)
+    cell-94 : κ 7 ≡ κ 7
+    cell-94 = refl
 
-module noteq-NotEq-τ48 where
+    -- σ=1285 (1 nodes)
+    cell-95 : κ 7 ≡ κ 7
+    cell-95 = refl
 
-  -- ctx-48: 14 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=59 (14×)
-  ctx-48-τ48 : τ 48 ≡ τ 48
-  ctx-48-τ48 = refl
+    -- σ=1304 (1 nodes)
+    cell-96 : κ 7 ≡ κ 7
+    cell-96 = refl
 
+    -- σ=1314 (1 nodes)
+    cell-97 : κ 7 ≡ κ 7
+    cell-97 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 13 nodes, 2 type contexts, 10 forms
+    -- σ=1342 (1 nodes)
+    cell-98 : κ 7 ≡ κ 7
+    cell-98 = refl
 
-module subscript-Subscript-τ37 where
+    -- σ=1390 (1 nodes)
+    cell-99 : κ 7 ≡ κ 7
+    cell-99 = refl
 
-  -- ctx-37: 12 nodes, 9 forms
-  -- [(untyped)]
-  ctx-37-τ37 : τ 37 ≡ τ 37
-  ctx-37-τ37 = refl
+    -- σ=1526 (1 nodes)
+    cell-100 : κ 7 ≡ κ 7
+    cell-100 = refl
 
-  -- ctx-150: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=220 (1×)
-  ctx-150-τ150 : τ 150 ≡ τ 150
-  ctx-150-τ150 = refl
+    -- σ=1531 (1 nodes)
+    cell-101 : κ 7 ≡ κ 7
+    cell-101 = refl
 
+    -- σ=1536 (1 nodes)
+    cell-102 : κ 7 ≡ κ 7
+    cell-102 = refl
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 13 nodes, 1 type contexts, 4 forms
+    -- σ=1572 (1 nodes)
+    cell-103 : κ 7 ≡ κ 7
+    cell-103 = refl
 
-module free_monoid-fold-JoinedStr-str-0 where
+    -- σ=1575 (1 nodes)
+    cell-104 : κ 7 ≡ κ 7
+    cell-104 = refl
 
-  -- str: 13 nodes, 4 forms
-  -- [str]
-  --   σ=1820 (4×)
-  --   σ=1827 (7×)
-  --   σ=1855 (1×)
-  --   σ=2079 (1×)
-  str-τ850 : τ 850 ≡ τ 850
-  str-τ850 = refl
+    -- σ=1582 (1 nodes)
+    cell-105 : κ 7 ≡ κ 7
+    cell-105 = refl
 
+    -- σ=1584 (1 nodes)
+    cell-106 : κ 7 ≡ κ 7
+    cell-106 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 12 nodes, 1 type contexts, 7 forms
+    -- σ=1586 (1 nodes)
+    cell-107 : κ 7 ≡ κ 7
+    cell-107 = refl
 
-module apply-Call-τ61 where
+    -- σ=1588 (1 nodes)
+    cell-108 : κ 7 ≡ κ 7
+    cell-108 = refl
 
-  -- ctx-61: 12 nodes, 7 forms
-  -- [(untyped)]
-  --   σ=82 (1×)
-  --   σ=84 (1×)
-  --   σ=492 (1×)
-  --   σ=792 (6×)
-  --   σ=960 (1×)
-  --   σ=1258 (1×)
-  --   σ=1732 (1×)
-  ctx-61-τ61 : τ 61 ≡ τ 61
-  ctx-61-τ61 = refl
+    -- σ=1609 (1 nodes)
+    cell-109 : κ 7 ≡ κ 7
+    cell-109 = refl
 
+    -- σ=1641 (1 nodes)
+    cell-110 : κ 7 ≡ κ 7
+    cell-110 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 12 nodes, 1 type contexts, 12 forms
+    -- σ=1643 (1 nodes)
+    cell-111 : κ 7 ≡ κ 7
+    cell-111 = refl
 
-module let-k-Assign-τ356 where
+    -- σ=1649 (1 nodes)
+    cell-112 : κ 7 ≡ κ 7
+    cell-112 = refl
 
-  -- ctx-356: 12 nodes, 12 forms
-  -- [(untyped)]
-  ctx-356-τ356 : τ 356 ≡ τ 356
-  ctx-356-τ356 = refl
+    -- σ=1656 (1 nodes)
+    cell-113 : κ 7 ≡ κ 7
+    cell-113 = refl
 
+    -- σ=1694 (1 nodes)
+    cell-114 : κ 7 ≡ κ 7
+    cell-114 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 11 nodes, 2 type contexts, 11 forms
+    -- σ=1698 (1 nodes)
+    cell-115 : κ 7 ≡ κ 7
+    cell-115 = refl
 
-module let-k-Assign-τ50 where
+    -- σ=1705 (1 nodes)
+    cell-116 : κ 7 ≡ κ 7
+    cell-116 = refl
 
-  -- ctx-50: 9 nodes, 9 forms
-  -- [(untyped)]
-  ctx-50-τ50 : τ 50 ≡ τ 50
-  ctx-50-τ50 = refl
+    -- σ=1730 (1 nodes)
+    cell-117 : κ 7 ≡ κ 7
+    cell-117 = refl
 
-  -- ctx-352: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=537 (1×)
-  --   σ=540 (1×)
-  ctx-352-τ352 : τ 352 ≡ τ 352
-  ctx-352-τ352 = refl
+    -- σ=1737 (1 nodes)
+    cell-118 : κ 7 ≡ κ 7
+    cell-118 = refl
 
+    -- σ=1868 (1 nodes)
+    cell-119 : κ 7 ≡ κ 7
+    cell-119 = refl
 
--- ── terminal.map (Return) ──────────────────────
--- 11 nodes, 2 type contexts, 9 forms
+    -- σ=1869 (1 nodes)
+    cell-120 : κ 7 ≡ κ 7
+    cell-120 = refl
 
-module terminal-map-Return-τ56 where
+    -- σ=1881 (1 nodes)
+    cell-121 : κ 7 ≡ κ 7
+    cell-121 = refl
 
-  -- ctx-56: 9 nodes, 7 forms
-  -- [(untyped)]
-  --   σ=70 (1×)
-  --   σ=91 (3×)
-  --   σ=271 (1×)
-  --   σ=867 (1×)
-  --   σ=1568 (1×)
-  --   σ=1689 (1×)
-  --   σ=1765 (1×)
-  ctx-56-τ56 : τ 56 ≡ τ 56
-  ctx-56-τ56 = refl
+    -- σ=1884 (1 nodes)
+    cell-122 : κ 7 ≡ κ 7
+    cell-122 = refl
 
-  -- ctx-162: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=234 (1×)
-  --   σ=882 (1×)
-  ctx-162-τ162 : τ 162 ≡ τ 162
-  ctx-162-τ162 = refl
+    -- σ=1892 (1 nodes)
+    cell-123 : κ 7 ≡ κ 7
+    cell-123 = refl
 
+    -- σ=1898 (1 nodes)
+    cell-124 : κ 7 ≡ κ 7
+    cell-124 = refl
 
--- ── equalizer (Compare) ────────────────────────
--- 11 nodes, 3 type contexts, 7 forms
+    -- σ=1917 (1 nodes)
+    cell-125 : κ 7 ≡ κ 7
+    cell-125 = refl
 
-module equalizer-Compare-τ471 where
+    -- σ=1986 (1 nodes)
+    cell-126 : κ 7 ≡ κ 7
+    cell-126 = refl
 
-  -- ctx-471: 8 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=806 (4×)
-  --   σ=926 (1×)
-  --   σ=1190 (1×)
-  --   σ=1317 (1×)
-  --   σ=1645 (1×)
-  ctx-471-τ471 : τ 471 ≡ τ 471
-  ctx-471-τ471 = refl
+    -- σ=512 (1 nodes)
+    cell-127 : κ 7 ≡ κ 7
+    cell-127 = refl
 
-  -- ctx-595: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1149 (2×)
-  ctx-595-τ595 : τ 595 ≡ τ 595
-  ctx-595-τ595 = refl
+    -- σ=2019 (1 nodes)
+    cell-128 : κ 7 ≡ κ 7
+    cell-128 = refl
 
-  -- ctx-522: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=905 (1×)
-  ctx-522-τ522 : τ 522 ≡ τ 522
-  ctx-522-τ522 = refl
+    -- σ=2020 (1 nodes)
+    cell-129 : κ 7 ≡ κ 7
+    cell-129 = refl
 
+    -- σ=2028 (1 nodes)
+    cell-130 : κ 7 ≡ κ 7
+    cell-130 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 11 nodes, 2 type contexts, 7 forms
+    -- σ=2051 (1 nodes)
+    cell-131 : κ 7 ≡ κ 7
+    cell-131 = refl
 
-module effect-seq-Expr-τ474 where
+    -- σ=2057 (1 nodes)
+    cell-132 : κ 7 ≡ κ 7
+    cell-132 = refl
 
-  -- ctx-474: 10 nodes, 6 forms
-  -- [(untyped)]
-  --   σ=809 (4×)
-  --   σ=943 (1×)
-  --   σ=1171 (1×)
-  --   σ=1192 (1×)
-  --   σ=1319 (1×)
-  --   σ=1334 (2×)
-  ctx-474-τ474 : τ 474 ≡ τ 474
-  ctx-474-τ474 = refl
+    -- σ=2066 (1 nodes)
+    cell-133 : κ 7 ≡ κ 7
+    cell-133 = refl
 
-  -- ctx-659: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1356 (1×)
-  ctx-659-τ659 : τ 659 ≡ τ 659
-  ctx-659-τ659 = refl
 
+  -- τ=7: 30 nodes, 24 σ-classes
+  module tuple where
 
--- ── product (Tuple) ────────────────────────────
--- 10 nodes, 1 type contexts, 1 forms
+    -- σ=14 (2 nodes)
+    cell-0 : κ 7 ≡ κ 7
+    cell-0 = refl
 
-module product-Tuple-tuple-2 where
+    -- σ=440 (2 nodes)
+    cell-1 : κ 7 ≡ κ 7
+    cell-1 = refl
 
-  -- tuple: 10 nodes, 1 forms
-  -- [tuple]
-  --   σ=342 (10×)
-  tuple-τ226 : τ 226 ≡ τ 226
-  tuple-τ226 = refl
+    -- σ=512 (2 nodes)
+    cell-2 : κ 7 ≡ κ 7
+    cell-2 = refl
 
+    -- σ=609 (2 nodes)
+    cell-3 : κ 7 ≡ κ 7
+    cell-3 = refl
 
--- ── index (Index) ──────────────────────────────
--- 10 nodes, 1 type contexts, 1 forms
+    -- σ=640 (2 nodes)
+    cell-4 : κ 7 ≡ κ 7
+    cell-4 = refl
 
-module index-Index-τ227 where
+    -- σ=1135 (2 nodes)
+    cell-5 : κ 7 ≡ κ 7
+    cell-5 = refl
 
-  -- ctx-227: 10 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=343 (10×)
-  ctx-227-τ227 : τ 227 ≡ τ 227
-  ctx-227-τ227 = refl
+    -- σ=209 (1 nodes)
+    cell-6 : κ 7 ≡ κ 7
+    cell-6 = refl
 
+    -- σ=481 (1 nodes)
+    cell-7 : κ 7 ≡ κ 7
+    cell-7 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 10 nodes, 1 type contexts, 1 forms
+    -- σ=541 (1 nodes)
+    cell-8 : κ 7 ≡ κ 7
+    cell-8 = refl
 
-module subscript-Subscript-τ228 where
+    -- σ=509 (1 nodes)
+    cell-9 : κ 7 ≡ κ 7
+    cell-9 = refl
 
-  -- ctx-228: 10 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=344 (10×)
-  ctx-228-τ228 : τ 228 ≡ τ 228
-  ctx-228-τ228 = refl
+    -- σ=900 (1 nodes)
+    cell-10 : κ 7 ≡ κ 7
+    cell-10 = refl
 
+    -- σ=1102 (1 nodes)
+    cell-11 : κ 7 ≡ κ 7
+    cell-11 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 10 nodes, 2 type contexts, 5 forms
+    -- σ=1227 (1 nodes)
+    cell-12 : κ 7 ≡ κ 7
+    cell-12 = refl
 
-module apply-Call-τ242 where
+    -- σ=1229 (1 nodes)
+    cell-13 : κ 7 ≡ κ 7
+    cell-13 = refl
 
-  -- ctx-242: 8 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=362 (4×)
-  --   σ=409 (1×)
-  --   σ=1431 (3×)
-  ctx-242-τ242 : τ 242 ≡ τ 242
-  ctx-242-τ242 = refl
+    -- σ=1234 (1 nodes)
+    cell-14 : κ 7 ≡ κ 7
+    cell-14 = refl
 
-  -- ctx-728: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1492 (1×)
-  --   σ=2067 (1×)
-  ctx-728-τ728 : τ 728 ≡ τ 728
-  ctx-728-τ728 = refl
+    -- σ=1621 (1 nodes)
+    cell-15 : κ 7 ≡ κ 7
+    cell-15 = refl
 
+    -- σ=1795 (1 nodes)
+    cell-16 : κ 7 ≡ κ 7
+    cell-16 = refl
 
--- ── free_monoid.op@state (Attribute) ───────────
--- 10 nodes, 1 type contexts, 4 forms
+    -- σ=1802 (1 nodes)
+    cell-17 : κ 7 ≡ κ 7
+    cell-17 = refl
 
-module free_monoid-op-at-state-Attribute-Self-_cleavage_levels-append where
+    -- σ=1804 (1 nodes)
+    cell-18 : κ 7 ≡ κ 7
+    cell-18 = refl
 
-  -- Self-_cleavage_levels-append: 10 nodes, 4 forms
-  -- [Self._cell_contents.get, Self._cell_obs.get, Self._cell_obs.keys, Self._cleavage_fibers.append, Self._cleavage_levels.append]
-  --   σ=519 (1×)
-  --   σ=530 (1×)
-  --   σ=624 (7×)
-  --   σ=1376 (1×)
-  Self-_cleavage_levels-append-τ153 : τ 153 ≡ τ 153
-  Self-_cleavage_levels-append-τ153 = refl
+    -- σ=1806 (1 nodes)
+    cell-19 : κ 7 ≡ κ 7
+    cell-19 = refl
 
+    -- σ=1811 (1 nodes)
+    cell-20 : κ 7 ≡ κ 7
+    cell-20 = refl
 
--- ── notin (NotIn) ──────────────────────────────
--- 9 nodes, 1 type contexts, 1 forms
+    -- σ=1972 (1 nodes)
+    cell-21 : κ 7 ≡ κ 7
+    cell-21 = refl
 
-module notin-NotIn-τ33 where
+    -- σ=1981 (1 nodes)
+    cell-22 : κ 7 ≡ κ 7
+    cell-22 = refl
 
-  -- ctx-33: 9 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=42 (9×)
-  ctx-33-τ33 : τ 33 ≡ τ 33
-  ctx-33-τ33 = refl
+    -- σ=755 (1 nodes)
+    cell-23 : κ 7 ≡ κ 7
+    cell-23 = refl
 
 
--- ── equalizer (Compare) ────────────────────────
--- 9 nodes, 2 type contexts, 7 forms
 
-module equalizer-Compare-τ78 where
+-- κ=0: 295 nodes, 2 τ-classes, 125 σ-classes
+module terminal-Constant where
 
-  -- ctx-78: 7 nodes, 6 forms
-  -- [(untyped)]
-  --   σ=115 (1×)
-  --   σ=208 (1×)
-  --   σ=735 (1×)
-  --   σ=1032 (1×)
-  --   σ=1150 (2×)
-  --   σ=1276 (1×)
-  ctx-78-τ78 : τ 78 ≡ τ 78
-  ctx-78-τ78 = refl
+  -- τ=0: 273 nodes, 124 σ-classes
+  module str where
 
-  -- ctx-396: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=650 (2×)
-  ctx-396-τ396 : τ 396 ≡ τ 396
-  ctx-396-τ396 = refl
+    -- σ=107 (37 nodes)
+    cell-0 : κ 0 ≡ κ 0
+    cell-0 = refl
 
+    -- σ=50 (31 nodes)
+    cell-1 : κ 0 ≡ κ 0
+    cell-1 = refl
 
--- ── free_monoid.literal (List) ─────────────────
--- 9 nodes, 1 type contexts, 1 forms
+    -- σ=37 (18 nodes)
+    cell-2 : κ 0 ≡ κ 0
+    cell-2 = refl
 
-module free_monoid-literal-List-list-0 where
+    -- σ=323 (10 nodes)
+    cell-3 : κ 0 ≡ κ 0
+    cell-3 = refl
 
-  -- list: 9 nodes, 1 forms
-  -- [list]
-  --   σ=164 (9×)
-  list-τ115 : τ 115 ≡ τ 115
-  list-τ115 = refl
+    -- σ=327 (9 nodes)
+    cell-4 : κ 0 ≡ κ 0
+    cell-4 = refl
 
+    -- σ=331 (9 nodes)
+    cell-5 : κ 0 ≡ κ 0
+    cell-5 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 9 nodes, 2 type contexts, 5 forms
+    -- σ=503 (8 nodes)
+    cell-6 : κ 0 ≡ κ 0
+    cell-6 = refl
 
-module apply-Call-τ174 where
+    -- σ=1826 (7 nodes)
+    cell-7 : κ 0 ≡ κ 0
+    cell-7 = refl
 
-  -- ctx-174: 7 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=254 (1×)
-  --   σ=811 (4×)
-  --   σ=1193 (1×)
-  --   σ=1320 (1×)
-  ctx-174-τ174 : τ 174 ≡ τ 174
-  ctx-174-τ174 = refl
+    -- σ=1829 (5 nodes)
+    cell-8 : κ 0 ≡ κ 0
+    cell-8 = refl
 
-  -- ctx-597: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1152 (2×)
-  ctx-597-τ597 : τ 597 ≡ τ 597
-  ctx-597-τ597 = refl
+    -- σ=523 (4 nodes)
+    cell-9 : κ 0 ≡ κ 0
+    cell-9 = refl
 
+    -- σ=613 (4 nodes)
+    cell-10 : κ 0 ≡ κ 0
+    cell-10 = refl
 
--- ── monoid.op@? (Attribute) ────────────────────
--- 9 nodes, 1 type contexts, 9 forms
+    -- σ=1789 (4 nodes)
+    cell-11 : κ 0 ≡ κ 0
+    cell-11 = refl
 
-module monoid-op-at-x3f-Attribute-τ188 where
+    -- σ=1819 (4 nodes)
+    cell-12 : κ 0 ≡ κ 0
+    cell-12 = refl
 
-  -- ctx-188: 9 nodes, 9 forms
-  -- [(untyped)]
-  ctx-188-τ188 : τ 188 ≡ τ 188
-  ctx-188-τ188 = refl
+    -- σ=1822 (4 nodes)
+    cell-13 : κ 0 ≡ κ 0
+    cell-13 = refl
 
+    -- σ=583 (3 nodes)
+    cell-14 : κ 0 ≡ κ 0
+    cell-14 = refl
 
--- ── gt (Gt) ────────────────────────────────────
--- 9 nodes, 1 type contexts, 1 forms
+    -- σ=170 (2 nodes)
+    cell-15 : κ 0 ≡ κ 0
+    cell-15 = refl
 
-module gt-Gt-τ307 where
+    -- σ=314 (2 nodes)
+    cell-16 : κ 0 ≡ κ 0
+    cell-16 = refl
 
-  -- ctx-307: 9 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=454 (9×)
-  ctx-307-τ307 : τ 307 ≡ τ 307
-  ctx-307-τ307 = refl
+    -- σ=612 (2 nodes)
+    cell-17 : κ 0 ≡ κ 0
+    cell-17 = refl
 
+    -- σ=1380 (2 nodes)
+    cell-18 : κ 0 ≡ κ 0
+    cell-18 = refl
 
--- ── partial.apply@state (Call) ─────────────────
--- 9 nodes, 1 type contexts, 7 forms
+    -- σ=1958 (2 nodes)
+    cell-19 : κ 0 ≡ κ 0
+    cell-19 = refl
 
-module partial-apply-at-state-Call-T-0 where
+    -- σ=1995 (2 nodes)
+    cell-20 : κ 0 ≡ κ 0
+    cell-20 = refl
 
-  -- T: 9 nodes, 7 forms
-  -- [T]
-  --   σ=485 (1×)
-  --   σ=761 (1×)
-  --   σ=922 (1×)
-  --   σ=927 (2×)
-  --   σ=1027 (1×)
-  --   σ=1051 (2×)
-  --   σ=1203 (1×)
-  T-τ324 : τ 324 ≡ τ 324
-  T-τ324 = refl
+    -- σ=2038 (2 nodes)
+    cell-21 : κ 0 ≡ κ 0
+    cell-21 = refl
 
+    -- σ=0 (1 nodes)
+    cell-22 : κ 0 ≡ κ 0
+    cell-22 = refl
 
--- ── arguments (arguments) ──────────────────────
--- 8 nodes, 2 type contexts, 6 forms
+    -- σ=11 (1 nodes)
+    cell-23 : κ 0 ≡ κ 0
+    cell-23 = refl
 
-module arguments-arguments-τ124 where
+    -- σ=15 (1 nodes)
+    cell-24 : κ 0 ≡ κ 0
+    cell-24 = refl
 
-  -- ctx-124: 5 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=183 (1×)
-  --   σ=236 (2×)
-  --   σ=1638 (1×)
-  --   σ=1691 (1×)
-  ctx-124-τ124 : τ 124 ≡ τ 124
-  ctx-124-τ124 = refl
+    -- σ=16 (1 nodes)
+    cell-25 : κ 0 ≡ κ 0
+    cell-25 = refl
 
-  -- ctx-32: 3 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=40 (2×)
-  --   σ=113 (1×)
-  ctx-32-τ32 : τ 32 ≡ τ 32
-  ctx-32-τ32 = refl
+    -- σ=75 (1 nodes)
+    cell-26 : κ 0 ≡ κ 0
+    cell-26 = refl
 
+    -- σ=131 (1 nodes)
+    cell-27 : κ 0 ≡ κ 0
+    cell-27 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 8 nodes, 2 type contexts, 7 forms
+    -- σ=133 (1 nodes)
+    cell-28 : κ 0 ≡ κ 0
+    cell-28 = refl
 
-module let-k-Assign-τ38 where
+    -- σ=134 (1 nodes)
+    cell-29 : κ 0 ≡ κ 0
+    cell-29 = refl
 
-  -- ctx-38: 5 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=47 (1×)
-  --   σ=103 (1×)
-  --   σ=825 (1×)
-  --   σ=1003 (1×)
-  --   σ=1084 (1×)
-  ctx-38-τ38 : τ 38 ≡ τ 38
-  ctx-38-τ38 = refl
+    -- σ=135 (1 nodes)
+    cell-30 : κ 0 ≡ κ 0
+    cell-30 = refl
 
-  -- ctx-149: 3 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=217 (1×)
-  --   σ=1160 (2×)
-  ctx-149-τ149 : τ 149 ≡ τ 149
-  ctx-149-τ149 = refl
+    -- σ=136 (1 nodes)
+    cell-31 : κ 0 ≡ κ 0
+    cell-31 = refl
 
+    -- σ=167 (1 nodes)
+    cell-32 : κ 0 ≡ κ 0
+    cell-32 = refl
 
--- ── monoid.op@? (Attribute) ────────────────────
--- 8 nodes, 2 type contexts, 6 forms
+    -- σ=174 (1 nodes)
+    cell-33 : κ 0 ≡ κ 0
+    cell-33 = refl
 
-module monoid-op-at-x3f-Attribute-τ178 where
+    -- σ=180 (1 nodes)
+    cell-34 : κ 0 ≡ κ 0
+    cell-34 = refl
 
-  -- ctx-178: 7 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=720 (1×)
-  --   σ=832 (1×)
-  --   σ=1089 (2×)
-  --   σ=1097 (1×)
-  --   σ=1364 (2×)
-  ctx-178-τ178 : τ 178 ≡ τ 178
-  ctx-178-τ178 = refl
+    -- σ=237 (1 nodes)
+    cell-35 : κ 0 ≡ κ 0
+    cell-35 = refl
 
-  -- ctx-158: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=448 (1×)
-  ctx-158-τ158 : τ 158 ≡ τ 158
-  ctx-158-τ158 = refl
+    -- σ=246 (1 nodes)
+    cell-36 : κ 0 ≡ κ 0
+    cell-36 = refl
 
+    -- σ=273 (1 nodes)
+    cell-37 : κ 0 ≡ κ 0
+    cell-37 = refl
 
--- ── monoid.op@? (Call) ─────────────────────────
--- 8 nodes, 2 type contexts, 7 forms
+    -- σ=309 (1 nodes)
+    cell-38 : κ 0 ≡ κ 0
+    cell-38 = refl
 
-module monoid-op-at-x3f-Call-τ444 where
+    -- σ=319 (1 nodes)
+    cell-39 : κ 0 ≡ κ 0
+    cell-39 = refl
 
-  -- ctx-444: 7 nodes, 6 forms
-  -- [(untyped)]
-  --   σ=721 (1×)
-  --   σ=833 (1×)
-  --   σ=1090 (1×)
-  --   σ=1098 (1×)
-  --   σ=1365 (2×)
-  --   σ=1371 (1×)
-  ctx-444-τ444 : τ 444 ≡ τ 444
-  ctx-444-τ444 = refl
+    -- σ=429 (1 nodes)
+    cell-40 : κ 0 ≡ κ 0
+    cell-40 = refl
 
-  -- ctx-303: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=450 (1×)
-  ctx-303-τ303 : τ 303 ≡ τ 303
-  ctx-303-τ303 = refl
+    -- σ=473 (1 nodes)
+    cell-41 : κ 0 ≡ κ 0
+    cell-41 = refl
 
+    -- σ=514 (1 nodes)
+    cell-42 : κ 0 ≡ κ 0
+    cell-42 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 8 nodes, 2 type contexts, 7 forms
+    -- σ=610 (1 nodes)
+    cell-43 : κ 0 ≡ κ 0
+    cell-43 = refl
 
-module effect-seq-Expr-τ445-0 where
+    -- σ=619 (1 nodes)
+    cell-44 : κ 0 ≡ κ 0
+    cell-44 = refl
 
-  -- ctx-445: 7 nodes, 6 forms
-  -- [(untyped)]
-  --   σ=722 (1×)
-  --   σ=834 (1×)
-  --   σ=1091 (1×)
-  --   σ=1099 (1×)
-  --   σ=1366 (2×)
-  --   σ=1372 (1×)
-  ctx-445-τ445 : τ 445 ≡ τ 445
-  ctx-445-τ445 = refl
+    -- σ=749 (1 nodes)
+    cell-45 : κ 0 ≡ κ 0
+    cell-45 = refl
 
-  -- ctx-304: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=451 (1×)
-  ctx-304-τ304 : τ 304 ≡ τ 304
-  ctx-304-τ304 = refl
+    -- σ=839 (1 nodes)
+    cell-46 : κ 0 ≡ κ 0
+    cell-46 = refl
 
+    -- σ=871 (1 nodes)
+    cell-47 : κ 0 ≡ κ 0
+    cell-47 = refl
 
--- ── sub (Sub) ──────────────────────────────────
--- 8 nodes, 1 type contexts, 1 forms
+    -- σ=915 (1 nodes)
+    cell-48 : κ 0 ≡ κ 0
+    cell-48 = refl
 
-module sub-Sub-τ313 where
+    -- σ=935 (1 nodes)
+    cell-49 : κ 0 ≡ κ 0
+    cell-49 = refl
 
-  -- ctx-313: 8 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=461 (8×)
-  ctx-313-τ313 : τ 313 ≡ τ 313
-  ctx-313-τ313 = refl
+    -- σ=998 (1 nodes)
+    cell-50 : κ 0 ≡ κ 0
+    cell-50 = refl
 
+    -- σ=1044 (1 nodes)
+    cell-51 : κ 0 ≡ κ 0
+    cell-51 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 8 nodes, 1 type contexts, 4 forms
+    -- σ=1075 (1 nodes)
+    cell-52 : κ 0 ≡ κ 0
+    cell-52 = refl
 
-module let-k-Assign-τ467 where
+    -- σ=1136 (1 nodes)
+    cell-53 : κ 0 ≡ κ 0
+    cell-53 = refl
 
-  -- ctx-467: 8 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=793 (4×)
-  --   σ=973 (2×)
-  --   σ=1259 (1×)
-  --   σ=1733 (1×)
-  ctx-467-τ467 : τ 467 ≡ τ 467
-  ctx-467-τ467 = refl
+    -- σ=1225 (1 nodes)
+    cell-54 : κ 0 ≡ κ 0
+    cell-54 = refl
 
+    -- σ=1299 (1 nodes)
+    cell-55 : κ 0 ≡ κ 0
+    cell-55 = refl
 
--- ── product (Tuple) ────────────────────────────
--- 8 nodes, 4 type contexts, 7 forms
+    -- σ=1301 (1 nodes)
+    cell-56 : κ 0 ≡ κ 0
+    cell-56 = refl
 
-module product-Tuple-tuple-3 where
+    -- σ=1377 (1 nodes)
+    cell-57 : κ 0 ≡ κ 0
+    cell-57 = refl
 
-  -- tuple: 4 nodes, 4 forms
-  -- [tuple]
-  --   σ=817 (1×)
-  --   σ=1232 (1×)
-  --   σ=1266 (1×)
-  --   σ=1752 (1×)
-  tuple-τ477 : τ 477 ≡ τ 477
-  tuple-τ477 = refl
+    -- σ=1378 (1 nodes)
+    cell-58 : κ 0 ≡ κ 0
+    cell-58 = refl
 
-  -- tuple: 2 nodes, 1 forms
-  -- [tuple]
-  --   σ=1425 (2×)
-  tuple-τ693 : τ 693 ≡ τ 693
-  tuple-τ693 = refl
+    -- σ=1379 (1 nodes)
+    cell-59 : κ 0 ≡ κ 0
+    cell-59 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=1197 (1×)
-  tuple-τ608 : τ 608 ≡ τ 608
-  tuple-τ608 = refl
+    -- σ=1381 (1 nodes)
+    cell-60 : κ 0 ≡ κ 0
+    cell-60 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=1324 (1×)
-  tuple-τ646 : τ 646 ≡ τ 646
-  tuple-τ646 = refl
+    -- σ=1382 (1 nodes)
+    cell-61 : κ 0 ≡ κ 0
+    cell-61 = refl
 
+    -- σ=1422 (1 nodes)
+    cell-62 : κ 0 ≡ κ 0
+    cell-62 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 8 nodes, 2 type contexts, 7 forms
+    -- σ=1459 (1 nodes)
+    cell-63 : κ 0 ≡ κ 0
+    cell-63 = refl
 
-module apply-Call-τ499 where
+    -- σ=1484 (1 nodes)
+    cell-64 : κ 0 ≡ κ 0
+    cell-64 = refl
 
-  -- ctx-499: 7 nodes, 6 forms
-  -- [(untyped)]
-  --   σ=858 (1×)
-  --   σ=1015 (1×)
-  --   σ=1059 (2×)
-  --   σ=1206 (1×)
-  --   σ=1563 (1×)
-  --   σ=1659 (1×)
-  ctx-499-τ499 : τ 499 ≡ τ 499
-  ctx-499-τ499 = refl
+    -- σ=1524 (1 nodes)
+    cell-65 : κ 0 ≡ κ 0
+    cell-65 = refl
 
-  -- ctx-660: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1357 (1×)
-  ctx-660-τ660 : τ 660 ≡ τ 660
-  ctx-660-τ660 = refl
+    -- σ=1556 (1 nodes)
+    cell-66 : κ 0 ≡ κ 0
+    cell-66 = refl
 
+    -- σ=1570 (1 nodes)
+    cell-67 : κ 0 ≡ κ 0
+    cell-67 = refl
 
--- ── div (Div) ──────────────────────────────────
--- 8 nodes, 1 type contexts, 1 forms
+    -- σ=1639 (1 nodes)
+    cell-68 : κ 0 ≡ κ 0
+    cell-68 = refl
 
-module div-Div-τ852 where
+    -- σ=1692 (1 nodes)
+    cell-69 : κ 0 ≡ κ 0
+    cell-69 = refl
 
-  -- ctx-852: 8 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1823 (8×)
-  ctx-852-τ852 : τ 852 ≡ τ 852
-  ctx-852-τ852 = refl
+    -- σ=1722 (1 nodes)
+    cell-70 : κ 0 ≡ κ 0
+    cell-70 = refl
 
+    -- σ=1773 (1 nodes)
+    cell-71 : κ 0 ≡ κ 0
+    cell-71 = refl
 
--- ── free_monoid.op@sequence (Attribute) ────────
--- 8 nodes, 1 type contexts, 1 forms
+    -- σ=1776 (1 nodes)
+    cell-72 : κ 0 ≡ κ 0
+    cell-72 = refl
 
-module free_monoid-op-at-sequence-Attribute-list-append where
+    -- σ=1779 (1 nodes)
+    cell-73 : κ 0 ≡ κ 0
+    cell-73 = refl
 
-  -- list-append: 8 nodes, 1 forms
-  -- [Self._cascade_abstraction_merge, Self._cascade_eta, Self._cell_contents, Self._cell_obs, Self._cleavage_fibers]
-  --   σ=1926 (8×)
-  list-append-τ34 : τ 34 ≡ τ 34
-  list-append-τ34 = refl
+    -- σ=1782 (1 nodes)
+    cell-74 : κ 0 ≡ κ 0
+    cell-74 = refl
 
+    -- σ=1785 (1 nodes)
+    cell-75 : κ 0 ≡ κ 0
+    cell-75 = refl
 
--- ── arg (arg) ──────────────────────────────────
--- 7 nodes, 2 type contexts, 5 forms
+    -- σ=1793 (1 nodes)
+    cell-76 : κ 0 ≡ κ 0
+    cell-76 = refl
 
-module arg-arg-τ103 where
+    -- σ=1799 (1 nodes)
+    cell-77 : κ 0 ≡ κ 0
+    cell-77 = refl
 
-  -- ctx-103: 5 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=149 (2×)
-  --   σ=1219 (1×)
-  --   σ=1220 (1×)
-  --   σ=1221 (1×)
-  ctx-103-τ103 : τ 103 ≡ τ 103
-  ctx-103-τ103 = refl
+    -- σ=1812 (1 nodes)
+    cell-78 : κ 0 ≡ κ 0
+    cell-78 = refl
 
-  -- ctx-99: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=145 (2×)
-  ctx-99-τ99 : τ 99 ≡ τ 99
-  ctx-99-τ99 = refl
+    -- σ=1814 (1 nodes)
+    cell-79 : κ 0 ≡ κ 0
+    cell-79 = refl
 
+    -- σ=1817 (1 nodes)
+    cell-80 : κ 0 ≡ κ 0
+    cell-80 = refl
 
--- ── monoid.accum (AugAssign) ───────────────────
--- 7 nodes, 1 type contexts, 3 forms
+    -- σ=1831 (1 nodes)
+    cell-81 : κ 0 ≡ κ 0
+    cell-81 = refl
 
-module monoid-accum-AugAssign-τ148 where
+    -- σ=1838 (1 nodes)
+    cell-82 : κ 0 ≡ κ 0
+    cell-82 = refl
 
-  -- ctx-148: 7 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=215 (1×)
-  --   σ=608 (1×)
-  --   σ=837 (5×)
-  ctx-148-τ148 : τ 148 ≡ τ 148
-  ctx-148-τ148 = refl
+    -- σ=1845 (1 nodes)
+    cell-83 : κ 0 ≡ κ 0
+    cell-83 = refl
 
+    -- σ=1848 (1 nodes)
+    cell-84 : κ 0 ≡ κ 0
+    cell-84 = refl
 
--- ── comprehension (comprehension) ──────────────
--- 7 nodes, 2 type contexts, 6 forms
+    -- σ=1853 (1 nodes)
+    cell-85 : κ 0 ≡ κ 0
+    cell-85 = refl
 
-module comprehension-comprehension-τ518 where
+    -- σ=1854 (1 nodes)
+    cell-86 : κ 0 ≡ κ 0
+    cell-86 = refl
 
-  -- ctx-518: 6 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=896 (1×)
-  --   σ=996 (1×)
-  --   σ=1253 (1×)
-  --   σ=1328 (2×)
-  --   σ=1887 (1×)
-  ctx-518-τ518 : τ 518 ≡ τ 518
-  ctx-518-τ518 = refl
+    -- σ=1861 (1 nodes)
+    cell-87 : κ 0 ≡ κ 0
+    cell-87 = refl
 
-  -- ctx-330: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=496 (1×)
-  ctx-330-τ330 : τ 330 ≡ τ 330
-  ctx-330-τ330 = refl
+    -- σ=1874 (1 nodes)
+    cell-88 : κ 0 ≡ κ 0
+    cell-88 = refl
 
+    -- σ=1927 (1 nodes)
+    cell-89 : κ 0 ≡ κ 0
+    cell-89 = refl
 
--- ── fixpoint.next (Continue) ───────────────────
--- 7 nodes, 1 type contexts, 1 forms
+    -- σ=1933 (1 nodes)
+    cell-90 : κ 0 ≡ κ 0
+    cell-90 = refl
 
-module fixpoint-next-Continue-τ412 where
+    -- σ=1936 (1 nodes)
+    cell-91 : κ 0 ≡ κ 0
+    cell-91 = refl
 
-  -- ctx-412: 7 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=671 (7×)
-  ctx-412-τ412 : τ 412 ≡ τ 412
-  ctx-412-τ412 = refl
+    -- σ=1938 (1 nodes)
+    cell-92 : κ 0 ≡ κ 0
+    cell-92 = refl
 
+    -- σ=1943 (1 nodes)
+    cell-93 : κ 0 ≡ κ 0
+    cell-93 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 7 nodes, 1 type contexts, 6 forms
+    -- σ=1946 (1 nodes)
+    cell-94 : κ 0 ≡ κ 0
+    cell-94 = refl
 
-module apply-Call-τ456 where
+    -- σ=1949 (1 nodes)
+    cell-95 : κ 0 ≡ κ 0
+    cell-95 = refl
 
-  -- ctx-456: 7 nodes, 6 forms
-  -- [(untyped)]
-  --   σ=762 (1×)
-  --   σ=923 (1×)
-  --   σ=928 (1×)
-  --   σ=1008 (1×)
-  --   σ=1052 (2×)
-  --   σ=1204 (1×)
-  ctx-456-τ456 : τ 456 ≡ τ 456
-  ctx-456-τ456 = refl
+    -- σ=1951 (1 nodes)
+    cell-96 : κ 0 ≡ κ 0
+    cell-96 = refl
 
+    -- σ=1955 (1 nodes)
+    cell-97 : κ 0 ≡ κ 0
+    cell-97 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 7 nodes, 1 type contexts, 6 forms
+    -- σ=1960 (1 nodes)
+    cell-98 : κ 0 ≡ κ 0
+    cell-98 = refl
 
-module effect-seq-Expr-τ457 where
+    -- σ=1962 (1 nodes)
+    cell-99 : κ 0 ≡ κ 0
+    cell-99 = refl
 
-  -- ctx-457: 7 nodes, 6 forms
-  -- [(untyped)]
-  --   σ=763 (1×)
-  --   σ=924 (1×)
-  --   σ=929 (1×)
-  --   σ=1009 (1×)
-  --   σ=1053 (2×)
-  --   σ=1205 (1×)
-  ctx-457-τ457 : τ 457 ≡ τ 457
-  ctx-457-τ457 = refl
+    -- σ=1965 (1 nodes)
+    cell-100 : κ 0 ≡ κ 0
+    cell-100 = refl
 
+    -- σ=1966 (1 nodes)
+    cell-101 : κ 0 ≡ κ 0
+    cell-101 = refl
 
--- ── alias (alias) ──────────────────────────────
--- 6 nodes, 1 type contexts, 6 forms
+    -- σ=1973 (1 nodes)
+    cell-102 : κ 0 ≡ κ 0
+    cell-102 = refl
 
-module alias-alias-τ2 where
+    -- σ=1974 (1 nodes)
+    cell-103 : κ 0 ≡ κ 0
+    cell-103 = refl
 
-  -- ctx-2: 6 nodes, 6 forms
-  -- [(untyped)]
-  --   σ=2 (1×)
-  --   σ=4 (1×)
-  --   σ=5 (1×)
-  --   σ=7 (1×)
-  --   σ=8 (1×)
-  --   σ=9 (1×)
-  ctx-2-τ2 : τ 2 ≡ τ 2
-  ctx-2-τ2 = refl
+    -- σ=1975 (1 nodes)
+    cell-104 : κ 0 ≡ κ 0
+    cell-104 = refl
 
+    -- σ=1976 (1 nodes)
+    cell-105 : κ 0 ≡ κ 0
+    cell-105 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 6 nodes, 1 type contexts, 6 forms
+    -- σ=1977 (1 nodes)
+    cell-106 : κ 0 ≡ κ 0
+    cell-106 = refl
 
-module let-k-Assign-τ45 where
+    -- σ=1978 (1 nodes)
+    cell-107 : κ 0 ≡ κ 0
+    cell-107 = refl
 
-  -- ctx-45: 6 nodes, 6 forms
-  -- [(untyped)]
-  --   σ=55 (1×)
-  --   σ=508 (1×)
-  --   σ=511 (1×)
-  --   σ=554 (1×)
-  --   σ=696 (1×)
-  --   σ=1210 (1×)
-  ctx-45-τ45 : τ 45 ≡ τ 45
-  ctx-45-τ45 = refl
+    -- σ=1990 (1 nodes)
+    cell-108 : κ 0 ≡ κ 0
+    cell-108 = refl
 
+    -- σ=1993 (1 nodes)
+    cell-109 : κ 0 ≡ κ 0
+    cell-109 = refl
 
--- ── arguments (arguments) ──────────────────────
--- 6 nodes, 2 type contexts, 6 forms
+    -- σ=1998 (1 nodes)
+    cell-110 : κ 0 ≡ κ 0
+    cell-110 = refl
 
-module arguments-arguments-τ168 where
+    -- σ=2014 (1 nodes)
+    cell-111 : κ 0 ≡ κ 0
+    cell-111 = refl
 
-  -- ctx-168: 5 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=245 (1×)
-  --   σ=727 (1×)
-  --   σ=1458 (1×)
-  --   σ=1483 (1×)
-  --   σ=1555 (1×)
-  ctx-168-τ168 : τ 168 ≡ τ 168
-  ctx-168-τ168 = refl
+    -- σ=2015 (1 nodes)
+    cell-112 : κ 0 ≡ κ 0
+    cell-112 = refl
 
-  -- ctx-58: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=74 (1×)
-  ctx-58-τ58 : τ 58 ≡ τ 58
-  ctx-58-τ58 = refl
+    -- σ=2031 (1 nodes)
+    cell-113 : κ 0 ≡ κ 0
+    cell-113 = refl
 
+    -- σ=2035 (1 nodes)
+    cell-114 : κ 0 ≡ κ 0
+    cell-114 = refl
 
--- ── eq (Eq) ────────────────────────────────────
--- 6 nodes, 1 type contexts, 1 forms
+    -- σ=2036 (1 nodes)
+    cell-115 : κ 0 ≡ κ 0
+    cell-115 = refl
 
-module eq-Eq-τ65 where
+    -- σ=2041 (1 nodes)
+    cell-116 : κ 0 ≡ κ 0
+    cell-116 = refl
 
-  -- ctx-65: 6 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=88 (6×)
-  ctx-65-τ65 : τ 65 ≡ τ 65
-  ctx-65-τ65 = refl
+    -- σ=2044 (1 nodes)
+    cell-117 : κ 0 ≡ κ 0
+    cell-117 = refl
 
+    -- σ=2069 (1 nodes)
+    cell-118 : κ 0 ≡ κ 0
+    cell-118 = refl
 
--- ── coerce (FormattedValue) ────────────────────
--- 6 nodes, 1 type contexts, 6 forms
+    -- σ=2071 (1 nodes)
+    cell-119 : κ 0 ≡ κ 0
+    cell-119 = refl
 
-module coerce-FormattedValue-τ119 where
+    -- σ=2076 (1 nodes)
+    cell-120 : κ 0 ≡ κ 0
+    cell-120 = refl
 
-  -- ctx-119: 6 nodes, 6 forms
-  -- [(untyped)]
-  --   σ=173 (1×)
-  --   σ=526 (1×)
-  --   σ=1778 (1×)
-  --   σ=1781 (1×)
-  --   σ=1784 (1×)
-  --   σ=1950 (1×)
-  ctx-119-τ119 : τ 119 ≡ τ 119
-  ctx-119-τ119 = refl
+    -- σ=2078 (1 nodes)
+    cell-121 : κ 0 ≡ κ 0
+    cell-121 = refl
 
+    -- σ=2081 (1 nodes)
+    cell-122 : κ 0 ≡ κ 0
+    cell-122 = refl
 
--- ── product (Tuple) ────────────────────────────
--- 6 nodes, 1 type contexts, 1 forms
+    -- σ=2090 (1 nodes)
+    cell-123 : κ 0 ≡ κ 0
+    cell-123 = refl
 
-module product-Tuple-tuple-4 where
 
-  -- tuple: 6 nodes, 1 forms
-  -- [tuple]
-  --   σ=348 (6×)
-  tuple-τ229 : τ 229 ≡ τ 229
-  tuple-τ229 = refl
+  -- τ=95: 22 nodes, 1 σ-classes
+  module τ95 where
 
+    -- σ=141 (22 nodes)
+    cell-0 : κ 0 ≡ κ 0
+    cell-0 = refl
 
--- ── index (Index) ──────────────────────────────
--- 6 nodes, 1 type contexts, 1 forms
 
-module index-Index-τ230 where
 
-  -- ctx-230: 6 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=349 (6×)
-  ctx-230-τ230 : τ 230 ≡ τ 230
-  ctx-230-τ230 = refl
+-- κ=24: 243 nodes, 1 τ-classes, 44 σ-classes
+module morphism-at-state-Attribute-0 where
 
+  -- τ=34: 243 nodes, 44 σ-classes
+  module Self-_parent where
 
--- ── subscript (Subscript) ──────────────────────
--- 6 nodes, 1 type contexts, 1 forms
+    -- σ=476 (54 nodes)
+    cell-0 : κ 24 ≡ κ 24
+    cell-0 = refl
 
-module subscript-Subscript-τ231 where
+    -- σ=578 (14 nodes)
+    cell-1 : κ 24 ≡ κ 24
+    cell-1 = refl
 
-  -- ctx-231: 6 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=350 (6×)
-  ctx-231-τ231 : τ 231 ≡ τ 231
-  ctx-231-τ231 = refl
+    -- σ=767 (14 nodes)
+    cell-2 : κ 24 ≡ κ 24
+    cell-2 = refl
 
+    -- σ=649 (12 nodes)
+    cell-3 : κ 24 ≡ κ 24
+    cell-3 = refl
 
--- ── index (Index) ──────────────────────────────
--- 6 nodes, 1 type contexts, 1 forms
+    -- σ=43 (11 nodes)
+    cell-4 : κ 24 ≡ κ 24
+    cell-4 = refl
 
-module index-Index-τ237 where
+    -- σ=1439 (11 nodes)
+    cell-5 : κ 24 ≡ κ 24
+    cell-5 = refl
 
-  -- ctx-237: 6 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=357 (6×)
-  ctx-237-τ237 : τ 237 ≡ τ 237
-  ctx-237-τ237 = refl
+    -- σ=920 (9 nodes)
+    cell-6 : κ 24 ≡ κ 24
+    cell-6 = refl
 
+    -- σ=490 (8 nodes)
+    cell-7 : κ 24 ≡ κ 24
+    cell-7 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 6 nodes, 1 type contexts, 1 forms
+    -- σ=623 (8 nodes)
+    cell-8 : κ 24 ≡ κ 24
+    cell-8 = refl
 
-module subscript-Subscript-τ238 where
+    -- σ=223 (7 nodes)
+    cell-9 : κ 24 ≡ κ 24
+    cell-9 = refl
 
-  -- ctx-238: 6 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=358 (6×)
-  ctx-238-τ238 : τ 238 ≡ τ 238
-  ctx-238-τ238 = refl
+    -- σ=48 (6 nodes)
+    cell-10 : κ 24 ≡ κ 24
+    cell-10 = refl
 
+    -- σ=218 (6 nodes)
+    cell-11 : κ 24 ≡ κ 24
+    cell-11 = refl
 
--- ── arg (arg) ──────────────────────────────────
--- 6 nodes, 2 type contexts, 5 forms
+    -- σ=482 (6 nodes)
+    cell-12 : κ 24 ≡ κ 24
+    cell-12 = refl
 
-module arg-arg-τ440 where
+    -- σ=759 (6 nodes)
+    cell-13 : κ 24 ≡ κ 24
+    cell-13 = refl
 
-  -- ctx-440: 3 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=710 (1×)
-  --   σ=869 (2×)
-  ctx-440-τ440 : τ 440 ≡ τ 440
-  ctx-440-τ440 = refl
+    -- σ=807 (6 nodes)
+    cell-14 : κ 24 ≡ κ 24
+    cell-14 = refl
 
-  -- ctx-452: 3 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=747 (1×)
-  --   σ=912 (1×)
-  --   σ=933 (1×)
-  ctx-452-τ452 : τ 452 ≡ τ 452
-  ctx-452-τ452 = refl
+    -- σ=855 (6 nodes)
+    cell-15 : κ 24 ≡ κ 24
+    cell-15 = refl
 
+    -- σ=431 (4 nodes)
+    cell-16 : κ 24 ≡ κ 24
+    cell-16 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 6 nodes, 1 type contexts, 3 forms
+    -- σ=516 (4 nodes)
+    cell-17 : κ 24 ≡ κ 24
+    cell-17 = refl
 
-module let-k-Assign-τ476 where
+    -- σ=641 (4 nodes)
+    cell-18 : κ 24 ≡ κ 24
+    cell-18 = refl
 
-  -- ctx-476: 6 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=812 (4×)
-  --   σ=1194 (1×)
-  --   σ=1321 (1×)
-  ctx-476-τ476 : τ 476 ≡ τ 476
-  ctx-476-τ476 = refl
+    -- σ=1240 (4 nodes)
+    cell-19 : κ 24 ≡ κ 24
+    cell-19 = refl
 
+    -- σ=1246 (4 nodes)
+    cell-20 : κ 24 ≡ κ 24
+    cell-20 = refl
 
--- ── fiber (Call) ───────────────────────────────
--- 6 nodes, 1 type contexts, 4 forms
+    -- σ=207 (3 nodes)
+    cell-21 : κ 24 ≡ κ 24
+    cell-21 = refl
 
-module fiber-Call-bool where
+    -- σ=444 (3 nodes)
+    cell-22 : κ 24 ≡ κ 24
+    cell-22 = refl
 
-  -- bool: 6 nodes, 4 forms
-  -- [bool]
-  --   σ=851 (1×)
-  --   σ=1011 (1×)
-  --   σ=1055 (3×)
-  --   σ=1872 (1×)
-  bool-τ494 : τ 494 ≡ τ 494
-  bool-τ494 = refl
+    -- σ=460 (3 nodes)
+    cell-23 : κ 24 ≡ κ 24
+    cell-23 = refl
 
+    -- σ=524 (3 nodes)
+    cell-24 : κ 24 ≡ κ 24
+    cell-24 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 6 nodes, 2 type contexts, 5 forms
+    -- σ=80 (2 nodes)
+    cell-25 : κ 24 ≡ κ 24
+    cell-25 = refl
 
-module effect-seq-Expr-τ500 where
+    -- σ=296 (2 nodes)
+    cell-26 : κ 24 ≡ κ 24
+    cell-26 = refl
 
-  -- ctx-500: 5 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=859 (1×)
-  --   σ=1016 (1×)
-  --   σ=1060 (2×)
-  --   σ=1207 (1×)
-  ctx-500-τ500 : τ 500 ≡ τ 500
-  ctx-500-τ500 = refl
+    -- σ=939 (2 nodes)
+    cell-27 : κ 24 ≡ κ 24
+    cell-27 = refl
 
-  -- ctx-661: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1358 (1×)
-  ctx-661-τ661 : τ 661 ≡ τ 661
-  ctx-661-τ661 = refl
+    -- σ=1166 (2 nodes)
+    cell-28 : κ 24 ≡ κ 24
+    cell-28 = refl
 
+    -- σ=1332 (2 nodes)
+    cell-29 : κ 24 ≡ κ 24
+    cell-29 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 6 nodes, 1 type contexts, 3 forms
+    -- σ=1562 (2 nodes)
+    cell-30 : κ 24 ≡ κ 24
+    cell-30 = refl
 
-module apply-Call-τ701 where
+    -- σ=1770 (2 nodes)
+    cell-31 : κ 24 ≡ κ 24
+    cell-31 = refl
 
-  -- ctx-701: 6 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=1441 (2×)
-  --   σ=1442 (2×)
-  --   σ=1443 (2×)
-  ctx-701-τ701 : τ 701 ≡ τ 701
-  ctx-701-τ701 = refl
+    -- σ=1774 (2 nodes)
+    cell-32 : κ 24 ≡ κ 24
+    cell-32 = refl
 
+    -- σ=168 (1 nodes)
+    cell-33 : κ 24 ≡ κ 24
+    cell-33 = refl
 
--- ── bimap (BinOp) ──────────────────────────────
--- 6 nodes, 3 type contexts, 6 forms
+    -- σ=171 (1 nodes)
+    cell-34 : κ 24 ≡ κ 24
+    cell-34 = refl
 
-module bimap-BinOp-τ853 where
+    -- σ=213 (1 nodes)
+    cell-35 : κ 24 ≡ κ 24
+    cell-35 = refl
 
-  -- ctx-853: 4 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=1824 (1×)
-  --   σ=1834 (1×)
-  --   σ=1841 (1×)
-  --   σ=1996 (1×)
-  ctx-853-τ853 : τ 853 ≡ τ 853
-  ctx-853-τ853 = refl
+    -- σ=310 (1 nodes)
+    cell-36 : κ 24 ≡ κ 24
+    cell-36 = refl
 
-  -- ctx-921: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2001 (1×)
-  ctx-921-τ921 : τ 921 ≡ τ 921
-  ctx-921-τ921 = refl
+    -- σ=959 (1 nodes)
+    cell-37 : κ 24 ≡ κ 24
+    cell-37 = refl
 
-  -- ctx-949: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2077 (1×)
-  ctx-949-τ949 : τ 949 ≡ τ 949
-  ctx-949-τ949 = refl
+    -- σ=1354 (1 nodes)
+    cell-38 : κ 24 ≡ κ 24
+    cell-38 = refl
 
+    -- σ=1731 (1 nodes)
+    cell-39 : κ 24 ≡ κ 24
+    cell-39 = refl
 
--- ── coerce (FormattedValue) ────────────────────
--- 5 nodes, 1 type contexts, 5 forms
+    -- σ=1808 (1 nodes)
+    cell-40 : κ 24 ≡ κ 24
+    cell-40 = refl
 
-module coerce-FormattedValue-τ118 where
+    -- σ=1928 (1 nodes)
+    cell-41 : κ 24 ≡ κ 24
+    cell-41 = refl
 
-  -- ctx-118: 5 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=169 (1×)
-  --   σ=311 (1×)
-  --   σ=1775 (1×)
-  --   σ=1929 (1×)
-  --   σ=1948 (1×)
-  ctx-118-τ118 : τ 118 ≡ τ 118
-  ctx-118-τ118 = refl
+    -- σ=1947 (1 nodes)
+    cell-42 : κ 24 ≡ κ 24
+    cell-42 = refl
 
+    -- σ=2054 (1 nodes)
+    cell-43 : κ 24 ≡ κ 24
+    cell-43 = refl
 
--- ── morphism@? (Attribute) ─────────────────────
--- 5 nodes, 2 type contexts, 5 forms
 
-module morphism-at-x3f-Attribute-τ178 where
 
-  -- ctx-178: 4 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=263 (1×)
-  --   σ=268 (1×)
-  --   σ=739 (1×)
-  --   σ=828 (1×)
-  ctx-178-τ178 : τ 178 ≡ τ 178
-  ctx-178-τ178 = refl
+-- κ=26: 130 nodes, 2 τ-classes, 43 σ-classes
+module index-Index-0 where
 
-  -- ctx-158: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=229 (1×)
-  ctx-158-τ158 : τ 158 ≡ τ 158
-  ctx-158-τ158 = refl
+  -- τ=36: 84 nodes, 38 σ-classes
+  module τ36 where
 
+    -- σ=123 (9 nodes)
+    cell-0 : κ 26 ≡ κ 26
+    cell-0 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 5 nodes, 2 type contexts, 5 forms
+    -- σ=801 (6 nodes)
+    cell-1 : κ 26 ≡ κ 26
+    cell-1 = refl
 
-module annassign-AnnAssign-τ185 where
+    -- σ=976 (6 nodes)
+    cell-2 : κ 26 ≡ κ 26
+    cell-2 = refl
 
-  -- ctx-185: 4 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=279 (1×)
-  --   σ=752 (1×)
-  --   σ=1336 (1×)
-  --   σ=1527 (1×)
-  ctx-185-τ185 : τ 185 ≡ τ 185
-  ctx-185-τ185 = refl
+    -- σ=45 (5 nodes)
+    cell-3 : κ 26 ≡ κ 26
+    cell-3 = refl
 
-  -- ctx-391: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=637 (1×)
-  ctx-391-τ391 : τ 391 ≡ τ 391
-  ctx-391-τ391 = refl
+    -- σ=771 (4 nodes)
+    cell-4 : κ 26 ≡ κ 26
+    cell-4 = refl
 
+    -- σ=826 (4 nodes)
+    cell-5 : κ 26 ≡ κ 26
+    cell-5 = refl
 
--- ── equalizer (Compare) ────────────────────────
--- 5 nodes, 1 type contexts, 5 forms
+    -- σ=93 (3 nodes)
+    cell-6 : κ 26 ≡ κ 26
+    cell-6 = refl
 
-module equalizer-Compare-τ187 where
+    -- σ=96 (3 nodes)
+    cell-7 : κ 26 ≡ κ 26
+    cell-7 = refl
 
-  -- ctx-187: 5 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=284 (1×)
-  --   σ=557 (1×)
-  --   σ=1117 (1×)
-  --   σ=1279 (1×)
-  --   σ=1905 (1×)
-  ctx-187-τ187 : τ 187 ≡ τ 187
-  ctx-187-τ187 = refl
+    -- σ=580 (3 nodes)
+    cell-8 : κ 26 ≡ κ 26
+    cell-8 = refl
 
+    -- σ=954 (3 nodes)
+    cell-9 : κ 26 ≡ κ 26
+    cell-9 = refl
 
--- ── monoid.op@? (Call) ─────────────────────────
--- 5 nodes, 1 type contexts, 5 forms
+    -- σ=1360 (3 nodes)
+    cell-10 : κ 26 ≡ κ 26
+    cell-10 = refl
 
-module monoid-op-at-x3f-Call-τ189 where
+    -- σ=57 (2 nodes)
+    cell-11 : κ 26 ≡ κ 26
+    cell-11 = refl
 
-  -- ctx-189: 5 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=286 (1×)
-  --   σ=598 (1×)
-  --   σ=862 (1×)
-  --   σ=1156 (1×)
-  --   σ=1308 (1×)
-  ctx-189-τ189 : τ 189 ≡ τ 189
-  ctx-189-τ189 = refl
+    -- σ=210 (2 nodes)
+    cell-12 : κ 26 ≡ κ 26
+    cell-12 = refl
 
+    -- σ=433 (2 nodes)
+    cell-13 : κ 26 ≡ κ 26
+    cell-13 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 5 nodes, 1 type contexts, 5 forms
+    -- σ=586 (2 nodes)
+    cell-14 : κ 26 ≡ κ 26
+    cell-14 = refl
 
-module effect-seq-Expr-τ190-0 where
+    -- σ=1034 (2 nodes)
+    cell-15 : κ 26 ≡ κ 26
+    cell-15 = refl
 
-  -- ctx-190: 5 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=287 (1×)
-  --   σ=599 (1×)
-  --   σ=863 (1×)
-  --   σ=1157 (1×)
-  --   σ=1309 (1×)
-  ctx-190-τ190 : τ 190 ≡ τ 190
-  ctx-190-τ190 = refl
+    -- σ=1087 (2 nodes)
+    cell-16 : κ 26 ≡ κ 26
+    cell-16 = refl
 
+    -- σ=1618 (2 nodes)
+    cell-17 : κ 26 ≡ κ 26
+    cell-17 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 5 nodes, 1 type contexts, 3 forms
+    -- σ=1906 (2 nodes)
+    cell-18 : κ 26 ≡ κ 26
+    cell-18 = refl
 
-module apply-Call-τ198 where
+    -- σ=261 (1 nodes)
+    cell-19 : κ 26 ≡ κ 26
+    cell-19 = refl
 
-  -- ctx-198: 5 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=297 (2×)
-  --   σ=1771 (2×)
-  --   σ=1809 (1×)
-  ctx-198-τ198 : τ 198 ≡ τ 198
-  ctx-198-τ198 = refl
+    -- σ=266 (1 nodes)
+    cell-20 : κ 26 ≡ κ 26
+    cell-20 = refl
 
+    -- σ=398 (1 nodes)
+    cell-21 : κ 26 ≡ κ 26
+    cell-21 = refl
 
--- ── coerce (FormattedValue) ────────────────────
--- 5 nodes, 2 type contexts, 5 forms
+    -- σ=436 (1 nodes)
+    cell-22 : κ 26 ≡ κ 26
+    cell-22 = refl
 
-module coerce-FormattedValue-τ840 where
+    -- σ=558 (1 nodes)
+    cell-23 : κ 26 ≡ κ 26
+    cell-23 = refl
 
-  -- ctx-840: 4 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=1788 (1×)
-  --   σ=1937 (1×)
-  --   σ=1939 (1×)
-  --   σ=2040 (1×)
-  ctx-840-τ840 : τ 840 ≡ τ 840
-  ctx-840-τ840 = refl
+    -- σ=718 (1 nodes)
+    cell-24 : κ 26 ≡ κ 26
+    cell-24 = refl
 
-  -- ctx-211: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=313 (1×)
-  ctx-211-τ211 : τ 211 ≡ τ 211
-  ctx-211-τ211 = refl
+    -- σ=737 (1 nodes)
+    cell-25 : κ 26 ≡ κ 26
+    cell-25 = refl
 
+    -- σ=740 (1 nodes)
+    cell-26 : κ 26 ≡ κ 26
+    cell-26 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 5 nodes, 1 type contexts, 4 forms
+    -- σ=1095 (1 nodes)
+    cell-27 : κ 26 ≡ κ 26
+    cell-27 = refl
 
-module let-k-Assign-τ302 where
+    -- σ=1118 (1 nodes)
+    cell-28 : κ 26 ≡ κ 26
+    cell-28 = refl
 
-  -- ctx-302: 5 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=442 (2×)
-  --   σ=545 (1×)
-  --   σ=903 (1×)
-  --   σ=1238 (1×)
-  ctx-302-τ302 : τ 302 ≡ τ 302
-  ctx-302-τ302 = refl
+    -- σ=1412 (1 nodes)
+    cell-29 : κ 26 ≡ κ 26
+    cell-29 = refl
 
+    -- σ=1539 (1 nodes)
+    cell-30 : κ 26 ≡ κ 26
+    cell-30 = refl
 
--- ── fold (For) ─────────────────────────────────
--- 5 nodes, 2 type contexts, 5 forms
+    -- σ=1545 (1 nodes)
+    cell-31 : κ 26 ≡ κ 26
+    cell-31 = refl
 
-module fold-For-τ483-0 where
+    -- σ=1592 (1 nodes)
+    cell-32 : κ 26 ≡ κ 26
+    cell-32 = refl
 
-  -- ctx-483: 4 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=835 (1×)
-  --   σ=1092 (1×)
-  --   σ=1100 (1×)
-  --   σ=1373 (1×)
-  ctx-483-τ483 : τ 483 ≡ τ 483
-  ctx-483-τ483 = refl
+    -- σ=1597 (1 nodes)
+    cell-33 : κ 26 ≡ κ 26
+    cell-33 = refl
 
-  -- ctx-305: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=452 (1×)
-  ctx-305-τ305 : τ 305 ≡ τ 305
-  ctx-305-τ305 = refl
+    -- σ=1603 (1 nodes)
+    cell-34 : κ 26 ≡ κ 26
+    cell-34 = refl
 
+    -- σ=1663 (1 nodes)
+    cell-35 : κ 26 ≡ κ 26
+    cell-35 = refl
 
--- ── equalizer (Compare) ────────────────────────
--- 5 nodes, 2 type contexts, 5 forms
+    -- σ=1695 (1 nodes)
+    cell-36 : κ 26 ≡ κ 26
+    cell-36 = refl
 
-module equalizer-Compare-τ468 where
+    -- σ=1710 (1 nodes)
+    cell-37 : κ 26 ≡ κ 26
+    cell-37 = refl
 
-  -- ctx-468: 4 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=799 (1×)
-  --   σ=975 (1×)
-  --   σ=1037 (1×)
-  --   σ=1068 (1×)
-  ctx-468-τ468 : τ 468 ≡ τ 468
-  ctx-468-τ468 = refl
 
-  -- ctx-353: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=548 (1×)
-  ctx-353-τ353 : τ 353 ≡ τ 353
-  ctx-353-τ353 = refl
+  -- τ=113: 46 nodes, 6 σ-classes
+  module τ113 where
 
+    -- σ=346 (20 nodes)
+    cell-0 : κ 26 ≡ κ 26
+    cell-0 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 5 nodes, 1 type contexts, 4 forms
+    -- σ=162 (19 nodes)
+    cell-1 : κ 26 ≡ κ 26
+    cell-1 = refl
 
-module subscript-Subscript-τ365 where
+    -- σ=219 (2 nodes)
+    cell-2 : κ 26 ≡ κ 26
+    cell-2 = refl
 
-  -- ctx-365: 5 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=587 (2×)
-  --   σ=1593 (1×)
-  --   σ=1598 (1×)
-  --   σ=1604 (1×)
-  ctx-365-τ365 : τ 365 ≡ τ 365
-  ctx-365-τ365 = refl
+    -- σ=433 (2 nodes)
+    cell-3 : κ 26 ≡ κ 26
+    cell-3 = refl
 
+    -- σ=550 (2 nodes)
+    cell-4 : κ 26 ≡ κ 26
+    cell-4 = refl
 
--- ── morphism@? (Attribute) ─────────────────────
--- 5 nodes, 1 type contexts, 4 forms
+    -- σ=446 (1 nodes)
+    cell-5 : κ 26 ≡ κ 26
+    cell-5 = refl
 
-module morphism-at-x3f-Attribute-τ366 where
 
-  -- ctx-366: 5 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=588 (2×)
-  --   σ=1594 (1×)
-  --   σ=1599 (1×)
-  --   σ=1605 (1×)
-  ctx-366-τ366 : τ 366 ≡ τ 366
-  ctx-366-τ366 = refl
 
+-- κ=14: 36 nodes, 1 τ-classes, 28 σ-classes
+module morphism-at-state-Attribute-1 where
 
--- ── slice (Slice) ──────────────────────────────
--- 5 nodes, 1 type contexts, 3 forms
+  -- τ=14: 36 nodes, 28 σ-classes
+  module Self-_counter where
 
-module slice-Slice-τ378 where
+    -- σ=376 (7 nodes)
+    cell-0 : κ 14 ≡ κ 14
+    cell-0 = refl
 
-  -- ctx-378: 5 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=614 (2×)
-  --   σ=1178 (2×)
-  --   σ=2032 (1×)
-  ctx-378-τ378 : τ 378 ≡ τ 378
-  ctx-378-τ378 = refl
+    -- σ=198 (2 nodes)
+    cell-1 : κ 14 ≡ κ 14
+    cell-1 = refl
 
+    -- σ=401 (2 nodes)
+    cell-2 : κ 14 ≡ κ 14
+    cell-2 = refl
 
--- ── free_monoid.op@? (Attribute) ───────────────
--- 5 nodes, 1 type contexts, 5 forms
+    -- σ=23 (1 nodes)
+    cell-3 : κ 14 ≡ κ 14
+    cell-3 = refl
 
-module free_monoid-op-at-x3f-Attribute-τ188 where
+    -- σ=31 (1 nodes)
+    cell-4 : κ 14 ≡ κ 14
+    cell-4 = refl
 
-  -- ctx-188: 5 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=816 (1×)
-  --   σ=983 (1×)
-  --   σ=1293 (1×)
-  --   σ=1669 (1×)
-  --   σ=1750 (1×)
-  ctx-188-τ188 : τ 188 ≡ τ 188
-  ctx-188-τ188 = refl
+    -- σ=151 (1 nodes)
+    cell-5 : κ 14 ≡ κ 14
+    cell-5 = refl
 
+    -- σ=154 (1 nodes)
+    cell-6 : κ 14 ≡ κ 14
+    cell-6 = refl
 
--- ── coerce (Call) ──────────────────────────────
--- 5 nodes, 1 type contexts, 3 forms
+    -- σ=157 (1 nodes)
+    cell-7 : κ 14 ≡ κ 14
+    cell-7 = refl
 
-module coerce-Call-τ495 where
+    -- σ=160 (1 nodes)
+    cell-8 : κ 14 ≡ κ 14
+    cell-8 = refl
 
-  -- ctx-495: 5 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=852 (1×)
-  --   σ=1012 (1×)
-  --   σ=1056 (3×)
-  ctx-495-τ495 : τ 495 ≡ τ 495
-  ctx-495-τ495 = refl
+    -- σ=184 (1 nodes)
+    cell-9 : κ 14 ≡ κ 14
+    cell-9 = refl
 
+    -- σ=187 (1 nodes)
+    cell-10 : κ 14 ≡ κ 14
+    cell-10 = refl
 
--- ── ifexp (IfExp) ──────────────────────────────
--- 5 nodes, 1 type contexts, 3 forms
+    -- σ=193 (1 nodes)
+    cell-11 : κ 14 ≡ κ 14
+    cell-11 = refl
 
-module ifexp-IfExp-τ496 where
+    -- σ=200 (1 nodes)
+    cell-12 : κ 14 ≡ κ 14
+    cell-12 = refl
 
-  -- ctx-496: 5 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=853 (1×)
-  --   σ=1013 (1×)
-  --   σ=1057 (3×)
-  ctx-496-τ496 : τ 496 ≡ τ 496
-  ctx-496-τ496 = refl
+    -- σ=321 (1 nodes)
+    cell-13 : κ 14 ≡ κ 14
+    cell-13 = refl
 
+    -- σ=326 (1 nodes)
+    cell-14 : κ 14 ≡ κ 14
+    cell-14 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 5 nodes, 1 type contexts, 3 forms
+    -- σ=330 (1 nodes)
+    cell-15 : κ 14 ≡ κ 14
+    cell-15 = refl
 
-module let-k-Assign-τ497 where
+    -- σ=334 (1 nodes)
+    cell-16 : κ 14 ≡ κ 14
+    cell-16 = refl
 
-  -- ctx-497: 5 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=854 (1×)
-  --   σ=1014 (1×)
-  --   σ=1058 (3×)
-  ctx-497-τ497 : τ 497 ≡ τ 497
-  ctx-497-τ497 = refl
+    -- σ=341 (1 nodes)
+    cell-17 : κ 14 ≡ κ 14
+    cell-17 = refl
 
+    -- σ=355 (1 nodes)
+    cell-18 : κ 14 ≡ κ 14
+    cell-18 = refl
 
--- ── equalizer (Compare) ────────────────────────
--- 5 nodes, 1 type contexts, 5 forms
+    -- σ=364 (1 nodes)
+    cell-19 : κ 14 ≡ κ 14
+    cell-19 = refl
 
-module equalizer-Compare-τ585 where
+    -- σ=369 (1 nodes)
+    cell-20 : κ 14 ≡ κ 14
+    cell-20 = refl
 
-  -- ctx-585: 5 nodes, 5 forms
-  -- [(untyped)]
-  --   σ=1124 (1×)
-  --   σ=1164 (1×)
-  --   σ=1338 (1×)
-  --   σ=1736 (1×)
-  --   σ=1920 (1×)
-  ctx-585-τ585 : τ 585 ≡ τ 585
-  ctx-585-τ585 = refl
+    -- σ=374 (1 nodes)
+    cell-21 : κ 14 ≡ κ 14
+    cell-21 = refl
 
+    -- σ=378 (1 nodes)
+    cell-22 : κ 14 ≡ κ 14
+    cell-22 = refl
 
--- ── exponential (Call) ─────────────────────────
--- 5 nodes, 1 type contexts, 4 forms
+    -- σ=386 (1 nodes)
+    cell-23 : κ 14 ≡ κ 14
+    cell-23 = refl
 
-module exponential-Call-τ404 where
+    -- σ=393 (1 nodes)
+    cell-24 : κ 14 ≡ κ 14
+    cell-24 = refl
 
-  -- ctx-404: 5 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=1452 (2×)
-  --   σ=1507 (1×)
-  --   σ=1716 (1×)
-  --   σ=1863 (1×)
-  ctx-404-τ404 : τ 404 ≡ τ 404
-  ctx-404-τ404 = refl
+    -- σ=397 (1 nodes)
+    cell-25 : κ 14 ≡ κ 14
+    cell-25 = refl
 
+    -- σ=403 (1 nodes)
+    cell-26 : κ 14 ≡ κ 14
+    cell-26 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 4 nodes, 4 type contexts, 4 forms
+    -- σ=413 (1 nodes)
+    cell-27 : κ 14 ≡ κ 14
+    cell-27 = refl
 
-module annassign-AnnAssign-τ21 where
 
-  -- ctx-21: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=30 (1×)
-  ctx-21-τ21 : τ 21 ≡ τ 21
-  ctx-21-τ21 = refl
 
-  -- ctx-28: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=36 (1×)
-  ctx-28-τ28 : τ 28 ≡ τ 28
-  ctx-28-τ28 = refl
+-- κ=21: 38 nodes, 2 τ-classes, 27 σ-classes
+module arg-arg-0 where
 
-  -- ctx-131: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=192 (1×)
-  ctx-131-τ131 : τ 131 ≡ τ 131
-  ctx-131-τ131 = refl
+  -- τ=93: 32 nodes, 22 σ-classes
+  module τ93 where
 
-  -- ctx-253: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=373 (1×)
-  ctx-253-τ253 : τ 253 ≡ τ 253
-  ctx-253-τ253 = refl
+    -- σ=139 (4 nodes)
+    cell-0 : κ 21 ≡ κ 21
+    cell-0 = refl
 
+    -- σ=471 (3 nodes)
+    cell-1 : κ 21 ≡ κ 21
+    cell-1 = refl
 
--- ── equalizer (Compare) ────────────────────────
--- 4 nodes, 1 type contexts, 3 forms
+    -- σ=1521 (3 nodes)
+    cell-2 : κ 21 ≡ κ 21
+    cell-2 = refl
 
-module equalizer-Compare-τ66 where
+    -- σ=470 (2 nodes)
+    cell-3 : κ 21 ≡ κ 21
+    cell-3 = refl
 
-  -- ctx-66: 4 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=90 (2×)
-  --   σ=258 (1×)
-  --   σ=2052 (1×)
-  ctx-66-τ66 : τ 66 ≡ τ 66
-  ctx-66-τ66 = refl
+    -- σ=709 (2 nodes)
+    cell-4 : κ 21 ≡ κ 21
+    cell-4 = refl
 
+    -- σ=1522 (2 nodes)
+    cell-5 : κ 21 ≡ κ 21
+    cell-5 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 4 nodes, 1 type contexts, 2 forms
+    -- σ=182 (1 nodes)
+    cell-6 : κ 21 ≡ κ 21
+    cell-6 = refl
 
-module apply-Call-τ140 where
+    -- σ=205 (1 nodes)
+    cell-7 : κ 21 ≡ κ 21
+    cell-7 = refl
 
-  -- ctx-140: 4 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=202 (2×)
-  --   σ=1559 (2×)
-  ctx-140-τ140 : τ 140 ≡ τ 140
-  ctx-140-τ140 = refl
+    -- σ=243 (1 nodes)
+    cell-8 : κ 21 ≡ κ 21
+    cell-8 = refl
 
+    -- σ=244 (1 nodes)
+    cell-9 : κ 21 ≡ κ 21
+    cell-9 = refl
 
--- ── index (Index) ──────────────────────────────
--- 4 nodes, 3 type contexts, 3 forms
+    -- σ=423 (1 nodes)
+    cell-10 : κ 21 ≡ κ 21
+    cell-10 = refl
 
-module index-Index-τ758 where
+    -- σ=469 (1 nodes)
+    cell-11 : κ 21 ≡ κ 21
+    cell-11 = refl
 
-  -- ctx-758: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1579 (2×)
-  ctx-758-τ758 : τ 758 ≡ τ 758
-  ctx-758-τ758 = refl
+    -- σ=725 (1 nodes)
+    cell-12 : κ 21 ≡ κ 21
+    cell-12 = refl
 
-  -- ctx-222: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=338 (1×)
-  ctx-222-τ222 : τ 222 ≡ τ 222
-  ctx-222-τ222 = refl
+    -- σ=726 (1 nodes)
+    cell-13 : κ 21 ≡ κ 21
+    cell-13 = refl
 
-  -- ctx-273: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=394 (1×)
-  ctx-273-τ273 : τ 273 ≡ τ 273
-  ctx-273-τ273 = refl
+    -- σ=1218 (1 nodes)
+    cell-14 : κ 21 ≡ κ 21
+    cell-14 = refl
 
+    -- σ=1222 (1 nodes)
+    cell-15 : κ 21 ≡ κ 21
+    cell-15 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 4 nodes, 3 type contexts, 3 forms
+    -- σ=1223 (1 nodes)
+    cell-16 : κ 21 ≡ κ 21
+    cell-16 = refl
 
-module subscript-Subscript-τ759 where
+    -- σ=1409 (1 nodes)
+    cell-17 : κ 21 ≡ κ 21
+    cell-17 = refl
 
-  -- ctx-759: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1580 (2×)
-  ctx-759-τ759 : τ 759 ≡ τ 759
-  ctx-759-τ759 = refl
+    -- σ=1456 (1 nodes)
+    cell-18 : κ 21 ≡ κ 21
+    cell-18 = refl
 
-  -- ctx-223: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=339 (1×)
-  ctx-223-τ223 : τ 223 ≡ τ 223
-  ctx-223-τ223 = refl
+    -- σ=1457 (1 nodes)
+    cell-19 : κ 21 ≡ κ 21
+    cell-19 = refl
 
-  -- ctx-274: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=395 (1×)
-  ctx-274-τ274 : τ 274 ≡ τ 274
-  ctx-274-τ274 = refl
+    -- σ=1481 (1 nodes)
+    cell-20 : κ 21 ≡ κ 21
+    cell-20 = refl
 
+    -- σ=1482 (1 nodes)
+    cell-21 : κ 21 ≡ κ 21
+    cell-21 = refl
 
--- ── index (Index) ──────────────────────────────
--- 4 nodes, 3 type contexts, 3 forms
 
-module index-Index-τ265 where
+  -- τ=31: 6 nodes, 5 σ-classes
+  module τ31 where
 
-  -- ctx-265: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=387 (2×)
-  ctx-265-τ265 : τ 265 ≡ τ 265
-  ctx-265-τ265 = refl
+    -- σ=39 (2 nodes)
+    cell-0 : κ 21 ≡ κ 21
+    cell-0 = refl
 
-  -- ctx-295: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=425 (1×)
-  ctx-295-τ295 : τ 295 ≡ τ 295
-  ctx-295-τ295 = refl
+    -- σ=72 (1 nodes)
+    cell-1 : κ 21 ≡ κ 21
+    cell-1 = refl
 
-  -- ctx-358: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=566 (1×)
-  ctx-358-τ358 : τ 358 ≡ τ 358
-  ctx-358-τ358 = refl
+    -- σ=73 (1 nodes)
+    cell-2 : κ 21 ≡ κ 21
+    cell-2 = refl
 
+    -- σ=112 (1 nodes)
+    cell-3 : κ 21 ≡ κ 21
+    cell-3 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 4 nodes, 3 type contexts, 3 forms
+    -- σ=424 (1 nodes)
+    cell-4 : κ 21 ≡ κ 21
+    cell-4 = refl
 
-module subscript-Subscript-τ266 where
 
-  -- ctx-266: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=388 (2×)
-  ctx-266-τ266 : τ 266 ≡ τ 266
-  ctx-266-τ266 = refl
 
-  -- ctx-296: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=426 (1×)
-  ctx-296-τ296 : τ 296 ≡ τ 296
-  ctx-296-τ296 = refl
+-- κ=1: 26 nodes, 1 τ-classes, 26 σ-classes
+module effect-seq-Expr-0 where
 
-  -- ctx-359: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=567 (1×)
-  ctx-359-τ359 : τ 359 ≡ τ 359
-  ctx-359-τ359 = refl
+  -- τ=1: 26 nodes, 26 σ-classes
+  module τ1 where
 
+    -- σ=1 (1 nodes)
+    cell-0 : κ 1 ≡ κ 1
+    cell-0 = refl
 
--- ── product (Tuple) ────────────────────────────
--- 4 nodes, 2 type contexts, 3 forms
+    -- σ=12 (1 nodes)
+    cell-1 : κ 1 ≡ κ 1
+    cell-1 = refl
 
-module product-Tuple-tuple-5 where
+    -- σ=76 (1 nodes)
+    cell-2 : κ 1 ≡ κ 1
+    cell-2 = refl
 
-  -- tuple: 3 nodes, 2 forms
-  -- [tuple]
-  --   σ=1517 (1×)
-  --   σ=1650 (2×)
-  tuple-τ738 : τ 738 ≡ τ 738
-  tuple-τ738 = refl
+    -- σ=132 (1 nodes)
+    cell-3 : κ 1 ≡ κ 1
+    cell-3 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=405 (1×)
-  tuple-τ282 : τ 282 ≡ τ 282
-  tuple-τ282 = refl
+    -- σ=181 (1 nodes)
+    cell-4 : κ 1 ≡ κ 1
+    cell-4 = refl
 
+    -- σ=238 (1 nodes)
+    cell-5 : κ 1 ≡ κ 1
+    cell-5 = refl
 
--- ── index (Index) ──────────────────────────────
--- 4 nodes, 2 type contexts, 3 forms
+    -- σ=247 (1 nodes)
+    cell-6 : κ 1 ≡ κ 1
+    cell-6 = refl
 
-module index-Index-τ739 where
+    -- σ=274 (1 nodes)
+    cell-7 : κ 1 ≡ κ 1
+    cell-7 = refl
 
-  -- ctx-739: 3 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1518 (1×)
-  --   σ=1651 (2×)
-  ctx-739-τ739 : τ 739 ≡ τ 739
-  ctx-739-τ739 = refl
+    -- σ=320 (1 nodes)
+    cell-8 : κ 1 ≡ κ 1
+    cell-8 = refl
 
-  -- ctx-283: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=406 (1×)
-  ctx-283-τ283 : τ 283 ≡ τ 283
-  ctx-283-τ283 = refl
+    -- σ=430 (1 nodes)
+    cell-9 : κ 1 ≡ κ 1
+    cell-9 = refl
 
+    -- σ=474 (1 nodes)
+    cell-10 : κ 1 ≡ κ 1
+    cell-10 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 4 nodes, 2 type contexts, 3 forms
+    -- σ=750 (1 nodes)
+    cell-11 : κ 1 ≡ κ 1
+    cell-11 = refl
 
-module subscript-Subscript-τ740 where
+    -- σ=872 (1 nodes)
+    cell-12 : κ 1 ≡ κ 1
+    cell-12 = refl
 
-  -- ctx-740: 3 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1519 (1×)
-  --   σ=1652 (2×)
-  ctx-740-τ740 : τ 740 ≡ τ 740
-  ctx-740-τ740 = refl
+    -- σ=916 (1 nodes)
+    cell-13 : κ 1 ≡ κ 1
+    cell-13 = refl
 
-  -- ctx-284: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=407 (1×)
-  ctx-284-τ284 : τ 284 ≡ τ 284
-  ctx-284-τ284 = refl
+    -- σ=936 (1 nodes)
+    cell-14 : κ 1 ≡ κ 1
+    cell-14 = refl
 
+    -- σ=1226 (1 nodes)
+    cell-15 : κ 1 ≡ κ 1
+    cell-15 = refl
 
--- ── gte (GtE) ──────────────────────────────────
--- 4 nodes, 1 type contexts, 1 forms
+    -- σ=1423 (1 nodes)
+    cell-16 : κ 1 ≡ κ 1
+    cell-16 = refl
 
-module gte-GtE-τ340 where
+    -- σ=1460 (1 nodes)
+    cell-17 : κ 1 ≡ κ 1
+    cell-17 = refl
 
-  -- ctx-340: 4 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=515 (4×)
-  ctx-340-τ340 : τ 340 ≡ τ 340
-  ctx-340-τ340 = refl
+    -- σ=1485 (1 nodes)
+    cell-18 : κ 1 ≡ κ 1
+    cell-18 = refl
 
+    -- σ=1525 (1 nodes)
+    cell-19 : κ 1 ≡ κ 1
+    cell-19 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 4 nodes, 1 type contexts, 2 forms
+    -- σ=1557 (1 nodes)
+    cell-20 : κ 1 ≡ κ 1
+    cell-20 = refl
 
-module subscript-Subscript-τ379 where
+    -- σ=1571 (1 nodes)
+    cell-21 : κ 1 ≡ κ 1
+    cell-21 = refl
 
-  -- ctx-379: 4 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=615 (2×)
-  --   σ=1179 (2×)
-  ctx-379-τ379 : τ 379 ≡ τ 379
-  ctx-379-τ379 = refl
+    -- σ=1640 (1 nodes)
+    cell-22 : κ 1 ≡ κ 1
+    cell-22 = refl
 
+    -- σ=1693 (1 nodes)
+    cell-23 : κ 1 ≡ κ 1
+    cell-23 = refl
 
--- ── free_monoid (Call) ─────────────────────────
--- 4 nodes, 1 type contexts, 3 forms
+    -- σ=1723 (1 nodes)
+    cell-24 : κ 1 ≡ κ 1
+    cell-24 = refl
 
-module free_monoid-Call-τ385 where
+    -- σ=1794 (1 nodes)
+    cell-25 : κ 1 ≡ κ 1
+    cell-25 = refl
 
-  -- ctx-385: 4 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=628 (2×)
-  --   σ=789 (1×)
-  --   σ=1128 (1×)
-  ctx-385-τ385 : τ 385 ≡ τ 385
-  ctx-385-τ385 = refl
 
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 4 nodes, 2 type contexts, 2 forms
+-- κ=33: 36 nodes, 2 τ-classes, 25 σ-classes
+module subscript-Subscript-0 where
 
-module free_monoid-fold-JoinedStr-str-1 where
+  -- τ=47: 32 nodes, 21 σ-classes
+  module τ47 where
 
-  -- str: 3 nodes, 1 forms
-  -- [str]
-  --   σ=675 (3×)
-  str-τ414 : τ 414 ≡ τ 414
-  str-τ414 = refl
+    -- σ=581 (3 nodes)
+    cell-0 : κ 33 ≡ κ 33
+    cell-0 = refl
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=841 (1×)
-  str-τ487 : τ 487 ≡ τ 487
-  str-τ487 = refl
+    -- σ=58 (2 nodes)
+    cell-1 : κ 33 ≡ κ 33
+    cell-1 = refl
 
+    -- σ=63 (2 nodes)
+    cell-2 : κ 33 ≡ κ 33
+    cell-2 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 4 nodes, 1 type contexts, 4 forms
+    -- σ=94 (2 nodes)
+    cell-3 : κ 33 ≡ κ 33
+    cell-3 = refl
 
-module apply-Call-τ469 where
+    -- σ=97 (2 nodes)
+    cell-4 : κ 33 ≡ κ 33
+    cell-4 = refl
 
-  -- ctx-469: 4 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=803 (1×)
-  --   σ=978 (1×)
-  --   σ=1039 (1×)
-  --   σ=1070 (1×)
-  ctx-469-τ469 : τ 469 ≡ τ 469
-  ctx-469-τ469 = refl
+    -- σ=434 (2 nodes)
+    cell-5 : κ 33 ≡ κ 33
+    cell-5 = refl
 
+    -- σ=772 (2 nodes)
+    cell-6 : κ 33 ≡ κ 33
+    cell-6 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 4 nodes, 1 type contexts, 4 forms
+    -- σ=827 (2 nodes)
+    cell-7 : κ 33 ≡ κ 33
+    cell-7 = refl
 
-module let-k-Assign-τ470 where
+    -- σ=1088 (2 nodes)
+    cell-8 : κ 33 ≡ κ 33
+    cell-8 = refl
 
-  -- ctx-470: 4 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=804 (1×)
-  --   σ=979 (1×)
-  --   σ=1040 (1×)
-  --   σ=1071 (1×)
-  ctx-470-τ470 : τ 470 ≡ τ 470
-  ctx-470-τ470 = refl
+    -- σ=1363 (2 nodes)
+    cell-9 : κ 33 ≡ κ 33
+    cell-9 = refl
 
+    -- σ=211 (1 nodes)
+    cell-10 : κ 33 ≡ κ 33
+    cell-10 = refl
 
--- ── lazy_fold (GeneratorExp) ───────────────────
--- 4 nodes, 1 type contexts, 4 forms
+    -- σ=262 (1 nodes)
+    cell-11 : κ 33 ≡ κ 33
+    cell-11 = refl
 
-module lazy_fold-GeneratorExp-τ519 where
+    -- σ=267 (1 nodes)
+    cell-12 : κ 33 ≡ κ 33
+    cell-12 = refl
 
-  -- ctx-519: 4 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=897 (1×)
-  --   σ=1254 (1×)
-  --   σ=1343 (1×)
-  --   σ=1888 (1×)
-  ctx-519-τ519 : τ 519 ≡ τ 519
-  ctx-519-τ519 = refl
+    -- σ=719 (1 nodes)
+    cell-13 : κ 33 ≡ κ 33
+    cell-13 = refl
 
+    -- σ=738 (1 nodes)
+    cell-14 : κ 33 ≡ κ 33
+    cell-14 = refl
 
--- ── product (Tuple) ────────────────────────────
--- 4 nodes, 4 type contexts, 4 forms
+    -- σ=741 (1 nodes)
+    cell-15 : κ 33 ≡ κ 33
+    cell-15 = refl
 
-module product-Tuple-tuple-6 where
+    -- σ=955 (1 nodes)
+    cell-16 : κ 33 ≡ κ 33
+    cell-16 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=966 (1×)
-  tuple-τ542 : τ 542 ≡ τ 542
-  tuple-τ542 = refl
+    -- σ=1035 (1 nodes)
+    cell-17 : κ 33 ≡ κ 33
+    cell-17 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=1489 (1×)
-  tuple-τ725 : τ 725 ≡ τ 725
-  tuple-τ725 = refl
+    -- σ=1096 (1 nodes)
+    cell-18 : κ 33 ≡ κ 33
+    cell-18 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=1628 (1×)
-  tuple-τ773 : τ 773 ≡ τ 773
-  tuple-τ773 = refl
+    -- σ=1546 (1 nodes)
+    cell-19 : κ 33 ≡ κ 33
+    cell-19 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=1699 (1×)
-  tuple-τ805 : τ 805 ≡ τ 805
-  tuple-τ805 = refl
+    -- σ=1696 (1 nodes)
+    cell-20 : κ 33 ≡ κ 33
+    cell-20 = refl
 
 
--- ── let (Assign) ───────────────────────────────
--- 4 nodes, 1 type contexts, 4 forms
+  -- τ=157: 4 nodes, 4 σ-classes
+  module τ157 where
 
-module let-k-Assign-τ620 where
+    -- σ=228 (1 nodes)
+    cell-0 : κ 33 ≡ κ 33
+    cell-0 = refl
 
-  -- ctx-620: 4 nodes, 4 forms
-  -- [(untyped)]
-  --   σ=1228 (1×)
-  --   σ=1803 (1×)
-  --   σ=1805 (1×)
-  --   σ=1807 (1×)
-  ctx-620-τ620 : τ 620 ≡ τ 620
-  ctx-620-τ620 = refl
+    -- σ=447 (1 nodes)
+    cell-1 : κ 33 ≡ κ 33
+    cell-1 = refl
 
+    -- σ=536 (1 nodes)
+    cell-2 : κ 33 ≡ κ 33
+    cell-2 = refl
 
--- ── eval (Call) ────────────────────────────────
--- 4 nodes, 1 type contexts, 2 forms
+    -- σ=539 (1 nodes)
+    cell-3 : κ 33 ≡ κ 33
+    cell-3 = refl
 
-module eval-Call-T where
 
-  -- T: 4 nodes, 2 forms
-  -- [T]
-  --   σ=1416 (1×)
-  --   σ=1529 (3×)
-  T-τ689 : τ 689 ≡ τ 689
-  T-τ689 = refl
 
+-- κ=67: 58 nodes, 4 τ-classes, 21 σ-classes
+module subscript-Subscript-1 where
 
--- ── annassign (AnnAssign) ──────────────────────
--- 4 nodes, 1 type contexts, 2 forms
+  -- τ=195: 25 nodes, 5 σ-classes
+  module τ195 where
 
-module annassign-AnnAssign-τ690 where
+    -- σ=347 (17 nodes)
+    cell-0 : κ 67 ≡ κ 67
+    cell-0 = refl
 
-  -- ctx-690: 4 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1417 (1×)
-  --   σ=1530 (3×)
-  ctx-690-τ690 : τ 690 ≡ τ 690
-  ctx-690-τ690 = refl
+    -- σ=1488 (3 nodes)
+    cell-1 : κ 67 ≡ κ 67
+    cell-1 = refl
 
+    -- σ=292 (2 nodes)
+    cell-2 : κ 67 ≡ κ 67
+    cell-2 = refl
 
--- ── equalizer (Compare) ────────────────────────
--- 3 nodes, 1 type contexts, 3 forms
+    -- σ=1573 (2 nodes)
+    cell-3 : κ 67 ≡ κ 67
+    cell-3 = refl
 
-module equalizer-Compare-τ35 where
+    -- σ=551 (1 nodes)
+    cell-4 : κ 67 ≡ κ 67
+    cell-4 = refl
 
-  -- ctx-35: 3 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=44 (1×)
-  --   σ=768 (1×)
-  --   σ=952 (1×)
-  ctx-35-τ35 : τ 35 ≡ τ 35
-  ctx-35-τ35 = refl
 
+  -- τ=114: 15 nodes, 3 σ-classes
+  module τ114 where
 
--- ── lt (Lt) ────────────────────────────────────
--- 3 nodes, 1 type contexts, 1 forms
+    -- σ=163 (7 nodes)
+    cell-0 : κ 67 ≡ κ 67
+    cell-0 = refl
 
-module lt-Lt-τ68 where
+    -- σ=277 (7 nodes)
+    cell-1 : κ 67 ≡ κ 67
+    cell-1 = refl
 
-  -- ctx-68: 3 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=95 (3×)
-  ctx-68-τ68 : τ 68 ≡ τ 68
-  ctx-68-τ68 = refl
+    -- σ=746 (1 nodes)
+    cell-2 : κ 67 ≡ κ 67
+    cell-2 = refl
 
 
--- ── apply (Call) ───────────────────────────────
--- 3 nodes, 1 type contexts, 2 forms
+  -- τ=257: 10 nodes, 5 σ-classes
+  module τ257 where
 
-module apply-Call-τ82 where
+    -- σ=417 (5 nodes)
+    cell-0 : κ 67 ≡ κ 67
+    cell-0 = refl
 
-  -- ctx-82: 3 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=120 (1×)
-  --   σ=1437 (2×)
-  ctx-82-τ82 : τ 82 ≡ τ 82
-  ctx-82-τ82 = refl
+    -- σ=379 (2 nodes)
+    cell-1 : κ 67 ≡ κ 67
+    cell-1 = refl
 
+    -- σ=399 (1 nodes)
+    cell-2 : κ 67 ≡ κ 67
+    cell-2 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 3 nodes, 1 type contexts, 3 forms
+    -- σ=1413 (1 nodes)
+    cell-3 : κ 67 ≡ κ 67
+    cell-3 = refl
 
-module annassign-AnnAssign-τ138 where
+    -- σ=1627 (1 nodes)
+    cell-4 : κ 67 ≡ κ 67
+    cell-4 = refl
 
-  -- ctx-138: 3 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=199 (1×)
-  --   σ=377 (1×)
-  --   σ=402 (1×)
-  ctx-138-τ138 : τ 138 ≡ τ 138
-  ctx-138-τ138 = refl
 
+  -- τ=84: 8 nodes, 8 σ-classes
+  module τ84 where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 3 nodes, 1 type contexts, 2 forms
+    -- σ=124 (1 nodes)
+    cell-0 : κ 67 ≡ κ 67
+    cell-0 = refl
 
-module effect-seq-Expr-τ155 where
+    -- σ=565 (1 nodes)
+    cell-1 : κ 67 ≡ κ 67
+    cell-1 = refl
 
-  -- ctx-155: 3 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=226 (1×)
-  --   σ=1145 (2×)
-  ctx-155-τ155 : τ 155 ≡ τ 155
-  ctx-155-τ155 = refl
+    -- σ=802 (1 nodes)
+    cell-2 : κ 67 ≡ κ 67
+    cell-2 = refl
 
+    -- σ=977 (1 nodes)
+    cell-3 : κ 67 ≡ κ 67
+    cell-3 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 3 nodes, 1 type contexts, 3 forms
+    -- σ=1038 (1 nodes)
+    cell-4 : κ 67 ≡ κ 67
+    cell-4 = refl
 
-module apply-Call-τ217 where
+    -- σ=1069 (1 nodes)
+    cell-5 : κ 67 ≡ κ 67
+    cell-5 = refl
 
-  -- ctx-217: 3 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=324 (1×)
-  --   σ=328 (1×)
-  --   σ=332 (1×)
-  ctx-217-τ217 : τ 217 ≡ τ 217
-  ctx-217-τ217 = refl
+    -- σ=1711 (1 nodes)
+    cell-6 : κ 67 ≡ κ 67
+    cell-6 = refl
 
+    -- σ=1910 (1 nodes)
+    cell-7 : κ 67 ≡ κ 67
+    cell-7 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 3 nodes, 1 type contexts, 3 forms
 
-module annassign-AnnAssign-τ218 where
 
-  -- ctx-218: 3 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=325 (1×)
-  --   σ=329 (1×)
-  --   σ=333 (1×)
-  ctx-218-τ218 : τ 218 ≡ τ 218
-  ctx-218-τ218 = refl
+-- κ=106: 46 nodes, 2 τ-classes, 19 σ-classes
+module apply-Call-0 where
 
+  -- τ=165: 41 nodes, 16 σ-classes
+  module τ165 where
 
--- ── product (Tuple) ────────────────────────────
--- 3 nodes, 2 type contexts, 2 forms
+    -- σ=795 (11 nodes)
+    cell-0 : κ 106 ≡ κ 106
+    cell-0 = refl
 
-module product-Tuple-tuple-7 where
+    -- σ=1182 (5 nodes)
+    cell-1 : κ 106 ≡ κ 106
+    cell-1 = refl
 
-  -- tuple: 2 nodes, 1 forms
-  -- [tuple]
-  --   σ=1464 (2×)
-  tuple-τ712 : τ 712 ≡ τ 712
-  tuple-τ712 = refl
+    -- σ=686 (4 nodes)
+    cell-2 : κ 106 ≡ κ 106
+    cell-2 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=418 (1×)
-  tuple-τ290 : τ 290 ≡ τ 290
-  tuple-τ290 = refl
+    -- σ=729 (4 nodes)
+    cell-3 : κ 106 ≡ κ 106
+    cell-3 = refl
 
+    -- σ=240 (3 nodes)
+    cell-4 : κ 106 ≡ κ 106
+    cell-4 = refl
 
--- ── index (Index) ──────────────────────────────
--- 3 nodes, 2 type contexts, 2 forms
+    -- σ=573 (3 nodes)
+    cell-5 : κ 106 ≡ κ 106
+    cell-5 = refl
 
-module index-Index-τ713 where
+    -- σ=1186 (2 nodes)
+    cell-6 : κ 106 ≡ κ 106
+    cell-6 = refl
 
-  -- ctx-713: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1465 (2×)
-  ctx-713-τ713 : τ 713 ≡ τ 713
-  ctx-713-τ713 = refl
+    -- σ=248 (1 nodes)
+    cell-7 : κ 106 ≡ κ 106
+    cell-7 = refl
 
-  -- ctx-291: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=419 (1×)
-  ctx-291-τ291 : τ 291 ≡ τ 291
-  ctx-291-τ291 = refl
+    -- σ=249 (1 nodes)
+    cell-8 : κ 106 ≡ κ 106
+    cell-8 = refl
 
+    -- σ=479 (1 nodes)
+    cell-9 : κ 106 ≡ κ 106
+    cell-9 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 3 nodes, 3 type contexts, 3 forms
+    -- σ=713 (1 nodes)
+    cell-10 : κ 106 ≡ κ 106
+    cell-10 = refl
 
-module subscript-Subscript-τ292 where
+    -- σ=732 (1 nodes)
+    cell-11 : κ 106 ≡ κ 106
+    cell-11 = refl
 
-  -- ctx-292: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=420 (1×)
-  ctx-292-τ292 : τ 292 ≡ τ 292
-  ctx-292-τ292 = refl
+    -- σ=893 (1 nodes)
+    cell-12 : κ 106 ≡ κ 106
+    cell-12 = refl
 
-  -- ctx-714: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1466 (1×)
-  ctx-714-τ714 : τ 714 ≡ τ 714
-  ctx-714-τ714 = refl
+    -- σ=1252 (1 nodes)
+    cell-13 : κ 106 ≡ κ 106
+    cell-13 = refl
 
-  -- ctx-723: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1479 (1×)
-  ctx-723-τ723 : τ 723 ≡ τ 723
-  ctx-723-τ723 = refl
+    -- σ=1283 (1 nodes)
+    cell-14 : κ 106 ≡ κ 106
+    cell-14 = refl
 
+    -- σ=1886 (1 nodes)
+    cell-15 : κ 106 ≡ κ 106
+    cell-15 = refl
 
--- ── equalizer (Compare) ────────────────────────
--- 3 nodes, 1 type contexts, 3 forms
 
-module equalizer-Compare-τ308 where
+  -- τ=154: 5 nodes, 3 σ-classes
+  module τ154 where
 
-  -- ctx-308: 3 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=455 (1×)
-  --   σ=1661 (1×)
-  --   σ=2065 (1×)
-  ctx-308-τ308 : τ 308 ≡ τ 308
-  ctx-308-τ308 = refl
+    -- σ=652 (2 nodes)
+    cell-0 : κ 106 ≡ κ 106
+    cell-0 = refl
 
+    -- σ=1144 (2 nodes)
+    cell-1 : κ 106 ≡ κ 106
+    cell-1 = refl
 
--- ── comprehension (comprehension) ──────────────
--- 3 nodes, 1 type contexts, 2 forms
+    -- σ=225 (1 nodes)
+    cell-2 : κ 106 ≡ κ 106
+    cell-2 = refl
 
-module comprehension-comprehension-τ422 where
 
-  -- ctx-422: 3 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=687 (2×)
-  --   σ=1286 (1×)
-  ctx-422-τ422 : τ 422 ≡ τ 422
-  ctx-422-τ422 = refl
 
+-- κ=127: 27 nodes, 1 τ-classes, 19 σ-classes
+module let-k-Assign-0 where
 
--- ── isnot (IsNot) ──────────────────────────────
--- 3 nodes, 1 type contexts, 1 forms
+  -- τ=186: 27 nodes, 19 σ-classes
+  module τ186 where
 
-module isnot-IsNot-τ442 where
+    -- σ=796 (5 nodes)
+    cell-0 : κ 127 ≡ κ 127
+    cell-0 = refl
 
-  -- ctx-442: 3 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=716 (3×)
-  ctx-442-τ442 : τ 442 ≡ τ 442
-  ctx-442-τ442 = refl
+    -- σ=574 (3 nodes)
+    cell-1 : κ 127 ≡ κ 127
+    cell-1 = refl
 
+    -- σ=925 (2 nodes)
+    cell-2 : κ 127 ≡ κ 127
+    cell-2 = refl
 
--- ── equalizer (Compare) ────────────────────────
--- 3 nodes, 1 type contexts, 2 forms
+    -- σ=1049 (2 nodes)
+    cell-3 : κ 127 ≡ κ 127
+    cell-3 = refl
 
-module equalizer-Compare-τ443 where
+    -- σ=281 (1 nodes)
+    cell-4 : κ 127 ≡ κ 127
+    cell-4 = refl
 
-  -- ctx-443: 3 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=717 (1×)
-  --   σ=1275 (2×)
-  ctx-443-τ443 : τ 443 ≡ τ 443
-  ctx-443-τ443 = refl
+    -- σ=480 (1 nodes)
+    cell-5 : κ 127 ≡ κ 127
+    cell-5 = refl
 
+    -- σ=714 (1 nodes)
+    cell-6 : κ 127 ≡ κ 127
+    cell-6 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 3 nodes, 1 type contexts, 3 forms
+    -- σ=730 (1 nodes)
+    cell-7 : κ 127 ≡ κ 127
+    cell-7 = refl
 
-module annassign-AnnAssign-τ454 where
+    -- σ=733 (1 nodes)
+    cell-8 : κ 127 ≡ κ 127
+    cell-8 = refl
 
-  -- ctx-454: 3 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=754 (1×)
-  --   σ=938 (1×)
-  --   σ=945 (1×)
-  ctx-454-τ454 : τ 454 ≡ τ 454
-  ctx-454-τ454 = refl
+    -- σ=846 (1 nodes)
+    cell-9 : κ 127 ≡ κ 127
+    cell-9 = refl
 
+    -- σ=1114 (1 nodes)
+    cell-10 : κ 127 ≡ κ 127
+    cell-10 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 3 nodes, 1 type contexts, 2 forms
+    -- σ=1183 (1 nodes)
+    cell-11 : κ 127 ≡ κ 127
+    cell-11 = refl
 
-module annassign-AnnAssign-τ460 where
+    -- σ=1187 (1 nodes)
+    cell-12 : κ 127 ≡ κ 127
+    cell-12 = refl
 
-  -- ctx-460: 3 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=775 (2×)
-  --   σ=1066 (1×)
-  ctx-460-τ460 : τ 460 ≡ τ 460
-  ctx-460-τ460 = refl
+    -- σ=1201 (1 nodes)
+    cell-13 : κ 127 ≡ κ 127
+    cell-13 = refl
 
+    -- σ=1313 (1 nodes)
+    cell-14 : κ 127 ≡ κ 127
+    cell-14 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 3 nodes, 1 type contexts, 3 forms
+    -- σ=1315 (1 nodes)
+    cell-15 : κ 127 ≡ κ 127
+    cell-15 = refl
 
-module let-k-Assign-τ517 where
+    -- σ=1327 (1 nodes)
+    cell-16 : κ 127 ≡ κ 127
+    cell-16 = refl
 
-  -- ctx-517: 3 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=890 (1×)
-  --   σ=1025 (1×)
-  --   σ=1086 (1×)
-  ctx-517-τ517 : τ 517 ≡ τ 517
-  ctx-517-τ517 = refl
+    -- σ=1367 (1 nodes)
+    cell-17 : κ 127 ≡ κ 127
+    cell-17 = refl
 
+    -- σ=1391 (1 nodes)
+    cell-18 : κ 127 ≡ κ 127
+    cell-18 = refl
 
--- ── index (Index) ──────────────────────────────
--- 3 nodes, 3 type contexts, 3 forms
 
-module index-Index-τ543 where
 
-  -- ctx-543: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=967 (1×)
-  ctx-543-τ543 : τ 543 ≡ τ 543
-  ctx-543-τ543 = refl
+-- κ=275: 24 nodes, 2 τ-classes, 18 σ-classes
+module coerce-FormattedValue-0 where
 
-  -- ctx-726: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1490 (1×)
-  ctx-726-τ726 : τ 726 ≡ τ 726
-  ctx-726-τ726 = refl
+  -- τ=486: 15 nodes, 14 σ-classes
+  module τ486 where
 
-  -- ctx-806: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1700 (1×)
-  ctx-806-τ806 : τ 806 ≡ τ 806
-  ctx-806-τ806 = refl
+    -- σ=611 (2 nodes)
+    cell-0 : κ 275 ≡ κ 275
+    cell-0 = refl
 
+    -- σ=840 (1 nodes)
+    cell-1 : κ 275 ≡ κ 275
+    cell-1 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 3 nodes, 3 type contexts, 3 forms
+    -- σ=1300 (1 nodes)
+    cell-2 : κ 275 ≡ κ 275
+    cell-2 = refl
 
-module subscript-Subscript-τ544 where
+    -- σ=1935 (1 nodes)
+    cell-3 : κ 275 ≡ κ 275
+    cell-3 = refl
 
-  -- ctx-544: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=968 (1×)
-  ctx-544-τ544 : τ 544 ≡ τ 544
-  ctx-544-τ544 = refl
+    -- σ=1945 (1 nodes)
+    cell-4 : κ 275 ≡ κ 275
+    cell-4 = refl
 
-  -- ctx-727: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1491 (1×)
-  ctx-727-τ727 : τ 727 ≡ τ 727
-  ctx-727-τ727 = refl
+    -- σ=1957 (1 nodes)
+    cell-5 : κ 275 ≡ κ 275
+    cell-5 = refl
 
-  -- ctx-807: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1701 (1×)
-  ctx-807-τ807 : τ 807 ≡ τ 807
-  ctx-807-τ807 = refl
+    -- σ=2000 (1 nodes)
+    cell-6 : κ 275 ≡ κ 275
+    cell-6 = refl
 
+    -- σ=2043 (1 nodes)
+    cell-7 : κ 275 ≡ κ 275
+    cell-7 = refl
 
--- ── free_monoid.literal (List) ─────────────────
--- 3 nodes, 1 type contexts, 3 forms
+    -- σ=2046 (1 nodes)
+    cell-8 : κ 275 ≡ κ 275
+    cell-8 = refl
 
-module free_monoid-literal-List-list-1 where
+    -- σ=2070 (1 nodes)
+    cell-9 : κ 275 ≡ κ 275
+    cell-9 = refl
 
-  -- list: 3 nodes, 3 forms
-  -- [list]
-  --   σ=1043 (1×)
-  --   σ=1074 (1×)
-  --   σ=1296 (1×)
-  list-τ568 : τ 568 ≡ τ 568
-  list-τ568 = refl
+    -- σ=2072 (1 nodes)
+    cell-10 : κ 275 ≡ κ 275
+    cell-10 = refl
 
+    -- σ=2074 (1 nodes)
+    cell-11 : κ 275 ≡ κ 275
+    cell-11 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 3 nodes, 2 type contexts, 3 forms
+    -- σ=2075 (1 nodes)
+    cell-12 : κ 275 ≡ κ 275
+    cell-12 = refl
 
-module let-k-Assign-τ603 where
+    -- σ=2083 (1 nodes)
+    cell-13 : κ 275 ≡ κ 275
+    cell-13 = refl
 
-  -- ctx-603: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1168 (1×)
-  --   σ=2056 (1×)
-  ctx-603-τ603 : τ 603 ≡ τ 603
-  ctx-603-τ603 = refl
 
-  -- ctx-654: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1340 (1×)
-  ctx-654-τ654 : τ 654 ≡ τ 654
-  ctx-654-τ654 = refl
+  -- τ=377: 9 nodes, 5 σ-classes
+  module τ377 where
 
+    -- σ=611 (5 nodes)
+    cell-0 : κ 275 ≡ κ 275
+    cell-0 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 3 nodes, 2 type contexts, 3 forms
+    -- σ=1813 (1 nodes)
+    cell-1 : κ 275 ≡ κ 275
+    cell-1 = refl
 
-module apply-Call-τ623 where
+    -- σ=1959 (1 nodes)
+    cell-2 : κ 275 ≡ κ 275
+    cell-2 = refl
 
-  -- ctx-623: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1243 (1×)
-  --   σ=1249 (1×)
-  ctx-623-τ623 : τ 623 ≡ τ 623
-  ctx-623-τ623 = refl
+    -- σ=1994 (1 nodes)
+    cell-3 : κ 275 ≡ κ 275
+    cell-3 = refl
 
-  -- ctx-631: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1270 (1×)
-  ctx-631-τ631 : τ 631 ≡ τ 631
-  ctx-631-τ631 = refl
+    -- σ=2037 (1 nodes)
+    cell-4 : κ 275 ≡ κ 275
+    cell-4 = refl
 
 
--- ── let (Assign) ───────────────────────────────
--- 3 nodes, 2 type contexts, 3 forms
 
-module let-k-Assign-τ624 where
+-- κ=15: 30 nodes, 4 τ-classes, 17 σ-classes
+module product-Tuple-0 where
 
-  -- ctx-624: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1244 (1×)
-  --   σ=1250 (1×)
-  ctx-624-τ624 : τ 624 ≡ τ 624
-  ctx-624-τ624 = refl
+  -- τ=17: 12 nodes, 10 σ-classes
+  module tuple-0 where
 
-  -- ctx-632: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1271 (1×)
-  ctx-632-τ632 : τ 632 ≡ τ 632
-  ctx-632-τ632 = refl
+    -- σ=26 (2 nodes)
+    cell-0 : κ 15 ≡ κ 15
+    cell-0 = refl
 
+    -- σ=441 (2 nodes)
+    cell-1 : κ 15 ≡ κ 15
+    cell-1 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 3 nodes, 1 type contexts, 3 forms
+    -- σ=99 (1 nodes)
+    cell-2 : κ 15 ≡ κ 15
+    cell-2 = refl
 
-module apply-Call-τ189 where
+    -- σ=544 (1 nodes)
+    cell-3 : κ 15 ≡ κ 15
+    cell-3 = refl
 
-  -- ctx-189: 3 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=1352 (1×)
-  --   σ=1419 (1×)
-  --   σ=1534 (1×)
-  ctx-189-τ189 : τ 189 ≡ τ 189
-  ctx-189-τ189 = refl
+    -- σ=902 (1 nodes)
+    cell-4 : κ 15 ≡ κ 15
+    cell-4 = refl
 
+    -- σ=984 (1 nodes)
+    cell-5 : κ 15 ≡ κ 15
+    cell-5 = refl
 
--- ── terminal.map (Return) ──────────────────────
--- 3 nodes, 1 type contexts, 2 forms
+    -- σ=1237 (1 nodes)
+    cell-6 : κ 15 ≡ κ 15
+    cell-6 = refl
 
-module terminal-map-Return-τ709 where
+    -- σ=1272 (1 nodes)
+    cell-7 : κ 15 ≡ κ 15
+    cell-7 = refl
 
-  -- ctx-709: 3 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1453 (2×)
-  --   σ=1717 (1×)
-  ctx-709-τ709 : τ 709 ≡ τ 709
-  ctx-709-τ709 = refl
+    -- σ=1632 (1 nodes)
+    cell-8 : κ 15 ≡ κ 15
+    cell-8 = refl
 
+    -- σ=1670 (1 nodes)
+    cell-9 : κ 15 ≡ κ 15
+    cell-9 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 3 nodes, 1 type contexts, 3 forms
 
-module let-k-Assign-τ761 where
+  -- τ=250: 10 nodes, 3 σ-classes
+  module tuple-1 where
 
-  -- ctx-761: 3 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=1583 (1×)
-  --   σ=1585 (1×)
-  --   σ=1587 (1×)
-  ctx-761-τ761 : τ 761 ≡ τ 761
-  ctx-761-τ761 = refl
+    -- σ=1576 (6 nodes)
+    cell-0 : κ 15 ≡ κ 15
+    cell-0 = refl
 
+    -- σ=1461 (3 nodes)
+    cell-1 : κ 15 ≡ κ 15
+    cell-1 = refl
 
--- ── cardinality (Call) ─────────────────────────
--- 3 nodes, 1 type contexts, 3 forms
+    -- σ=370 (1 nodes)
+    cell-2 : κ 15 ≡ κ 15
+    cell-2 = refl
 
-module cardinality-Call-int-2 where
 
-  -- int: 3 nodes, 3 forms
-  -- [int]
-  --   σ=1595 (1×)
-  --   σ=1600 (1×)
-  --   σ=1606 (1×)
-  int-τ763 : τ 763 ≡ τ 763
-  int-τ763 = refl
+  -- τ=127: 6 nodes, 3 σ-classes
+  module tuple-2 where
 
+    -- σ=335 (3 nodes)
+    cell-0 : κ 15 ≡ κ 15
+    cell-0 = refl
 
--- ── partial@? (Attribute) ──────────────────────
--- 3 nodes, 1 type contexts, 3 forms
+    -- σ=414 (2 nodes)
+    cell-1 : κ 15 ≡ κ 15
+    cell-1 = refl
 
-module partial-at-x3f-Attribute-τ188 where
+    -- σ=189 (1 nodes)
+    cell-2 : κ 15 ≡ κ 15
+    cell-2 = refl
 
-  -- ctx-188: 3 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=1612 (1×)
-  --   σ=1912 (1×)
-  --   σ=2058 (1×)
-  ctx-188-τ188 : τ 188 ≡ τ 188
-  ctx-188-τ188 = refl
 
+  -- τ=25: 2 nodes, 1 σ-classes
+  module tuple-3 where
 
--- ── product (Tuple) ────────────────────────────
--- 3 nodes, 1 type contexts, 1 forms
+    -- σ=33 (2 nodes)
+    cell-0 : κ 15 ≡ κ 15
+    cell-0 = refl
 
-module product-Tuple-tuple-8 where
 
-  -- tuple: 3 nodes, 1 forms
-  -- [tuple]
-  --   σ=1644 (3×)
-  tuple-τ782 : τ 782 ≡ τ 782
-  tuple-τ782 = refl
 
+-- κ=149: 23 nodes, 2 τ-classes, 17 σ-classes
+module cardinality-Call-0 where
 
--- ── coerce (FormattedValue) ────────────────────
--- 3 nodes, 1 type contexts, 3 forms
+  -- τ=335: 22 nodes, 16 σ-classes
+  module int-0 where
 
-module coerce-FormattedValue-τ851 where
+    -- σ=1787 (3 nodes)
+    cell-0 : κ 149 ≡ κ 149
+    cell-0 = refl
 
-  -- ctx-851: 3 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=1821 (1×)
-  --   σ=1833 (1×)
-  --   σ=1840 (1×)
-  ctx-851-τ851 : τ 851 ≡ τ 851
-  ctx-851-τ851 = refl
+    -- σ=1738 (2 nodes)
+    cell-1 : κ 149 ≡ κ 149
+    cell-1 = refl
 
+    -- σ=1846 (2 nodes)
+    cell-2 : κ 149 ≡ κ 149
+    cell-2 = refl
 
--- ── bimap (BinOp) ──────────────────────────────
--- 3 nodes, 1 type contexts, 3 forms
+    -- σ=1893 (2 nodes)
+    cell-3 : κ 149 ≡ κ 149
+    cell-3 = refl
 
-module bimap-BinOp-τ854 where
+    -- σ=1895 (2 nodes)
+    cell-4 : κ 149 ≡ κ 149
+    cell-4 = refl
 
-  -- ctx-854: 3 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=1825 (1×)
-  --   σ=1835 (1×)
-  --   σ=1842 (1×)
-  ctx-854-τ854 : τ 854 ≡ τ 854
-  ctx-854-τ854 = refl
+    -- σ=502 (1 nodes)
+    cell-5 : κ 149 ≡ κ 149
+    cell-5 = refl
 
+    -- σ=561 (1 nodes)
+    cell-6 : κ 149 ≡ κ 149
+    cell-6 = refl
 
--- ── coerce (FormattedValue) ────────────────────
--- 3 nodes, 1 type contexts, 3 forms
+    -- σ=603 (1 nodes)
+    cell-7 : κ 149 ≡ κ 149
+    cell-7 = refl
 
-module coerce-FormattedValue-τ855 where
+    -- σ=694 (1 nodes)
+    cell-8 : κ 149 ≡ κ 149
+    cell-8 = refl
 
-  -- ctx-855: 3 nodes, 3 forms
-  -- [(untyped)]
-  --   σ=1828 (1×)
-  --   σ=1836 (1×)
-  --   σ=1843 (1×)
-  ctx-855-τ855 : τ 855 ≡ τ 855
-  ctx-855-τ855 = refl
+    -- σ=991 (1 nodes)
+    cell-9 : κ 149 ≡ κ 149
+    cell-9 = refl
 
+    -- σ=1123 (1 nodes)
+    cell-10 : κ 149 ≡ κ 149
+    cell-10 = refl
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 3 nodes, 1 type contexts, 3 forms
+    -- σ=1163 (1 nodes)
+    cell-11 : κ 149 ≡ κ 149
+    cell-11 = refl
 
-module free_monoid-fold-JoinedStr-str-2 where
+    -- σ=1337 (1 nodes)
+    cell-12 : κ 149 ≡ κ 149
+    cell-12 = refl
 
-  -- str: 3 nodes, 3 forms
-  -- [str]
-  --   σ=1830 (1×)
-  --   σ=1837 (1×)
-  --   σ=1844 (1×)
-  str-τ856 : τ 856 ≡ τ 856
-  str-τ856 = refl
+    -- σ=1552 (1 nodes)
+    cell-13 : κ 149 ≡ κ 149
+    cell-13 = refl
 
+    -- σ=1735 (1 nodes)
+    cell-14 : κ 149 ≡ κ 149
+    cell-14 = refl
 
--- ── coerce (FormattedValue) ────────────────────
--- 3 nodes, 3 type contexts, 3 forms
+    -- σ=2039 (1 nodes)
+    cell-15 : κ 149 ≡ κ 149
+    cell-15 = refl
 
-module coerce-FormattedValue-τ920 where
 
-  -- ctx-920: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1997 (1×)
-  ctx-920-τ920 : τ 920 ≡ τ 920
-  ctx-920-τ920 = refl
+  -- τ=210: 1 nodes, 1 σ-classes
+  module int-1 where
 
-  -- ctx-922: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2002 (1×)
-  ctx-922-τ922 : τ 922 ≡ τ 922
-  ctx-922-τ922 = refl
+    -- σ=312 (1 nodes)
+    cell-0 : κ 149 ≡ κ 149
+    cell-0 = refl
 
-  -- ctx-950: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2080 (1×)
-  ctx-950-τ950 : τ 950 ≡ τ 950
-  ctx-950-τ950 = refl
 
 
--- ── equalizer (Compare) ────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+-- κ=105: 68 nodes, 1 τ-classes, 14 σ-classes
+module morphism-at-state-Attribute-2 where
 
-module equalizer-Compare-τ49 where
+  -- τ=153: 68 nodes, 14 σ-classes
+  module Self-tau-canonical where
 
-  -- ctx-49: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=60 (1×)
-  --   σ=64 (1×)
-  ctx-49-τ49 : τ 49 ≡ τ 49
-  ctx-49-τ49 = refl
+    -- σ=477 (39 nodes)
+    cell-0 : κ 105 ≡ κ 105
+    cell-0 = refl
 
+    -- σ=810 (6 nodes)
+    cell-1 : κ 105 ≡ κ 105
+    cell-1 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=239 (5 nodes)
+    cell-2 : κ 105 ≡ κ 105
+    cell-2 = refl
 
-module equalizer-If-τ67 where
+    -- σ=575 (4 nodes)
+    cell-3 : κ 105 ≡ κ 105
+    cell-3 = refl
 
-  -- ctx-67: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=92 (2×)
-  ctx-67-τ67 : τ 67 ≡ τ 67
-  ctx-67-τ67 = refl
+    -- σ=651 (3 nodes)
+    cell-4 : κ 105 ≡ κ 105
+    cell-4 = refl
 
+    -- σ=1142 (2 nodes)
+    cell-5 : κ 105 ≡ κ 105
+    cell-5 = refl
 
--- ── terminal.map (Return) ──────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1151 (2 nodes)
+    cell-6 : κ 105 ≡ κ 105
+    cell-6 = refl
 
-module terminal-map-Return-τ88 where
+    -- σ=224 (1 nodes)
+    cell-7 : κ 105 ≡ κ 105
+    cell-7 = refl
 
-  -- ctx-88: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=128 (1×)
-  --   σ=1405 (1×)
-  ctx-88-τ88 : τ 88 ≡ τ 88
-  ctx-88-τ88 = refl
+    -- σ=253 (1 nodes)
+    cell-8 : κ 105 ≡ κ 105
+    cell-8 = refl
 
+    -- σ=1241 (1 nodes)
+    cell-9 : κ 105 ≡ κ 105
+    cell-9 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1247 (1 nodes)
+    cell-10 : κ 105 ≡ κ 105
+    cell-10 = refl
 
-module annassign-AnnAssign-τ106 where
+    -- σ=1268 (1 nodes)
+    cell-11 : κ 105 ≡ κ 105
+    cell-11 = refl
 
-  -- ctx-106: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=153 (1×)
-  --   σ=186 (1×)
-  ctx-106-τ106 : τ 106 ≡ τ 106
-  ctx-106-τ106 = refl
+    -- σ=1590 (1 nodes)
+    cell-12 : κ 105 ≡ κ 105
+    cell-12 = refl
 
+    -- σ=1601 (1 nodes)
+    cell-13 : κ 105 ≡ κ 105
+    cell-13 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 2 nodes, 2 type contexts, 2 forms
 
-module annassign-AnnAssign-τ108 where
 
-  -- ctx-108: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=156 (1×)
-  ctx-108-τ108 : τ 108 ≡ τ 108
-  ctx-108-τ108 = refl
+-- κ=353: 18 nodes, 2 τ-classes, 14 σ-classes
+module apply-Call-1 where
 
-  -- ctx-110: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=159 (1×)
-  ctx-110-τ110 : τ 110 ≡ τ 110
-  ctx-110-τ110 = refl
+  -- τ=473: 16 nodes, 12 σ-classes
+  module τ473 where
 
+    -- σ=808 (4 nodes)
+    cell-0 : κ 353 ≡ κ 353
+    cell-0 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 2 nodes, 2 type contexts, 2 forms
+    -- σ=1333 (2 nodes)
+    cell-1 : κ 353 ≡ κ 353
+    cell-1 = refl
 
-module annassign-AnnAssign-τ116 where
+    -- σ=942 (1 nodes)
+    cell-2 : κ 353 ≡ κ 353
+    cell-2 = refl
 
-  -- ctx-116: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=165 (1×)
-  ctx-116-τ116 : τ 116 ≡ τ 116
-  ctx-116-τ116 = refl
+    -- σ=1167 (1 nodes)
+    cell-3 : κ 353 ≡ κ 353
+    cell-3 = refl
 
-  -- ctx-277: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=400 (1×)
-  ctx-277-τ277 : τ 277 ≡ τ 277
-  ctx-277-τ277 = refl
+    -- σ=1170 (1 nodes)
+    cell-4 : κ 353 ≡ κ 353
+    cell-4 = refl
 
+    -- σ=1191 (1 nodes)
+    cell-5 : κ 353 ≡ κ 353
+    cell-5 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1318 (1 nodes)
+    cell-6 : κ 353 ≡ κ 353
+    cell-6 = refl
 
-module annassign-AnnAssign-τ141 where
+    -- σ=1469 (1 nodes)
+    cell-7 : κ 353 ≡ κ 353
+    cell-7 = refl
 
-  -- ctx-141: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=203 (1×)
-  --   σ=375 (1×)
-  ctx-141-τ141 : τ 141 ≡ τ 141
-  ctx-141-τ141 = refl
+    -- σ=1471 (1 nodes)
+    cell-8 : κ 353 ≡ κ 353
+    cell-8 = refl
 
+    -- σ=1496 (1 nodes)
+    cell-9 : κ 353 ≡ κ 353
+    cell-9 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1500 (1 nodes)
+    cell-10 : κ 353 ≡ κ 353
+    cell-10 = refl
 
-module let-k-Assign-τ146 where
+    -- σ=2055 (1 nodes)
+    cell-11 : κ 353 ≡ κ 353
+    cell-11 = refl
 
-  -- ctx-146: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=214 (1×)
-  --   σ=1796 (1×)
-  ctx-146-τ146 : τ 146 ≡ τ 146
-  ctx-146-τ146 = refl
 
+  -- τ=653: 2 nodes, 2 σ-classes
+  module τ653 where
 
--- ── free_monoid.op@? (Attribute) ───────────────
--- 2 nodes, 2 type contexts, 2 forms
+    -- σ=1339 (1 nodes)
+    cell-0 : κ 353 ≡ κ 353
+    cell-0 = refl
 
-module free_monoid-op-at-x3f-Attribute-τ159 where
+    -- σ=1355 (1 nodes)
+    cell-1 : κ 353 ≡ κ 353
+    cell-1 = refl
 
-  -- ctx-159: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=230 (1×)
-  ctx-159-τ159 : τ 159 ≡ τ 159
-  ctx-159-τ159 = refl
 
-  -- ctx-179: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=264 (1×)
-  ctx-179-τ179 : τ 179 ≡ τ 179
-  ctx-179-τ179 = refl
 
+-- κ=17: 20 nodes, 5 τ-classes, 13 σ-classes
+module subscript-Subscript-2 where
 
--- ── terminal.map (Return) ──────────────────────
--- 2 nodes, 2 type contexts, 2 forms
+  -- τ=252: 10 nodes, 5 σ-classes
+  module τ252 where
 
-module terminal-map-Return-τ166 where
+    -- σ=1589 (4 nodes)
+    cell-0 : κ 17 ≡ κ 17
+    cell-0 = refl
 
-  -- ctx-166: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=241 (1×)
-  ctx-166-τ166 : τ 166 ≡ τ 166
-  ctx-166-τ166 = refl
+    -- σ=1463 (2 nodes)
+    cell-1 : κ 17 ≡ κ 17
+    cell-1 = refl
 
-  -- ctx-512: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=880 (1×)
-  ctx-512-τ512 : τ 512 ≡ τ 512
-  ctx-512-τ512 = refl
+    -- σ=1578 (2 nodes)
+    cell-2 : κ 17 ≡ κ 17
+    cell-2 = refl
 
+    -- σ=372 (1 nodes)
+    cell-3 : κ 17 ≡ κ 17
+    cell-3 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 2 nodes, 2 type contexts, 2 forms
+    -- σ=1516 (1 nodes)
+    cell-4 : κ 17 ≡ κ 17
+    cell-4 = refl
 
-module annassign-AnnAssign-τ224 where
 
-  -- ctx-224: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=340 (1×)
-  ctx-224-τ224 : τ 224 ≡ τ 224
-  ctx-224-τ224 = refl
+  -- τ=129: 6 nodes, 5 σ-classes
+  module τ129 where
 
-  -- ctx-275: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=396 (1×)
-  ctx-275-τ275 : τ 275 ≡ τ 275
-  ctx-275-τ275 = refl
+    -- σ=337 (2 nodes)
+    cell-0 : κ 17 ≡ κ 17
+    cell-0 = refl
 
+    -- σ=191 (1 nodes)
+    cell-1 : κ 17 ≡ κ 17
+    cell-1 = refl
 
--- ── product (Tuple) ────────────────────────────
--- 2 nodes, 2 type contexts, 2 forms
+    -- σ=416 (1 nodes)
+    cell-2 : κ 17 ≡ κ 17
+    cell-2 = refl
 
-module product-Tuple-tuple-9 where
+    -- σ=1107 (1 nodes)
+    cell-3 : κ 17 ≡ κ 17
+    cell-3 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=380 (1×)
-  tuple-τ258 : τ 258 ≡ τ 258
-  tuple-τ258 = refl
+    -- σ=1213 (1 nodes)
+    cell-4 : κ 17 ≡ κ 17
+    cell-4 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=777 (1×)
-  tuple-τ461 : τ 461 ≡ τ 461
-  tuple-τ461 = refl
 
+  -- τ=19: 2 nodes, 1 σ-classes
+  module τ19 where
 
--- ── index (Index) ──────────────────────────────
--- 2 nodes, 2 type contexts, 2 forms
+    -- σ=28 (2 nodes)
+    cell-0 : κ 17 ≡ κ 17
+    cell-0 = refl
 
-module index-Index-τ259 where
 
-  -- ctx-259: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=381 (1×)
-  ctx-259-τ259 : τ 259 ≡ τ 259
-  ctx-259-τ259 = refl
+  -- τ=27: 1 nodes, 1 σ-classes
+  module τ27 where
 
-  -- ctx-462: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=778 (1×)
-  ctx-462-τ462 : τ 462 ≡ τ 462
-  ctx-462-τ462 = refl
+    -- σ=35 (1 nodes)
+    cell-0 : κ 17 ≡ κ 17
+    cell-0 = refl
 
 
--- ── subscript (Subscript) ──────────────────────
--- 2 nodes, 2 type contexts, 2 forms
+  -- τ=281: 1 nodes, 1 σ-classes
+  module τ281 where
 
-module subscript-Subscript-τ260 where
+    -- σ=404 (1 nodes)
+    cell-0 : κ 17 ≡ κ 17
+    cell-0 = refl
 
-  -- ctx-260: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=382 (1×)
-  ctx-260-τ260 : τ 260 ≡ τ 260
-  ctx-260-τ260 = refl
 
-  -- ctx-463: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=779 (1×)
-  ctx-463-τ463 : τ 463 ≡ τ 463
-  ctx-463-τ463 = refl
 
+-- κ=255: 12 nodes, 1 τ-classes, 12 σ-classes
+module let-k-Assign-1 where
 
--- ── index (Index) ──────────────────────────────
--- 2 nodes, 2 type contexts, 2 forms
+  -- τ=356: 12 nodes, 12 σ-classes
+  module τ356 where
 
-module index-Index-τ261 where
+    -- σ=560 (1 nodes)
+    cell-0 : κ 255 ≡ κ 255
+    cell-0 = refl
 
-  -- ctx-261: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=383 (1×)
-  ctx-261-τ261 : τ 261 ≡ τ 261
-  ctx-261-τ261 = refl
+    -- σ=814 (1 nodes)
+    cell-1 : κ 255 ≡ κ 255
+    cell-1 = refl
 
-  -- ctx-464: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=780 (1×)
-  ctx-464-τ464 : τ 464 ≡ τ 464
-  ctx-464-τ464 = refl
+    -- σ=821 (1 nodes)
+    cell-2 : κ 255 ≡ κ 255
+    cell-2 = refl
 
+    -- σ=981 (1 nodes)
+    cell-3 : κ 255 ≡ κ 255
+    cell-3 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 2 nodes, 2 type contexts, 2 forms
+    -- σ=988 (1 nodes)
+    cell-4 : κ 255 ≡ κ 255
+    cell-4 = refl
 
-module subscript-Subscript-τ262 where
+    -- σ=1042 (1 nodes)
+    cell-5 : κ 255 ≡ κ 255
+    cell-5 = refl
 
-  -- ctx-262: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=384 (1×)
-  ctx-262-τ262 : τ 262 ≡ τ 262
-  ctx-262-τ262 = refl
+    -- σ=1062 (1 nodes)
+    cell-6 : κ 255 ≡ κ 255
+    cell-6 = refl
 
-  -- ctx-465: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=781 (1×)
-  ctx-465-τ465 : τ 465 ≡ τ 465
-  ctx-465-τ465 = refl
+    -- σ=1073 (1 nodes)
+    cell-7 : κ 255 ≡ κ 255
+    cell-7 = refl
 
+    -- σ=1080 (1 nodes)
+    cell-8 : κ 255 ≡ κ 255
+    cell-8 = refl
 
--- ── product (Tuple) ────────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=1120 (1 nodes)
+    cell-9 : κ 255 ≡ κ 255
+    cell-9 = refl
 
-module product-Tuple-tuple-10 where
+    -- σ=1362 (1 nodes)
+    cell-10 : κ 255 ≡ κ 255
+    cell-10 = refl
 
-  -- tuple: 2 nodes, 1 forms
-  -- [tuple]
-  --   σ=389 (2×)
-  tuple-τ267 : τ 267 ≡ τ 267
-  tuple-τ267 = refl
+    -- σ=1665 (1 nodes)
+    cell-11 : κ 255 ≡ κ 255
+    cell-11 = refl
 
 
--- ── index (Index) ──────────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
 
-module index-Index-τ268 where
+-- κ=36: 11 nodes, 2 τ-classes, 11 σ-classes
+module let-k-Assign-2 where
 
-  -- ctx-268: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=390 (2×)
-  ctx-268-τ268 : τ 268 ≡ τ 268
-  ctx-268-τ268 = refl
+  -- τ=50: 9 nodes, 9 σ-classes
+  module τ50 where
 
+    -- σ=61 (1 nodes)
+    cell-0 : κ 36 ≡ κ 36
+    cell-0 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 2 nodes, 2 type contexts, 2 forms
+    -- σ=212 (1 nodes)
+    cell-1 : κ 36 ≡ κ 36
+    cell-1 = refl
 
-module subscript-Subscript-τ269 where
+    -- σ=674 (1 nodes)
+    cell-2 : κ 36 ≡ κ 36
+    cell-2 = refl
 
-  -- ctx-269: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=391 (1×)
-  ctx-269-τ269 : τ 269 ≡ τ 269
-  ctx-269-τ269 = refl
+    -- σ=773 (1 nodes)
+    cell-3 : κ 36 ≡ κ 36
+    cell-3 = refl
 
-  -- ctx-878: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1899 (1×)
-  ctx-878-τ878 : τ 878 ≡ τ 878
-  ctx-878-τ878 = refl
+    -- σ=956 (1 nodes)
+    cell-4 : κ 36 ≡ κ 36
+    cell-4 = refl
 
+    -- σ=1036 (1 nodes)
+    cell-5 : κ 36 ≡ κ 36
+    cell-5 = refl
 
--- ── product (Tuple) ────────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=1278 (1 nodes)
+    cell-6 : κ 36 ≡ κ 36
+    cell-6 = refl
 
-module product-Tuple-tuple-11 where
+    -- σ=1697 (1 nodes)
+    cell-7 : κ 36 ≡ κ 36
+    cell-7 = refl
 
-  -- tuple: 2 nodes, 1 forms
-  -- [tuple]
-  --   σ=458 (2×)
-  tuple-τ310 : τ 310 ≡ τ 310
-  tuple-τ310 = refl
+    -- σ=2009 (1 nodes)
+    cell-8 : κ 36 ≡ κ 36
+    cell-8 = refl
 
 
--- ── partial.apply@state (Call) ─────────────────
--- 2 nodes, 2 type contexts, 2 forms
+  -- τ=352: 2 nodes, 2 σ-classes
+  module τ352 where
 
-module partial-apply-at-state-Call-T-1 where
+    -- σ=537 (1 nodes)
+    cell-0 : κ 36 ≡ κ 36
+    cell-0 = refl
 
-  -- T: 1 nodes, 1 forms
-  -- [T]
-  --   σ=459 (1×)
-  T-τ311 : τ 311 ≡ τ 311
-  T-τ311 = refl
+    -- σ=540 (1 nodes)
+    cell-1 : κ 36 ≡ κ 36
+    cell-1 = refl
 
-  -- T: 1 nodes, 1 forms
-  -- [T]
-  --   σ=639 (1×)
-  T-τ392 : τ 392 ≡ τ 392
-  T-τ392 = refl
 
 
--- ── arguments (arguments) ──────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+-- κ=254: 15 nodes, 2 τ-classes, 11 σ-classes
+module subscript-Subscript-3 where
 
-module arguments-arguments-τ320 where
+  -- τ=355: 14 nodes, 10 σ-classes
+  module τ355 where
 
-  -- ctx-320: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=472 (1×)
-  --   σ=1523 (1×)
-  ctx-320-τ320 : τ 320 ≡ τ 320
-  ctx-320-τ320 = refl
+    -- σ=813 (2 nodes)
+    cell-0 : κ 254 ≡ κ 254
+    cell-0 = refl
 
+    -- σ=980 (2 nodes)
+    cell-1 : κ 254 ≡ κ 254
+    cell-1 = refl
 
--- ── equalizer (Compare) ────────────────────────
--- 2 nodes, 2 type contexts, 2 forms
+    -- σ=1041 (2 nodes)
+    cell-2 : κ 254 ≡ κ 254
+    cell-2 = refl
 
-module equalizer-Compare-τ341 where
+    -- σ=1072 (2 nodes)
+    cell-3 : κ 254 ≡ κ 254
+    cell-3 = refl
 
-  -- ctx-341: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=518 (1×)
-  ctx-341-τ341 : τ 341 ≡ τ 341
-  ctx-341-τ341 = refl
+    -- σ=559 (1 nodes)
+    cell-4 : κ 254 ≡ κ 254
+    cell-4 = refl
 
-  -- ctx-411: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=670 (1×)
-  ctx-411-τ411 : τ 411 ≡ τ 411
-  ctx-411-τ411 = refl
+    -- σ=1119 (1 nodes)
+    cell-5 : κ 254 ≡ κ 254
+    cell-5 = refl
 
+    -- σ=1361 (1 nodes)
+    cell-6 : κ 254 ≡ κ 254
+    cell-6 = refl
 
--- ── equalizer (Compare) ────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1619 (1 nodes)
+    cell-7 : κ 254 ≡ κ 254
+    cell-7 = refl
 
-module equalizer-Compare-τ357 where
+    -- σ=1664 (1 nodes)
+    cell-8 : κ 254 ≡ κ 254
+    cell-8 = refl
 
-  -- ctx-357: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=562 (1×)
-  --   σ=695 (1×)
-  ctx-357-τ357 : τ 357 ≡ τ 357
-  ctx-357-τ357 = refl
+    -- σ=1907 (1 nodes)
+    cell-9 : κ 254 ≡ κ 254
+    cell-9 = refl
 
 
--- ── partial@? (Attribute) ──────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+  -- τ=434: 1 nodes, 1 σ-classes
+  module τ434 where
 
-module partial-at-x3f-Attribute-τ178 where
+    -- σ=703 (1 nodes)
+    cell-0 : κ 254 ≡ κ 254
+    cell-0 = refl
 
-  -- ctx-178: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=582 (2×)
-  ctx-178-τ178 : τ 178 ≡ τ 178
-  ctx-178-τ178 = refl
 
 
--- ── partial.apply@? (Call) ─────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+-- κ=258: 20 nodes, 1 τ-classes, 11 σ-classes
+module projection-at-x3f-Attribute-0 where
 
-module partial-apply-at-x3f-Call-τ364 where
+  -- τ=188: 20 nodes, 11 σ-classes
+  module τ188 where
 
-  -- ctx-364: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=584 (1×)
-  --   σ=1706 (1×)
-  ctx-364-τ364 : τ 364 ≡ τ 364
-  ctx-364-τ364 = refl
+    -- σ=570 (6 nodes)
+    cell-0 : κ 258 ≡ κ 258
+    cell-0 = refl
 
+    -- σ=787 (4 nodes)
+    cell-1 : κ 258 ≡ κ 258
+    cell-1 = refl
 
--- ── coerce (FormattedValue) ────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=626 (2 nodes)
+    cell-2 : κ 258 ≡ κ 258
+    cell-2 = refl
 
-module coerce-FormattedValue-τ380 where
+    -- σ=1004 (1 nodes)
+    cell-3 : κ 258 ≡ κ 258
+    cell-3 = refl
 
-  -- ctx-380: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=616 (2×)
-  ctx-380-τ380 : τ 380 ≡ τ 380
-  ctx-380-τ380 = refl
+    -- σ=1126 (1 nodes)
+    cell-4 : κ 258 ≡ κ 258
+    cell-4 = refl
 
+    -- σ=1511 (1 nodes)
+    cell-5 : κ 258 ≡ κ 258
+    cell-5 = refl
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1739 (1 nodes)
+    cell-6 : κ 258 ≡ κ 258
+    cell-6 = refl
 
-module free_monoid-fold-JoinedStr-str-3 where
+    -- σ=1746 (1 nodes)
+    cell-7 : κ 258 ≡ κ 258
+    cell-7 = refl
 
-  -- str: 2 nodes, 2 forms
-  -- [str]
-  --   σ=617 (1×)
-  --   σ=620 (1×)
-  str-τ381 : τ 381 ≡ τ 381
-  str-τ381 = refl
+    -- σ=1918 (1 nodes)
+    cell-8 : κ 258 ≡ κ 258
+    cell-8 = refl
 
+    -- σ=2022 (1 nodes)
+    cell-9 : κ 258 ≡ κ 258
+    cell-9 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=2061 (1 nodes)
+    cell-10 : κ 258 ≡ κ 258
+    cell-10 = refl
 
-module let-k-Assign-τ382 where
 
-  -- ctx-382: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=618 (1×)
-  --   σ=621 (1×)
-  ctx-382-τ382 : τ 382 ≡ τ 382
-  ctx-382-τ382 = refl
 
+-- κ=259: 20 nodes, 1 τ-classes, 11 σ-classes
+module projection-compute-at-x3f-Call-0 where
 
--- ── free_monoid (Call) ─────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+  -- τ=361: 20 nodes, 11 σ-classes
+  module τ361 where
 
-module free_monoid-Call-τ404 where
+    -- σ=571 (6 nodes)
+    cell-0 : κ 259 ≡ κ 259
+    cell-0 = refl
 
-  -- ctx-404: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=660 (1×)
-  --   σ=947 (1×)
-  ctx-404-τ404 : τ 404 ≡ τ 404
-  ctx-404-τ404 = refl
+    -- σ=788 (4 nodes)
+    cell-1 : κ 259 ≡ κ 259
+    cell-1 = refl
 
+    -- σ=627 (2 nodes)
+    cell-2 : κ 259 ≡ κ 259
+    cell-2 = refl
 
--- ── fixpoint.halt (Break) ──────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=1005 (1 nodes)
+    cell-3 : κ 259 ≡ κ 259
+    cell-3 = refl
 
-module fixpoint-halt-Break-τ433 where
+    -- σ=1127 (1 nodes)
+    cell-4 : κ 259 ≡ κ 259
+    cell-4 = refl
 
-  -- ctx-433: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=702 (2×)
-  ctx-433-τ433 : τ 433 ≡ τ 433
-  ctx-433-τ433 = refl
+    -- σ=1512 (1 nodes)
+    cell-5 : κ 259 ≡ κ 259
+    cell-5 = refl
 
+    -- σ=1740 (1 nodes)
+    cell-6 : κ 259 ≡ κ 259
+    cell-6 = refl
 
--- ── exponential.literal (Dict) ─────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1747 (1 nodes)
+    cell-7 : κ 259 ≡ κ 259
+    cell-7 = refl
 
-module exponential-literal-Dict-dict-1 where
+    -- σ=1919 (1 nodes)
+    cell-8 : κ 259 ≡ κ 259
+    cell-8 = refl
 
-  -- dict: 2 nodes, 2 forms
-  -- [dict]
-  --   σ=704 (1×)
-  --   σ=1369 (1×)
-  dict-τ435 : τ 435 ≡ τ 435
-  dict-τ435 = refl
+    -- σ=2023 (1 nodes)
+    cell-9 : κ 259 ≡ κ 259
+    cell-9 = refl
 
+    -- σ=2062 (1 nodes)
+    cell-10 : κ 259 ≡ κ 259
+    cell-10 = refl
 
--- ── arguments (arguments) ──────────────────────
--- 2 nodes, 1 type contexts, 2 forms
 
-module arguments-arguments-τ453 where
 
-  -- ctx-453: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=748 (1×)
-  --   σ=934 (1×)
-  ctx-453-τ453 : τ 453 ≡ τ 453
-  ctx-453-τ453 = refl
+-- κ=300: 15 nodes, 1 τ-classes, 11 σ-classes
+module morphism-at-x3f-Attribute-0 where
 
+  -- τ=188: 15 nodes, 11 σ-classes
+  module τ188 where
 
--- ── equalizer (If) ─────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1007 (4 nodes)
+    cell-0 : κ 300 ≡ κ 300
+    cell-0 = refl
 
-module equalizer-If-τ459 where
+    -- σ=919 (2 nodes)
+    cell-1 : κ 300 ≡ κ 300
+    cell-1 = refl
 
-  -- ctx-459: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=769 (1×)
-  --   σ=953 (1×)
-  ctx-459-τ459 : τ 459 ≡ τ 459
-  ctx-459-τ459 = refl
+    -- σ=666 (1 nodes)
+    cell-2 : κ 300 ≡ κ 300
+    cell-2 = refl
 
+    -- σ=758 (1 nodes)
+    cell-3 : κ 300 ≡ κ 300
+    cell-3 = refl
 
--- ── free_monoid.snoc@? (Call) ──────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1350 (1 nodes)
+    cell-4 : κ 300 ≡ κ 300
+    cell-4 = refl
 
-module free_monoid-snoc-at-x3f-Call-τ478 where
+    -- σ=1418 (1 nodes)
+    cell-5 : κ 300 ≡ κ 300
+    cell-5 = refl
 
-  -- ctx-478: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=818 (1×)
-  --   σ=1753 (1×)
-  ctx-478-τ478 : τ 478 ≡ τ 478
-  ctx-478-τ478 = refl
+    -- σ=1533 (1 nodes)
+    cell-6 : κ 300 ≡ κ 300
+    cell-6 = refl
 
+    -- σ=1537 (1 nodes)
+    cell-7 : κ 300 ≡ κ 300
+    cell-7 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1675 (1 nodes)
+    cell-8 : κ 300 ≡ κ 300
+    cell-8 = refl
 
-module effect-seq-Expr-τ479 where
+    -- σ=1704 (1 nodes)
+    cell-9 : κ 300 ≡ κ 300
+    cell-9 = refl
 
-  -- ctx-479: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=819 (1×)
-  --   σ=1754 (1×)
-  ctx-479-τ479 : τ 479 ≡ τ 479
-  ctx-479-τ479 = refl
+    -- σ=1757 (1 nodes)
+    cell-10 : κ 300 ≡ κ 300
+    cell-10 = refl
 
 
--- ── terminal.map (Return) ──────────────────────
--- 2 nodes, 1 type contexts, 2 forms
 
-module terminal-map-Return-τ508 where
+-- κ=27: 13 nodes, 2 τ-classes, 10 σ-classes
+module subscript-Subscript-4 where
 
-  -- ctx-508: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=876 (1×)
-  --   σ=1800 (1×)
-  ctx-508-τ508 : τ 508 ≡ τ 508
-  ctx-508-τ508 = refl
+  -- τ=37: 12 nodes, 9 σ-classes
+  module τ37 where
 
+    -- σ=46 (2 nodes)
+    cell-0 : κ 27 ≡ κ 27
+    cell-0 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=824 (2 nodes)
+    cell-1 : κ 27 ≡ κ 27
+    cell-1 = refl
 
-module apply-Call-τ520 where
+    -- σ=1159 (2 nodes)
+    cell-2 : κ 27 ≡ κ 27
+    cell-2 = refl
 
-  -- ctx-520: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=898 (1×)
-  --   σ=1255 (1×)
-  ctx-520-τ520 : τ 520 ≡ τ 520
-  ctx-520-τ520 = refl
+    -- σ=49 (1 nodes)
+    cell-3 : κ 27 ≡ κ 27
+    cell-3 = refl
 
+    -- σ=102 (1 nodes)
+    cell-4 : κ 27 ≡ κ 27
+    cell-4 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=105 (1 nodes)
+    cell-5 : κ 27 ≡ κ 27
+    cell-5 = refl
 
-module let-k-Assign-τ521-0 where
+    -- σ=216 (1 nodes)
+    cell-6 : κ 27 ≡ κ 27
+    cell-6 = refl
 
-  -- ctx-521: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=899 (1×)
-  --   σ=1256 (1×)
-  ctx-521-τ521 : τ 521 ≡ τ 521
-  ctx-521-τ521 = refl
+    -- σ=1002 (1 nodes)
+    cell-7 : κ 27 ≡ κ 27
+    cell-7 = refl
 
+    -- σ=1083 (1 nodes)
+    cell-8 : κ 27 ≡ κ 27
+    cell-8 = refl
 
--- ── not (Not) ──────────────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
 
-module not-Not-τ540 where
+  -- τ=150: 1 nodes, 1 σ-classes
+  module τ150 where
 
-  -- ctx-540: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=962 (2×)
-  ctx-540-τ540 : τ 540 ≡ τ 540
-  ctx-540-τ540 = refl
+    -- σ=220 (1 nodes)
+    cell-0 : κ 27 ≡ κ 27
+    cell-0 = refl
 
 
--- ── complement (UnaryOp) ───────────────────────
--- 2 nodes, 1 type contexts, 2 forms
 
-module complement-UnaryOp-τ541 where
+-- κ=45: 19 nodes, 1 τ-classes, 10 σ-classes
+module product-unpack-Tuple-0 where
 
-  -- ctx-541: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=964 (1×)
-  --   σ=2010 (1×)
-  ctx-541-τ541 : τ 541 ≡ τ 541
-  ctx-541-τ541 = refl
+  -- τ=59: 19 nodes, 10 σ-classes
+  module tuple where
 
+    -- σ=785 (5 nodes)
+    cell-0 : κ 45 ≡ κ 45
+    cell-0 = refl
 
--- ── free_monoid.snoc@? (Call) ──────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=79 (3 nodes)
+    cell-1 : κ 45 ≡ κ 45
+    cell-1 = refl
 
-module free_monoid-snoc-at-x3f-Call-τ548 where
+    -- σ=1435 (2 nodes)
+    cell-2 : κ 45 ≡ κ 45
+    cell-2 = refl
 
-  -- ctx-548: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=985 (1×)
-  --   σ=1671 (1×)
-  ctx-548-τ548 : τ 548 ≡ τ 548
-  ctx-548-τ548 = refl
+    -- σ=1510 (2 nodes)
+    cell-3 : κ 45 ≡ κ 45
+    cell-3 = refl
 
+    -- σ=1769 (2 nodes)
+    cell-4 : κ 45 ≡ κ 45
+    cell-4 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=888 (1 nodes)
+    cell-5 : κ 45 ≡ κ 45
+    cell-5 = refl
 
-module effect-seq-Expr-τ549 where
+    -- σ=958 (1 nodes)
+    cell-6 : κ 45 ≡ κ 45
+    cell-6 = refl
 
-  -- ctx-549: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=986 (1×)
-  --   σ=1672 (1×)
-  ctx-549-τ549 : τ 549 ≡ τ 549
-  ctx-549-τ549 = refl
+    -- σ=1024 (1 nodes)
+    cell-7 : κ 45 ≡ κ 45
+    cell-7 = refl
 
+    -- σ=1085 (1 nodes)
+    cell-8 : κ 45 ≡ κ 45
+    cell-8 = refl
 
--- ── product (Tuple) ────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=2021 (1 nodes)
+    cell-9 : κ 45 ≡ κ 45
+    cell-9 = refl
 
-module product-Tuple-tuple-12 where
 
-  -- tuple: 2 nodes, 2 forms
-  -- [tuple]
-  --   σ=1045 (1×)
-  --   σ=1076 (1×)
-  tuple-τ569 : τ 569 ≡ τ 569
-  tuple-τ569 = refl
 
+-- κ=372: 26 nodes, 1 τ-classes, 10 σ-classes
+module subscript-Subscript-5 where
 
--- ── free_monoid.snoc@state (Call) ──────────────
--- 2 nodes, 1 type contexts, 2 forms
+  -- τ=493: 26 nodes, 10 σ-classes
+  module τ493 where
 
-module free_monoid-snoc-at-state-Call-None-0 where
+    -- σ=1054 (9 nodes)
+    cell-0 : κ 372 ≡ κ 372
+    cell-0 = refl
 
-  -- None: 2 nodes, 2 forms
-  -- [None]
-  --   σ=1046 (1×)
-  --   σ=1077 (1×)
-  None-τ570 : τ 570 ≡ τ 570
-  None-τ570 = refl
+    -- σ=850 (3 nodes)
+    cell-1 : κ 372 ≡ κ 372
+    cell-1 = refl
 
+    -- σ=1010 (3 nodes)
+    cell-2 : κ 372 ≡ κ 372
+    cell-2 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1138 (2 nodes)
+    cell-3 : κ 372 ≡ κ 372
+    cell-3 = refl
 
-module effect-seq-Expr-τ571 where
+    -- σ=1175 (2 nodes)
+    cell-4 : κ 372 ≡ κ 372
+    cell-4 = refl
 
-  -- ctx-571: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1047 (1×)
-  --   σ=1078 (1×)
-  ctx-571-τ571 : τ 571 ≡ τ 571
-  ctx-571-τ571 = refl
+    -- σ=1680 (2 nodes)
+    cell-5 : κ 372 ≡ κ 372
+    cell-5 = refl
 
+    -- σ=1871 (2 nodes)
+    cell-6 : κ 372 ≡ κ 372
+    cell-6 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=994 (1 nodes)
+    cell-7 : κ 372 ≡ κ 372
+    cell-7 = refl
 
-module equalizer-If-τ572 where
+    -- σ=1759 (1 nodes)
+    cell-8 : κ 372 ≡ κ 372
+    cell-8 = refl
 
-  -- ctx-572: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1061 (1×)
-  --   σ=1079 (1×)
-  ctx-572-τ572 : τ 572 ≡ τ 572
-  ctx-572-τ572 = refl
+    -- σ=1902 (1 nodes)
+    cell-9 : κ 372 ≡ κ 372
+    cell-9 = refl
 
 
--- ── equalizer (If) ─────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
 
-module equalizer-If-τ573 where
+-- κ=42: 11 nodes, 2 τ-classes, 9 σ-classes
+module terminal-map-Return-0 where
 
-  -- ctx-573: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1063 (1×)
-  --   σ=1081 (1×)
-  ctx-573-τ573 : τ 573 ≡ τ 573
-  ctx-573-τ573 = refl
+  -- τ=56: 9 nodes, 7 σ-classes
+  module τ56 where
 
+    -- σ=91 (3 nodes)
+    cell-0 : κ 42 ≡ κ 42
+    cell-0 = refl
 
--- ── fold (For) ─────────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=70 (1 nodes)
+    cell-1 : κ 42 ≡ κ 42
+    cell-1 = refl
 
-module fold-For-τ574 where
+    -- σ=271 (1 nodes)
+    cell-2 : κ 42 ≡ κ 42
+    cell-2 = refl
 
-  -- ctx-574: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1064 (1×)
-  --   σ=1082 (1×)
-  ctx-574-τ574 : τ 574 ≡ τ 574
-  ctx-574-τ574 = refl
+    -- σ=867 (1 nodes)
+    cell-3 : κ 42 ≡ κ 42
+    cell-3 = refl
 
+    -- σ=1568 (1 nodes)
+    cell-4 : κ 42 ≡ κ 42
+    cell-4 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 2 nodes, 2 type contexts, 2 forms
+    -- σ=1689 (1 nodes)
+    cell-5 : κ 42 ≡ κ 42
+    cell-5 = refl
 
-module annassign-AnnAssign-τ579 where
+    -- σ=1765 (1 nodes)
+    cell-6 : κ 42 ≡ κ 42
+    cell-6 = refl
 
-  -- ctx-579: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1108 (1×)
-  ctx-579-τ579 : τ 579 ≡ τ 579
-  ctx-579-τ579 = refl
 
-  -- ctx-789: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1657 (1×)
-  ctx-789-τ789 : τ 789 ≡ τ 789
-  ctx-789-τ789 = refl
+  -- τ=162: 2 nodes, 2 σ-classes
+  module τ162 where
 
+    -- σ=234 (1 nodes)
+    cell-0 : κ 42 ≡ κ 42
+    cell-0 = refl
 
--- ── projection@object (Attribute) ──────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=882 (1 nodes)
+    cell-1 : κ 42 ≡ κ 42
+    cell-1 = refl
 
-module projection-at-object-Attribute-T-items where
 
-  -- T-items: 2 nodes, 2 forms
-  -- [Self._cascade_abstraction_merge, Self._cascade_eta, Self._cell_contents, Self._cell_obs, Self._cleavage_fibers]
-  --   σ=1110 (1×)
-  --   σ=1131 (1×)
-  T-items-τ34 : τ 34 ≡ τ 34
-  T-items-τ34 = refl
 
+-- κ=129: 9 nodes, 1 τ-classes, 9 σ-classes
+module monoid-op-at-x3f-Attribute-0 where
 
--- ── projection.compute@object (Call) ───────────
--- 2 nodes, 1 type contexts, 2 forms
+  -- τ=188: 9 nodes, 9 σ-classes
+  module τ188 where
 
-module projection-compute-at-object-Call-Iter where
+    -- σ=285 (1 nodes)
+    cell-0 : κ 129 ≡ κ 129
+    cell-0 = refl
 
-  -- Iter: 2 nodes, 2 forms
-  -- [Iter]
-  --   σ=1111 (1×)
-  --   σ=1132 (1×)
-  Iter-τ581 : τ 581 ≡ τ 581
-  Iter-τ581 = refl
+    -- σ=596 (1 nodes)
+    cell-1 : κ 129 ≡ κ 129
+    cell-1 = refl
 
+    -- σ=648 (1 nodes)
+    cell-2 : κ 129 ≡ κ 129
+    cell-2 = refl
 
--- ── free_monoid (Call) ─────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=861 (1 nodes)
+    cell-3 : κ 129 ≡ κ 129
+    cell-3 = refl
 
-module free_monoid-Call-τ582 where
+    -- σ=1155 (1 nodes)
+    cell-4 : κ 129 ≡ κ 129
+    cell-4 = refl
 
-  -- ctx-582: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1112 (1×)
-  --   σ=1133 (1×)
-  ctx-582-τ582 : τ 582 ≡ τ 582
-  ctx-582-τ582 = refl
+    -- σ=1307 (1 nodes)
+    cell-5 : κ 129 ≡ κ 129
+    cell-5 = refl
 
+    -- σ=1347 (1 nodes)
+    cell-6 : κ 129 ≡ κ 129
+    cell-6 = refl
 
--- ── coerce (FormattedValue) ────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=1543 (1 nodes)
+    cell-7 : κ 129 ≡ κ 129
+    cell-7 = refl
 
-module coerce-FormattedValue-τ589 where
+    -- σ=1625 (1 nodes)
+    cell-8 : κ 129 ≡ κ 129
+    cell-8 = refl
 
-  -- ctx-589: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1139 (2×)
-  ctx-589-τ589 : τ 589 ≡ τ 589
-  ctx-589-τ589 = refl
 
 
--- ── powerset.literal (Set) ─────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+-- κ=16: 20 nodes, 4 τ-classes, 8 σ-classes
+module index-Index-1 where
 
-module powerset-literal-Set-k-set where
+  -- τ=251: 10 nodes, 3 σ-classes
+  module τ251 where
 
-  -- set: 2 nodes, 1 forms
-  -- [set]
-  --   σ=1147 (2×)
-  set-τ593 : τ 593 ≡ τ 593
-  set-τ593 = refl
+    -- σ=1577 (6 nodes)
+    cell-0 : κ 16 ≡ κ 16
+    cell-0 = refl
 
+    -- σ=1462 (3 nodes)
+    cell-1 : κ 16 ≡ κ 16
+    cell-1 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=371 (1 nodes)
+    cell-2 : κ 16 ≡ κ 16
+    cell-2 = refl
 
-module annassign-AnnAssign-τ594 where
 
-  -- ctx-594: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1148 (1×)
-  --   σ=1305 (1×)
-  ctx-594-τ594 : τ 594 ≡ τ 594
-  ctx-594-τ594 = refl
+  -- τ=128: 6 nodes, 3 σ-classes
+  module τ128 where
 
+    -- σ=336 (3 nodes)
+    cell-0 : κ 16 ≡ κ 16
+    cell-0 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=415 (2 nodes)
+    cell-1 : κ 16 ≡ κ 16
+    cell-1 = refl
 
-module effect-seq-Expr-τ598 where
+    -- σ=190 (1 nodes)
+    cell-2 : κ 16 ≡ κ 16
+    cell-2 = refl
 
-  -- ctx-598: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1153 (2×)
-  ctx-598-τ598 : τ 598 ≡ τ 598
-  ctx-598-τ598 = refl
 
+  -- τ=18: 2 nodes, 1 σ-classes
+  module τ18 where
 
--- ── equalizer (If) ─────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=27 (2 nodes)
+    cell-0 : κ 16 ≡ κ 16
+    cell-0 = refl
 
-module equalizer-If-τ599 where
 
-  -- ctx-599: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1158 (1×)
-  --   σ=1310 (1×)
-  ctx-599-τ599 : τ 599 ≡ τ 599
-  ctx-599-τ599 = refl
+  -- τ=26: 2 nodes, 1 σ-classes
+  module τ26 where
 
+    -- σ=34 (2 nodes)
+    cell-0 : κ 16 ≡ κ 16
+    cell-0 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
 
-module equalizer-If-τ600 where
 
-  -- ctx-600: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1161 (1×)
-  --   σ=1311 (1×)
-  ctx-600-τ600 : τ 600 ≡ τ 600
-  ctx-600-τ600 = refl
+-- κ=70: 15 nodes, 1 τ-classes, 8 σ-classes
+module cardinality-Call-1 where
 
+  -- τ=87: 15 nodes, 8 σ-classes
+  module int where
 
--- ── fold (For) ─────────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=589 (4 nodes)
+    cell-0 : κ 70 ≡ κ 70
+    cell-0 = refl
 
-module fold-For-τ601 where
+    -- σ=517 (2 nodes)
+    cell-1 : κ 70 ≡ κ 70
+    cell-1 = refl
 
-  -- ctx-601: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1162 (1×)
-  --   σ=1312 (1×)
-  ctx-601-τ601 : τ 601 ≡ τ 601
-  ctx-601-τ601 = refl
+    -- σ=1777 (2 nodes)
+    cell-2 : κ 70 ≡ κ 70
+    cell-2 = refl
 
+    -- σ=1780 (2 nodes)
+    cell-3 : κ 70 ≡ κ 70
+    cell-3 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=1783 (2 nodes)
+    cell-4 : κ 70 ≡ κ 70
+    cell-4 = refl
 
-module let-k-Assign-τ605 where
+    -- σ=127 (1 nodes)
+    cell-5 : κ 70 ≡ κ 70
+    cell-5 = refl
 
-  -- ctx-605: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1176 (2×)
-  ctx-605-τ605 : τ 605 ≡ τ 605
-  ctx-605-τ605 = refl
+    -- σ=172 (1 nodes)
+    cell-6 : κ 70 ≡ κ 70
+    cell-6 = refl
 
+    -- σ=525 (1 nodes)
+    cell-7 : κ 70 ≡ κ 70
+    cell-7 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
 
-module equalizer-If-τ606 where
 
-  -- ctx-606: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1195 (1×)
-  --   σ=1322 (1×)
-  ctx-606-τ606 : τ 606 ≡ τ 606
-  ctx-606-τ606 = refl
+-- κ=28: 8 nodes, 2 τ-classes, 7 σ-classes
+module let-k-Assign-3 where
 
+  -- τ=38: 5 nodes, 5 σ-classes
+  module τ38 where
 
--- ── fold (For) ─────────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=47 (1 nodes)
+    cell-0 : κ 28 ≡ κ 28
+    cell-0 = refl
 
-module fold-For-τ607 where
+    -- σ=103 (1 nodes)
+    cell-1 : κ 28 ≡ κ 28
+    cell-1 = refl
 
-  -- ctx-607: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1196 (1×)
-  --   σ=1323 (1×)
-  ctx-607-τ607 : τ 607 ≡ τ 607
-  ctx-607-τ607 = refl
+    -- σ=825 (1 nodes)
+    cell-2 : κ 28 ≡ κ 28
+    cell-2 = refl
 
+    -- σ=1003 (1 nodes)
+    cell-3 : κ 28 ≡ κ 28
+    cell-3 = refl
 
--- ── free_monoid.snoc@state (Call) ──────────────
--- 2 nodes, 2 type contexts, 2 forms
+    -- σ=1084 (1 nodes)
+    cell-4 : κ 28 ≡ κ 28
+    cell-4 = refl
 
-module free_monoid-snoc-at-state-Call-None-1 where
 
-  -- None: 1 nodes, 1 forms
-  -- [None]
-  --   σ=1198 (1×)
-  None-τ609 : τ 609 ≡ τ 609
-  None-τ609 = refl
+  -- τ=149: 3 nodes, 2 σ-classes
+  module τ149 where
 
-  -- None: 1 nodes, 1 forms
-  -- [None]
-  --   σ=1325 (1×)
-  None-τ647 : τ 647 ≡ τ 647
-  None-τ647 = refl
+    -- σ=1160 (2 nodes)
+    cell-0 : κ 28 ≡ κ 28
+    cell-0 = refl
 
+    -- σ=217 (1 nodes)
+    cell-1 : κ 28 ≡ κ 28
+    cell-1 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 2 nodes, 2 type contexts, 2 forms
 
-module effect-seq-Expr-τ610 where
 
-  -- ctx-610: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1199 (1×)
-  ctx-610-τ610 : τ 610 ≡ τ 610
-  ctx-610-τ610 = refl
+-- κ=46: 12 nodes, 1 τ-classes, 7 σ-classes
+module apply-Call-2 where
 
-  -- ctx-648: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1326 (1×)
-  ctx-648-τ648 : τ 648 ≡ τ 648
-  ctx-648-τ648 = refl
+  -- τ=61: 12 nodes, 7 σ-classes
+  module τ61 where
 
+    -- σ=792 (6 nodes)
+    cell-0 : κ 46 ≡ κ 46
+    cell-0 = refl
 
--- ── and (And) ──────────────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=82 (1 nodes)
+    cell-1 : κ 46 ≡ κ 46
+    cell-1 = refl
 
-module and-And-τ634 where
+    -- σ=84 (1 nodes)
+    cell-2 : κ 46 ≡ κ 46
+    cell-2 = refl
 
-  -- ctx-634: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1274 (2×)
-  ctx-634-τ634 : τ 634 ≡ τ 634
-  ctx-634-τ634 = refl
+    -- σ=492 (1 nodes)
+    cell-3 : κ 46 ≡ κ 46
+    cell-3 = refl
 
+    -- σ=960 (1 nodes)
+    cell-4 : κ 46 ≡ κ 46
+    cell-4 = refl
 
--- ── powerset (Call) ────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1258 (1 nodes)
+    cell-5 : κ 46 ≡ κ 46
+    cell-5 = refl
 
-module powerset-Call-τ520 where
+    -- σ=1732 (1 nodes)
+    cell-6 : κ 46 ≡ κ 46
+    cell-6 = refl
 
-  -- ctx-520: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1344 (1×)
-  --   σ=1889 (1×)
-  ctx-520-τ520 : τ 520 ≡ τ 520
-  ctx-520-τ520 = refl
 
 
--- ── product (Tuple) ────────────────────────────
--- 2 nodes, 2 type contexts, 2 forms
+-- κ=62: 9 nodes, 2 τ-classes, 7 σ-classes
+module equalizer-Compare-0 where
 
-module product-Tuple-tuple-13 where
+  -- τ=78: 7 nodes, 6 σ-classes
+  module τ78 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=1399 (1×)
-  tuple-τ677 : τ 677 ≡ τ 677
-  tuple-τ677 = refl
+    -- σ=1150 (2 nodes)
+    cell-0 : κ 62 ≡ κ 62
+    cell-0 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=1401 (1×)
-  tuple-τ679 : τ 679 ≡ τ 679
-  tuple-τ679 = refl
+    -- σ=115 (1 nodes)
+    cell-1 : κ 62 ≡ κ 62
+    cell-1 = refl
 
+    -- σ=208 (1 nodes)
+    cell-2 : κ 62 ≡ κ 62
+    cell-2 = refl
 
--- ── index (Index) ──────────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=735 (1 nodes)
+    cell-3 : κ 62 ≡ κ 62
+    cell-3 = refl
 
-module index-Index-τ694 where
+    -- σ=1032 (1 nodes)
+    cell-4 : κ 62 ≡ κ 62
+    cell-4 = refl
 
-  -- ctx-694: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1426 (2×)
-  ctx-694-τ694 : τ 694 ≡ τ 694
-  ctx-694-τ694 = refl
+    -- σ=1276 (1 nodes)
+    cell-5 : κ 62 ≡ κ 62
+    cell-5 = refl
 
 
--- ── subscript (Subscript) ──────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+  -- τ=396: 2 nodes, 1 σ-classes
+  module τ396 where
 
-module subscript-Subscript-τ695 where
+    -- σ=650 (2 nodes)
+    cell-0 : κ 62 ≡ κ 62
+    cell-0 = refl
 
-  -- ctx-695: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1427 (2×)
-  ctx-695-τ695 : τ 695 ≡ τ 695
-  ctx-695-τ695 = refl
 
 
--- ── product (Tuple) ────────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+-- κ=211: 8 nodes, 2 τ-classes, 7 σ-classes
+module monoid-op-at-x3f-Call-0 where
 
-module product-Tuple-tuple-14 where
+  -- τ=444: 7 nodes, 6 σ-classes
+  module τ444 where
 
-  -- tuple: 2 nodes, 1 forms
-  -- [tuple]
-  --   σ=1428 (2×)
-  tuple-τ696 : τ 696 ≡ τ 696
-  tuple-τ696 = refl
+    -- σ=1365 (2 nodes)
+    cell-0 : κ 211 ≡ κ 211
+    cell-0 = refl
 
+    -- σ=721 (1 nodes)
+    cell-1 : κ 211 ≡ κ 211
+    cell-1 = refl
 
--- ── index (Index) ──────────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=833 (1 nodes)
+    cell-2 : κ 211 ≡ κ 211
+    cell-2 = refl
 
-module index-Index-τ697 where
+    -- σ=1090 (1 nodes)
+    cell-3 : κ 211 ≡ κ 211
+    cell-3 = refl
 
-  -- ctx-697: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1429 (2×)
-  ctx-697-τ697 : τ 697 ≡ τ 697
-  ctx-697-τ697 = refl
+    -- σ=1098 (1 nodes)
+    cell-4 : κ 211 ≡ κ 211
+    cell-4 = refl
 
+    -- σ=1371 (1 nodes)
+    cell-5 : κ 211 ≡ κ 211
+    cell-5 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 2 nodes, 2 type contexts, 2 forms
 
-module subscript-Subscript-τ698 where
+  -- τ=303: 1 nodes, 1 σ-classes
+  module τ303 where
 
-  -- ctx-698: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1430 (1×)
-  ctx-698-τ698 : τ 698 ≡ τ 698
-  ctx-698-τ698 = refl
+    -- σ=450 (1 nodes)
+    cell-0 : κ 211 ≡ κ 211
+    cell-0 = refl
 
-  -- ctx-710: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1454 (1×)
-  ctx-710-τ710 : τ 710 ≡ τ 710
-  ctx-710-τ710 = refl
 
 
--- ── annassign (AnnAssign) ──────────────────────
--- 2 nodes, 2 type contexts, 2 forms
+-- κ=212: 8 nodes, 2 τ-classes, 7 σ-classes
+module effect-seq-Expr-1 where
 
-module annassign-AnnAssign-τ729 where
+  -- τ=445: 7 nodes, 6 σ-classes
+  module τ445 where
 
-  -- ctx-729: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1493 (1×)
-  ctx-729-τ729 : τ 729 ≡ τ 729
-  ctx-729-τ729 = refl
+    -- σ=1366 (2 nodes)
+    cell-0 : κ 212 ≡ κ 212
+    cell-0 = refl
 
-  -- ctx-808: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1702 (1×)
-  ctx-808-τ808 : τ 808 ≡ τ 808
-  ctx-808-τ808 = refl
+    -- σ=722 (1 nodes)
+    cell-1 : κ 212 ≡ κ 212
+    cell-1 = refl
 
+    -- σ=834 (1 nodes)
+    cell-2 : κ 212 ≡ κ 212
+    cell-2 = refl
 
--- ── index (Index) ──────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1091 (1 nodes)
+    cell-3 : κ 212 ≡ κ 212
+    cell-3 = refl
 
-module index-Index-τ730 where
+    -- σ=1099 (1 nodes)
+    cell-4 : κ 212 ≡ κ 212
+    cell-4 = refl
 
-  -- ctx-730: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1497 (1×)
-  --   σ=1501 (1×)
-  ctx-730-τ730 : τ 730 ≡ τ 730
-  ctx-730-τ730 = refl
+    -- σ=1372 (1 nodes)
+    cell-5 : κ 212 ≡ κ 212
+    cell-5 = refl
 
 
--- ── comprehension (comprehension) ──────────────
--- 2 nodes, 1 type contexts, 2 forms
+  -- τ=304: 1 nodes, 1 σ-classes
+  module τ304 where
 
-module comprehension-comprehension-τ735 where
+    -- σ=451 (1 nodes)
+    cell-0 : κ 212 ≡ κ 212
+    cell-0 = refl
 
-  -- ctx-735: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1513 (1×)
-  --   σ=1741 (1×)
-  ctx-735-τ735 : τ 735 ≡ τ 735
-  ctx-735-τ735 = refl
 
 
--- ── annassign (AnnAssign) ──────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+-- κ=217: 15 nodes, 1 τ-classes, 7 σ-classes
+module partial-at-state-Attribute where
 
-module annassign-AnnAssign-τ751 where
+  -- τ=153: 15 nodes, 7 σ-classes
+  module Self-tau-canonical where
 
-  -- ctx-751: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1560 (1×)
-  --   σ=1574 (1×)
-  ctx-751-τ751 : τ 751 ≡ τ 751
-  ctx-751-τ751 = refl
+    -- σ=921 (7 nodes)
+    cell-0 : κ 217 ≡ κ 217
+    cell-0 = refl
 
+    -- σ=483 (2 nodes)
+    cell-1 : κ 217 ≡ κ 217
+    cell-1 = refl
 
--- ── index (Index) ──────────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=642 (2 nodes)
+    cell-2 : κ 217 ≡ κ 217
+    cell-2 = refl
 
-module index-Index-τ786 where
+    -- σ=457 (1 nodes)
+    cell-3 : κ 217 ≡ κ 217
+    cell-3 = refl
 
-  -- ctx-786: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1653 (2×)
-  ctx-786-τ786 : τ 786 ≡ τ 786
-  ctx-786-τ786 = refl
+    -- σ=760 (1 nodes)
+    cell-4 : κ 217 ≡ κ 217
+    cell-4 = refl
 
+    -- σ=1103 (1 nodes)
+    cell-5 : κ 217 ≡ κ 217
+    cell-5 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=1982 (1 nodes)
+    cell-6 : κ 217 ≡ κ 217
+    cell-6 = refl
 
-module subscript-Subscript-τ787 where
 
-  -- ctx-787: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1654 (2×)
-  ctx-787-τ787 : τ 787 ≡ τ 787
-  ctx-787-τ787 = refl
 
+-- κ=228: 9 nodes, 1 τ-classes, 7 σ-classes
+module partial-apply-at-state-Call-0 where
 
--- ── usub (USub) ────────────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+  -- τ=324: 9 nodes, 7 σ-classes
+  module T where
 
-module usub-USub-τ795 where
+    -- σ=927 (2 nodes)
+    cell-0 : κ 228 ≡ κ 228
+    cell-0 = refl
 
-  -- ctx-795: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1678 (2×)
-  ctx-795-τ795 : τ 795 ≡ τ 795
-  ctx-795-τ795 = refl
+    -- σ=1051 (2 nodes)
+    cell-1 : κ 228 ≡ κ 228
+    cell-1 = refl
 
+    -- σ=485 (1 nodes)
+    cell-2 : κ 228 ≡ κ 228
+    cell-2 = refl
 
--- ── product (Tuple) ────────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=761 (1 nodes)
+    cell-3 : κ 228 ≡ κ 228
+    cell-3 = refl
 
-module product-Tuple-tuple-15 where
+    -- σ=922 (1 nodes)
+    cell-4 : κ 228 ≡ κ 228
+    cell-4 = refl
 
-  -- tuple: 2 nodes, 1 forms
-  -- [tuple]
-  --   σ=1724 (2×)
-  tuple-τ818 : τ 818 ≡ τ 818
-  tuple-τ818 = refl
+    -- σ=1027 (1 nodes)
+    cell-5 : κ 228 ≡ κ 228
+    cell-5 = refl
 
+    -- σ=1203 (1 nodes)
+    cell-6 : κ 228 ≡ κ 228
+    cell-6 = refl
 
--- ── index (Index) ──────────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
 
-module index-Index-τ819 where
 
-  -- ctx-819: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1725 (2×)
-  ctx-819-τ819 : τ 819 ≡ τ 819
-  ctx-819-τ819 = refl
+-- κ=352: 11 nodes, 3 τ-classes, 7 σ-classes
+module equalizer-Compare-1 where
 
+  -- τ=471: 8 nodes, 5 σ-classes
+  module τ471 where
 
--- ── subscript (Subscript) ──────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=806 (4 nodes)
+    cell-0 : κ 352 ≡ κ 352
+    cell-0 = refl
 
-module subscript-Subscript-τ820 where
+    -- σ=926 (1 nodes)
+    cell-1 : κ 352 ≡ κ 352
+    cell-1 = refl
 
-  -- ctx-820: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1726 (2×)
-  ctx-820-τ820 : τ 820 ≡ τ 820
-  ctx-820-τ820 = refl
+    -- σ=1190 (1 nodes)
+    cell-2 : κ 352 ≡ κ 352
+    cell-2 = refl
 
+    -- σ=1317 (1 nodes)
+    cell-3 : κ 352 ≡ κ 352
+    cell-3 = refl
 
--- ── index (Index) ──────────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=1645 (1 nodes)
+    cell-4 : κ 352 ≡ κ 352
+    cell-4 = refl
 
-module index-Index-τ821 where
 
-  -- ctx-821: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1727 (2×)
-  ctx-821-τ821 : τ 821 ≡ τ 821
-  ctx-821-τ821 = refl
+  -- τ=595: 2 nodes, 1 σ-classes
+  module τ595 where
 
+    -- σ=1149 (2 nodes)
+    cell-0 : κ 352 ≡ κ 352
+    cell-0 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 2 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-τ822 where
+  -- τ=522: 1 nodes, 1 σ-classes
+  module τ522 where
 
-  -- ctx-822: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1728 (2×)
-  ctx-822-τ822 : τ 822 ≡ τ 822
-  ctx-822-τ822 = refl
+    -- σ=905 (1 nodes)
+    cell-0 : κ 352 ≡ κ 352
+    cell-0 = refl
 
 
--- ── apply (Call) ───────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
 
-module apply-Call-τ827 where
+-- κ=354: 11 nodes, 2 τ-classes, 7 σ-classes
+module effect-seq-Expr-2 where
 
-  -- ctx-827: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1748 (1×)
-  --   σ=2063 (1×)
-  ctx-827-τ827 : τ 827 ≡ τ 827
-  ctx-827-τ827 = refl
+  -- τ=474: 10 nodes, 6 σ-classes
+  module τ474 where
 
+    -- σ=809 (4 nodes)
+    cell-0 : κ 354 ≡ κ 354
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1334 (2 nodes)
+    cell-1 : κ 354 ≡ κ 354
+    cell-1 = refl
 
-module let-k-Assign-τ828 where
+    -- σ=943 (1 nodes)
+    cell-2 : κ 354 ≡ κ 354
+    cell-2 = refl
 
-  -- ctx-828: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1749 (1×)
-  --   σ=2064 (1×)
-  ctx-828-τ828 : τ 828 ≡ τ 828
-  ctx-828-τ828 = refl
+    -- σ=1171 (1 nodes)
+    cell-3 : κ 354 ≡ κ 354
+    cell-3 = refl
 
+    -- σ=1192 (1 nodes)
+    cell-4 : κ 354 ≡ κ 354
+    cell-4 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=1319 (1 nodes)
+    cell-5 : κ 354 ≡ κ 354
+    cell-5 = refl
 
-module let-k-Assign-τ838 where
 
-  -- ctx-838: 2 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1772 (2×)
-  ctx-838-τ838 : τ 838 ≡ τ 838
-  ctx-838-τ838 = refl
+  -- τ=659: 1 nodes, 1 σ-classes
+  module τ659 where
 
+    -- σ=1356 (1 nodes)
+    cell-0 : κ 354 ≡ κ 354
+    cell-0 = refl
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 2 nodes, 2 type contexts, 2 forms
 
-module free_monoid-fold-JoinedStr-str-4 where
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=1815 (1×)
-  str-τ848 : τ 848 ≡ τ 848
-  str-τ848 = refl
+-- κ=357: 8 nodes, 4 τ-classes, 7 σ-classes
+module product-Tuple-1 where
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=2016 (1×)
-  str-τ931 : τ 931 ≡ τ 931
-  str-τ931 = refl
+  -- τ=477: 4 nodes, 4 σ-classes
+  module tuple-0 where
 
+    -- σ=817 (1 nodes)
+    cell-0 : κ 357 ≡ κ 357
+    cell-0 = refl
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 2 nodes, 1 type contexts, 1 forms
+    -- σ=1232 (1 nodes)
+    cell-1 : κ 357 ≡ κ 357
+    cell-1 = refl
 
-module free_monoid-fold-JoinedStr-str-5 where
+    -- σ=1266 (1 nodes)
+    cell-2 : κ 357 ≡ κ 357
+    cell-2 = refl
 
-  -- str: 2 nodes, 1 forms
-  -- [str]
-  --   σ=1816 (2×)
-  str-τ849 : τ 849 ≡ τ 849
-  str-τ849 = refl
+    -- σ=1752 (1 nodes)
+    cell-3 : κ 357 ≡ κ 357
+    cell-3 = refl
 
 
--- ── coerce (FormattedValue) ────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+  -- τ=693: 2 nodes, 1 σ-classes
+  module tuple-1 where
 
-module coerce-FormattedValue-τ857 where
+    -- σ=1425 (2 nodes)
+    cell-0 : κ 357 ≡ κ 357
+    cell-0 = refl
 
-  -- ctx-857: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1847 (1×)
-  --   σ=1856 (1×)
-  ctx-857-τ857 : τ 857 ≡ τ 857
-  ctx-857-τ857 = refl
 
+  -- τ=608: 1 nodes, 1 σ-classes
+  module tuple-2 where
 
--- ── bimap (BinOp) ──────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1197 (1 nodes)
+    cell-0 : κ 357 ≡ κ 357
+    cell-0 = refl
 
-module bimap-BinOp-τ858 where
 
-  -- ctx-858: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1849 (1×)
-  --   σ=1857 (1×)
-  ctx-858-τ858 : τ 858 ≡ τ 858
-  ctx-858-τ858 = refl
+  -- τ=646: 1 nodes, 1 σ-classes
+  module tuple-3 where
 
+    -- σ=1324 (1 nodes)
+    cell-0 : κ 357 ≡ κ 357
+    cell-0 = refl
 
--- ── bimap (BinOp) ──────────────────────────────
--- 2 nodes, 1 type contexts, 2 forms
 
-module bimap-BinOp-τ859 where
 
-  -- ctx-859: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1850 (1×)
-  --   σ=1858 (1×)
-  ctx-859-τ859 : τ 859 ≡ τ 859
-  ctx-859-τ859 = refl
+-- κ=377: 8 nodes, 2 τ-classes, 7 σ-classes
+module apply-Call-3 where
 
+  -- τ=499: 7 nodes, 6 σ-classes
+  module τ499 where
 
--- ── coerce (FormattedValue) ────────────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1059 (2 nodes)
+    cell-0 : κ 377 ≡ κ 377
+    cell-0 = refl
 
-module coerce-FormattedValue-τ860 where
+    -- σ=858 (1 nodes)
+    cell-1 : κ 377 ≡ κ 377
+    cell-1 = refl
 
-  -- ctx-860: 2 nodes, 2 forms
-  -- [(untyped)]
-  --   σ=1851 (1×)
-  --   σ=1859 (1×)
-  ctx-860-τ860 : τ 860 ≡ τ 860
-  ctx-860-τ860 = refl
+    -- σ=1015 (1 nodes)
+    cell-2 : κ 377 ≡ κ 377
+    cell-2 = refl
 
+    -- σ=1206 (1 nodes)
+    cell-3 : κ 377 ≡ κ 377
+    cell-3 = refl
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 2 nodes, 1 type contexts, 2 forms
+    -- σ=1563 (1 nodes)
+    cell-4 : κ 377 ≡ κ 377
+    cell-4 = refl
 
-module free_monoid-fold-JoinedStr-str-6 where
+    -- σ=1659 (1 nodes)
+    cell-5 : κ 377 ≡ κ 377
+    cell-5 = refl
 
-  -- str: 2 nodes, 2 forms
-  -- [str]
-  --   σ=1852 (1×)
-  --   σ=1860 (1×)
-  str-τ861 : τ 861 ≡ τ 861
-  str-τ861 = refl
 
+  -- τ=660: 1 nodes, 1 σ-classes
+  module τ660 where
 
--- ── pullback.import (ImportFrom) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1357 (1 nodes)
+    cell-0 : κ 377 ≡ κ 377
+    cell-0 = refl
 
-module pullback-import-ImportFrom-τ3 where
 
-  -- ctx-3: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=3 (1×)
-  ctx-3-τ3 : τ 3 ≡ τ 3
-  ctx-3-τ3 = refl
 
+-- κ=2: 6 nodes, 1 τ-classes, 6 σ-classes
+module alias-alias where
 
--- ── pullback.import (ImportFrom) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=2: 6 nodes, 6 σ-classes
+  module τ2 where
 
-module pullback-import-ImportFrom-τ4 where
+    -- σ=2 (1 nodes)
+    cell-0 : κ 2 ≡ κ 2
+    cell-0 = refl
 
-  -- ctx-4: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=6 (1×)
-  ctx-4-τ4 : τ 4 ≡ τ 4
-  ctx-4-τ4 = refl
+    -- σ=4 (1 nodes)
+    cell-1 : κ 2 ≡ κ 2
+    cell-1 = refl
 
+    -- σ=5 (1 nodes)
+    cell-2 : κ 2 ≡ κ 2
+    cell-2 = refl
 
--- ── pullback.import (ImportFrom) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=7 (1 nodes)
+    cell-3 : κ 2 ≡ κ 2
+    cell-3 = refl
 
-module pullback-import-ImportFrom-τ5 where
+    -- σ=8 (1 nodes)
+    cell-4 : κ 2 ≡ κ 2
+    cell-4 = refl
 
-  -- ctx-5: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=10 (1×)
-  ctx-5-τ5 : τ 5 ≡ τ 5
-  ctx-5-τ5 = refl
+    -- σ=9 (1 nodes)
+    cell-5 : κ 2 ≡ κ 2
+    cell-5 = refl
 
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-tuple-16 where
+-- κ=22: 8 nodes, 2 τ-classes, 6 σ-classes
+module arguments-arguments-0 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=18 (1×)
-  tuple-τ9 : τ 9 ≡ τ 9
-  tuple-τ9 = refl
+  -- τ=124: 5 nodes, 4 σ-classes
+  module τ124 where
 
+    -- σ=236 (2 nodes)
+    cell-0 : κ 22 ≡ κ 22
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=183 (1 nodes)
+    cell-1 : κ 22 ≡ κ 22
+    cell-1 = refl
 
-module let-k-Assign-τ10 where
+    -- σ=1638 (1 nodes)
+    cell-2 : κ 22 ≡ κ 22
+    cell-2 = refl
 
-  -- ctx-10: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=19 (1×)
-  ctx-10-τ10 : τ 10 ≡ τ 10
-  ctx-10-τ10 = refl
+    -- σ=1691 (1 nodes)
+    cell-3 : κ 22 ≡ κ 22
+    cell-3 = refl
 
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=32: 3 nodes, 2 σ-classes
+  module τ32 where
 
-module exponential-intro-FunctionDef-τ30 where
+    -- σ=40 (2 nodes)
+    cell-0 : κ 22 ≡ κ 22
+    cell-0 = refl
 
-  -- ctx-30: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=38 (1×)
-  ctx-30-τ30 : τ 30 ≡ τ 30
-  ctx-30-τ30 = refl
+    -- σ=113 (1 nodes)
+    cell-1 : κ 22 ≡ κ 22
+    cell-1 = refl
 
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ40 where
+-- κ=32: 6 nodes, 1 τ-classes, 6 σ-classes
+module let-k-Assign-4 where
 
-  -- ctx-40: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=51 (1×)
-  ctx-40-τ40 : τ 40 ≡ τ 40
-  ctx-40-τ40 = refl
+  -- τ=45: 6 nodes, 6 σ-classes
+  module τ45 where
 
+    -- σ=55 (1 nodes)
+    cell-0 : κ 32 ≡ κ 32
+    cell-0 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=508 (1 nodes)
+    cell-1 : κ 32 ≡ κ 32
+    cell-1 = refl
 
-module equalizer-If-τ41 where
+    -- σ=511 (1 nodes)
+    cell-2 : κ 32 ≡ κ 32
+    cell-2 = refl
 
-  -- ctx-41: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=52 (1×)
-  ctx-41-τ41 : τ 41 ≡ τ 41
-  ctx-41-τ41 = refl
+    -- σ=554 (1 nodes)
+    cell-3 : κ 32 ≡ κ 32
+    cell-3 = refl
 
+    -- σ=696 (1 nodes)
+    cell-4 : κ 32 ≡ κ 32
+    cell-4 = refl
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1210 (1 nodes)
+    cell-5 : κ 32 ≡ κ 32
+    cell-5 = refl
 
-module exponential-intro-FunctionDef-τ43 where
 
-  -- ctx-43: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=53 (1×)
-  ctx-43-τ43 : τ 43 ≡ τ 43
-  ctx-43-τ43 = refl
 
+-- κ=44: 6 nodes, 2 τ-classes, 6 σ-classes
+module arguments-arguments-1 where
 
--- ── fixpoint (While) ───────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=168: 5 nodes, 5 σ-classes
+  module τ168 where
 
-module fixpoint-While-τ51 where
+    -- σ=245 (1 nodes)
+    cell-0 : κ 44 ≡ κ 44
+    cell-0 = refl
 
-  -- ctx-51: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=62 (1×)
-  ctx-51-τ51 : τ 51 ≡ τ 51
-  ctx-51-τ51 = refl
+    -- σ=727 (1 nodes)
+    cell-1 : κ 44 ≡ κ 44
+    cell-1 = refl
 
+    -- σ=1458 (1 nodes)
+    cell-2 : κ 44 ≡ κ 44
+    cell-2 = refl
 
--- ── product.unpack (Tuple) ─────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1483 (1 nodes)
+    cell-3 : κ 44 ≡ κ 44
+    cell-3 = refl
 
-module product-unpack-Tuple-tuple-1 where
+    -- σ=1555 (1 nodes)
+    cell-4 : κ 44 ≡ κ 44
+    cell-4 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=66 (1×)
-  tuple-τ52 : τ 52 ≡ τ 52
-  tuple-τ52 = refl
 
+  -- τ=58: 1 nodes, 1 σ-classes
+  module τ58 where
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=74 (1 nodes)
+    cell-0 : κ 44 ≡ κ 44
+    cell-0 = refl
 
-module product-Tuple-tuple-17 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=67 (1×)
-  tuple-τ53 : τ 53 ≡ τ 53
-  tuple-τ53 = refl
 
+-- κ=87: 6 nodes, 1 τ-classes, 6 σ-classes
+module coerce-FormattedValue-1 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=119: 6 nodes, 6 σ-classes
+  module τ119 where
 
-module let-k-Assign-τ54 where
+    -- σ=173 (1 nodes)
+    cell-0 : κ 87 ≡ κ 87
+    cell-0 = refl
 
-  -- ctx-54: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=68 (1×)
-  ctx-54-τ54 : τ 54 ≡ τ 54
-  ctx-54-τ54 = refl
+    -- σ=526 (1 nodes)
+    cell-1 : κ 87 ≡ κ 87
+    cell-1 = refl
 
+    -- σ=1778 (1 nodes)
+    cell-2 : κ 87 ≡ κ 87
+    cell-2 = refl
 
--- ── fixpoint (While) ───────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1781 (1 nodes)
+    cell-3 : κ 87 ≡ κ 87
+    cell-3 = refl
 
-module fixpoint-While-τ55 where
+    -- σ=1784 (1 nodes)
+    cell-4 : κ 87 ≡ κ 87
+    cell-4 = refl
 
-  -- ctx-55: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=69 (1×)
-  ctx-55-τ55 : τ 55 ≡ τ 55
-  ctx-55-τ55 = refl
+    -- σ=1950 (1 nodes)
+    cell-5 : κ 87 ≡ κ 87
+    cell-5 = refl
 
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-τ57 where
+-- κ=210: 8 nodes, 2 τ-classes, 6 σ-classes
+module monoid-op-at-x3f-Attribute-1 where
 
-  -- ctx-57: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=71 (1×)
-  ctx-57-τ57 : τ 57 ≡ τ 57
-  ctx-57-τ57 = refl
+  -- τ=178: 7 nodes, 5 σ-classes
+  module τ178 where
 
+    -- σ=1089 (2 nodes)
+    cell-0 : κ 210 ≡ κ 210
+    cell-0 = refl
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1364 (2 nodes)
+    cell-1 : κ 210 ≡ κ 210
+    cell-1 = refl
 
-module product-Tuple-tuple-18 where
+    -- σ=720 (1 nodes)
+    cell-2 : κ 210 ≡ κ 210
+    cell-2 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=85 (1×)
-  tuple-τ63 : τ 63 ≡ τ 63
-  tuple-τ63 = refl
+    -- σ=832 (1 nodes)
+    cell-3 : κ 210 ≡ κ 210
+    cell-3 = refl
 
+    -- σ=1097 (1 nodes)
+    cell-4 : κ 210 ≡ κ 210
+    cell-4 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ64 where
+  -- τ=158: 1 nodes, 1 σ-classes
+  module τ158 where
 
-  -- ctx-64: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=86 (1×)
-  ctx-64-τ64 : τ 64 ≡ τ 64
-  ctx-64-τ64 = refl
+    -- σ=448 (1 nodes)
+    cell-0 : κ 210 ≡ κ 210
+    cell-0 = refl
 
 
--- ── equalizer (Compare) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-Compare-τ69 where
+-- κ=232: 7 nodes, 2 τ-classes, 6 σ-classes
+module comprehension-comprehension-0 where
 
-  -- ctx-69: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=98 (1×)
-  ctx-69-τ69 : τ 69 ≡ τ 69
-  ctx-69-τ69 = refl
+  -- τ=518: 6 nodes, 5 σ-classes
+  module τ518 where
 
+    -- σ=1328 (2 nodes)
+    cell-0 : κ 232 ≡ κ 232
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=896 (1 nodes)
+    cell-1 : κ 232 ≡ κ 232
+    cell-1 = refl
 
-module let-k-Assign-τ70 where
+    -- σ=996 (1 nodes)
+    cell-2 : κ 232 ≡ κ 232
+    cell-2 = refl
 
-  -- ctx-70: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=100 (1×)
-  ctx-70-τ70 : τ 70 ≡ τ 70
-  ctx-70-τ70 = refl
+    -- σ=1253 (1 nodes)
+    cell-3 : κ 232 ≡ κ 232
+    cell-3 = refl
 
+    -- σ=1887 (1 nodes)
+    cell-4 : κ 232 ≡ κ 232
+    cell-4 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-τ71 where
+  -- τ=330: 1 nodes, 1 σ-classes
+  module τ330 where
 
-  -- ctx-71: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=101 (1×)
-  ctx-71-τ71 : τ 71 ≡ τ 71
-  ctx-71-τ71 = refl
+    -- σ=496 (1 nodes)
+    cell-0 : κ 232 ≡ κ 232
+    cell-0 = refl
 
 
--- ── equalizer (Compare) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-Compare-τ72 where
+-- κ=343: 7 nodes, 1 τ-classes, 6 σ-classes
+module apply-Call-4 where
 
-  -- ctx-72: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=104 (1×)
-  ctx-72-τ72 : τ 72 ≡ τ 72
-  ctx-72-τ72 = refl
+  -- τ=456: 7 nodes, 6 σ-classes
+  module τ456 where
 
+    -- σ=1052 (2 nodes)
+    cell-0 : κ 343 ≡ κ 343
+    cell-0 = refl
 
--- ── monoid.accum (AugAssign) ───────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=762 (1 nodes)
+    cell-1 : κ 343 ≡ κ 343
+    cell-1 = refl
 
-module monoid-accum-AugAssign-τ74 where
+    -- σ=923 (1 nodes)
+    cell-2 : κ 343 ≡ κ 343
+    cell-2 = refl
 
-  -- ctx-74: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=108 (1×)
-  ctx-74-τ74 : τ 74 ≡ τ 74
-  ctx-74-τ74 = refl
+    -- σ=928 (1 nodes)
+    cell-3 : κ 343 ≡ κ 343
+    cell-3 = refl
 
+    -- σ=1008 (1 nodes)
+    cell-4 : κ 343 ≡ κ 343
+    cell-4 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1204 (1 nodes)
+    cell-5 : κ 343 ≡ κ 343
+    cell-5 = refl
 
-module equalizer-If-τ75 where
 
-  -- ctx-75: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=109 (1×)
-  ctx-75-τ75 : τ 75 ≡ τ 75
-  ctx-75-τ75 = refl
 
+-- κ=344: 7 nodes, 1 τ-classes, 6 σ-classes
+module effect-seq-Expr-3 where
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=457: 7 nodes, 6 σ-classes
+  module τ457 where
 
-module exponential-intro-FunctionDef-τ76 where
+    -- σ=1053 (2 nodes)
+    cell-0 : κ 344 ≡ κ 344
+    cell-0 = refl
 
-  -- ctx-76: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=110 (1×)
-  ctx-76-τ76 : τ 76 ≡ τ 76
-  ctx-76-τ76 = refl
+    -- σ=763 (1 nodes)
+    cell-1 : κ 344 ≡ κ 344
+    cell-1 = refl
 
+    -- σ=924 (1 nodes)
+    cell-2 : κ 344 ≡ κ 344
+    cell-2 = refl
 
--- ── terminal.map (Return) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=929 (1 nodes)
+    cell-3 : κ 344 ≡ κ 344
+    cell-3 = refl
 
-module terminal-map-Return-τ79 where
+    -- σ=1009 (1 nodes)
+    cell-4 : κ 344 ≡ κ 344
+    cell-4 = refl
 
-  -- ctx-79: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=116 (1×)
-  ctx-79-τ79 : τ 79 ≡ τ 79
-  ctx-79-τ79 = refl
+    -- σ=1205 (1 nodes)
+    cell-5 : κ 344 ≡ κ 344
+    cell-5 = refl
 
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-τ81 where
+-- κ=676: 6 nodes, 3 τ-classes, 6 σ-classes
+module bimap-BinOp-0 where
 
-  -- ctx-81: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=118 (1×)
-  ctx-81-τ81 : τ 81 ≡ τ 81
-  ctx-81-τ81 = refl
+  -- τ=853: 4 nodes, 4 σ-classes
+  module τ853 where
 
+    -- σ=1824 (1 nodes)
+    cell-0 : κ 676 ≡ κ 676
+    cell-0 = refl
 
--- ── terminal.map (Return) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1834 (1 nodes)
+    cell-1 : κ 676 ≡ κ 676
+    cell-1 = refl
 
-module terminal-map-Return-τ83 where
+    -- σ=1841 (1 nodes)
+    cell-2 : κ 676 ≡ κ 676
+    cell-2 = refl
 
-  -- ctx-83: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=121 (1×)
-  ctx-83-τ83 : τ 83 ≡ τ 83
-  ctx-83-τ83 = refl
+    -- σ=1996 (1 nodes)
+    cell-3 : κ 676 ≡ κ 676
+    cell-3 = refl
 
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=921: 1 nodes, 1 σ-classes
+  module τ921 where
 
-module exponential-intro-FunctionDef-τ85 where
+    -- σ=2001 (1 nodes)
+    cell-0 : κ 676 ≡ κ 676
+    cell-0 = refl
 
-  -- ctx-85: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=125 (1×)
-  ctx-85-τ85 : τ 85 ≡ τ 85
-  ctx-85-τ85 = refl
 
+  -- τ=949: 1 nodes, 1 σ-classes
+  module τ949 where
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=2077 (1 nodes)
+    cell-0 : κ 676 ≡ κ 676
+    cell-0 = refl
 
-module exponential-intro-FunctionDef-τ89 where
 
-  -- ctx-89: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=129 (1×)
-  ctx-89-τ89 : τ 89 ≡ τ 89
-  ctx-89-τ89 = refl
 
+-- κ=79: 7 nodes, 2 τ-classes, 5 σ-classes
+module arg-arg-1 where
 
--- ── classifier.intro (ClassDef) ────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=103: 5 nodes, 4 σ-classes
+  module τ103 where
 
-module classifier-intro-ClassDef-τ90 where
+    -- σ=149 (2 nodes)
+    cell-0 : κ 79 ≡ κ 79
+    cell-0 = refl
 
-  -- ctx-90: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=130 (1×)
-  ctx-90-τ90 : τ 90 ≡ τ 90
-  ctx-90-τ90 = refl
+    -- σ=1219 (1 nodes)
+    cell-1 : κ 79 ≡ κ 79
+    cell-1 = refl
 
+    -- σ=1220 (1 nodes)
+    cell-2 : κ 79 ≡ κ 79
+    cell-2 = refl
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1221 (1 nodes)
+    cell-3 : κ 79 ≡ κ 79
+    cell-3 = refl
 
-module product-Tuple-tuple-19 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=137 (1×)
-  tuple-τ91 : τ 91 ≡ τ 91
-  tuple-τ91 = refl
+  -- τ=99: 2 nodes, 1 σ-classes
+  module τ99 where
 
+    -- σ=145 (2 nodes)
+    cell-0 : κ 79 ≡ κ 79
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ92 where
 
-  -- ctx-92: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=138 (1×)
-  ctx-92-τ92 : τ 92 ≡ τ 92
-  ctx-92-τ92 = refl
+-- κ=86: 5 nodes, 1 τ-classes, 5 σ-classes
+module coerce-FormattedValue-2 where
 
+  -- τ=118: 5 nodes, 5 σ-classes
+  module τ118 where
 
--- ── arguments (arguments) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=169 (1 nodes)
+    cell-0 : κ 86 ≡ κ 86
+    cell-0 = refl
 
-module arguments-arguments-τ104 where
+    -- σ=311 (1 nodes)
+    cell-1 : κ 86 ≡ κ 86
+    cell-1 = refl
 
-  -- ctx-104: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=150 (1×)
-  ctx-104-τ104 : τ 104 ≡ τ 104
-  ctx-104-τ104 = refl
+    -- σ=1775 (1 nodes)
+    cell-2 : κ 86 ≡ κ 86
+    cell-2 = refl
 
+    -- σ=1929 (1 nodes)
+    cell-3 : κ 86 ≡ κ 86
+    cell-3 = refl
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1948 (1 nodes)
+    cell-4 : κ 86 ≡ κ 86
+    cell-4 = refl
 
-module exponential-intro-FunctionDef-τ117 where
 
-  -- ctx-117: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=166 (1×)
-  ctx-117-τ117 : τ 117 ≡ τ 117
-  ctx-117-τ117 = refl
 
+-- κ=109: 5 nodes, 2 τ-classes, 5 σ-classes
+module morphism-at-x3f-Attribute-1 where
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=178: 4 nodes, 4 σ-classes
+  module τ178 where
 
-module free_monoid-fold-JoinedStr-str-7 where
+    -- σ=263 (1 nodes)
+    cell-0 : κ 109 ≡ κ 109
+    cell-0 = refl
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=175 (1×)
-  str-τ120 : τ 120 ≡ τ 120
-  str-τ120 = refl
+    -- σ=268 (1 nodes)
+    cell-1 : κ 109 ≡ κ 109
+    cell-1 = refl
 
+    -- σ=739 (1 nodes)
+    cell-2 : κ 109 ≡ κ 109
+    cell-2 = refl
 
--- ── terminal.map (Return) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=828 (1 nodes)
+    cell-3 : κ 109 ≡ κ 109
+    cell-3 = refl
 
-module terminal-map-Return-τ121 where
 
-  -- ctx-121: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=176 (1×)
-  ctx-121-τ121 : τ 121 ≡ τ 121
-  ctx-121-τ121 = refl
+  -- τ=158: 1 nodes, 1 σ-classes
+  module τ158 where
 
+    -- σ=229 (1 nodes)
+    cell-0 : κ 109 ≡ κ 109
+    cell-0 = refl
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-τ122 where
 
-  -- ctx-122: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=178 (1×)
-  ctx-122-τ122 : τ 122 ≡ τ 122
-  ctx-122-τ122 = refl
+-- κ=118: 9 nodes, 2 τ-classes, 5 σ-classes
+module apply-Call-5 where
 
+  -- τ=174: 7 nodes, 4 σ-classes
+  module τ174 where
 
--- ── classifier.intro (ClassDef) ────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=811 (4 nodes)
+    cell-0 : κ 118 ≡ κ 118
+    cell-0 = refl
 
-module classifier-intro-ClassDef-τ123 where
+    -- σ=254 (1 nodes)
+    cell-1 : κ 118 ≡ κ 118
+    cell-1 = refl
 
-  -- ctx-123: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=179 (1×)
-  ctx-123-τ123 : τ 123 ≡ τ 123
-  ctx-123-τ123 = refl
+    -- σ=1193 (1 nodes)
+    cell-2 : κ 118 ≡ κ 118
+    cell-2 = refl
 
+    -- σ=1320 (1 nodes)
+    cell-3 : κ 118 ≡ κ 118
+    cell-3 = refl
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-tuple-20 where
+  -- τ=597: 2 nodes, 1 σ-classes
+  module τ597 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=194 (1×)
-  tuple-τ133 : τ 133 ≡ τ 133
-  tuple-τ133 = refl
+    -- σ=1152 (2 nodes)
+    cell-0 : κ 118 ≡ κ 118
+    cell-0 = refl
 
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-τ134 where
+-- κ=126: 5 nodes, 2 τ-classes, 5 σ-classes
+module annassign-AnnAssign-0 where
 
-  -- ctx-134: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=195 (1×)
-  ctx-134-τ134 : τ 134 ≡ τ 134
-  ctx-134-τ134 = refl
+  -- τ=185: 4 nodes, 4 σ-classes
+  module τ185 where
 
+    -- σ=279 (1 nodes)
+    cell-0 : κ 126 ≡ κ 126
+    cell-0 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=752 (1 nodes)
+    cell-1 : κ 126 ≡ κ 126
+    cell-1 = refl
 
-module subscript-Subscript-τ135 where
+    -- σ=1336 (1 nodes)
+    cell-2 : κ 126 ≡ κ 126
+    cell-2 = refl
 
-  -- ctx-135: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=196 (1×)
-  ctx-135-τ135 : τ 135 ≡ τ 135
-  ctx-135-τ135 = refl
+    -- σ=1527 (1 nodes)
+    cell-3 : κ 126 ≡ κ 126
+    cell-3 = refl
 
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=391: 1 nodes, 1 σ-classes
+  module τ391 where
 
-module annassign-AnnAssign-τ136 where
+    -- σ=637 (1 nodes)
+    cell-0 : κ 126 ≡ κ 126
+    cell-0 = refl
 
-  -- ctx-136: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=197 (1×)
-  ctx-136-τ136 : τ 136 ≡ τ 136
-  ctx-136-τ136 = refl
 
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=128: 5 nodes, 1 τ-classes, 5 σ-classes
+module equalizer-Compare-2 where
 
-module exponential-intro-FunctionDef-τ142 where
+  -- τ=187: 5 nodes, 5 σ-classes
+  module τ187 where
 
-  -- ctx-142: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=204 (1×)
-  ctx-142-τ142 : τ 142 ≡ τ 142
-  ctx-142-τ142 = refl
+    -- σ=284 (1 nodes)
+    cell-0 : κ 128 ≡ κ 128
+    cell-0 = refl
 
+    -- σ=557 (1 nodes)
+    cell-1 : κ 128 ≡ κ 128
+    cell-1 = refl
 
--- ── arguments (arguments) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1117 (1 nodes)
+    cell-2 : κ 128 ≡ κ 128
+    cell-2 = refl
 
-module arguments-arguments-τ143 where
+    -- σ=1279 (1 nodes)
+    cell-3 : κ 128 ≡ κ 128
+    cell-3 = refl
 
-  -- ctx-143: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=206 (1×)
-  ctx-143-τ143 : τ 143 ≡ τ 143
-  ctx-143-τ143 = refl
+    -- σ=1905 (1 nodes)
+    cell-4 : κ 128 ≡ κ 128
+    cell-4 = refl
 
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-τ151 where
+-- κ=130: 5 nodes, 1 τ-classes, 5 σ-classes
+module monoid-op-at-x3f-Call-1 where
 
-  -- ctx-151: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=221 (1×)
-  ctx-151-τ151 : τ 151 ≡ τ 151
-  ctx-151-τ151 = refl
+  -- τ=189: 5 nodes, 5 σ-classes
+  module τ189 where
 
+    -- σ=286 (1 nodes)
+    cell-0 : κ 130 ≡ κ 130
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=598 (1 nodes)
+    cell-1 : κ 130 ≡ κ 130
+    cell-1 = refl
 
-module let-k-Assign-τ152 where
+    -- σ=862 (1 nodes)
+    cell-2 : κ 130 ≡ κ 130
+    cell-2 = refl
 
-  -- ctx-152: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=222 (1×)
-  ctx-152-τ152 : τ 152 ≡ τ 152
-  ctx-152-τ152 = refl
+    -- σ=1156 (1 nodes)
+    cell-3 : κ 130 ≡ κ 130
+    cell-3 = refl
 
+    -- σ=1308 (1 nodes)
+    cell-4 : κ 130 ≡ κ 130
+    cell-4 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-τ156 where
 
-  -- ctx-156: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=227 (1×)
-  ctx-156-τ156 : τ 156 ≡ τ 156
-  ctx-156-τ156 = refl
+-- κ=131: 5 nodes, 1 τ-classes, 5 σ-classes
+module effect-seq-Expr-4 where
 
+  -- τ=190: 5 nodes, 5 σ-classes
+  module τ190 where
 
--- ── free_monoid.snoc@? (Call) ──────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=287 (1 nodes)
+    cell-0 : κ 131 ≡ κ 131
+    cell-0 = refl
 
-module free_monoid-snoc-at-x3f-Call-τ160 where
+    -- σ=599 (1 nodes)
+    cell-1 : κ 131 ≡ κ 131
+    cell-1 = refl
 
-  -- ctx-160: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=232 (1×)
-  ctx-160-τ160 : τ 160 ≡ τ 160
-  ctx-160-τ160 = refl
+    -- σ=863 (1 nodes)
+    cell-2 : κ 131 ≡ κ 131
+    cell-2 = refl
 
+    -- σ=1157 (1 nodes)
+    cell-3 : κ 131 ≡ κ 131
+    cell-3 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1309 (1 nodes)
+    cell-4 : κ 131 ≡ κ 131
+    cell-4 = refl
 
-module effect-seq-Expr-τ161 where
 
-  -- ctx-161: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=233 (1×)
-  ctx-161-τ161 : τ 161 ≡ τ 161
-  ctx-161-τ161 = refl
 
+-- κ=150: 5 nodes, 2 τ-classes, 5 σ-classes
+module coerce-FormattedValue-3 where
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=840: 4 nodes, 4 σ-classes
+  module τ840 where
 
-module exponential-intro-FunctionDef-τ163 where
+    -- σ=1788 (1 nodes)
+    cell-0 : κ 150 ≡ κ 150
+    cell-0 = refl
 
-  -- ctx-163: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=235 (1×)
-  ctx-163-τ163 : τ 163 ≡ τ 163
-  ctx-163-τ163 = refl
+    -- σ=1937 (1 nodes)
+    cell-1 : κ 150 ≡ κ 150
+    cell-1 = refl
 
+    -- σ=1939 (1 nodes)
+    cell-2 : κ 150 ≡ κ 150
+    cell-2 = refl
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=2040 (1 nodes)
+    cell-3 : κ 150 ≡ κ 150
+    cell-3 = refl
 
-module exponential-intro-FunctionDef-τ167 where
 
-  -- ctx-167: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=242 (1×)
-  ctx-167-τ167 : τ 167 ≡ τ 167
-  ctx-167-τ167 = refl
+  -- τ=211: 1 nodes, 1 σ-classes
+  module τ211 where
 
+    -- σ=313 (1 nodes)
+    cell-0 : κ 150 ≡ κ 150
+    cell-0 = refl
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-tuple-21 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=250 (1×)
-  tuple-τ171 : τ 171 ≡ τ 171
-  tuple-τ171 = refl
+-- κ=175: 10 nodes, 2 τ-classes, 5 σ-classes
+module apply-Call-6 where
 
+  -- τ=242: 8 nodes, 3 σ-classes
+  module τ242 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=362 (4 nodes)
+    cell-0 : κ 175 ≡ κ 175
+    cell-0 = refl
 
-module let-k-Assign-τ172 where
+    -- σ=1431 (3 nodes)
+    cell-1 : κ 175 ≡ κ 175
+    cell-1 = refl
 
-  -- ctx-172: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=251 (1×)
-  ctx-172-τ172 : τ 172 ≡ τ 172
-  ctx-172-τ172 = refl
+    -- σ=409 (1 nodes)
+    cell-2 : κ 175 ≡ κ 175
+    cell-2 = refl
 
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=728: 2 nodes, 2 σ-classes
+  module τ728 where
 
-module annassign-AnnAssign-τ175 where
+    -- σ=1492 (1 nodes)
+    cell-0 : κ 175 ≡ κ 175
+    cell-0 = refl
 
-  -- ctx-175: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=255 (1×)
-  ctx-175-τ175 : τ 175 ≡ τ 175
-  ctx-175-τ175 = refl
+    -- σ=2067 (1 nodes)
+    cell-1 : κ 175 ≡ κ 175
+    cell-1 = refl
 
 
--- ── ifexp (IfExp) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module ifexp-IfExp-τ176 where
+-- κ=213: 5 nodes, 2 τ-classes, 5 σ-classes
+module fold-For-0 where
 
-  -- ctx-176: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=259 (1×)
-  ctx-176-τ176 : τ 176 ≡ τ 176
-  ctx-176-τ176 = refl
+  -- τ=483: 4 nodes, 4 σ-classes
+  module τ483 where
 
+    -- σ=835 (1 nodes)
+    cell-0 : κ 213 ≡ κ 213
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1092 (1 nodes)
+    cell-1 : κ 213 ≡ κ 213
+    cell-1 = refl
 
-module let-k-Assign-τ177 where
+    -- σ=1100 (1 nodes)
+    cell-2 : κ 213 ≡ κ 213
+    cell-2 = refl
 
-  -- ctx-177: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=260 (1×)
-  ctx-177-τ177 : τ 177 ≡ τ 177
-  ctx-177-τ177 = refl
+    -- σ=1373 (1 nodes)
+    cell-3 : κ 213 ≡ κ 213
+    cell-3 = refl
 
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=305: 1 nodes, 1 σ-classes
+  module τ305 where
 
-module apply-Call-τ180 where
+    -- σ=452 (1 nodes)
+    cell-0 : κ 213 ≡ κ 213
+    cell-0 = refl
 
-  -- ctx-180: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=269 (1×)
-  ctx-180-τ180 : τ 180 ≡ τ 180
-  ctx-180-τ180 = refl
 
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=252: 5 nodes, 2 τ-classes, 5 σ-classes
+module equalizer-Compare-3 where
 
-module effect-seq-Expr-τ181 where
+  -- τ=468: 4 nodes, 4 σ-classes
+  module τ468 where
 
-  -- ctx-181: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=270 (1×)
-  ctx-181-τ181 : τ 181 ≡ τ 181
-  ctx-181-τ181 = refl
+    -- σ=799 (1 nodes)
+    cell-0 : κ 252 ≡ κ 252
+    cell-0 = refl
 
+    -- σ=975 (1 nodes)
+    cell-1 : κ 252 ≡ κ 252
+    cell-1 = refl
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1037 (1 nodes)
+    cell-2 : κ 252 ≡ κ 252
+    cell-2 = refl
 
-module exponential-intro-FunctionDef-τ182 where
+    -- σ=1068 (1 nodes)
+    cell-3 : κ 252 ≡ κ 252
+    cell-3 = refl
 
-  -- ctx-182: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=272 (1×)
-  ctx-182-τ182 : τ 182 ≡ τ 182
-  ctx-182-τ182 = refl
 
+  -- τ=353: 1 nodes, 1 σ-classes
+  module τ353 where
 
--- ── cofree (Yield) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=548 (1 nodes)
+    cell-0 : κ 252 ≡ κ 252
+    cell-0 = refl
 
-module cofree-Yield-τ191 where
 
-  -- ctx-191: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=288 (1×)
-  ctx-191-τ191 : τ 191 ≡ τ 191
-  ctx-191-τ191 = refl
 
+-- κ=331: 6 nodes, 2 τ-classes, 5 σ-classes
+module arg-arg-2 where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=440: 3 nodes, 2 σ-classes
+  module τ440 where
 
-module effect-seq-Expr-τ192 where
+    -- σ=869 (2 nodes)
+    cell-0 : κ 331 ≡ κ 331
+    cell-0 = refl
 
-  -- ctx-192: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=289 (1×)
-  ctx-192-τ192 : τ 192 ≡ τ 192
-  ctx-192-τ192 = refl
+    -- σ=710 (1 nodes)
+    cell-1 : κ 331 ≡ κ 331
+    cell-1 = refl
 
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=452: 3 nodes, 3 σ-classes
+  module τ452 where
 
-module equalizer-If-τ193 where
+    -- σ=747 (1 nodes)
+    cell-0 : κ 331 ≡ κ 331
+    cell-0 = refl
 
-  -- ctx-193: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=290 (1×)
-  ctx-193-τ193 : τ 193 ≡ τ 193
-  ctx-193-τ193 = refl
+    -- σ=912 (1 nodes)
+    cell-1 : κ 331 ≡ κ 331
+    cell-1 = refl
 
+    -- σ=933 (1 nodes)
+    cell-2 : κ 331 ≡ κ 331
+    cell-2 = refl
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-τ194 where
 
-  -- ctx-194: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=291 (1×)
-  ctx-194-τ194 : τ 194 ≡ τ 194
-  ctx-194-τ194 = refl
+-- κ=356: 5 nodes, 1 τ-classes, 5 σ-classes
+module free_monoid-op-at-x3f-Attribute-0 where
 
+  -- τ=188: 5 nodes, 5 σ-classes
+  module τ188 where
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=816 (1 nodes)
+    cell-0 : κ 356 ≡ κ 356
+    cell-0 = refl
 
-module exponential-intro-FunctionDef-τ196 where
+    -- σ=983 (1 nodes)
+    cell-1 : κ 356 ≡ κ 356
+    cell-1 = refl
 
-  -- ctx-196: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=293 (1×)
-  ctx-196-τ196 : τ 196 ≡ τ 196
-  ctx-196-τ196 = refl
+    -- σ=1293 (1 nodes)
+    cell-2 : κ 356 ≡ κ 356
+    cell-2 = refl
 
+    -- σ=1669 (1 nodes)
+    cell-3 : κ 356 ≡ κ 356
+    cell-3 = refl
 
--- ── comprehension (comprehension) ──────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1750 (1 nodes)
+    cell-4 : κ 356 ≡ κ 356
+    cell-4 = refl
 
-module comprehension-comprehension-τ199 where
 
-  -- ctx-199: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=298 (1×)
-  ctx-199-τ199 : τ 199 ≡ τ 199
-  ctx-199-τ199 = refl
 
+-- κ=378: 6 nodes, 2 τ-classes, 5 σ-classes
+module effect-seq-Expr-5 where
 
--- ── lazy_fold (GeneratorExp) ───────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=500: 5 nodes, 4 σ-classes
+  module τ500 where
 
-module lazy_fold-GeneratorExp-τ200 where
+    -- σ=1060 (2 nodes)
+    cell-0 : κ 378 ≡ κ 378
+    cell-0 = refl
 
-  -- ctx-200: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=299 (1×)
-  ctx-200-τ200 : τ 200 ≡ τ 200
-  ctx-200-τ200 = refl
+    -- σ=859 (1 nodes)
+    cell-1 : κ 378 ≡ κ 378
+    cell-1 = refl
 
+    -- σ=1016 (1 nodes)
+    cell-2 : κ 378 ≡ κ 378
+    cell-2 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1207 (1 nodes)
+    cell-3 : κ 378 ≡ κ 378
+    cell-3 = refl
 
-module apply-Call-τ201 where
 
-  -- ctx-201: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=300 (1×)
-  ctx-201-τ201 : τ 201 ≡ τ 201
-  ctx-201-τ201 = refl
+  -- τ=661: 1 nodes, 1 σ-classes
+  module τ661 where
 
+    -- σ=1358 (1 nodes)
+    cell-0 : κ 378 ≡ κ 378
+    cell-0 = refl
 
--- ── terminal.map (Return) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-τ202 where
 
-  -- ctx-202: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=301 (1×)
-  ctx-202-τ202 : τ 202 ≡ τ 202
-  ctx-202-τ202 = refl
+-- κ=456: 5 nodes, 1 τ-classes, 5 σ-classes
+module equalizer-Compare-4 where
 
+  -- τ=585: 5 nodes, 5 σ-classes
+  module τ585 where
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1124 (1 nodes)
+    cell-0 : κ 456 ≡ κ 456
+    cell-0 = refl
 
-module exponential-intro-FunctionDef-τ203 where
+    -- σ=1164 (1 nodes)
+    cell-1 : κ 456 ≡ κ 456
+    cell-1 = refl
 
-  -- ctx-203: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=302 (1×)
-  ctx-203-τ203 : τ 203 ≡ τ 203
-  ctx-203-τ203 = refl
+    -- σ=1338 (1 nodes)
+    cell-2 : κ 456 ≡ κ 456
+    cell-2 = refl
 
+    -- σ=1736 (1 nodes)
+    cell-3 : κ 456 ≡ κ 456
+    cell-3 = refl
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1920 (1 nodes)
+    cell-4 : κ 456 ≡ κ 456
+    cell-4 = refl
 
-module index-Index-τ204 where
 
-  -- ctx-204: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=303 (1×)
-  ctx-204-τ204 : τ 204 ≡ τ 204
-  ctx-204-τ204 = refl
 
+-- κ=19: 4 nodes, 4 τ-classes, 4 σ-classes
+module annassign-AnnAssign-1 where
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=21: 1 nodes, 1 σ-classes
+  module τ21 where
 
-module subscript-Subscript-τ205 where
+    -- σ=30 (1 nodes)
+    cell-0 : κ 19 ≡ κ 19
+    cell-0 = refl
 
-  -- ctx-205: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=304 (1×)
-  ctx-205-τ205 : τ 205 ≡ τ 205
-  ctx-205-τ205 = refl
 
+  -- τ=28: 1 nodes, 1 σ-classes
+  module τ28 where
 
--- ── terminal.map (Return) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=36 (1 nodes)
+    cell-0 : κ 19 ≡ κ 19
+    cell-0 = refl
 
-module terminal-map-Return-τ206 where
 
-  -- ctx-206: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=305 (1×)
-  ctx-206-τ206 : τ 206 ≡ τ 206
-  ctx-206-τ206 = refl
+  -- τ=131: 1 nodes, 1 σ-classes
+  module τ131 where
 
+    -- σ=192 (1 nodes)
+    cell-0 : κ 19 ≡ κ 19
+    cell-0 = refl
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-τ207 where
+  -- τ=253: 1 nodes, 1 σ-classes
+  module τ253 where
 
-  -- ctx-207: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=306 (1×)
-  ctx-207-τ207 : τ 207 ≡ τ 207
-  ctx-207-τ207 = refl
+    -- σ=373 (1 nodes)
+    cell-0 : κ 19 ≡ κ 19
+    cell-0 = refl
 
 
--- ── terminal.map (Return) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-τ208 where
+-- κ=69: 55 nodes, 1 τ-classes, 4 σ-classes
+module arrow-Name where
 
-  -- ctx-208: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=307 (1×)
-  ctx-208-τ208 : τ 208 ≡ τ 208
-  ctx-208-τ208 = refl
+  -- τ=13: 55 nodes, 4 σ-classes
+  module Self where
 
+    -- σ=126 (42 nodes)
+    cell-0 : κ 69 ≡ κ 69
+    cell-0 = refl
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=848 (6 nodes)
+    cell-1 : κ 69 ≡ κ 69
+    cell-1 = refl
 
-module exponential-intro-FunctionDef-τ209 where
+    -- σ=1415 (4 nodes)
+    cell-2 : κ 69 ≡ κ 69
+    cell-2 = refl
 
-  -- ctx-209: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=308 (1×)
-  ctx-209-τ209 : τ 209 ≡ τ 209
-  ctx-209-τ209 = refl
+    -- σ=488 (3 nodes)
+    cell-3 : κ 69 ≡ κ 69
+    cell-3 = refl
 
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-str-8 where
+-- κ=209: 5 nodes, 1 τ-classes, 4 σ-classes
+module let-k-Assign-5 where
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=315 (1×)
-  str-τ212 : τ 212 ≡ τ 212
-  str-τ212 = refl
+  -- τ=302: 5 nodes, 4 σ-classes
+  module τ302 where
 
+    -- σ=442 (2 nodes)
+    cell-0 : κ 209 ≡ κ 209
+    cell-0 = refl
 
--- ── terminal.map (Return) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=545 (1 nodes)
+    cell-1 : κ 209 ≡ κ 209
+    cell-1 = refl
 
-module terminal-map-Return-τ213 where
+    -- σ=903 (1 nodes)
+    cell-2 : κ 209 ≡ κ 209
+    cell-2 = refl
 
-  -- ctx-213: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=316 (1×)
-  ctx-213-τ213 : τ 213 ≡ τ 213
-  ctx-213-τ213 = refl
+    -- σ=1238 (1 nodes)
+    cell-3 : κ 209 ≡ κ 209
+    cell-3 = refl
 
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-τ214 where
+-- κ=243: 10 nodes, 1 τ-classes, 4 σ-classes
+module free_monoid-op-at-state-Attribute where
 
-  -- ctx-214: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=317 (1×)
-  ctx-214-τ214 : τ 214 ≡ τ 214
-  ctx-214-τ214 = refl
+  -- τ=153: 10 nodes, 4 σ-classes
+  module Self-tau-canonical where
 
+    -- σ=624 (7 nodes)
+    cell-0 : κ 243 ≡ κ 243
+    cell-0 = refl
 
--- ── classifier.intro (ClassDef) ────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=519 (1 nodes)
+    cell-1 : κ 243 ≡ κ 243
+    cell-1 = refl
 
-module classifier-intro-ClassDef-τ215 where
+    -- σ=530 (1 nodes)
+    cell-2 : κ 243 ≡ κ 243
+    cell-2 = refl
 
-  -- ctx-215: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=318 (1×)
-  ctx-215-τ215 : τ 215 ≡ τ 215
-  ctx-215-τ215 = refl
+    -- σ=1376 (1 nodes)
+    cell-3 : κ 243 ≡ κ 243
+    cell-3 = refl
 
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-tuple-22 where
+-- κ=263: 5 nodes, 1 τ-classes, 4 σ-classes
+module subscript-Subscript-6 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=351 (1×)
-  tuple-τ232 : τ 232 ≡ τ 232
-  tuple-τ232 = refl
+  -- τ=365: 5 nodes, 4 σ-classes
+  module τ365 where
 
+    -- σ=587 (2 nodes)
+    cell-0 : κ 263 ≡ κ 263
+    cell-0 = refl
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1593 (1 nodes)
+    cell-1 : κ 263 ≡ κ 263
+    cell-1 = refl
 
-module index-Index-τ233 where
+    -- σ=1598 (1 nodes)
+    cell-2 : κ 263 ≡ κ 263
+    cell-2 = refl
 
-  -- ctx-233: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=352 (1×)
-  ctx-233-τ233 : τ 233 ≡ τ 233
-  ctx-233-τ233 = refl
+    -- σ=1604 (1 nodes)
+    cell-3 : κ 263 ≡ κ 263
+    cell-3 = refl
 
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-τ234 where
+-- κ=264: 5 nodes, 1 τ-classes, 4 σ-classes
+module morphism-at-x3f-Attribute-2 where
 
-  -- ctx-234: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=353 (1×)
-  ctx-234-τ234 : τ 234 ≡ τ 234
-  ctx-234-τ234 = refl
+  -- τ=366: 5 nodes, 4 σ-classes
+  module τ366 where
 
+    -- σ=588 (2 nodes)
+    cell-0 : κ 264 ≡ κ 264
+    cell-0 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1594 (1 nodes)
+    cell-1 : κ 264 ≡ κ 264
+    cell-1 = refl
 
-module annassign-AnnAssign-τ235 where
+    -- σ=1599 (1 nodes)
+    cell-2 : κ 264 ≡ κ 264
+    cell-2 = refl
 
-  -- ctx-235: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=354 (1×)
-  ctx-235-τ235 : τ 235 ≡ τ 235
-  ctx-235-τ235 = refl
+    -- σ=1605 (1 nodes)
+    cell-3 : κ 264 ≡ κ 264
+    cell-3 = refl
 
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-tuple-23 where
+-- κ=349: 8 nodes, 1 τ-classes, 4 σ-classes
+module let-k-Assign-6 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=359 (1×)
-  tuple-τ239 : τ 239 ≡ τ 239
-  tuple-τ239 = refl
+  -- τ=467: 8 nodes, 4 σ-classes
+  module τ467 where
 
+    -- σ=793 (4 nodes)
+    cell-0 : κ 349 ≡ κ 349
+    cell-0 = refl
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=973 (2 nodes)
+    cell-1 : κ 349 ≡ κ 349
+    cell-1 = refl
 
-module index-Index-τ240 where
+    -- σ=1259 (1 nodes)
+    cell-2 : κ 349 ≡ κ 349
+    cell-2 = refl
 
-  -- ctx-240: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=360 (1×)
-  ctx-240-τ240 : τ 240 ≡ τ 240
-  ctx-240-τ240 = refl
+    -- σ=1733 (1 nodes)
+    cell-3 : κ 349 ≡ κ 349
+    cell-3 = refl
 
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-τ241 where
+-- κ=350: 4 nodes, 1 τ-classes, 4 σ-classes
+module apply-Call-7 where
 
-  -- ctx-241: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=361 (1×)
-  ctx-241-τ241 : τ 241 ≡ τ 241
-  ctx-241-τ241 = refl
+  -- τ=469: 4 nodes, 4 σ-classes
+  module τ469 where
 
+    -- σ=803 (1 nodes)
+    cell-0 : κ 350 ≡ κ 350
+    cell-0 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=978 (1 nodes)
+    cell-1 : κ 350 ≡ κ 350
+    cell-1 = refl
 
-module annassign-AnnAssign-τ243 where
+    -- σ=1039 (1 nodes)
+    cell-2 : κ 350 ≡ κ 350
+    cell-2 = refl
 
-  -- ctx-243: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=363 (1×)
-  ctx-243-τ243 : τ 243 ≡ τ 243
-  ctx-243-τ243 = refl
+    -- σ=1070 (1 nodes)
+    cell-3 : κ 350 ≡ κ 350
+    cell-3 = refl
 
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-tuple-24 where
+-- κ=351: 4 nodes, 1 τ-classes, 4 σ-classes
+module let-k-Assign-7 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=365 (1×)
-  tuple-τ245 : τ 245 ≡ τ 245
-  tuple-τ245 = refl
+  -- τ=470: 4 nodes, 4 σ-classes
+  module τ470 where
 
+    -- σ=804 (1 nodes)
+    cell-0 : κ 351 ≡ κ 351
+    cell-0 = refl
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=979 (1 nodes)
+    cell-1 : κ 351 ≡ κ 351
+    cell-1 = refl
 
-module index-Index-τ246 where
+    -- σ=1040 (1 nodes)
+    cell-2 : κ 351 ≡ κ 351
+    cell-2 = refl
 
-  -- ctx-246: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=366 (1×)
-  ctx-246-τ246 : τ 246 ≡ τ 246
-  ctx-246-τ246 = refl
+    -- σ=1071 (1 nodes)
+    cell-3 : κ 351 ≡ κ 351
+    cell-3 = refl
 
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-τ247 where
+-- κ=371: 26 nodes, 1 τ-classes, 4 σ-classes
+module index-Index-2 where
 
-  -- ctx-247: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=367 (1×)
-  ctx-247-τ247 : τ 247 ≡ τ 247
-  ctx-247-τ247 = refl
+  -- τ=492: 26 nodes, 4 σ-classes
+  module τ492 where
 
+    -- σ=849 (20 nodes)
+    cell-0 : κ 371 ≡ κ 371
+    cell-0 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1758 (3 nodes)
+    cell-1 : κ 371 ≡ κ 371
+    cell-1 = refl
 
-module annassign-AnnAssign-τ248 where
+    -- σ=1679 (2 nodes)
+    cell-2 : κ 371 ≡ κ 371
+    cell-2 = refl
 
-  -- ctx-248: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=368 (1×)
-  ctx-248-τ248 : τ 248 ≡ τ 248
-  ctx-248-τ248 = refl
+    -- σ=1901 (1 nodes)
+    cell-3 : κ 371 ≡ κ 371
+    cell-3 = refl
 
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-τ263 where
+-- κ=373: 6 nodes, 1 τ-classes, 4 σ-classes
+module fiber-Call where
 
-  -- ctx-263: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=385 (1×)
-  ctx-263-τ263 : τ 263 ≡ τ 263
-  ctx-263-τ263 = refl
+  -- τ=494: 6 nodes, 4 σ-classes
+  module bool where
 
+    -- σ=1055 (3 nodes)
+    cell-0 : κ 373 ≡ κ 373
+    cell-0 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=851 (1 nodes)
+    cell-1 : κ 373 ≡ κ 373
+    cell-1 = refl
 
-module annassign-AnnAssign-τ270 where
+    -- σ=1011 (1 nodes)
+    cell-2 : κ 373 ≡ κ 373
+    cell-2 = refl
 
-  -- ctx-270: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=392 (1×)
-  ctx-270-τ270 : τ 270 ≡ τ 270
-  ctx-270-τ270 = refl
+    -- σ=1872 (1 nodes)
+    cell-3 : κ 373 ≡ κ 373
+    cell-3 = refl
 
 
--- ── arguments (arguments) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module arguments-arguments-τ285 where
+-- κ=395: 4 nodes, 1 τ-classes, 4 σ-classes
+module lazy_fold-GeneratorExp-0 where
 
-  -- ctx-285: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=408 (1×)
-  ctx-285-τ285 : τ 285 ≡ τ 285
-  ctx-285-τ285 = refl
+  -- τ=519: 4 nodes, 4 σ-classes
+  module τ519 where
 
+    -- σ=897 (1 nodes)
+    cell-0 : κ 395 ≡ κ 395
+    cell-0 = refl
 
--- ── lambda (Lambda) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1254 (1 nodes)
+    cell-1 : κ 395 ≡ κ 395
+    cell-1 = refl
 
-module lambda-Lambda-τ286 where
+    -- σ=1343 (1 nodes)
+    cell-2 : κ 395 ≡ κ 395
+    cell-2 = refl
 
-  -- ctx-286: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=410 (1×)
-  ctx-286-τ286 : τ 286 ≡ τ 286
-  ctx-286-τ286 = refl
+    -- σ=1888 (1 nodes)
+    cell-3 : κ 395 ≡ κ 395
+    cell-3 = refl
 
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-τ287 where
+-- κ=414: 4 nodes, 4 τ-classes, 4 σ-classes
+module product-Tuple-2 where
 
-  -- ctx-287: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=411 (1×)
-  ctx-287-τ287 : τ 287 ≡ τ 287
-  ctx-287-τ287 = refl
+  -- τ=542: 1 nodes, 1 σ-classes
+  module tuple-0 where
 
+    -- σ=966 (1 nodes)
+    cell-0 : κ 414 ≡ κ 414
+    cell-0 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-τ288 where
+  -- τ=725: 1 nodes, 1 σ-classes
+  module tuple-1 where
 
-  -- ctx-288: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=412 (1×)
-  ctx-288-τ288 : τ 288 ≡ τ 288
-  ctx-288-τ288 = refl
+    -- σ=1489 (1 nodes)
+    cell-0 : κ 414 ≡ κ 414
+    cell-0 = refl
 
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=773: 1 nodes, 1 σ-classes
+  module tuple-2 where
 
-module annassign-AnnAssign-τ293 where
+    -- σ=1628 (1 nodes)
+    cell-0 : κ 414 ≡ κ 414
+    cell-0 = refl
 
-  -- ctx-293: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=421 (1×)
-  ctx-293-τ293 : τ 293 ≡ τ 293
-  ctx-293-τ293 = refl
 
+  -- τ=805: 1 nodes, 1 σ-classes
+  module tuple-3 where
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1699 (1 nodes)
+    cell-0 : κ 414 ≡ κ 414
+    cell-0 = refl
 
-module exponential-intro-FunctionDef-τ294 where
 
-  -- ctx-294: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=422 (1×)
-  ctx-294-τ294 : τ 294 ≡ τ 294
-  ctx-294-τ294 = refl
 
+-- κ=484: 4 nodes, 1 τ-classes, 4 σ-classes
+module let-k-Assign-8 where
 
--- ── arg (arg) ──────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=620: 4 nodes, 4 σ-classes
+  module τ620 where
 
-module arg-arg-τ297 where
+    -- σ=1228 (1 nodes)
+    cell-0 : κ 484 ≡ κ 484
+    cell-0 = refl
 
-  -- ctx-297: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=427 (1×)
-  ctx-297-τ297 : τ 297 ≡ τ 297
-  ctx-297-τ297 = refl
+    -- σ=1803 (1 nodes)
+    cell-1 : κ 484 ≡ κ 484
+    cell-1 = refl
 
+    -- σ=1805 (1 nodes)
+    cell-2 : κ 484 ≡ κ 484
+    cell-2 = refl
 
--- ── arguments (arguments) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1807 (1 nodes)
+    cell-3 : κ 484 ≡ κ 484
+    cell-3 = refl
 
-module arguments-arguments-τ298 where
 
-  -- ctx-298: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=428 (1×)
-  ctx-298-τ298 : τ 298 ≡ τ 298
-  ctx-298-τ298 = refl
 
+-- κ=558: 5 nodes, 1 τ-classes, 4 σ-classes
+module exponential-Call where
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=404: 5 nodes, 4 σ-classes
+  module τ404 where
 
-module subscript-Subscript-τ299 where
+    -- σ=1452 (2 nodes)
+    cell-0 : κ 558 ≡ κ 558
+    cell-0 = refl
 
-  -- ctx-299: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=437 (1×)
-  ctx-299-τ299 : τ 299 ≡ τ 299
-  ctx-299-τ299 = refl
+    -- σ=1507 (1 nodes)
+    cell-1 : κ 558 ≡ κ 558
+    cell-1 = refl
 
+    -- σ=1716 (1 nodes)
+    cell-2 : κ 558 ≡ κ 558
+    cell-2 = refl
 
--- ── monoid.accum (AugAssign) ───────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1863 (1 nodes)
+    cell-3 : κ 558 ≡ κ 558
+    cell-3 = refl
 
-module monoid-accum-AugAssign-τ300 where
 
-  -- ctx-300: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=438 (1×)
-  ctx-300-τ300 : τ 300 ≡ τ 300
-  ctx-300-τ300 = refl
 
+-- κ=673: 13 nodes, 1 τ-classes, 4 σ-classes
+module free_monoid-fold-JoinedStr-0 where
 
--- ── coproduct.elim (If) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=850: 13 nodes, 4 σ-classes
+  module str where
 
-module coproduct-elim-If-τ306 where
+    -- σ=1827 (7 nodes)
+    cell-0 : κ 673 ≡ κ 673
+    cell-0 = refl
 
-  -- ctx-306: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=453 (1×)
-  ctx-306-τ306 : τ 306 ≡ τ 306
-  ctx-306-τ306 = refl
+    -- σ=1820 (4 nodes)
+    cell-1 : κ 673 ≡ κ 673
+    cell-1 = refl
 
+    -- σ=1855 (1 nodes)
+    cell-2 : κ 673 ≡ κ 673
+    cell-2 = refl
 
--- ── bimap (BinOp) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=2079 (1 nodes)
+    cell-3 : κ 673 ≡ κ 673
+    cell-3 = refl
 
-module bimap-BinOp-τ314 where
 
-  -- ctx-314: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=462 (1×)
-  ctx-314-τ314 : τ 314 ≡ τ 314
-  ctx-314-τ314 = refl
 
+-- κ=25: 3 nodes, 1 τ-classes, 3 σ-classes
+module equalizer-Compare-5 where
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=35: 3 nodes, 3 σ-classes
+  module τ35 where
 
-module apply-Call-τ315 where
+    -- σ=44 (1 nodes)
+    cell-0 : κ 25 ≡ κ 25
+    cell-0 = refl
 
-  -- ctx-315: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=464 (1×)
-  ctx-315-τ315 : τ 315 ≡ τ 315
-  ctx-315-τ315 = refl
+    -- σ=768 (1 nodes)
+    cell-1 : κ 25 ≡ κ 25
+    cell-1 = refl
 
+    -- σ=952 (1 nodes)
+    cell-2 : κ 25 ≡ κ 25
+    cell-2 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-τ316 where
 
-  -- ctx-316: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=465 (1×)
-  ctx-316-τ316 : τ 316 ≡ τ 316
-  ctx-316-τ316 = refl
+-- κ=50: 4 nodes, 1 τ-classes, 3 σ-classes
+module equalizer-Compare-6 where
 
+  -- τ=66: 4 nodes, 3 σ-classes
+  module τ66 where
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=90 (2 nodes)
+    cell-0 : κ 50 ≡ κ 50
+    cell-0 = refl
 
-module fold-For-τ317 where
+    -- σ=258 (1 nodes)
+    cell-1 : κ 50 ≡ κ 50
+    cell-1 = refl
 
-  -- ctx-317: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=466 (1×)
-  ctx-317-τ317 : τ 317 ≡ τ 317
-  ctx-317-τ317 = refl
+    -- σ=2052 (1 nodes)
+    cell-2 : κ 50 ≡ κ 50
+    cell-2 = refl
 
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-τ318 where
+-- κ=96: 3 nodes, 1 τ-classes, 3 σ-classes
+module annassign-AnnAssign-2 where
 
-  -- ctx-318: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=467 (1×)
-  ctx-318-τ318 : τ 318 ≡ τ 318
-  ctx-318-τ318 = refl
+  -- τ=138: 3 nodes, 3 σ-classes
+  module τ138 where
 
+    -- σ=199 (1 nodes)
+    cell-0 : κ 96 ≡ κ 96
+    cell-0 = refl
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=377 (1 nodes)
+    cell-1 : κ 96 ≡ κ 96
+    cell-1 = refl
 
-module exponential-intro-FunctionDef-τ319 where
+    -- σ=402 (1 nodes)
+    cell-2 : κ 96 ≡ κ 96
+    cell-2 = refl
 
-  -- ctx-319: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=468 (1×)
-  ctx-319-τ319 : τ 319 ≡ τ 319
-  ctx-319-τ319 = refl
 
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=102: 7 nodes, 1 τ-classes, 3 σ-classes
+module monoid-accum-AugAssign-0 where
 
-module let-k-Assign-τ325 where
+  -- τ=148: 7 nodes, 3 σ-classes
+  module τ148 where
 
-  -- ctx-325: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=486 (1×)
-  ctx-325-τ325 : τ 325 ≡ τ 325
-  ctx-325-τ325 = refl
+    -- σ=837 (5 nodes)
+    cell-0 : κ 102 ≡ κ 102
+    cell-0 = refl
 
+    -- σ=215 (1 nodes)
+    cell-1 : κ 102 ≡ κ 102
+    cell-1 = refl
 
--- ── or (Or) ────────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=608 (1 nodes)
+    cell-2 : κ 102 ≡ κ 102
+    cell-2 = refl
 
-module or-Or-τ327 where
 
-  -- ctx-327: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=489 (1×)
-  ctx-327-τ327 : τ 327 ≡ τ 327
-  ctx-327-τ327 = refl
 
+-- κ=137: 5 nodes, 1 τ-classes, 3 σ-classes
+module apply-Call-8 where
 
--- ── join (BoolOp) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=198: 5 nodes, 3 σ-classes
+  module τ198 where
 
-module join-BoolOp-τ329 where
+    -- σ=297 (2 nodes)
+    cell-0 : κ 137 ≡ κ 137
+    cell-0 = refl
 
-  -- ctx-329: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=493 (1×)
-  ctx-329-τ329 : τ 329 ≡ τ 329
-  ctx-329-τ329 = refl
+    -- σ=1771 (2 nodes)
+    cell-1 : κ 137 ≡ κ 137
+    cell-1 = refl
 
+    -- σ=1809 (1 nodes)
+    cell-2 : κ 137 ≡ κ 137
+    cell-2 = refl
 
--- ── lazy_fold (GeneratorExp) ───────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module lazy_fold-GeneratorExp-τ331 where
 
-  -- ctx-331: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=497 (1×)
-  ctx-331-τ331 : τ 331 ≡ τ 331
-  ctx-331-τ331 = refl
+-- κ=155: 3 nodes, 1 τ-classes, 3 σ-classes
+module apply-Call-9 where
 
+  -- τ=217: 3 nodes, 3 σ-classes
+  module τ217 where
 
--- ── total_order (Call) ─────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=324 (1 nodes)
+    cell-0 : κ 155 ≡ κ 155
+    cell-0 = refl
 
-module total_order-Call-list-0 where
+    -- σ=328 (1 nodes)
+    cell-1 : κ 155 ≡ κ 155
+    cell-1 = refl
 
-  -- list: 1 nodes, 1 forms
-  -- [list]
-  --   σ=498 (1×)
-  list-τ332 : τ 332 ≡ τ 332
-  list-τ332 = refl
+    -- σ=332 (1 nodes)
+    cell-2 : κ 155 ≡ κ 155
+    cell-2 = refl
 
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-τ333 where
+-- κ=156: 3 nodes, 1 τ-classes, 3 σ-classes
+module annassign-AnnAssign-3 where
 
-  -- ctx-333: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=499 (1×)
-  ctx-333-τ333 : τ 333 ≡ τ 333
-  ctx-333-τ333 = refl
+  -- τ=218: 3 nodes, 3 σ-classes
+  module τ218 where
 
+    -- σ=325 (1 nodes)
+    cell-0 : κ 156 ≡ κ 156
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=329 (1 nodes)
+    cell-1 : κ 156 ≡ κ 156
+    cell-1 = refl
 
-module let-k-Assign-τ334 where
+    -- σ=333 (1 nodes)
+    cell-2 : κ 156 ≡ κ 156
+    cell-2 = refl
 
-  -- ctx-334: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=500 (1×)
-  ctx-334-τ334 : τ 334 ≡ τ 334
-  ctx-334-τ334 = refl
 
 
--- ── equalizer (Compare) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=157: 4 nodes, 3 τ-classes, 3 σ-classes
+module index-Index-3 where
 
-module equalizer-Compare-τ336 where
+  -- τ=758: 2 nodes, 1 σ-classes
+  module τ758 where
 
-  -- ctx-336: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=504 (1×)
-  ctx-336-τ336 : τ 336 ≡ τ 336
-  ctx-336-τ336 = refl
+    -- σ=1579 (2 nodes)
+    cell-0 : κ 157 ≡ κ 157
+    cell-0 = refl
 
 
--- ── terminal.map (Return) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=222: 1 nodes, 1 σ-classes
+  module τ222 where
 
-module terminal-map-Return-τ337 where
+    -- σ=338 (1 nodes)
+    cell-0 : κ 157 ≡ κ 157
+    cell-0 = refl
 
-  -- ctx-337: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=505 (1×)
-  ctx-337-τ337 : τ 337 ≡ τ 337
-  ctx-337-τ337 = refl
 
+  -- τ=273: 1 nodes, 1 σ-classes
+  module τ273 where
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=394 (1 nodes)
+    cell-0 : κ 157 ≡ κ 157
+    cell-0 = refl
 
-module equalizer-If-τ338 where
 
-  -- ctx-338: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=506 (1×)
-  ctx-338-τ338 : τ 338 ≡ τ 338
-  ctx-338-τ338 = refl
 
+-- κ=158: 4 nodes, 3 τ-classes, 3 σ-classes
+module subscript-Subscript-7 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=759: 2 nodes, 1 σ-classes
+  module τ759 where
 
-module let-k-Assign-τ339 where
+    -- σ=1580 (2 nodes)
+    cell-0 : κ 158 ≡ κ 158
+    cell-0 = refl
 
-  -- ctx-339: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=513 (1×)
-  ctx-339-τ339 : τ 339 ≡ τ 339
-  ctx-339-τ339 = refl
 
+  -- τ=223: 1 nodes, 1 σ-classes
+  module τ223 where
 
--- ── free_monoid.snoc@state (Call) ──────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=339 (1 nodes)
+    cell-0 : κ 158 ≡ κ 158
+    cell-0 = refl
 
-module free_monoid-snoc-at-state-Call-None-2 where
 
-  -- None: 1 nodes, 1 forms
-  -- [None]
-  --   σ=520 (1×)
-  None-τ343 : τ 343 ≡ τ 343
-  None-τ343 = refl
+  -- τ=274: 1 nodes, 1 σ-classes
+  module τ274 where
 
+    -- σ=395 (1 nodes)
+    cell-0 : κ 158 ≡ κ 158
+    cell-0 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-τ344 where
 
-  -- ctx-344: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=521 (1×)
-  ctx-344-τ344 : τ 344 ≡ τ 344
-  ctx-344-τ344 = refl
+-- κ=187: 4 nodes, 3 τ-classes, 3 σ-classes
+module index-Index-4 where
 
+  -- τ=265: 2 nodes, 1 σ-classes
+  module τ265 where
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=387 (2 nodes)
+    cell-0 : κ 187 ≡ κ 187
+    cell-0 = refl
 
-module free_monoid-fold-JoinedStr-str-9 where
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=527 (1×)
-  str-τ345 : τ 345 ≡ τ 345
-  str-τ345 = refl
+  -- τ=295: 1 nodes, 1 σ-classes
+  module τ295 where
 
+    -- σ=425 (1 nodes)
+    cell-0 : κ 187 ≡ κ 187
+    cell-0 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-τ346 where
+  -- τ=358: 1 nodes, 1 σ-classes
+  module τ358 where
 
-  -- ctx-346: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=528 (1×)
-  ctx-346-τ346 : τ 346 ≡ τ 346
-  ctx-346-τ346 = refl
+    -- σ=566 (1 nodes)
+    cell-0 : κ 187 ≡ κ 187
+    cell-0 = refl
 
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ347 where
+-- κ=188: 4 nodes, 3 τ-classes, 3 σ-classes
+module subscript-Subscript-8 where
 
-  -- ctx-347: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=529 (1×)
-  ctx-347-τ347 : τ 347 ≡ τ 347
-  ctx-347-τ347 = refl
+  -- τ=266: 2 nodes, 1 σ-classes
+  module τ266 where
 
+    -- σ=388 (2 nodes)
+    cell-0 : κ 188 ≡ κ 188
+    cell-0 = refl
 
--- ── free_monoid.snoc@state (Call) ──────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-state-Call-None-3 where
+  -- τ=296: 1 nodes, 1 σ-classes
+  module τ296 where
 
-  -- None: 1 nodes, 1 forms
-  -- [None, T]
-  --   σ=532 (1×)
-  None-τ349 : τ 349 ≡ τ 349
-  None-τ349 = refl
+    -- σ=426 (1 nodes)
+    cell-0 : κ 188 ≡ κ 188
+    cell-0 = refl
 
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=359: 1 nodes, 1 σ-classes
+  module τ359 where
 
-module effect-seq-Expr-τ350 where
+    -- σ=567 (1 nodes)
+    cell-0 : κ 188 ≡ κ 188
+    cell-0 = refl
 
-  -- ctx-350: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=533 (1×)
-  ctx-350-τ350 : τ 350 ≡ τ 350
-  ctx-350-τ350 = refl
 
 
--- ── fixpoint (While) ───────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=193: 4 nodes, 2 τ-classes, 3 σ-classes
+module product-Tuple-3 where
 
-module fixpoint-While-τ351 where
+  -- τ=738: 3 nodes, 2 σ-classes
+  module tuple-0 where
 
-  -- ctx-351: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=534 (1×)
-  ctx-351-τ351 : τ 351 ≡ τ 351
-  ctx-351-τ351 = refl
+    -- σ=1650 (2 nodes)
+    cell-0 : κ 193 ≡ κ 193
+    cell-0 = refl
 
+    -- σ=1517 (1 nodes)
+    cell-1 : κ 193 ≡ κ 193
+    cell-1 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ354 where
+  -- τ=282: 1 nodes, 1 σ-classes
+  module tuple-1 where
 
-  -- ctx-354: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=552 (1×)
-  ctx-354-τ354 : τ 354 ≡ τ 354
-  ctx-354-τ354 = refl
+    -- σ=405 (1 nodes)
+    cell-0 : κ 193 ≡ κ 193
+    cell-0 = refl
 
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-τ360 where
+-- κ=194: 4 nodes, 2 τ-classes, 3 σ-classes
+module index-Index-5 where
 
-  -- ctx-360: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=568 (1×)
-  ctx-360-τ360 : τ 360 ≡ τ 360
-  ctx-360-τ360 = refl
+  -- τ=739: 3 nodes, 2 σ-classes
+  module τ739 where
 
+    -- σ=1651 (2 nodes)
+    cell-0 : κ 194 ≡ κ 194
+    cell-0 = refl
 
--- ── equalizer (Compare) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1518 (1 nodes)
+    cell-1 : κ 194 ≡ κ 194
+    cell-1 = refl
 
-module equalizer-Compare-τ363 where
 
-  -- ctx-363: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=576 (1×)
-  ctx-363-τ363 : τ 363 ≡ τ 363
-  ctx-363-τ363 = refl
+  -- τ=283: 1 nodes, 1 σ-classes
+  module τ283 where
 
+    -- σ=406 (1 nodes)
+    cell-0 : κ 194 ≡ κ 194
+    cell-0 = refl
 
--- ── equalizer (Compare) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-Compare-τ367 where
 
-  -- ctx-367: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=590 (1×)
-  ctx-367-τ367 : τ 367 ≡ τ 367
-  ctx-367-τ367 = refl
+-- κ=195: 4 nodes, 2 τ-classes, 3 σ-classes
+module subscript-Subscript-9 where
 
+  -- τ=740: 3 nodes, 2 σ-classes
+  module τ740 where
 
--- ── comprehension (comprehension) ──────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1652 (2 nodes)
+    cell-0 : κ 195 ≡ κ 195
+    cell-0 = refl
 
-module comprehension-comprehension-τ368 where
+    -- σ=1519 (1 nodes)
+    cell-1 : κ 195 ≡ κ 195
+    cell-1 = refl
 
-  -- ctx-368: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=591 (1×)
-  ctx-368-τ368 : τ 368 ≡ τ 368
-  ctx-368-τ368 = refl
 
+  -- τ=284: 1 nodes, 1 σ-classes
+  module τ284 where
 
--- ── lazy_fold (GeneratorExp) ───────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=407 (1 nodes)
+    cell-0 : κ 195 ≡ κ 195
+    cell-0 = refl
 
-module lazy_fold-GeneratorExp-τ369 where
 
-  -- ctx-369: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=592 (1×)
-  ctx-369-τ369 : τ 369 ≡ τ 369
-  ctx-369-τ369 = refl
 
+-- κ=202: 3 nodes, 3 τ-classes, 3 σ-classes
+module subscript-Subscript-10 where
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=292: 1 nodes, 1 σ-classes
+  module τ292 where
 
-module apply-Call-τ370 where
+    -- σ=420 (1 nodes)
+    cell-0 : κ 202 ≡ κ 202
+    cell-0 = refl
 
-  -- ctx-370: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=593 (1×)
-  ctx-370-τ370 : τ 370 ≡ τ 370
-  ctx-370-τ370 = refl
 
+  -- τ=714: 1 nodes, 1 σ-classes
+  module τ714 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1466 (1 nodes)
+    cell-0 : κ 202 ≡ κ 202
+    cell-0 = refl
 
-module let-k-Assign-τ371 where
 
-  -- ctx-371: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=594 (1×)
-  ctx-371-τ371 : τ 371 ≡ τ 371
-  ctx-371-τ371 = refl
+  -- τ=723: 1 nodes, 1 σ-classes
+  module τ723 where
 
+    -- σ=1479 (1 nodes)
+    cell-0 : κ 202 ≡ κ 202
+    cell-0 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-τ372 where
 
-  -- ctx-372: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=600 (1×)
-  ctx-372-τ372 : τ 372 ≡ τ 372
-  ctx-372-τ372 = refl
+-- κ=216: 3 nodes, 1 τ-classes, 3 σ-classes
+module equalizer-Compare-7 where
 
+  -- τ=308: 3 nodes, 3 σ-classes
+  module τ308 where
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=455 (1 nodes)
+    cell-0 : κ 216 ≡ κ 216
+    cell-0 = refl
 
-module fold-For-τ373 where
+    -- σ=1661 (1 nodes)
+    cell-1 : κ 216 ≡ κ 216
+    cell-1 = refl
 
-  -- ctx-373: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=601 (1×)
-  ctx-373-τ373 : τ 373 ≡ τ 373
-  ctx-373-τ373 = refl
+    -- σ=2065 (1 nodes)
+    cell-2 : κ 216 ≡ κ 216
+    cell-2 = refl
 
 
--- ── lte (LtE) ──────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module lte-LtE-τ374 where
+-- κ=276: 5 nodes, 1 τ-classes, 3 σ-classes
+module slice-Slice where
 
-  -- ctx-374: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=604 (1×)
-  ctx-374-τ374 : τ 374 ≡ τ 374
-  ctx-374-τ374 = refl
+  -- τ=378: 5 nodes, 3 σ-classes
+  module τ378 where
 
+    -- σ=614 (2 nodes)
+    cell-0 : κ 276 ≡ κ 276
+    cell-0 = refl
 
--- ── equalizer (Compare) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1178 (2 nodes)
+    cell-1 : κ 276 ≡ κ 276
+    cell-1 = refl
 
-module equalizer-Compare-τ375 where
+    -- σ=2032 (1 nodes)
+    cell-2 : κ 276 ≡ κ 276
+    cell-2 = refl
 
-  -- ctx-375: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=605 (1×)
-  ctx-375-τ375 : τ 375 ≡ τ 375
-  ctx-375-τ375 = refl
 
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=282: 4 nodes, 1 τ-classes, 3 σ-classes
+module free_monoid-Call-0 where
 
-module let-k-Assign-τ376 where
+  -- τ=385: 4 nodes, 3 σ-classes
+  module τ385 where
 
-  -- ctx-376: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=606 (1×)
-  ctx-376-τ376 : τ 376 ≡ τ 376
-  ctx-376-τ376 = refl
+    -- σ=628 (2 nodes)
+    cell-0 : κ 282 ≡ κ 282
+    cell-0 = refl
 
+    -- σ=789 (1 nodes)
+    cell-1 : κ 282 ≡ κ 282
+    cell-1 = refl
 
--- ── coproduct.elim (If) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1128 (1 nodes)
+    cell-2 : κ 282 ≡ κ 282
+    cell-2 = refl
 
-module coproduct-elim-If-τ383 where
 
-  -- ctx-383: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=622 (1×)
-  ctx-383-τ383 : τ 383 ≡ τ 383
-  ctx-383-τ383 = refl
 
+-- κ=342: 3 nodes, 1 τ-classes, 3 σ-classes
+module annassign-AnnAssign-4 where
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=454: 3 nodes, 3 σ-classes
+  module τ454 where
 
-module product-Tuple-tuple-25 where
+    -- σ=754 (1 nodes)
+    cell-0 : κ 342 ≡ κ 342
+    cell-0 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=630 (1×)
-  tuple-τ386 : τ 386 ≡ τ 386
-  tuple-τ386 = refl
+    -- σ=938 (1 nodes)
+    cell-1 : κ 342 ≡ κ 342
+    cell-1 = refl
 
+    -- σ=945 (1 nodes)
+    cell-2 : κ 342 ≡ κ 342
+    cell-2 = refl
 
--- ── free_monoid.snoc@state (Call) ──────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-state-Call-None-4 where
 
-  -- None: 1 nodes, 1 forms
-  -- [None]
-  --   σ=631 (1×)
-  None-τ387 : τ 387 ≡ τ 387
-  None-τ387 = refl
+-- κ=355: 6 nodes, 1 τ-classes, 3 σ-classes
+module let-k-Assign-9 where
 
+  -- τ=476: 6 nodes, 3 σ-classes
+  module τ476 where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=812 (4 nodes)
+    cell-0 : κ 355 ≡ κ 355
+    cell-0 = refl
 
-module effect-seq-Expr-τ388 where
+    -- σ=1194 (1 nodes)
+    cell-1 : κ 355 ≡ κ 355
+    cell-1 = refl
 
-  -- ctx-388: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=632 (1×)
-  ctx-388-τ388 : τ 388 ≡ τ 388
-  ctx-388-τ388 = refl
+    -- σ=1321 (1 nodes)
+    cell-2 : κ 355 ≡ κ 355
+    cell-2 = refl
 
 
--- ── monoid.op (BinOp) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-op-BinOp-τ389 where
+-- κ=374: 5 nodes, 1 τ-classes, 3 σ-classes
+module coerce-Call-0 where
 
-  -- ctx-389: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=634 (1×)
-  ctx-389-τ389 : τ 389 ≡ τ 389
-  ctx-389-τ389 = refl
+  -- τ=495: 5 nodes, 3 σ-classes
+  module τ495 where
 
+    -- σ=1056 (3 nodes)
+    cell-0 : κ 374 ≡ κ 374
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=852 (1 nodes)
+    cell-1 : κ 374 ≡ κ 374
+    cell-1 = refl
 
-module let-k-Assign-τ390 where
+    -- σ=1012 (1 nodes)
+    cell-2 : κ 374 ≡ κ 374
+    cell-2 = refl
 
-  -- ctx-390: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=635 (1×)
-  ctx-390-τ390 : τ 390 ≡ τ 390
-  ctx-390-τ390 = refl
 
 
--- ── partial.apply@state (Call) ─────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=375: 5 nodes, 1 τ-classes, 3 σ-classes
+module ifexp-IfExp-0 where
 
-module partial-apply-at-state-Call-T-2 where
+  -- τ=496: 5 nodes, 3 σ-classes
+  module τ496 where
 
-  -- T: 1 nodes, 1 forms
-  -- [None, T]
-  --   σ=644 (1×)
-  T-τ349 : τ 349 ≡ τ 349
-  T-τ349 = refl
+    -- σ=1057 (3 nodes)
+    cell-0 : κ 375 ≡ κ 375
+    cell-0 = refl
 
+    -- σ=853 (1 nodes)
+    cell-1 : κ 375 ≡ κ 375
+    cell-1 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1013 (1 nodes)
+    cell-2 : κ 375 ≡ κ 375
+    cell-2 = refl
 
-module let-k-Assign-τ395 where
 
-  -- ctx-395: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=645 (1×)
-  ctx-395-τ395 : τ 395 ≡ τ 395
-  ctx-395-τ395 = refl
 
+-- κ=376: 5 nodes, 1 τ-classes, 3 σ-classes
+module let-k-Assign-10 where
 
--- ── ifexp (IfExp) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=497: 5 nodes, 3 σ-classes
+  module τ497 where
 
-module ifexp-IfExp-τ398 where
+    -- σ=1058 (3 nodes)
+    cell-0 : κ 376 ≡ κ 376
+    cell-0 = refl
 
-  -- ctx-398: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=653 (1×)
-  ctx-398-τ398 : τ 398 ≡ τ 398
-  ctx-398-τ398 = refl
+    -- σ=854 (1 nodes)
+    cell-1 : κ 376 ≡ κ 376
+    cell-1 = refl
 
+    -- σ=1014 (1 nodes)
+    cell-2 : κ 376 ≡ κ 376
+    cell-2 = refl
 
--- ── monoid.op@? (Call) ─────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-op-at-x3f-Call-τ399 where
 
-  -- ctx-399: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=654 (1×)
-  ctx-399-τ399 : τ 399 ≡ τ 399
-  ctx-399-τ399 = refl
+-- κ=394: 3 nodes, 1 τ-classes, 3 σ-classes
+module let-k-Assign-11 where
 
+  -- τ=517: 3 nodes, 3 σ-classes
+  module τ517 where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=890 (1 nodes)
+    cell-0 : κ 394 ≡ κ 394
+    cell-0 = refl
 
-module effect-seq-Expr-τ400 where
+    -- σ=1025 (1 nodes)
+    cell-1 : κ 394 ≡ κ 394
+    cell-1 = refl
 
-  -- ctx-400: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=655 (1×)
-  ctx-400-τ400 : τ 400 ≡ τ 400
-  ctx-400-τ400 = refl
+    -- σ=1086 (1 nodes)
+    cell-2 : κ 394 ≡ κ 394
+    cell-2 = refl
 
 
--- ── coproduct.elim (If) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module coproduct-elim-If-τ401 where
+-- κ=415: 3 nodes, 3 τ-classes, 3 σ-classes
+module index-Index-6 where
 
-  -- ctx-401: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=656 (1×)
-  ctx-401-τ401 : τ 401 ≡ τ 401
-  ctx-401-τ401 = refl
+  -- τ=543: 1 nodes, 1 σ-classes
+  module τ543 where
 
+    -- σ=967 (1 nodes)
+    cell-0 : κ 415 ≡ κ 415
+    cell-0 = refl
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-τ402 where
+  -- τ=726: 1 nodes, 1 σ-classes
+  module τ726 where
 
-  -- ctx-402: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=657 (1×)
-  ctx-402-τ402 : τ 402 ≡ τ 402
-  ctx-402-τ402 = refl
+    -- σ=1490 (1 nodes)
+    cell-0 : κ 415 ≡ κ 415
+    cell-0 = refl
 
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=806: 1 nodes, 1 σ-classes
+  module τ806 where
 
-module fold-For-τ403 where
+    -- σ=1700 (1 nodes)
+    cell-0 : κ 415 ≡ κ 415
+    cell-0 = refl
 
-  -- ctx-403: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=658 (1×)
-  ctx-403-τ403 : τ 403 ≡ τ 403
-  ctx-403-τ403 = refl
 
 
--- ── ifexp (IfExp) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=416: 3 nodes, 3 τ-classes, 3 σ-classes
+module subscript-Subscript-11 where
 
-module ifexp-IfExp-τ405 where
+  -- τ=544: 1 nodes, 1 σ-classes
+  module τ544 where
 
-  -- ctx-405: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=661 (1×)
-  ctx-405-τ405 : τ 405 ≡ τ 405
-  ctx-405-τ405 = refl
+    -- σ=968 (1 nodes)
+    cell-0 : κ 416 ≡ κ 416
+    cell-0 = refl
 
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=727: 1 nodes, 1 σ-classes
+  module τ727 where
 
-module apply-Call-τ406 where
+    -- σ=1491 (1 nodes)
+    cell-0 : κ 416 ≡ κ 416
+    cell-0 = refl
 
-  -- ctx-406: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=662 (1×)
-  ctx-406-τ406 : τ 406 ≡ τ 406
-  ctx-406-τ406 = refl
 
+  -- τ=807: 1 nodes, 1 σ-classes
+  module τ807 where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1701 (1 nodes)
+    cell-0 : κ 416 ≡ κ 416
+    cell-0 = refl
 
-module effect-seq-Expr-τ407 where
 
-  -- ctx-407: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=663 (1×)
-  ctx-407-τ407 : τ 407 ≡ τ 407
-  ctx-407-τ407 = refl
 
+-- κ=440: 3 nodes, 1 τ-classes, 3 σ-classes
+module free_monoid-literal-List-0 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=568: 3 nodes, 3 σ-classes
+  module list where
 
-module let-k-Assign-τ408 where
+    -- σ=1043 (1 nodes)
+    cell-0 : κ 440 ≡ κ 440
+    cell-0 = refl
 
-  -- ctx-408: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=667 (1×)
-  ctx-408-τ408 : τ 408 ≡ τ 408
-  ctx-408-τ408 = refl
+    -- σ=1074 (1 nodes)
+    cell-1 : κ 440 ≡ κ 440
+    cell-1 = refl
 
+    -- σ=1296 (1 nodes)
+    cell-2 : κ 440 ≡ κ 440
+    cell-2 = refl
 
--- ── morphism@? (Attribute) ─────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module morphism-at-x3f-Attribute-τ409 where
 
-  -- ctx-409: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=668 (1×)
-  ctx-409-τ409 : τ 409 ≡ τ 409
-  ctx-409-τ409 = refl
+-- κ=468: 3 nodes, 2 τ-classes, 3 σ-classes
+module let-k-Assign-12 where
 
+  -- τ=603: 2 nodes, 2 σ-classes
+  module τ603 where
 
--- ── monoid.accum (AugAssign) ───────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1168 (1 nodes)
+    cell-0 : κ 468 ≡ κ 468
+    cell-0 = refl
 
-module monoid-accum-AugAssign-τ410 where
+    -- σ=2056 (1 nodes)
+    cell-1 : κ 468 ≡ κ 468
+    cell-1 = refl
 
-  -- ctx-410: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=669 (1×)
-  ctx-410-τ410 : τ 410 ≡ τ 410
-  ctx-410-τ410 = refl
 
+  -- τ=654: 1 nodes, 1 σ-classes
+  module τ654 where
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1340 (1 nodes)
+    cell-0 : κ 468 ≡ κ 468
+    cell-0 = refl
 
-module equalizer-If-τ413 where
 
-  -- ctx-413: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=672 (1×)
-  ctx-413-τ413 : τ 413 ≡ τ 413
-  ctx-413-τ413 = refl
 
+-- κ=486: 3 nodes, 2 τ-classes, 3 σ-classes
+module apply-Call-10 where
 
--- ── equalizer (Compare) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=623: 2 nodes, 2 σ-classes
+  module τ623 where
 
-module equalizer-Compare-τ415 where
+    -- σ=1243 (1 nodes)
+    cell-0 : κ 486 ≡ κ 486
+    cell-0 = refl
 
-  -- ctx-415: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=677 (1×)
-  ctx-415-τ415 : τ 415 ≡ τ 415
-  ctx-415-τ415 = refl
+    -- σ=1249 (1 nodes)
+    cell-1 : κ 486 ≡ κ 486
+    cell-1 = refl
 
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=631: 1 nodes, 1 σ-classes
+  module τ631 where
 
-module index-Index-τ416 where
+    -- σ=1270 (1 nodes)
+    cell-0 : κ 486 ≡ κ 486
+    cell-0 = refl
 
-  -- ctx-416: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=678 (1×)
-  ctx-416-τ416 : τ 416 ≡ τ 416
-  ctx-416-τ416 = refl
 
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=487: 3 nodes, 2 τ-classes, 3 σ-classes
+module let-k-Assign-13 where
 
-module subscript-Subscript-τ417 where
+  -- τ=624: 2 nodes, 2 σ-classes
+  module τ624 where
 
-  -- ctx-417: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=679 (1×)
-  ctx-417-τ417 : τ 417 ≡ τ 417
-  ctx-417-τ417 = refl
+    -- σ=1244 (1 nodes)
+    cell-0 : κ 487 ≡ κ 487
+    cell-0 = refl
 
+    -- σ=1250 (1 nodes)
+    cell-1 : κ 487 ≡ κ 487
+    cell-1 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ418 where
+  -- τ=632: 1 nodes, 1 σ-classes
+  module τ632 where
 
-  -- ctx-418: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=681 (1×)
-  ctx-418-τ418 : τ 418 ≡ τ 418
-  ctx-418-τ418 = refl
+    -- σ=1271 (1 nodes)
+    cell-0 : κ 487 ≡ κ 487
+    cell-0 = refl
 
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-τ419 where
+-- κ=515: 3 nodes, 1 τ-classes, 3 σ-classes
+module apply-Call-11 where
 
-  -- ctx-419: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=682 (1×)
-  ctx-419-τ419 : τ 419 ≡ τ 419
-  ctx-419-τ419 = refl
+  -- τ=189: 3 nodes, 3 σ-classes
+  module τ189 where
 
+    -- σ=1352 (1 nodes)
+    cell-0 : κ 515 ≡ κ 515
+    cell-0 = refl
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1419 (1 nodes)
+    cell-1 : κ 515 ≡ κ 515
+    cell-1 = refl
 
-module fold-For-τ420 where
+    -- σ=1534 (1 nodes)
+    cell-2 : κ 515 ≡ κ 515
+    cell-2 = refl
 
-  -- ctx-420: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=683 (1×)
-  ctx-420-τ420 : τ 420 ≡ τ 420
-  ctx-420-τ420 = refl
 
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=550: 6 nodes, 1 τ-classes, 3 σ-classes
+module apply-Call-12 where
 
-module fold-For-τ421 where
+  -- τ=701: 6 nodes, 3 σ-classes
+  module τ701 where
 
-  -- ctx-421: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=684 (1×)
-  ctx-421-τ421 : τ 421 ≡ τ 421
-  ctx-421-τ421 = refl
+    -- σ=1441 (2 nodes)
+    cell-0 : κ 550 ≡ κ 550
+    cell-0 = refl
 
+    -- σ=1442 (2 nodes)
+    cell-1 : κ 550 ≡ κ 550
+    cell-1 = refl
 
--- ── lazy_fold (GeneratorExp) ───────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1443 (2 nodes)
+    cell-2 : κ 550 ≡ κ 550
+    cell-2 = refl
 
-module lazy_fold-GeneratorExp-τ423 where
 
-  -- ctx-423: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=688 (1×)
-  ctx-423-τ423 : τ 423 ≡ τ 423
-  ctx-423-τ423 = refl
 
+-- κ=596: 3 nodes, 1 τ-classes, 3 σ-classes
+module let-k-Assign-14 where
 
--- ── powerset (Call) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=761: 3 nodes, 3 σ-classes
+  module τ761 where
 
-module powerset-Call-τ424 where
+    -- σ=1583 (1 nodes)
+    cell-0 : κ 596 ≡ κ 596
+    cell-0 = refl
 
-  -- ctx-424: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=689 (1×)
-  ctx-424-τ424 : τ 424 ≡ τ 424
-  ctx-424-τ424 = refl
+    -- σ=1585 (1 nodes)
+    cell-1 : κ 596 ≡ κ 596
+    cell-1 = refl
 
+    -- σ=1587 (1 nodes)
+    cell-2 : κ 596 ≡ κ 596
+    cell-2 = refl
 
--- ── total_order (Call) ─────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module total_order-Call-list-1 where
 
-  -- list: 1 nodes, 1 forms
-  -- [list]
-  --   σ=690 (1×)
-  list-τ425 : τ 425 ≡ τ 425
-  list-τ425 = refl
+-- κ=597: 3 nodes, 1 τ-classes, 3 σ-classes
+module cardinality-Call-2 where
 
+  -- τ=763: 3 nodes, 3 σ-classes
+  module int where
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1595 (1 nodes)
+    cell-0 : κ 597 ≡ κ 597
+    cell-0 = refl
 
-module apply-Call-τ426 where
+    -- σ=1600 (1 nodes)
+    cell-1 : κ 597 ≡ κ 597
+    cell-1 = refl
 
-  -- ctx-426: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=691 (1×)
-  ctx-426-τ426 : τ 426 ≡ τ 426
-  ctx-426-τ426 = refl
+    -- σ=1606 (1 nodes)
+    cell-2 : κ 597 ≡ κ 597
+    cell-2 = refl
 
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ427 where
+-- κ=600: 3 nodes, 1 τ-classes, 3 σ-classes
+module partial-at-x3f-Attribute-0 where
 
-  -- ctx-427: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=692 (1×)
-  ctx-427-τ427 : τ 427 ≡ τ 427
-  ctx-427-τ427 = refl
+  -- τ=188: 3 nodes, 3 σ-classes
+  module τ188 where
 
+    -- σ=1612 (1 nodes)
+    cell-0 : κ 600 ≡ κ 600
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1912 (1 nodes)
+    cell-1 : κ 600 ≡ κ 600
+    cell-1 = refl
 
-module let-k-Assign-τ428 where
+    -- σ=2058 (1 nodes)
+    cell-2 : κ 600 ≡ κ 600
+    cell-2 = refl
 
-  -- ctx-428: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=697 (1×)
-  ctx-428-τ428 : τ 428 ≡ τ 428
-  ctx-428-τ428 = refl
 
 
--- ── monoid.accum (AugAssign) ───────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=674: 3 nodes, 1 τ-classes, 3 σ-classes
+module coerce-FormattedValue-4 where
 
-module monoid-accum-AugAssign-τ429 where
+  -- τ=851: 3 nodes, 3 σ-classes
+  module τ851 where
 
-  -- ctx-429: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=698 (1×)
-  ctx-429-τ429 : τ 429 ≡ τ 429
-  ctx-429-τ429 = refl
+    -- σ=1821 (1 nodes)
+    cell-0 : κ 674 ≡ κ 674
+    cell-0 = refl
 
+    -- σ=1833 (1 nodes)
+    cell-1 : κ 674 ≡ κ 674
+    cell-1 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1840 (1 nodes)
+    cell-2 : κ 674 ≡ κ 674
+    cell-2 = refl
 
-module equalizer-If-τ430 where
 
-  -- ctx-430: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=699 (1×)
-  ctx-430-τ430 : τ 430 ≡ τ 430
-  ctx-430-τ430 = refl
 
+-- κ=677: 3 nodes, 1 τ-classes, 3 σ-classes
+module bimap-BinOp-1 where
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=854: 3 nodes, 3 σ-classes
+  module τ854 where
 
-module equalizer-If-τ431 where
+    -- σ=1825 (1 nodes)
+    cell-0 : κ 677 ≡ κ 677
+    cell-0 = refl
 
-  -- ctx-431: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=700 (1×)
-  ctx-431-τ431 : τ 431 ≡ τ 431
-  ctx-431-τ431 = refl
+    -- σ=1835 (1 nodes)
+    cell-1 : κ 677 ≡ κ 677
+    cell-1 = refl
 
+    -- σ=1842 (1 nodes)
+    cell-2 : κ 677 ≡ κ 677
+    cell-2 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-τ432 where
 
-  -- ctx-432: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=701 (1×)
-  ctx-432-τ432 : τ 432 ≡ τ 432
-  ctx-432-τ432 = refl
+-- κ=678: 3 nodes, 1 τ-classes, 3 σ-classes
+module coerce-FormattedValue-5 where
 
+  -- τ=855: 3 nodes, 3 σ-classes
+  module τ855 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1828 (1 nodes)
+    cell-0 : κ 678 ≡ κ 678
+    cell-0 = refl
 
-module let-k-Assign-τ436 where
+    -- σ=1836 (1 nodes)
+    cell-1 : κ 678 ≡ κ 678
+    cell-1 = refl
 
-  -- ctx-436: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=705 (1×)
-  ctx-436-τ436 : τ 436 ≡ τ 436
-  ctx-436-τ436 = refl
+    -- σ=1843 (1 nodes)
+    cell-2 : κ 678 ≡ κ 678
+    cell-2 = refl
 
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-τ437 where
+-- κ=679: 3 nodes, 1 τ-classes, 3 σ-classes
+module free_monoid-fold-JoinedStr-1 where
 
-  -- ctx-437: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=706 (1×)
-  ctx-437-τ437 : τ 437 ≡ τ 437
-  ctx-437-τ437 = refl
+  -- τ=856: 3 nodes, 3 σ-classes
+  module str where
 
+    -- σ=1830 (1 nodes)
+    cell-0 : κ 679 ≡ κ 679
+    cell-0 = refl
 
--- ── fixpoint (While) ───────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1837 (1 nodes)
+    cell-1 : κ 679 ≡ κ 679
+    cell-1 = refl
 
-module fixpoint-While-τ438 where
+    -- σ=1844 (1 nodes)
+    cell-2 : κ 679 ≡ κ 679
+    cell-2 = refl
 
-  -- ctx-438: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=707 (1×)
-  ctx-438-τ438 : τ 438 ≡ τ 438
-  ctx-438-τ438 = refl
 
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=742: 3 nodes, 3 τ-classes, 3 σ-classes
+module coerce-FormattedValue-6 where
 
-module exponential-intro-FunctionDef-τ439 where
+  -- τ=920: 1 nodes, 1 σ-classes
+  module τ920 where
 
-  -- ctx-439: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=708 (1×)
-  ctx-439-τ439 : τ 439 ≡ τ 439
-  ctx-439-τ439 = refl
+    -- σ=1997 (1 nodes)
+    cell-0 : κ 742 ≡ κ 742
+    cell-0 = refl
 
 
--- ── arguments (arguments) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=922: 1 nodes, 1 σ-classes
+  module τ922 where
 
-module arguments-arguments-τ441 where
+    -- σ=2002 (1 nodes)
+    cell-0 : κ 742 ≡ κ 742
+    cell-0 = refl
 
-  -- ctx-441: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=711 (1×)
-  ctx-441-τ441 : τ 441 ≡ τ 441
-  ctx-441-τ441 = refl
 
+  -- τ=950: 1 nodes, 1 σ-classes
+  module τ950 where
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=2080 (1 nodes)
+    cell-0 : κ 742 ≡ κ 742
+    cell-0 = refl
 
-module equalizer-If-τ446 where
 
-  -- ctx-446: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=723 (1×)
-  ctx-446-τ446 : τ 446 ≡ τ 446
-  ctx-446-τ446 = refl
 
+-- κ=11: 45 nodes, 1 τ-classes, 2 σ-classes
+module arg-arg-3 where
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=11: 45 nodes, 2 σ-classes
+  module τ11 where
 
-module exponential-intro-FunctionDef-τ447 where
+    -- σ=20 (42 nodes)
+    cell-0 : κ 11 ≡ κ 11
+    cell-0 = refl
 
-  -- ctx-447: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=724 (1×)
-  ctx-447-τ447 : τ 447 ≡ τ 447
-  ctx-447-τ447 = refl
+    -- σ=1676 (3 nodes)
+    cell-1 : κ 11 ≡ κ 11
+    cell-1 = refl
 
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-τ448 where
+-- κ=12: 18 nodes, 1 τ-classes, 2 σ-classes
+module arguments-arguments-2 where
 
-  -- ctx-448: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=742 (1×)
-  ctx-448-τ448 : τ 448 ≡ τ 448
-  ctx-448-τ448 = refl
+  -- τ=12: 18 nodes, 2 σ-classes
+  module τ12 where
 
+    -- σ=21 (15 nodes)
+    cell-0 : κ 12 ≡ κ 12
+    cell-0 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1677 (3 nodes)
+    cell-1 : κ 12 ≡ κ 12
+    cell-1 = refl
 
-module effect-seq-Expr-τ449 where
 
-  -- ctx-449: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=743 (1×)
-  ctx-449-τ449 : τ 449 ≡ τ 449
-  ctx-449-τ449 = refl
 
+-- κ=35: 2 nodes, 1 τ-classes, 2 σ-classes
+module equalizer-Compare-8 where
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=49: 2 nodes, 2 σ-classes
+  module τ49 where
 
-module equalizer-If-τ450 where
+    -- σ=60 (1 nodes)
+    cell-0 : κ 35 ≡ κ 35
+    cell-0 = refl
 
-  -- ctx-450: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=744 (1×)
-  ctx-450-τ450 : τ 450 ≡ τ 450
-  ctx-450-τ450 = refl
+    -- σ=64 (1 nodes)
+    cell-1 : κ 35 ≡ κ 35
+    cell-1 = refl
 
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-τ451 where
+-- κ=65: 3 nodes, 1 τ-classes, 2 σ-classes
+module apply-Call-13 where
 
-  -- ctx-451: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=745 (1×)
-  ctx-451-τ451 : τ 451 ≡ τ 451
-  ctx-451-τ451 = refl
+  -- τ=82: 3 nodes, 2 σ-classes
+  module τ82 where
 
+    -- σ=1437 (2 nodes)
+    cell-0 : κ 65 ≡ κ 65
+    cell-0 = refl
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=120 (1 nodes)
+    cell-1 : κ 65 ≡ κ 65
+    cell-1 = refl
 
-module fold-For-τ458 where
 
-  -- ctx-458: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=764 (1×)
-  ctx-458-τ458 : τ 458 ≡ τ 458
-  ctx-458-τ458 = refl
 
+-- κ=71: 2 nodes, 1 τ-classes, 2 σ-classes
+module terminal-map-Return-1 where
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=88: 2 nodes, 2 σ-classes
+  module τ88 where
 
-module annassign-AnnAssign-τ466 where
+    -- σ=128 (1 nodes)
+    cell-0 : κ 71 ≡ κ 71
+    cell-0 = refl
 
-  -- ctx-466: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=782 (1×)
-  ctx-466-τ466 : τ 466 ≡ τ 466
-  ctx-466-τ466 = refl
+    -- σ=1405 (1 nodes)
+    cell-1 : κ 71 ≡ κ 71
+    cell-1 = refl
 
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-τ480 where
+-- κ=76: 21 nodes, 2 τ-classes, 2 σ-classes
+module product-Tuple-4 where
 
-  -- ctx-480: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=820 (1×)
-  ctx-480-τ480 : τ 480 ≡ τ 480
-  ctx-480-τ480 = refl
+  -- τ=100: 17 nodes, 1 σ-classes
+  module tuple-0 where
 
+    -- σ=146 (17 nodes)
+    cell-0 : κ 76 ≡ κ 76
+    cell-0 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-τ481 where
+  -- τ=96: 4 nodes, 1 σ-classes
+  module tuple-1 where
 
-  -- ctx-481: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=822 (1×)
-  ctx-481-τ481 : τ 481 ≡ τ 481
-  ctx-481-τ481 = refl
+    -- σ=142 (4 nodes)
+    cell-0 : κ 76 ≡ κ 76
+    cell-0 = refl
 
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-τ482 where
+-- κ=77: 21 nodes, 2 τ-classes, 2 σ-classes
+module index-Index-7 where
 
-  -- ctx-482: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=823 (1×)
-  ctx-482-τ482 : τ 482 ≡ τ 482
-  ctx-482-τ482 = refl
+  -- τ=101: 17 nodes, 1 σ-classes
+  module τ101 where
 
+    -- σ=147 (17 nodes)
+    cell-0 : κ 77 ≡ κ 77
+    cell-0 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-τ444 where
+  -- τ=97: 4 nodes, 1 σ-classes
+  module τ97 where
 
-  -- ctx-444: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=829 (1×)
-  ctx-444-τ444 : τ 444 ≡ τ 444
-  ctx-444-τ444 = refl
+    -- σ=143 (4 nodes)
+    cell-0 : κ 77 ≡ κ 77
+    cell-0 = refl
 
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-τ445-1 where
+-- κ=78: 21 nodes, 2 τ-classes, 2 σ-classes
+module subscript-Subscript-12 where
 
-  -- ctx-445: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=830 (1×)
-  ctx-445-τ445 : τ 445 ≡ τ 445
-  ctx-445-τ445 = refl
+  -- τ=102: 17 nodes, 1 σ-classes
+  module τ102 where
 
+    -- σ=148 (17 nodes)
+    cell-0 : κ 78 ≡ κ 78
+    cell-0 = refl
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-τ483-1 where
+  -- τ=98: 4 nodes, 1 σ-classes
+  module τ98 where
 
-  -- ctx-483: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=831 (1×)
-  ctx-483-τ483 : τ 483 ≡ τ 483
-  ctx-483-τ483 = refl
+    -- σ=144 (4 nodes)
+    cell-0 : κ 78 ≡ κ 78
+    cell-0 = refl
 
 
--- ── product.unpack (Tuple) ─────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module product-unpack-Tuple-tuple-2 where
+-- κ=81: 2 nodes, 1 τ-classes, 2 σ-classes
+module annassign-AnnAssign-5 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=836 (1×)
-  tuple-τ484 : τ 484 ≡ τ 484
-  tuple-τ484 = refl
+  -- τ=106: 2 nodes, 2 σ-classes
+  module τ106 where
 
+    -- σ=153 (1 nodes)
+    cell-0 : κ 81 ≡ κ 81
+    cell-0 = refl
 
--- ── free_monoid.literal (List) ─────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=186 (1 nodes)
+    cell-1 : κ 81 ≡ κ 81
+    cell-1 = refl
 
-module free_monoid-literal-List-list-2 where
 
-  -- list: 1 nodes, 1 forms
-  -- [list]
-  --   σ=838 (1×)
-  list-τ485 : τ 485 ≡ τ 485
-  list-τ485 = refl
 
+-- κ=82: 2 nodes, 2 τ-classes, 2 σ-classes
+module annassign-AnnAssign-6 where
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=108: 1 nodes, 1 σ-classes
+  module τ108 where
 
-module product-Tuple-tuple-26 where
+    -- σ=156 (1 nodes)
+    cell-0 : κ 82 ≡ κ 82
+    cell-0 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=842 (1×)
-  tuple-τ488 : τ 488 ≡ τ 488
-  tuple-τ488 = refl
 
+  -- τ=110: 1 nodes, 1 σ-classes
+  module τ110 where
 
--- ── free_monoid.snoc@state (Call) ──────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=159 (1 nodes)
+    cell-0 : κ 82 ≡ κ 82
+    cell-0 = refl
 
-module free_monoid-snoc-at-state-Call-None-5 where
 
-  -- None: 1 nodes, 1 forms
-  -- [None]
-  --   σ=843 (1×)
-  None-τ489 : τ 489 ≡ τ 489
-  None-τ489 = refl
 
+-- κ=84: 2 nodes, 2 τ-classes, 2 σ-classes
+module annassign-AnnAssign-7 where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=116: 1 nodes, 1 σ-classes
+  module τ116 where
 
-module effect-seq-Expr-τ490 where
+    -- σ=165 (1 nodes)
+    cell-0 : κ 84 ≡ κ 84
+    cell-0 = refl
 
-  -- ctx-490: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=844 (1×)
-  ctx-490-τ490 : τ 490 ≡ τ 490
-  ctx-490-τ490 = refl
 
+  -- τ=277: 1 nodes, 1 σ-classes
+  module τ277 where
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=400 (1 nodes)
+    cell-0 : κ 84 ≡ κ 84
+    cell-0 = refl
 
-module fold-For-τ501 where
 
-  -- ctx-501: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=864 (1×)
-  ctx-501-τ501 : τ 501 ≡ τ 501
-  ctx-501-τ501 = refl
 
+-- κ=97: 4 nodes, 1 τ-classes, 2 σ-classes
+module apply-Call-14 where
 
--- ── coproduct.elim (If) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=140: 4 nodes, 2 σ-classes
+  module τ140 where
 
-module coproduct-elim-If-τ502 where
+    -- σ=202 (2 nodes)
+    cell-0 : κ 97 ≡ κ 97
+    cell-0 = refl
 
-  -- ctx-502: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=865 (1×)
-  ctx-502-τ502 : τ 502 ≡ τ 502
-  ctx-502-τ502 = refl
+    -- σ=1559 (2 nodes)
+    cell-1 : κ 97 ≡ κ 97
+    cell-1 = refl
 
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-τ503 where
+-- κ=98: 2 nodes, 1 τ-classes, 2 σ-classes
+module annassign-AnnAssign-8 where
 
-  -- ctx-503: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=866 (1×)
-  ctx-503-τ503 : τ 503 ≡ τ 503
-  ctx-503-τ503 = refl
+  -- τ=141: 2 nodes, 2 σ-classes
+  module τ141 where
 
+    -- σ=203 (1 nodes)
+    cell-0 : κ 98 ≡ κ 98
+    cell-0 = refl
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=375 (1 nodes)
+    cell-1 : κ 98 ≡ κ 98
+    cell-1 = refl
 
-module exponential-intro-FunctionDef-τ504 where
 
-  -- ctx-504: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=868 (1×)
-  ctx-504-τ504 : τ 504 ≡ τ 504
-  ctx-504-τ504 = refl
 
+-- κ=101: 2 nodes, 1 τ-classes, 2 σ-classes
+module let-k-Assign-15 where
 
--- ── arguments (arguments) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=146: 2 nodes, 2 σ-classes
+  module τ146 where
 
-module arguments-arguments-τ505 where
+    -- σ=214 (1 nodes)
+    cell-0 : κ 101 ≡ κ 101
+    cell-0 = refl
 
-  -- ctx-505: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=870 (1×)
-  ctx-505-τ505 : τ 505 ≡ τ 505
-  ctx-505-τ505 = refl
+    -- σ=1796 (1 nodes)
+    cell-1 : κ 101 ≡ κ 101
+    cell-1 = refl
 
 
--- ── is (Is) ────────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module is-Is-τ506 where
+-- κ=107: 3 nodes, 1 τ-classes, 2 σ-classes
+module effect-seq-Expr-6 where
 
-  -- ctx-506: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=874 (1×)
-  ctx-506-τ506 : τ 506 ≡ τ 506
-  ctx-506-τ506 = refl
+  -- τ=155: 3 nodes, 2 σ-classes
+  module τ155 where
 
+    -- σ=1145 (2 nodes)
+    cell-0 : κ 107 ≡ κ 107
+    cell-0 = refl
 
--- ── equalizer (Compare) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=226 (1 nodes)
+    cell-1 : κ 107 ≡ κ 107
+    cell-1 = refl
 
-module equalizer-Compare-τ507 where
 
-  -- ctx-507: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=875 (1×)
-  ctx-507-τ507 : τ 507 ≡ τ 507
-  ctx-507-τ507 = refl
 
+-- κ=110: 2 nodes, 2 τ-classes, 2 σ-classes
+module free_monoid-op-at-x3f-Attribute-1 where
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=159: 1 nodes, 1 σ-classes
+  module τ159 where
 
-module equalizer-If-τ509 where
+    -- σ=230 (1 nodes)
+    cell-0 : κ 110 ≡ κ 110
+    cell-0 = refl
 
-  -- ctx-509: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=877 (1×)
-  ctx-509-τ509 : τ 509 ≡ τ 509
-  ctx-509-τ509 = refl
 
+  -- τ=179: 1 nodes, 1 σ-classes
+  module τ179 where
 
--- ── partial.apply@state (Call) ─────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=264 (1 nodes)
+    cell-0 : κ 110 ≡ κ 110
+    cell-0 = refl
 
-module partial-apply-at-state-Call-T-3 where
 
-  -- T: 1 nodes, 1 forms
-  -- [T]
-  --   σ=878 (1×)
-  T-τ510 : τ 510 ≡ τ 510
-  T-τ510 = refl
 
+-- κ=114: 2 nodes, 2 τ-classes, 2 σ-classes
+module terminal-map-Return-2 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=166: 1 nodes, 1 σ-classes
+  module τ166 where
 
-module let-k-Assign-τ511 where
+    -- σ=241 (1 nodes)
+    cell-0 : κ 114 ≡ κ 114
+    cell-0 = refl
 
-  -- ctx-511: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=879 (1×)
-  ctx-511-τ511 : τ 511 ≡ τ 511
-  ctx-511-τ511 = refl
 
+  -- τ=512: 1 nodes, 1 σ-classes
+  module τ512 where
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=880 (1 nodes)
+    cell-0 : κ 114 ≡ κ 114
+    cell-0 = refl
 
-module equalizer-If-τ513 where
 
-  -- ctx-513: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=881 (1×)
-  ctx-513-τ513 : τ 513 ≡ τ 513
-  ctx-513-τ513 = refl
 
+-- κ=159: 2 nodes, 2 τ-classes, 2 σ-classes
+module annassign-AnnAssign-9 where
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=224: 1 nodes, 1 σ-classes
+  module τ224 where
 
-module exponential-intro-FunctionDef-τ514 where
+    -- σ=340 (1 nodes)
+    cell-0 : κ 159 ≡ κ 159
+    cell-0 = refl
 
-  -- ctx-514: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=883 (1×)
-  ctx-514-τ514 : τ 514 ≡ τ 514
-  ctx-514-τ514 = refl
 
+  -- τ=275: 1 nodes, 1 σ-classes
+  module τ275 where
 
--- ── arg (arg) ──────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=396 (1 nodes)
+    cell-0 : κ 159 ≡ κ 159
+    cell-0 = refl
 
-module arg-arg-τ515 where
 
-  -- ctx-515: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=884 (1×)
-  ctx-515-τ515 : τ 515 ≡ τ 515
-  ctx-515-τ515 = refl
 
+-- κ=181: 2 nodes, 2 τ-classes, 2 σ-classes
+module product-Tuple-5 where
 
--- ── arguments (arguments) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=258: 1 nodes, 1 σ-classes
+  module tuple-0 where
 
-module arguments-arguments-τ516 where
+    -- σ=380 (1 nodes)
+    cell-0 : κ 181 ≡ κ 181
+    cell-0 = refl
 
-  -- ctx-516: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=885 (1×)
-  ctx-516-τ516 : τ 516 ≡ τ 516
-  ctx-516-τ516 = refl
 
+  -- τ=461: 1 nodes, 1 σ-classes
+  module tuple-1 where
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=777 (1 nodes)
+    cell-0 : κ 181 ≡ κ 181
+    cell-0 = refl
 
-module product-Tuple-tuple-27 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=906 (1×)
-  tuple-τ523 : τ 523 ≡ τ 523
-  tuple-τ523 = refl
 
+-- κ=182: 2 nodes, 2 τ-classes, 2 σ-classes
+module index-Index-8 where
 
--- ── terminal.map (Return) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=259: 1 nodes, 1 σ-classes
+  module τ259 where
 
-module terminal-map-Return-τ524 where
+    -- σ=381 (1 nodes)
+    cell-0 : κ 182 ≡ κ 182
+    cell-0 = refl
 
-  -- ctx-524: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=907 (1×)
-  ctx-524-τ524 : τ 524 ≡ τ 524
-  ctx-524-τ524 = refl
 
+  -- τ=462: 1 nodes, 1 σ-classes
+  module τ462 where
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=778 (1 nodes)
+    cell-0 : κ 182 ≡ κ 182
+    cell-0 = refl
 
-module product-Tuple-tuple-28 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=908 (1×)
-  tuple-τ525 : τ 525 ≡ τ 525
-  tuple-τ525 = refl
 
+-- κ=183: 2 nodes, 2 τ-classes, 2 σ-classes
+module subscript-Subscript-13 where
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=260: 1 nodes, 1 σ-classes
+  module τ260 where
 
-module index-Index-τ526 where
+    -- σ=382 (1 nodes)
+    cell-0 : κ 183 ≡ κ 183
+    cell-0 = refl
 
-  -- ctx-526: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=909 (1×)
-  ctx-526-τ526 : τ 526 ≡ τ 526
-  ctx-526-τ526 = refl
 
+  -- τ=463: 1 nodes, 1 σ-classes
+  module τ463 where
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=779 (1 nodes)
+    cell-0 : κ 183 ≡ κ 183
+    cell-0 = refl
 
-module subscript-Subscript-τ527 where
 
-  -- ctx-527: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=910 (1×)
-  ctx-527-τ527 : τ 527 ≡ τ 527
-  ctx-527-τ527 = refl
 
+-- κ=184: 2 nodes, 2 τ-classes, 2 σ-classes
+module index-Index-9 where
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=261: 1 nodes, 1 σ-classes
+  module τ261 where
 
-module exponential-intro-FunctionDef-τ528 where
+    -- σ=383 (1 nodes)
+    cell-0 : κ 184 ≡ κ 184
+    cell-0 = refl
 
-  -- ctx-528: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=911 (1×)
-  ctx-528-τ528 : τ 528 ≡ τ 528
-  ctx-528-τ528 = refl
 
+  -- τ=464: 1 nodes, 1 σ-classes
+  module τ464 where
 
--- ── arg (arg) ──────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=780 (1 nodes)
+    cell-0 : κ 184 ≡ κ 184
+    cell-0 = refl
 
-module arg-arg-τ529 where
 
-  -- ctx-529: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=913 (1×)
-  ctx-529-τ529 : τ 529 ≡ τ 529
-  ctx-529-τ529 = refl
 
+-- κ=185: 2 nodes, 2 τ-classes, 2 σ-classes
+module subscript-Subscript-14 where
 
--- ── arguments (arguments) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=262: 1 nodes, 1 σ-classes
+  module τ262 where
 
-module arguments-arguments-τ530 where
+    -- σ=384 (1 nodes)
+    cell-0 : κ 185 ≡ κ 185
+    cell-0 = refl
 
-  -- ctx-530: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=914 (1×)
-  ctx-530-τ530 : τ 530 ≡ τ 530
-  ctx-530-τ530 = refl
 
+  -- τ=465: 1 nodes, 1 σ-classes
+  module τ465 where
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=781 (1 nodes)
+    cell-0 : κ 185 ≡ κ 185
+    cell-0 = refl
 
-module equalizer-If-τ532 where
 
-  -- ctx-532: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=930 (1×)
-  ctx-532-τ532 : τ 532 ≡ τ 532
-  ctx-532-τ532 = refl
 
+-- κ=191: 2 nodes, 2 τ-classes, 2 σ-classes
+module subscript-Subscript-15 where
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=269: 1 nodes, 1 σ-classes
+  module τ269 where
 
-module fold-For-τ533 where
+    -- σ=391 (1 nodes)
+    cell-0 : κ 191 ≡ κ 191
+    cell-0 = refl
 
-  -- ctx-533: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=931 (1×)
-  ctx-533-τ533 : τ 533 ≡ τ 533
-  ctx-533-τ533 = refl
 
+  -- τ=878: 1 nodes, 1 σ-classes
+  module τ878 where
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1899 (1 nodes)
+    cell-0 : κ 191 ≡ κ 191
+    cell-0 = refl
 
-module exponential-intro-FunctionDef-τ534 where
 
-  -- ctx-534: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=932 (1×)
-  ctx-534-τ534 : τ 534 ≡ τ 534
-  ctx-534-τ534 = refl
 
+-- κ=200: 3 nodes, 2 τ-classes, 2 σ-classes
+module product-Tuple-6 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=712: 2 nodes, 1 σ-classes
+  module tuple-0 where
 
-module let-k-Assign-τ536 where
+    -- σ=1464 (2 nodes)
+    cell-0 : κ 200 ≡ κ 200
+    cell-0 = refl
 
-  -- ctx-536: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=948 (1×)
-  ctx-536-τ536 : τ 536 ≡ τ 536
-  ctx-536-τ536 = refl
 
+  -- τ=290: 1 nodes, 1 σ-classes
+  module tuple-1 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=418 (1 nodes)
+    cell-0 : κ 200 ≡ κ 200
+    cell-0 = refl
 
-module let-k-Assign-τ537 where
 
-  -- ctx-537: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=949 (1×)
-  ctx-537-τ537 : τ 537 ≡ τ 537
-  ctx-537-τ537 = refl
 
+-- κ=201: 3 nodes, 2 τ-classes, 2 σ-classes
+module index-Index-10 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=713: 2 nodes, 1 σ-classes
+  module τ713 where
 
-module let-k-Assign-τ539 where
+    -- σ=1465 (2 nodes)
+    cell-0 : κ 201 ≡ κ 201
+    cell-0 = refl
 
-  -- ctx-539: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=961 (1×)
-  ctx-539-τ539 : τ 539 ≡ τ 539
-  ctx-539-τ539 = refl
 
+  -- τ=291: 1 nodes, 1 σ-classes
+  module τ291 where
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=419 (1 nodes)
+    cell-0 : κ 201 ≡ κ 201
+    cell-0 = refl
 
-module index-Index-τ545 where
 
-  -- ctx-545: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=969 (1×)
-  ctx-545-τ545 : τ 545 ≡ τ 545
-  ctx-545-τ545 = refl
 
+-- κ=219: 2 nodes, 2 τ-classes, 2 σ-classes
+module partial-apply-at-state-Call-1 where
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=311: 1 nodes, 1 σ-classes
+  module T-0 where
 
-module subscript-Subscript-τ546 where
+    -- σ=459 (1 nodes)
+    cell-0 : κ 219 ≡ κ 219
+    cell-0 = refl
 
-  -- ctx-546: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=970 (1×)
-  ctx-546-τ546 : τ 546 ≡ τ 546
-  ctx-546-τ546 = refl
 
+  -- τ=392: 1 nodes, 1 σ-classes
+  module T-1 where
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=639 (1 nodes)
+    cell-0 : κ 219 ≡ κ 219
+    cell-0 = refl
 
-module annassign-AnnAssign-τ547 where
 
-  -- ctx-547: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=971 (1×)
-  ctx-547-τ547 : τ 547 ≡ τ 547
-  ctx-547-τ547 = refl
 
+-- κ=227: 2 nodes, 1 τ-classes, 2 σ-classes
+module arguments-arguments-3 where
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=320: 2 nodes, 2 σ-classes
+  module τ320 where
 
-module equalizer-If-τ550 where
+    -- σ=472 (1 nodes)
+    cell-0 : κ 227 ≡ κ 227
+    cell-0 = refl
 
-  -- ctx-550: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=987 (1×)
-  ctx-550-τ550 : τ 550 ≡ τ 550
-  ctx-550-τ550 = refl
+    -- σ=1523 (1 nodes)
+    cell-1 : κ 227 ≡ κ 227
+    cell-1 = refl
 
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-τ551 where
+-- κ=242: 2 nodes, 2 τ-classes, 2 σ-classes
+module equalizer-Compare-9 where
 
-  -- ctx-551: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=989 (1×)
-  ctx-551-τ551 : τ 551 ≡ τ 551
-  ctx-551-τ551 = refl
+  -- τ=341: 1 nodes, 1 σ-classes
+  module τ341 where
 
+    -- σ=518 (1 nodes)
+    cell-0 : κ 242 ≡ κ 242
+    cell-0 = refl
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-τ552 where
+  -- τ=411: 1 nodes, 1 σ-classes
+  module τ411 where
 
-  -- ctx-552: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=990 (1×)
-  ctx-552-τ552 : τ 552 ≡ τ 552
-  ctx-552-τ552 = refl
+    -- σ=670 (1 nodes)
+    cell-0 : κ 242 ≡ κ 242
+    cell-0 = refl
 
 
--- ── monoid.accum (AugAssign) ───────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-accum-AugAssign-τ553 where
+-- κ=256: 2 nodes, 1 τ-classes, 2 σ-classes
+module equalizer-Compare-10 where
 
-  -- ctx-553: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=992 (1×)
-  ctx-553-τ553 : τ 553 ≡ τ 553
-  ctx-553-τ553 = refl
+  -- τ=357: 2 nodes, 2 σ-classes
+  module τ357 where
 
+    -- σ=562 (1 nodes)
+    cell-0 : κ 256 ≡ κ 256
+    cell-0 = refl
 
--- ── free_monoid.map (ListComp) ─────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=695 (1 nodes)
+    cell-1 : κ 256 ≡ κ 256
+    cell-1 = refl
 
-module free_monoid-map-ListComp-τ554 where
 
-  -- ctx-554: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=997 (1×)
-  ctx-554-τ554 : τ 554 ≡ τ 554
-  ctx-554-τ554 = refl
 
+-- κ=262: 2 nodes, 1 τ-classes, 2 σ-classes
+module partial-apply-at-x3f-Call-0 where
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=364: 2 nodes, 2 σ-classes
+  module τ364 where
 
-module product-Tuple-tuple-29 where
+    -- σ=584 (1 nodes)
+    cell-0 : κ 262 ≡ κ 262
+    cell-0 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=999 (1×)
-  tuple-τ555 : τ 555 ≡ τ 555
-  tuple-τ555 = refl
+    -- σ=1706 (1 nodes)
+    cell-1 : κ 262 ≡ κ 262
+    cell-1 = refl
 
 
--- ── free_monoid.snoc@state (Call) ──────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-state-Call-None-6 where
+-- κ=277: 4 nodes, 1 τ-classes, 2 σ-classes
+module subscript-Subscript-16 where
 
-  -- None: 1 nodes, 1 forms
-  -- [None]
-  --   σ=1000 (1×)
-  None-τ556 : τ 556 ≡ τ 556
-  None-τ556 = refl
+  -- τ=379: 4 nodes, 2 σ-classes
+  module τ379 where
 
+    -- σ=615 (2 nodes)
+    cell-0 : κ 277 ≡ κ 277
+    cell-0 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1179 (2 nodes)
+    cell-1 : κ 277 ≡ κ 277
+    cell-1 = refl
 
-module effect-seq-Expr-τ557 where
 
-  -- ctx-557: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1001 (1×)
-  ctx-557-τ557 : τ 557 ≡ τ 557
-  ctx-557-τ557 = refl
 
+-- κ=279: 2 nodes, 1 τ-classes, 2 σ-classes
+module free_monoid-fold-JoinedStr-2 where
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=381: 2 nodes, 2 σ-classes
+  module str where
 
-module fold-For-τ558 where
+    -- σ=617 (1 nodes)
+    cell-0 : κ 279 ≡ κ 279
+    cell-0 = refl
 
-  -- ctx-558: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1017 (1×)
-  ctx-558-τ558 : τ 558 ≡ τ 558
-  ctx-558-τ558 = refl
+    -- σ=620 (1 nodes)
+    cell-1 : κ 279 ≡ κ 279
+    cell-1 = refl
 
 
--- ── coproduct.elim (If) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module coproduct-elim-If-τ559 where
+-- κ=280: 2 nodes, 1 τ-classes, 2 σ-classes
+module let-k-Assign-16 where
 
-  -- ctx-559: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1018 (1×)
-  ctx-559-τ559 : τ 559 ≡ τ 559
-  ctx-559-τ559 = refl
+  -- τ=382: 2 nodes, 2 σ-classes
+  module τ382 where
 
+    -- σ=618 (1 nodes)
+    cell-0 : κ 280 ≡ κ 280
+    cell-0 = refl
 
--- ── complement (If) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=621 (1 nodes)
+    cell-1 : κ 280 ≡ κ 280
+    cell-1 = refl
 
-module complement-If-τ560 where
 
-  -- ctx-560: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1019 (1×)
-  ctx-560-τ560 : τ 560 ≡ τ 560
-  ctx-560-τ560 = refl
 
+-- κ=296: 2 nodes, 1 τ-classes, 2 σ-classes
+module free_monoid-Call-1 where
 
--- ── del (Del) ──────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=404: 2 nodes, 2 σ-classes
+  module τ404 where
 
-module del-Del-τ561 where
+    -- σ=660 (1 nodes)
+    cell-0 : κ 296 ≡ κ 296
+    cell-0 = refl
 
-  -- ctx-561: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1020 (1×)
-  ctx-561-τ561 : τ 561 ≡ τ 561
-  ctx-561-τ561 = refl
+    -- σ=947 (1 nodes)
+    cell-1 : κ 296 ≡ κ 296
+    cell-1 = refl
 
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-τ562 where
+-- κ=306: 4 nodes, 2 τ-classes, 2 σ-classes
+module free_monoid-fold-JoinedStr-3 where
 
-  -- ctx-562: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1021 (1×)
-  ctx-562-τ562 : τ 562 ≡ τ 562
-  ctx-562-τ562 = refl
+  -- τ=414: 3 nodes, 1 σ-classes
+  module str-0 where
 
+    -- σ=675 (3 nodes)
+    cell-0 : κ 306 ≡ κ 306
+    cell-0 = refl
 
--- ── delete (Delete) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module delete-Delete-τ563 where
+  -- τ=487: 1 nodes, 1 σ-classes
+  module str-1 where
 
-  -- ctx-563: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1022 (1×)
-  ctx-563-τ563 : τ 563 ≡ τ 563
-  ctx-563-τ563 = refl
+    -- σ=841 (1 nodes)
+    cell-0 : κ 306 ≡ κ 306
+    cell-0 = refl
 
 
--- ── morphism@object (Attribute) ────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module morphism-at-object-Attribute-T-discard where
+-- κ=314: 3 nodes, 1 τ-classes, 2 σ-classes
+module comprehension-comprehension-1 where
 
-  -- T-discard: 1 nodes, 1 forms
-  -- [T.discard]
-  --   σ=1028 (1×)
-  T-discard-τ564 : τ 564 ≡ τ 564
-  T-discard-τ564 = refl
+  -- τ=422: 3 nodes, 2 σ-classes
+  module τ422 where
 
+    -- σ=687 (2 nodes)
+    cell-0 : κ 314 ≡ κ 314
+    cell-0 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1286 (1 nodes)
+    cell-1 : κ 314 ≡ κ 314
+    cell-1 = refl
 
-module apply-Call-τ565 where
 
-  -- ctx-565: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1029 (1×)
-  ctx-565-τ565 : τ 565 ≡ τ 565
-  ctx-565-τ565 = refl
 
+-- κ=326: 2 nodes, 1 τ-classes, 2 σ-classes
+module exponential-literal-Dict-0 where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=435: 2 nodes, 2 σ-classes
+  module dict where
 
-module effect-seq-Expr-τ566 where
+    -- σ=704 (1 nodes)
+    cell-0 : κ 326 ≡ κ 326
+    cell-0 = refl
 
-  -- ctx-566: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1030 (1×)
-  ctx-566-τ566 : τ 566 ≡ τ 566
-  ctx-566-τ566 = refl
+    -- σ=1369 (1 nodes)
+    cell-1 : κ 326 ≡ κ 326
+    cell-1 = refl
 
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-τ567 where
+-- κ=334: 3 nodes, 1 τ-classes, 2 σ-classes
+module equalizer-Compare-11 where
 
-  -- ctx-567: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1031 (1×)
-  ctx-567-τ567 : τ 567 ≡ τ 567
-  ctx-567-τ567 = refl
+  -- τ=443: 3 nodes, 2 σ-classes
+  module τ443 where
 
+    -- σ=1275 (2 nodes)
+    cell-0 : κ 334 ≡ κ 334
+    cell-0 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=717 (1 nodes)
+    cell-1 : κ 334 ≡ κ 334
+    cell-1 = refl
 
-module equalizer-If-τ575 where
 
-  -- ctx-575: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1101 (1×)
-  ctx-575-τ575 : τ 575 ≡ τ 575
-  ctx-575-τ575 = refl
 
+-- κ=341: 2 nodes, 1 τ-classes, 2 σ-classes
+module arguments-arguments-4 where
 
--- ── partial.apply@state (Call) ─────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=453: 2 nodes, 2 σ-classes
+  module τ453 where
 
-module partial-apply-at-state-Call-T-4 where
+    -- σ=748 (1 nodes)
+    cell-0 : κ 341 ≡ κ 341
+    cell-0 = refl
 
-  -- T: 1 nodes, 1 forms
-  -- [T]
-  --   σ=1104 (1×)
-  T-τ577 : τ 577 ≡ τ 577
-  T-τ577 = refl
+    -- σ=934 (1 nodes)
+    cell-1 : κ 341 ≡ κ 341
+    cell-1 = refl
 
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ578 where
+-- κ=346: 2 nodes, 1 τ-classes, 2 σ-classes
+module equalizer-If-0 where
 
-  -- ctx-578: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1105 (1×)
-  ctx-578-τ578 : τ 578 ≡ τ 578
-  ctx-578-τ578 = refl
+  -- τ=459: 2 nodes, 2 σ-classes
+  module τ459 where
 
+    -- σ=769 (1 nodes)
+    cell-0 : κ 346 ≡ κ 346
+    cell-0 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=953 (1 nodes)
+    cell-1 : κ 346 ≡ κ 346
+    cell-1 = refl
 
-module equalizer-If-τ583 where
 
-  -- ctx-583: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1121 (1×)
-  ctx-583-τ583 : τ 583 ≡ τ 583
-  ctx-583-τ583 = refl
 
+-- κ=347: 3 nodes, 1 τ-classes, 2 σ-classes
+module annassign-AnnAssign-10 where
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=460: 3 nodes, 2 σ-classes
+  module τ460 where
 
-module fold-For-τ584 where
+    -- σ=775 (2 nodes)
+    cell-0 : κ 347 ≡ κ 347
+    cell-0 = refl
 
-  -- ctx-584: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1122 (1×)
-  ctx-584-τ584 : τ 584 ≡ τ 584
-  ctx-584-τ584 = refl
+    -- σ=1066 (1 nodes)
+    cell-1 : κ 347 ≡ κ 347
+    cell-1 = refl
 
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ586 where
+-- κ=358: 2 nodes, 1 τ-classes, 2 σ-classes
+module free_monoid-snoc-at-x3f-Call-0 where
 
-  -- ctx-586: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1129 (1×)
-  ctx-586-τ586 : τ 586 ≡ τ 586
-  ctx-586-τ586 = refl
+  -- τ=478: 2 nodes, 2 σ-classes
+  module τ478 where
 
+    -- σ=818 (1 nodes)
+    cell-0 : κ 358 ≡ κ 358
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1753 (1 nodes)
+    cell-1 : κ 358 ≡ κ 358
+    cell-1 = refl
 
-module let-k-Assign-τ588 where
 
-  -- ctx-588: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1134 (1×)
-  ctx-588-τ588 : τ 588 ≡ τ 588
-  ctx-588-τ588 = refl
 
+-- κ=359: 2 nodes, 1 τ-classes, 2 σ-classes
+module effect-seq-Expr-7 where
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=479: 2 nodes, 2 σ-classes
+  module τ479 where
 
-module free_monoid-fold-JoinedStr-str-10 where
+    -- σ=819 (1 nodes)
+    cell-0 : κ 359 ≡ κ 359
+    cell-0 = refl
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=1140 (1×)
-  str-τ590 : τ 590 ≡ τ 590
-  str-τ590 = refl
+    -- σ=1754 (1 nodes)
+    cell-1 : κ 359 ≡ κ 359
+    cell-1 = refl
 
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ591 where
+-- κ=386: 2 nodes, 1 τ-classes, 2 σ-classes
+module terminal-map-Return-3 where
 
-  -- ctx-591: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1141 (1×)
-  ctx-591-τ591 : τ 591 ≡ τ 591
-  ctx-591-τ591 = refl
+  -- τ=508: 2 nodes, 2 σ-classes
+  module τ508 where
 
+    -- σ=876 (1 nodes)
+    cell-0 : κ 386 ≡ κ 386
+    cell-0 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1800 (1 nodes)
+    cell-1 : κ 386 ≡ κ 386
+    cell-1 = refl
 
-module equalizer-If-τ604 where
 
-  -- ctx-604: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1172 (1×)
-  ctx-604-τ604 : τ 604 ≡ τ 604
-  ctx-604-τ604 = refl
 
+-- κ=396: 2 nodes, 1 τ-classes, 2 σ-classes
+module apply-Call-15 where
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=520: 2 nodes, 2 σ-classes
+  module τ520 where
 
-module equalizer-If-τ611 where
+    -- σ=898 (1 nodes)
+    cell-0 : κ 396 ≡ κ 396
+    cell-0 = refl
 
-  -- ctx-611: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1208 (1×)
-  ctx-611-τ611 : τ 611 ≡ τ 611
-  ctx-611-τ611 = refl
+    -- σ=1255 (1 nodes)
+    cell-1 : κ 396 ≡ κ 396
+    cell-1 = refl
 
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-τ612 where
+-- κ=397: 2 nodes, 1 τ-classes, 2 σ-classes
+module let-k-Assign-17 where
 
-  -- ctx-612: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1209 (1×)
-  ctx-612-τ612 : τ 612 ≡ τ 612
-  ctx-612-τ612 = refl
+  -- τ=521: 2 nodes, 2 σ-classes
+  module τ521 where
 
+    -- σ=899 (1 nodes)
+    cell-0 : κ 397 ≡ κ 397
+    cell-0 = refl
 
--- ── fixpoint (While) ───────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1256 (1 nodes)
+    cell-1 : κ 397 ≡ κ 397
+    cell-1 = refl
 
-module fixpoint-While-τ613 where
 
-  -- ctx-613: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1211 (1×)
-  ctx-613-τ613 : τ 613 ≡ τ 613
-  ctx-613-τ613 = refl
 
+-- κ=413: 2 nodes, 1 τ-classes, 2 σ-classes
+module complement-UnaryOp where
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=541: 2 nodes, 2 σ-classes
+  module τ541 where
 
-module exponential-intro-FunctionDef-τ614 where
+    -- σ=964 (1 nodes)
+    cell-0 : κ 413 ≡ κ 413
+    cell-0 = refl
 
-  -- ctx-614: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1212 (1×)
-  ctx-614-τ614 : τ 614 ≡ τ 614
-  ctx-614-τ614 = refl
+    -- σ=2010 (1 nodes)
+    cell-1 : κ 413 ≡ κ 413
+    cell-1 = refl
 
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-tuple-30 where
+-- κ=420: 2 nodes, 1 τ-classes, 2 σ-classes
+module free_monoid-snoc-at-x3f-Call-1 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=1214 (1×)
-  tuple-τ615 : τ 615 ≡ τ 615
-  tuple-τ615 = refl
+  -- τ=548: 2 nodes, 2 σ-classes
+  module τ548 where
 
+    -- σ=985 (1 nodes)
+    cell-0 : κ 420 ≡ κ 420
+    cell-0 = refl
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1671 (1 nodes)
+    cell-1 : κ 420 ≡ κ 420
+    cell-1 = refl
 
-module index-Index-τ616 where
 
-  -- ctx-616: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1215 (1×)
-  ctx-616-τ616 : τ 616 ≡ τ 616
-  ctx-616-τ616 = refl
 
+-- κ=421: 2 nodes, 1 τ-classes, 2 σ-classes
+module effect-seq-Expr-8 where
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=549: 2 nodes, 2 σ-classes
+  module τ549 where
 
-module subscript-Subscript-τ617 where
+    -- σ=986 (1 nodes)
+    cell-0 : κ 421 ≡ κ 421
+    cell-0 = refl
 
-  -- ctx-617: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1216 (1×)
-  ctx-617-τ617 : τ 617 ≡ τ 617
-  ctx-617-τ617 = refl
+    -- σ=1672 (1 nodes)
+    cell-1 : κ 421 ≡ κ 421
+    cell-1 = refl
 
 
--- ── arg (arg) ──────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module arg-arg-τ618 where
+-- κ=441: 2 nodes, 1 τ-classes, 2 σ-classes
+module product-Tuple-7 where
 
-  -- ctx-618: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1217 (1×)
-  ctx-618-τ618 : τ 618 ≡ τ 618
-  ctx-618-τ618 = refl
+  -- τ=569: 2 nodes, 2 σ-classes
+  module tuple where
 
+    -- σ=1045 (1 nodes)
+    cell-0 : κ 441 ≡ κ 441
+    cell-0 = refl
 
--- ── arguments (arguments) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1076 (1 nodes)
+    cell-1 : κ 441 ≡ κ 441
+    cell-1 = refl
 
-module arguments-arguments-τ619 where
 
-  -- ctx-619: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1224 (1×)
-  ctx-619-τ619 : τ 619 ≡ τ 619
-  ctx-619-τ619 = refl
 
+-- κ=442: 2 nodes, 1 τ-classes, 2 σ-classes
+module free_monoid-snoc-at-state-Call-0 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=570: 2 nodes, 2 σ-classes
+  module None where
 
-module let-k-Assign-τ621 where
+    -- σ=1046 (1 nodes)
+    cell-0 : κ 442 ≡ κ 442
+    cell-0 = refl
 
-  -- ctx-621: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1233 (1×)
-  ctx-621-τ621 : τ 621 ≡ τ 621
-  ctx-621-τ621 = refl
+    -- σ=1077 (1 nodes)
+    cell-1 : κ 442 ≡ κ 442
+    cell-1 = refl
 
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-tuple-31 where
+-- κ=443: 2 nodes, 1 τ-classes, 2 σ-classes
+module effect-seq-Expr-9 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=1261 (1×)
-  tuple-τ626 : τ 626 ≡ τ 626
-  tuple-τ626 = refl
+  -- τ=571: 2 nodes, 2 σ-classes
+  module τ571 where
 
+    -- σ=1047 (1 nodes)
+    cell-0 : κ 443 ≡ κ 443
+    cell-0 = refl
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1078 (1 nodes)
+    cell-1 : κ 443 ≡ κ 443
+    cell-1 = refl
 
-module index-Index-τ627 where
 
-  -- ctx-627: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1262 (1×)
-  ctx-627-τ627 : τ 627 ≡ τ 627
-  ctx-627-τ627 = refl
 
+-- κ=444: 2 nodes, 1 τ-classes, 2 σ-classes
+module equalizer-If-1 where
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=572: 2 nodes, 2 σ-classes
+  module τ572 where
 
-module subscript-Subscript-τ628 where
+    -- σ=1061 (1 nodes)
+    cell-0 : κ 444 ≡ κ 444
+    cell-0 = refl
 
-  -- ctx-628: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1263 (1×)
-  ctx-628-τ628 : τ 628 ≡ τ 628
-  ctx-628-τ628 = refl
+    -- σ=1079 (1 nodes)
+    cell-1 : κ 444 ≡ κ 444
+    cell-1 = refl
 
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-τ629 where
+-- κ=445: 2 nodes, 1 τ-classes, 2 σ-classes
+module equalizer-If-2 where
 
-  -- ctx-629: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1267 (1×)
-  ctx-629-τ629 : τ 629 ≡ τ 629
-  ctx-629-τ629 = refl
+  -- τ=573: 2 nodes, 2 σ-classes
+  module τ573 where
 
+    -- σ=1063 (1 nodes)
+    cell-0 : κ 445 ≡ κ 445
+    cell-0 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1081 (1 nodes)
+    cell-1 : κ 445 ≡ κ 445
+    cell-1 = refl
 
-module annassign-AnnAssign-τ633 where
 
-  -- ctx-633: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1273 (1×)
-  ctx-633-τ633 : τ 633 ≡ τ 633
-  ctx-633-τ633 = refl
 
+-- κ=446: 2 nodes, 1 τ-classes, 2 σ-classes
+module fold-For-1 where
 
--- ── meet (BoolOp) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=574: 2 nodes, 2 σ-classes
+  module τ574 where
 
-module meet-BoolOp-τ635 where
+    -- σ=1064 (1 nodes)
+    cell-0 : κ 446 ≡ κ 446
+    cell-0 = refl
 
-  -- ctx-635: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1277 (1×)
-  ctx-635-τ635 : τ 635 ≡ τ 635
-  ctx-635-τ635 = refl
+    -- σ=1082 (1 nodes)
+    cell-1 : κ 446 ≡ κ 446
+    cell-1 = refl
 
 
--- ── equalizer (Compare) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-Compare-τ636 where
+-- κ=450: 2 nodes, 2 τ-classes, 2 σ-classes
+module annassign-AnnAssign-11 where
 
-  -- ctx-636: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1284 (1×)
-  ctx-636-τ636 : τ 636 ≡ τ 636
-  ctx-636-τ636 = refl
+  -- τ=579: 1 nodes, 1 σ-classes
+  module τ579 where
 
+    -- σ=1108 (1 nodes)
+    cell-0 : κ 450 ≡ κ 450
+    cell-0 = refl
 
--- ── lazy_fold (GeneratorExp) ───────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module lazy_fold-GeneratorExp-τ637 where
+  -- τ=789: 1 nodes, 1 σ-classes
+  module τ789 where
 
-  -- ctx-637: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1287 (1×)
-  ctx-637-τ637 : τ 637 ≡ τ 637
-  ctx-637-τ637 = refl
+    -- σ=1657 (1 nodes)
+    cell-0 : κ 450 ≡ κ 450
+    cell-0 = refl
 
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-τ638 where
+-- κ=451: 2 nodes, 1 τ-classes, 2 σ-classes
+module projection-at-object-Attribute where
 
-  -- ctx-638: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1288 (1×)
-  ctx-638-τ638 : τ 638 ≡ τ 638
-  ctx-638-τ638 = refl
+  -- τ=34: 2 nodes, 2 σ-classes
+  module Self-_parent where
 
+    -- σ=1110 (1 nodes)
+    cell-0 : κ 451 ≡ κ 451
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1131 (1 nodes)
+    cell-1 : κ 451 ≡ κ 451
+    cell-1 = refl
 
-module let-k-Assign-τ639 where
 
-  -- ctx-639: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1289 (1×)
-  ctx-639-τ639 : τ 639 ≡ τ 639
-  ctx-639-τ639 = refl
 
+-- κ=452: 2 nodes, 1 τ-classes, 2 σ-classes
+module projection-compute-at-object-Call where
 
--- ── free_monoid.map (ListComp) ─────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=581: 2 nodes, 2 σ-classes
+  module Iter where
 
-module free_monoid-map-ListComp-τ640 where
+    -- σ=1111 (1 nodes)
+    cell-0 : κ 452 ≡ κ 452
+    cell-0 = refl
 
-  -- ctx-640: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1291 (1×)
-  ctx-640-τ640 : τ 640 ≡ τ 640
-  ctx-640-τ640 = refl
+    -- σ=1132 (1 nodes)
+    cell-1 : κ 452 ≡ κ 452
+    cell-1 = refl
 
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ641 where
+-- κ=453: 2 nodes, 1 τ-classes, 2 σ-classes
+module free_monoid-Call-2 where
 
-  -- ctx-641: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1292 (1×)
-  ctx-641-τ641 : τ 641 ≡ τ 641
-  ctx-641-τ641 = refl
+  -- τ=582: 2 nodes, 2 σ-classes
+  module τ582 where
 
+    -- σ=1112 (1 nodes)
+    cell-0 : κ 453 ≡ κ 453
+    cell-0 = refl
 
--- ── free_monoid.snoc@? (Call) ──────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1133 (1 nodes)
+    cell-1 : κ 453 ≡ κ 453
+    cell-1 = refl
 
-module free_monoid-snoc-at-x3f-Call-τ189 where
 
-  -- ctx-189: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1294 (1×)
-  ctx-189-τ189 : τ 189 ≡ τ 189
-  ctx-189-τ189 = refl
 
+-- κ=463: 2 nodes, 1 τ-classes, 2 σ-classes
+module annassign-AnnAssign-12 where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=594: 2 nodes, 2 σ-classes
+  module τ594 where
 
-module effect-seq-Expr-τ190-1 where
+    -- σ=1148 (1 nodes)
+    cell-0 : κ 463 ≡ κ 463
+    cell-0 = refl
 
-  -- ctx-190: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1295 (1×)
-  ctx-190-τ190 : τ 190 ≡ τ 190
-  ctx-190-τ190 = refl
+    -- σ=1305 (1 nodes)
+    cell-1 : κ 463 ≡ κ 463
+    cell-1 = refl
 
 
--- ── monoid.op (BinOp) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-op-BinOp-τ642 where
+-- κ=465: 2 nodes, 1 τ-classes, 2 σ-classes
+module equalizer-If-3 where
 
-  -- ctx-642: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1297 (1×)
-  ctx-642-τ642 : τ 642 ≡ τ 642
-  ctx-642-τ642 = refl
+  -- τ=599: 2 nodes, 2 σ-classes
+  module τ599 where
 
+    -- σ=1158 (1 nodes)
+    cell-0 : κ 465 ≡ κ 465
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1310 (1 nodes)
+    cell-1 : κ 465 ≡ κ 465
+    cell-1 = refl
 
-module let-k-Assign-τ643 where
 
-  -- ctx-643: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1298 (1×)
-  ctx-643-τ643 : τ 643 ≡ τ 643
-  ctx-643-τ643 = refl
 
+-- κ=466: 2 nodes, 1 τ-classes, 2 σ-classes
+module equalizer-If-4 where
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=600: 2 nodes, 2 σ-classes
+  module τ600 where
 
-module free_monoid-fold-JoinedStr-str-11 where
+    -- σ=1161 (1 nodes)
+    cell-0 : κ 466 ≡ κ 466
+    cell-0 = refl
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=1302 (1×)
-  str-τ644 : τ 644 ≡ τ 644
-  str-τ644 = refl
+    -- σ=1311 (1 nodes)
+    cell-1 : κ 466 ≡ κ 466
+    cell-1 = refl
 
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ645 where
+-- κ=467: 2 nodes, 1 τ-classes, 2 σ-classes
+module fold-For-2 where
 
-  -- ctx-645: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1303 (1×)
-  ctx-645-τ645 : τ 645 ≡ τ 645
-  ctx-645-τ645 = refl
+  -- τ=601: 2 nodes, 2 σ-classes
+  module τ601 where
 
+    -- σ=1162 (1 nodes)
+    cell-0 : κ 467 ≡ κ 467
+    cell-0 = refl
 
--- ── free_monoid.map (ListComp) ─────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1312 (1 nodes)
+    cell-1 : κ 467 ≡ κ 467
+    cell-1 = refl
 
-module free_monoid-map-ListComp-τ649 where
 
-  -- ctx-649: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1329 (1×)
-  ctx-649-τ649 : τ 649 ≡ τ 649
-  ctx-649-τ649 = refl
 
+-- κ=471: 2 nodes, 1 τ-classes, 2 σ-classes
+module equalizer-If-5 where
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=606: 2 nodes, 2 σ-classes
+  module τ606 where
 
-module apply-Call-τ650 where
+    -- σ=1195 (1 nodes)
+    cell-0 : κ 471 ≡ κ 471
+    cell-0 = refl
 
-  -- ctx-650: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1330 (1×)
-  ctx-650-τ650 : τ 650 ≡ τ 650
-  ctx-650-τ650 = refl
+    -- σ=1322 (1 nodes)
+    cell-1 : κ 471 ≡ κ 471
+    cell-1 = refl
 
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-τ651 where
+-- κ=472: 2 nodes, 1 τ-classes, 2 σ-classes
+module fold-For-3 where
 
-  -- ctx-651: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1331 (1×)
-  ctx-651-τ651 : τ 651 ≡ τ 651
-  ctx-651-τ651 = refl
+  -- τ=607: 2 nodes, 2 σ-classes
+  module τ607 where
 
+    -- σ=1196 (1 nodes)
+    cell-0 : κ 472 ≡ κ 472
+    cell-0 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1323 (1 nodes)
+    cell-1 : κ 472 ≡ κ 472
+    cell-1 = refl
 
-module equalizer-If-τ655 where
 
-  -- ctx-655: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1341 (1×)
-  ctx-655-τ655 : τ 655 ≡ τ 655
-  ctx-655-τ655 = refl
 
+-- κ=473: 2 nodes, 2 τ-classes, 2 σ-classes
+module free_monoid-snoc-at-state-Call-1 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=609: 1 nodes, 1 σ-classes
+  module None-0 where
 
-module let-k-Assign-τ521-1 where
+    -- σ=1198 (1 nodes)
+    cell-0 : κ 473 ≡ κ 473
+    cell-0 = refl
 
-  -- ctx-521: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1345 (1×)
-  ctx-521-τ521 : τ 521 ≡ τ 521
-  ctx-521-τ521 = refl
 
+  -- τ=647: 1 nodes, 1 σ-classes
+  module None-1 where
 
--- ── monoid.op@? (Call) ─────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1325 (1 nodes)
+    cell-0 : κ 473 ≡ κ 473
+    cell-0 = refl
 
-module monoid-op-at-x3f-Call-τ656 where
 
-  -- ctx-656: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1348 (1×)
-  ctx-656-τ656 : τ 656 ≡ τ 656
-  ctx-656-τ656 = refl
 
+-- κ=474: 2 nodes, 2 τ-classes, 2 σ-classes
+module effect-seq-Expr-10 where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=610: 1 nodes, 1 σ-classes
+  module τ610 where
 
-module effect-seq-Expr-τ657 where
+    -- σ=1199 (1 nodes)
+    cell-0 : κ 474 ≡ κ 474
+    cell-0 = refl
 
-  -- ctx-657: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1349 (1×)
-  ctx-657-τ657 : τ 657 ≡ τ 657
-  ctx-657-τ657 = refl
 
+  -- τ=648: 1 nodes, 1 σ-classes
+  module τ648 where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1326 (1 nodes)
+    cell-0 : κ 474 ≡ κ 474
+    cell-0 = refl
 
-module effect-seq-Expr-τ190-2 where
 
-  -- ctx-190: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1353 (1×)
-  ctx-190-τ190 : τ 190 ≡ τ 190
-  ctx-190-τ190 = refl
 
+-- κ=511: 2 nodes, 1 τ-classes, 2 σ-classes
+module powerset-Call-0 where
 
--- ── coproduct.elim (If) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=520: 2 nodes, 2 σ-classes
+  module τ520 where
 
-module coproduct-elim-If-τ662 where
+    -- σ=1344 (1 nodes)
+    cell-0 : κ 511 ≡ κ 511
+    cell-0 = refl
 
-  -- ctx-662: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1359 (1×)
-  ctx-662-τ662 : τ 662 ≡ τ 662
-  ctx-662-τ662 = refl
+    -- σ=1889 (1 nodes)
+    cell-1 : κ 511 ≡ κ 511
+    cell-1 = refl
 
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-τ663 where
+-- κ=531: 2 nodes, 2 τ-classes, 2 σ-classes
+module product-Tuple-8 where
 
-  -- ctx-663: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1368 (1×)
-  ctx-663-τ663 : τ 663 ≡ τ 663
-  ctx-663-τ663 = refl
+  -- τ=677: 1 nodes, 1 σ-classes
+  module tuple-0 where
 
+    -- σ=1399 (1 nodes)
+    cell-0 : κ 531 ≡ κ 531
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ664 where
+  -- τ=679: 1 nodes, 1 σ-classes
+  module tuple-1 where
 
-  -- ctx-664: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1370 (1×)
-  ctx-664-τ664 : τ 664 ≡ τ 664
-  ctx-664-τ664 = refl
+    -- σ=1401 (1 nodes)
+    cell-0 : κ 531 ≡ κ 531
+    cell-0 = refl
 
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-τ665 where
+-- κ=540: 4 nodes, 1 τ-classes, 2 σ-classes
+module eval-Call where
 
-  -- ctx-665: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1374 (1×)
-  ctx-665-τ665 : τ 665 ≡ τ 665
-  ctx-665-τ665 = refl
+  -- τ=689: 4 nodes, 2 σ-classes
+  module T where
 
+    -- σ=1529 (3 nodes)
+    cell-0 : κ 540 ≡ κ 540
+    cell-0 = refl
 
--- ── coproduct.elim (If) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1416 (1 nodes)
+    cell-1 : κ 540 ≡ κ 540
+    cell-1 = refl
 
-module coproduct-elim-If-τ666 where
 
-  -- ctx-666: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1375 (1×)
-  ctx-666-τ666 : τ 666 ≡ τ 666
-  ctx-666-τ666 = refl
 
+-- κ=541: 4 nodes, 1 τ-classes, 2 σ-classes
+module annassign-AnnAssign-13 where
 
--- ── exponential.literal (Dict) ─────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=690: 4 nodes, 2 σ-classes
+  module τ690 where
 
-module exponential-literal-Dict-dict-2 where
+    -- σ=1530 (3 nodes)
+    cell-0 : κ 541 ≡ κ 541
+    cell-0 = refl
 
-  -- dict: 1 nodes, 1 forms
-  -- [dict]
-  --   σ=1387 (1×)
-  dict-τ668 : τ 668 ≡ τ 668
-  dict-τ668 = refl
+    -- σ=1417 (1 nodes)
+    cell-1 : κ 541 ≡ κ 541
+    cell-1 = refl
 
 
--- ── free_monoid.snoc@state (Call) ──────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-state-Call-None-7 where
+-- κ=548: 2 nodes, 2 τ-classes, 2 σ-classes
+module subscript-Subscript-17 where
 
-  -- None: 1 nodes, 1 forms
-  -- [None]
-  --   σ=1388 (1×)
-  None-τ669 : τ 669 ≡ τ 669
-  None-τ669 = refl
+  -- τ=698: 1 nodes, 1 σ-classes
+  module τ698 where
 
+    -- σ=1430 (1 nodes)
+    cell-0 : κ 548 ≡ κ 548
+    cell-0 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-τ670 where
+  -- τ=710: 1 nodes, 1 σ-classes
+  module τ710 where
 
-  -- ctx-670: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1389 (1×)
-  ctx-670-τ670 : τ 670 ≡ τ 670
-  ctx-670-τ670 = refl
+    -- σ=1454 (1 nodes)
+    cell-0 : κ 548 ≡ κ 548
+    cell-0 = refl
 
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-tuple-32 where
+-- κ=559: 3 nodes, 1 τ-classes, 2 σ-classes
+module terminal-map-Return-4 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=1393 (1×)
-  tuple-τ671 : τ 671 ≡ τ 671
-  tuple-τ671 = refl
+  -- τ=709: 3 nodes, 2 σ-classes
+  module τ709 where
 
+    -- σ=1453 (2 nodes)
+    cell-0 : κ 559 ≡ κ 559
+    cell-0 = refl
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1717 (1 nodes)
+    cell-1 : κ 559 ≡ κ 559
+    cell-1 = refl
 
-module index-Index-τ672 where
 
-  -- ctx-672: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1394 (1×)
-  ctx-672-τ672 : τ 672 ≡ τ 672
-  ctx-672-τ672 = refl
 
+-- κ=570: 2 nodes, 2 τ-classes, 2 σ-classes
+module annassign-AnnAssign-14 where
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=729: 1 nodes, 1 σ-classes
+  module τ729 where
 
-module subscript-Subscript-τ673 where
+    -- σ=1493 (1 nodes)
+    cell-0 : κ 570 ≡ κ 570
+    cell-0 = refl
 
-  -- ctx-673: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1395 (1×)
-  ctx-673-τ673 : τ 673 ≡ τ 673
-  ctx-673-τ673 = refl
 
+  -- τ=808: 1 nodes, 1 σ-classes
+  module τ808 where
 
--- ── monoid.op@? (Attribute) ────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1702 (1 nodes)
+    cell-0 : κ 570 ≡ κ 570
+    cell-0 = refl
 
-module monoid-op-at-x3f-Attribute-τ674 where
 
-  -- ctx-674: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1396 (1×)
-  ctx-674-τ674 : τ 674 ≡ τ 674
-  ctx-674-τ674 = refl
 
+-- κ=571: 2 nodes, 1 τ-classes, 2 σ-classes
+module index-Index-11 where
 
--- ── monoid.op@? (Call) ─────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=730: 2 nodes, 2 σ-classes
+  module τ730 where
 
-module monoid-op-at-x3f-Call-τ675 where
+    -- σ=1497 (1 nodes)
+    cell-0 : κ 571 ≡ κ 571
+    cell-0 = refl
 
-  -- ctx-675: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1397 (1×)
-  ctx-675-τ675 : τ 675 ≡ τ 675
-  ctx-675-τ675 = refl
+    -- σ=1501 (1 nodes)
+    cell-1 : κ 571 ≡ κ 571
+    cell-1 = refl
 
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-τ676 where
+-- κ=576: 2 nodes, 1 τ-classes, 2 σ-classes
+module comprehension-comprehension-2 where
 
-  -- ctx-676: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1398 (1×)
-  ctx-676-τ676 : τ 676 ≡ τ 676
-  ctx-676-τ676 = refl
+  -- τ=735: 2 nodes, 2 σ-classes
+  module τ735 where
 
+    -- σ=1513 (1 nodes)
+    cell-0 : κ 576 ≡ κ 576
+    cell-0 = refl
 
--- ── terminal.map (Return) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1741 (1 nodes)
+    cell-1 : κ 576 ≡ κ 576
+    cell-1 = refl
 
-module terminal-map-Return-τ678 where
 
-  -- ctx-678: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1400 (1×)
-  ctx-678-τ678 : τ 678 ≡ τ 678
-  ctx-678-τ678 = refl
 
+-- κ=589: 2 nodes, 1 τ-classes, 2 σ-classes
+module annassign-AnnAssign-15 where
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=751: 2 nodes, 2 σ-classes
+  module τ751 where
 
-module index-Index-τ680 where
+    -- σ=1560 (1 nodes)
+    cell-0 : κ 589 ≡ κ 589
+    cell-0 = refl
 
-  -- ctx-680: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1402 (1×)
-  ctx-680-τ680 : τ 680 ≡ τ 680
-  ctx-680-τ680 = refl
+    -- σ=1574 (1 nodes)
+    cell-1 : κ 589 ≡ κ 589
+    cell-1 = refl
 
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-τ681 where
+-- κ=654: 2 nodes, 1 τ-classes, 2 σ-classes
+module apply-Call-16 where
 
-  -- ctx-681: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1403 (1×)
-  ctx-681-τ681 : τ 681 ≡ τ 681
-  ctx-681-τ681 = refl
+  -- τ=827: 2 nodes, 2 σ-classes
+  module τ827 where
 
+    -- σ=1748 (1 nodes)
+    cell-0 : κ 654 ≡ κ 654
+    cell-0 = refl
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=2063 (1 nodes)
+    cell-1 : κ 654 ≡ κ 654
+    cell-1 = refl
 
-module exponential-intro-FunctionDef-τ682 where
 
-  -- ctx-682: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1404 (1×)
-  ctx-682-τ682 : τ 682 ≡ τ 682
-  ctx-682-τ682 = refl
 
+-- κ=655: 2 nodes, 1 τ-classes, 2 σ-classes
+module let-k-Assign-18 where
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=828: 2 nodes, 2 σ-classes
+  module τ828 where
 
-module exponential-intro-FunctionDef-τ683 where
+    -- σ=1749 (1 nodes)
+    cell-0 : κ 655 ≡ κ 655
+    cell-0 = refl
 
-  -- ctx-683: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1407 (1×)
-  ctx-683-τ683 : τ 683 ≡ τ 683
-  ctx-683-τ683 = refl
+    -- σ=2064 (1 nodes)
+    cell-1 : κ 655 ≡ κ 655
+    cell-1 = refl
 
 
--- ── arg (arg) ──────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module arg-arg-τ684 where
+-- κ=671: 2 nodes, 2 τ-classes, 2 σ-classes
+module free_monoid-fold-JoinedStr-4 where
 
-  -- ctx-684: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1408 (1×)
-  ctx-684-τ684 : τ 684 ≡ τ 684
-  ctx-684-τ684 = refl
+  -- τ=848: 1 nodes, 1 σ-classes
+  module str-0 where
 
+    -- σ=1815 (1 nodes)
+    cell-0 : κ 671 ≡ κ 671
+    cell-0 = refl
 
--- ── arguments (arguments) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module arguments-arguments-τ685 where
+  -- τ=931: 1 nodes, 1 σ-classes
+  module str-1 where
 
-  -- ctx-685: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1410 (1×)
-  ctx-685-τ685 : τ 685 ≡ τ 685
-  ctx-685-τ685 = refl
+    -- σ=2016 (1 nodes)
+    cell-0 : κ 671 ≡ κ 671
+    cell-0 = refl
 
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-τ687 where
+-- κ=680: 2 nodes, 1 τ-classes, 2 σ-classes
+module coerce-FormattedValue-7 where
 
-  -- ctx-687: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1414 (1×)
-  ctx-687-τ687 : τ 687 ≡ τ 687
-  ctx-687-τ687 = refl
+  -- τ=857: 2 nodes, 2 σ-classes
+  module τ857 where
 
+    -- σ=1847 (1 nodes)
+    cell-0 : κ 680 ≡ κ 680
+    cell-0 = refl
 
--- ── terminal.map (Return) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1856 (1 nodes)
+    cell-1 : κ 680 ≡ κ 680
+    cell-1 = refl
 
-module terminal-map-Return-τ691 where
 
-  -- ctx-691: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1420 (1×)
-  ctx-691-τ691 : τ 691 ≡ τ 691
-  ctx-691-τ691 = refl
 
+-- κ=681: 2 nodes, 1 τ-classes, 2 σ-classes
+module bimap-BinOp-2 where
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=858: 2 nodes, 2 σ-classes
+  module τ858 where
 
-module exponential-intro-FunctionDef-τ692 where
+    -- σ=1849 (1 nodes)
+    cell-0 : κ 681 ≡ κ 681
+    cell-0 = refl
 
-  -- ctx-692: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1421 (1×)
-  ctx-692-τ692 : τ 692 ≡ τ 692
-  ctx-692-τ692 = refl
+    -- σ=1857 (1 nodes)
+    cell-1 : κ 681 ≡ κ 681
+    cell-1 = refl
 
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-τ699 where
+-- κ=682: 2 nodes, 1 τ-classes, 2 σ-classes
+module bimap-BinOp-3 where
 
-  -- ctx-699: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1432 (1×)
-  ctx-699-τ699 : τ 699 ≡ τ 699
-  ctx-699-τ699 = refl
+  -- τ=859: 2 nodes, 2 σ-classes
+  module τ859 where
 
+    -- σ=1850 (1 nodes)
+    cell-0 : κ 682 ≡ κ 682
+    cell-0 = refl
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1858 (1 nodes)
+    cell-1 : κ 682 ≡ κ 682
+    cell-1 = refl
 
-module product-Tuple-tuple-33 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=1444 (1×)
-  tuple-τ702 : τ 702 ≡ τ 702
-  tuple-τ702 = refl
 
+-- κ=683: 2 nodes, 1 τ-classes, 2 σ-classes
+module coerce-FormattedValue-8 where
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=860: 2 nodes, 2 σ-classes
+  module τ860 where
 
-module index-Index-τ703 where
+    -- σ=1851 (1 nodes)
+    cell-0 : κ 683 ≡ κ 683
+    cell-0 = refl
 
-  -- ctx-703: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1445 (1×)
-  ctx-703-τ703 : τ 703 ≡ τ 703
-  ctx-703-τ703 = refl
+    -- σ=1859 (1 nodes)
+    cell-1 : κ 683 ≡ κ 683
+    cell-1 = refl
 
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-τ704 where
+-- κ=684: 2 nodes, 1 τ-classes, 2 σ-classes
+module free_monoid-fold-JoinedStr-5 where
 
-  -- ctx-704: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1446 (1×)
-  ctx-704-τ704 : τ 704 ≡ τ 704
-  ctx-704-τ704 = refl
+  -- τ=861: 2 nodes, 2 σ-classes
+  module str where
 
+    -- σ=1852 (1 nodes)
+    cell-0 : κ 684 ≡ κ 684
+    cell-0 = refl
 
--- ── free_monoid.op@? (Attribute) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=1860 (1 nodes)
+    cell-1 : κ 684 ≡ κ 684
+    cell-1 = refl
 
-module free_monoid-op-at-x3f-Attribute-τ705 where
 
-  -- ctx-705: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1447 (1×)
-  ctx-705-τ705 : τ 705 ≡ τ 705
-  ctx-705-τ705 = refl
 
+-- κ=3: 1 nodes, 1 τ-classes, 1 σ-classes
+module pullback-import-ImportFrom-0 where
 
--- ── free_monoid.snoc@? (Call) ──────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=3: 1 nodes, 1 σ-classes
+  module τ3 where
 
-module free_monoid-snoc-at-x3f-Call-τ706 where
+    -- σ=3 (1 nodes)
+    cell-0 : κ 3 ≡ κ 3
+    cell-0 = refl
 
-  -- ctx-706: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1449 (1×)
-  ctx-706-τ706 : τ 706 ≡ τ 706
-  ctx-706-τ706 = refl
 
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=4: 1 nodes, 1 τ-classes, 1 σ-classes
+module pullback-import-ImportFrom-1 where
 
-module effect-seq-Expr-τ707 where
+  -- τ=4: 1 nodes, 1 σ-classes
+  module τ4 where
 
-  -- ctx-707: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1450 (1×)
-  ctx-707-τ707 : τ 707 ≡ τ 707
-  ctx-707-τ707 = refl
+    -- σ=6 (1 nodes)
+    cell-0 : κ 4 ≡ κ 4
+    cell-0 = refl
 
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-τ708 where
+-- κ=5: 1 nodes, 1 τ-classes, 1 σ-classes
+module pullback-import-ImportFrom-2 where
 
-  -- ctx-708: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1451 (1×)
-  ctx-708-τ708 : τ 708 ≡ τ 708
-  ctx-708-τ708 = refl
+  -- τ=5: 1 nodes, 1 σ-classes
+  module τ5 where
 
+    -- σ=10 (1 nodes)
+    cell-0 : κ 5 ≡ κ 5
+    cell-0 = refl
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-τ711 where
 
-  -- ctx-711: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1455 (1×)
-  ctx-711-τ711 : τ 711 ≡ τ 711
-  ctx-711-τ711 = refl
+-- κ=6: 365 nodes, 1 τ-classes, 1 σ-classes
+module store-Store where
 
+  -- τ=6: 365 nodes, 1 σ-classes
+  module τ6 where
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=13 (365 nodes)
+    cell-0 : κ 6 ≡ κ 6
+    cell-0 = refl
 
-module annassign-AnnAssign-τ715 where
 
-  -- ctx-715: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1467 (1×)
-  ctx-715-τ715 : τ 715 ≡ τ 715
-  ctx-715-τ715 = refl
 
+-- κ=8: 2366 nodes, 1 τ-classes, 1 σ-classes
+module load-Load where
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=8: 2366 nodes, 1 σ-classes
+  module τ8 where
 
-module product-Tuple-tuple-34 where
+    -- σ=17 (2366 nodes)
+    cell-0 : κ 8 ≡ κ 8
+    cell-0 = refl
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=1472 (1×)
-  tuple-τ716 : τ 716 ≡ τ 716
-  tuple-τ716 = refl
 
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=9: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-9 where
 
-module index-Index-τ717 where
+  -- τ=9: 1 nodes, 1 σ-classes
+  module tuple where
 
-  -- ctx-717: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1473 (1×)
-  ctx-717-τ717 : τ 717 ≡ τ 717
-  ctx-717-τ717 = refl
+    -- σ=18 (1 nodes)
+    cell-0 : κ 9 ≡ κ 9
+    cell-0 = refl
 
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-τ718 where
+-- κ=10: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-19 where
 
-  -- ctx-718: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1474 (1×)
-  ctx-718-τ718 : τ 718 ≡ τ 718
-  ctx-718-τ718 = refl
+  -- τ=10: 1 nodes, 1 σ-classes
+  module τ10 where
 
+    -- σ=19 (1 nodes)
+    cell-0 : κ 10 ≡ κ 10
+    cell-0 = refl
 
--- ── free_monoid.op@? (Attribute) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-op-at-x3f-Attribute-τ719 where
 
-  -- ctx-719: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1475 (1×)
-  ctx-719-τ719 : τ 719 ≡ τ 719
-  ctx-719-τ719 = refl
+-- κ=18: 15 nodes, 1 τ-classes, 1 σ-classes
+module exponential-literal-Dict-1 where
 
+  -- τ=20: 15 nodes, 1 σ-classes
+  module dict where
 
--- ── free_monoid.snoc@? (Call) ──────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=29 (15 nodes)
+    cell-0 : κ 18 ≡ κ 18
+    cell-0 = refl
 
-module free_monoid-snoc-at-x3f-Call-τ720 where
 
-  -- ctx-720: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1476 (1×)
-  ctx-720-τ720 : τ 720 ≡ τ 720
-  ctx-720-τ720 = refl
 
+-- κ=20: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-0 where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=30: 1 nodes, 1 σ-classes
+  module τ30 where
 
-module effect-seq-Expr-τ721 where
+    -- σ=38 (1 nodes)
+    cell-0 : κ 20 ≡ κ 20
+    cell-0 = refl
 
-  -- ctx-721: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1477 (1×)
-  ctx-721-τ721 : τ 721 ≡ τ 721
-  ctx-721-τ721 = refl
 
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=23: 9 nodes, 1 τ-classes, 1 σ-classes
+module notin-NotIn where
 
-module fold-For-τ722 where
+  -- τ=33: 9 nodes, 1 σ-classes
+  module τ33 where
 
-  -- ctx-722: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1478 (1×)
-  ctx-722-τ722 : τ 722 ≡ τ 722
-  ctx-722-τ722 = refl
+    -- σ=42 (9 nodes)
+    cell-0 : κ 23 ≡ κ 23
+    cell-0 = refl
 
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-τ724 where
+-- κ=29: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-20 where
 
-  -- ctx-724: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1480 (1×)
-  ctx-724-τ724 : τ 724 ≡ τ 724
-  ctx-724-τ724 = refl
+  -- τ=40: 1 nodes, 1 σ-classes
+  module τ40 where
 
+    -- σ=51 (1 nodes)
+    cell-0 : κ 29 ≡ κ 29
+    cell-0 = refl
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module subscript-Subscript-τ731 where
 
-  -- ctx-731: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1498 (1×)
-  ctx-731-τ731 : τ 731 ≡ τ 731
-  ctx-731-τ731 = refl
+-- κ=30: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-6 where
 
+  -- τ=41: 1 nodes, 1 σ-classes
+  module τ41 where
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=52 (1 nodes)
+    cell-0 : κ 30 ≡ κ 30
+    cell-0 = refl
 
-module subscript-Subscript-τ732 where
 
-  -- ctx-732: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1502 (1×)
-  ctx-732-τ732 : τ 732 ≡ τ 732
-  ctx-732-τ732 = refl
 
+-- κ=31: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-1 where
 
--- ── monoid.accum (AugAssign) ───────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=43: 1 nodes, 1 σ-classes
+  module τ43 where
 
-module monoid-accum-AugAssign-τ733 where
+    -- σ=53 (1 nodes)
+    cell-0 : κ 31 ≡ κ 31
+    cell-0 = refl
 
-  -- ctx-733: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1503 (1×)
-  ctx-733-τ733 : τ 733 ≡ τ 733
-  ctx-733-τ733 = refl
 
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=34: 14 nodes, 1 τ-classes, 1 σ-classes
+module noteq-NotEq where
 
-module fold-For-τ734 where
+  -- τ=48: 14 nodes, 1 σ-classes
+  module τ48 where
 
-  -- ctx-734: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1504 (1×)
-  ctx-734-τ734 : τ 734 ≡ τ 734
-  ctx-734-τ734 = refl
+    -- σ=59 (14 nodes)
+    cell-0 : κ 34 ≡ κ 34
+    cell-0 = refl
 
 
--- ── exponential.map (DictComp) ─────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-map-DictComp-τ736 where
+-- κ=37: 1 nodes, 1 τ-classes, 1 σ-classes
+module fixpoint-While-0 where
 
-  -- ctx-736: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1514 (1×)
-  ctx-736-τ736 : τ 736 ≡ τ 736
-  ctx-736-τ736 = refl
+  -- τ=51: 1 nodes, 1 σ-classes
+  module τ51 where
 
+    -- σ=62 (1 nodes)
+    cell-0 : κ 37 ≡ κ 37
+    cell-0 = refl
 
--- ── terminal.map (Return) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-τ737 where
 
-  -- ctx-737: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1515 (1×)
-  ctx-737-τ737 : τ 737 ≡ τ 737
-  ctx-737-τ737 = refl
+-- κ=38: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-unpack-Tuple-1 where
 
+  -- τ=52: 1 nodes, 1 σ-classes
+  module tuple where
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=66 (1 nodes)
+    cell-0 : κ 38 ≡ κ 38
+    cell-0 = refl
 
-module exponential-intro-FunctionDef-τ741 where
 
-  -- ctx-741: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1520 (1×)
-  ctx-741-τ741 : τ 741 ≡ τ 741
-  ctx-741-τ741 = refl
 
+-- κ=39: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-10 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=53: 1 nodes, 1 σ-classes
+  module tuple where
 
-module let-k-Assign-τ742 where
+    -- σ=67 (1 nodes)
+    cell-0 : κ 39 ≡ κ 39
+    cell-0 = refl
 
-  -- ctx-742: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1535 (1×)
-  ctx-742-τ742 : τ 742 ≡ τ 742
-  ctx-742-τ742 = refl
 
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=40: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-21 where
 
-module subscript-Subscript-τ743 where
+  -- τ=54: 1 nodes, 1 σ-classes
+  module τ54 where
 
-  -- ctx-743: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1540 (1×)
-  ctx-743-τ743 : τ 743 ≡ τ 743
-  ctx-743-τ743 = refl
+    -- σ=68 (1 nodes)
+    cell-0 : κ 40 ≡ κ 40
+    cell-0 = refl
 
 
--- ── morphism@? (Attribute) ─────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module morphism-at-x3f-Attribute-τ744 where
+-- κ=41: 1 nodes, 1 τ-classes, 1 σ-classes
+module fixpoint-While-1 where
 
-  -- ctx-744: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1541 (1×)
-  ctx-744-τ744 : τ 744 ≡ τ 744
-  ctx-744-τ744 = refl
+  -- τ=55: 1 nodes, 1 σ-classes
+  module τ55 where
 
+    -- σ=69 (1 nodes)
+    cell-0 : κ 41 ≡ κ 41
+    cell-0 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-τ745 where
 
-  -- ctx-745: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1548 (1×)
-  ctx-745-τ745 : τ 745 ≡ τ 745
-  ctx-745-τ745 = refl
+-- κ=43: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-2 where
 
+  -- τ=57: 1 nodes, 1 σ-classes
+  module τ57 where
 
--- ── monoid.op@? (Call) ─────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=71 (1 nodes)
+    cell-0 : κ 43 ≡ κ 43
+    cell-0 = refl
 
-module monoid-op-at-x3f-Call-τ746 where
 
-  -- ctx-746: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1549 (1×)
-  ctx-746-τ746 : τ 746 ≡ τ 746
-  ctx-746-τ746 = refl
 
+-- κ=47: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-11 where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=63: 1 nodes, 1 σ-classes
+  module tuple where
 
-module effect-seq-Expr-τ747 where
+    -- σ=85 (1 nodes)
+    cell-0 : κ 47 ≡ κ 47
+    cell-0 = refl
 
-  -- ctx-747: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1550 (1×)
-  ctx-747-τ747 : τ 747 ≡ τ 747
-  ctx-747-τ747 = refl
 
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=48: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-22 where
 
-module fold-For-τ748 where
+  -- τ=64: 1 nodes, 1 σ-classes
+  module τ64 where
 
-  -- ctx-748: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1551 (1×)
-  ctx-748-τ748 : τ 748 ≡ τ 748
-  ctx-748-τ748 = refl
+    -- σ=86 (1 nodes)
+    cell-0 : κ 48 ≡ κ 48
+    cell-0 = refl
 
 
--- ── terminal.map (Return) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module terminal-map-Return-τ749 where
+-- κ=49: 6 nodes, 1 τ-classes, 1 σ-classes
+module eq-Eq where
 
-  -- ctx-749: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1553 (1×)
-  ctx-749-τ749 : τ 749 ≡ τ 749
-  ctx-749-τ749 = refl
+  -- τ=65: 6 nodes, 1 σ-classes
+  module τ65 where
 
+    -- σ=88 (6 nodes)
+    cell-0 : κ 49 ≡ κ 49
+    cell-0 = refl
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-τ750 where
 
-  -- ctx-750: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1554 (1×)
-  ctx-750-τ750 : τ 750 ≡ τ 750
-  ctx-750-τ750 = refl
+-- κ=51: 2 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-7 where
 
+  -- τ=67: 2 nodes, 1 σ-classes
+  module τ67 where
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=92 (2 nodes)
+    cell-0 : κ 51 ≡ κ 51
+    cell-0 = refl
 
-module index-Index-τ753 where
 
-  -- ctx-753: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1564 (1×)
-  ctx-753-τ753 : τ 753 ≡ τ 753
-  ctx-753-τ753 = refl
 
+-- κ=52: 3 nodes, 1 τ-classes, 1 σ-classes
+module lt-Lt where
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=68: 3 nodes, 1 σ-classes
+  module τ68 where
 
-module subscript-Subscript-τ754 where
+    -- σ=95 (3 nodes)
+    cell-0 : κ 52 ≡ κ 52
+    cell-0 = refl
 
-  -- ctx-754: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1565 (1×)
-  ctx-754-τ754 : τ 754 ≡ τ 754
-  ctx-754-τ754 = refl
 
 
--- ── monoid.accum (AugAssign) ───────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=53: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-Compare-12 where
 
-module monoid-accum-AugAssign-τ755 where
+  -- τ=69: 1 nodes, 1 σ-classes
+  module τ69 where
 
-  -- ctx-755: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1566 (1×)
-  ctx-755-τ755 : τ 755 ≡ τ 755
-  ctx-755-τ755 = refl
+    -- σ=98 (1 nodes)
+    cell-0 : κ 53 ≡ κ 53
+    cell-0 = refl
 
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-τ756 where
+-- κ=54: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-23 where
 
-  -- ctx-756: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1567 (1×)
-  ctx-756-τ756 : τ 756 ≡ τ 756
-  ctx-756-τ756 = refl
+  -- τ=70: 1 nodes, 1 σ-classes
+  module τ70 where
 
+    -- σ=100 (1 nodes)
+    cell-0 : κ 54 ≡ κ 54
+    cell-0 = refl
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-τ757 where
 
-  -- ctx-757: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1569 (1×)
-  ctx-757-τ757 : τ 757 ≡ τ 757
-  ctx-757-τ757 = refl
+-- κ=55: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-8 where
 
+  -- τ=71: 1 nodes, 1 σ-classes
+  module τ71 where
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=101 (1 nodes)
+    cell-0 : κ 55 ≡ κ 55
+    cell-0 = refl
 
-module annassign-AnnAssign-τ760 where
 
-  -- ctx-760: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1581 (1×)
-  ctx-760-τ760 : τ 760 ≡ τ 760
-  ctx-760-τ760 = refl
 
+-- κ=56: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-Compare-13 where
 
--- ── exponential.literal (Dict) ─────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=72: 1 nodes, 1 σ-classes
+  module τ72 where
 
-module exponential-literal-Dict-dict-3 where
+    -- σ=104 (1 nodes)
+    cell-0 : κ 56 ≡ κ 56
+    cell-0 = refl
 
-  -- dict: 1 nodes, 1 forms
-  -- [dict]
-  --   σ=1607 (1×)
-  dict-τ765 : τ 765 ≡ τ 765
-  dict-τ765 = refl
 
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=57: 17 nodes, 1 τ-classes, 1 σ-classes
+module add-Add where
 
-module annassign-AnnAssign-τ766 where
+  -- τ=73: 17 nodes, 1 σ-classes
+  module τ73 where
 
-  -- ctx-766: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1608 (1×)
-  ctx-766-τ766 : τ 766 ≡ τ 766
-  ctx-766-τ766 = refl
+    -- σ=106 (17 nodes)
+    cell-0 : κ 57 ≡ κ 57
+    cell-0 = refl
 
 
--- ── keyword (keyword) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module keyword-keyword-τ767 where
+-- κ=58: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-accum-AugAssign-1 where
 
-  -- ctx-767: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1613 (1×)
-  ctx-767-τ767 : τ 767 ≡ τ 767
-  ctx-767-τ767 = refl
+  -- τ=74: 1 nodes, 1 σ-classes
+  module τ74 where
 
+    -- σ=108 (1 nodes)
+    cell-0 : κ 58 ≡ κ 58
+    cell-0 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-τ768 where
 
-  -- ctx-768: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1614 (1×)
-  ctx-768-τ768 : τ 768 ≡ τ 768
-  ctx-768-τ768 = refl
+-- κ=59: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-9 where
 
+  -- τ=75: 1 nodes, 1 σ-classes
+  module τ75 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=109 (1 nodes)
+    cell-0 : κ 59 ≡ κ 59
+    cell-0 = refl
 
-module let-k-Assign-τ769 where
 
-  -- ctx-769: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1615 (1×)
-  ctx-769-τ769 : τ 769 ≡ τ 769
-  ctx-769-τ769 = refl
 
+-- κ=60: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-3 where
 
--- ── monoid.accum (AugAssign) ───────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=76: 1 nodes, 1 σ-classes
+  module τ76 where
 
-module monoid-accum-AugAssign-τ770 where
+    -- σ=110 (1 nodes)
+    cell-0 : κ 60 ≡ κ 60
+    cell-0 = refl
 
-  -- ctx-770: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1620 (1×)
-  ctx-770-τ770 : τ 770 ≡ τ 770
-  ctx-770-τ770 = refl
 
 
--- ── exponential.literal (Dict) ─────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=61: 15 nodes, 1 τ-classes, 1 σ-classes
+module in-k-In where
 
-module exponential-literal-Dict-dict-4 where
+  -- τ=77: 15 nodes, 1 σ-classes
+  module τ77 where
 
-  -- dict: 1 nodes, 1 forms
-  -- [dict]
-  --   σ=1622 (1×)
-  dict-τ771 : τ 771 ≡ τ 771
-  dict-τ771 = refl
+    -- σ=114 (15 nodes)
+    cell-0 : κ 61 ≡ κ 61
+    cell-0 = refl
 
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ772 where
+-- κ=63: 1 nodes, 1 τ-classes, 1 σ-classes
+module terminal-map-Return-5 where
 
-  -- ctx-772: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1623 (1×)
-  ctx-772-τ772 : τ 772 ≡ τ 772
-  ctx-772-τ772 = refl
+  -- τ=79: 1 nodes, 1 σ-classes
+  module τ79 where
 
+    -- σ=116 (1 nodes)
+    cell-0 : κ 63 ≡ κ 63
+    cell-0 = refl
 
--- ── monoid.op@? (Call) ─────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-op-at-x3f-Call-τ774 where
 
-  -- ctx-774: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1629 (1×)
-  ctx-774-τ774 : τ 774 ≡ τ 774
-  ctx-774-τ774 = refl
+-- κ=64: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-4 where
 
+  -- τ=81: 1 nodes, 1 σ-classes
+  module τ81 where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=118 (1 nodes)
+    cell-0 : κ 64 ≡ κ 64
+    cell-0 = refl
 
-module effect-seq-Expr-τ775 where
 
-  -- ctx-775: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1630 (1×)
-  ctx-775-τ775 : τ 775 ≡ τ 775
-  ctx-775-τ775 = refl
 
+-- κ=66: 1 nodes, 1 τ-classes, 1 σ-classes
+module terminal-map-Return-6 where
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=83: 1 nodes, 1 σ-classes
+  module τ83 where
 
-module fold-For-τ776 where
+    -- σ=121 (1 nodes)
+    cell-0 : κ 66 ≡ κ 66
+    cell-0 = refl
 
-  -- ctx-776: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1631 (1×)
-  ctx-776-τ776 : τ 776 ≡ τ 776
-  ctx-776-τ776 = refl
 
 
--- ── terminal.map (Return) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=68: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-5 where
 
-module terminal-map-Return-τ777 where
+  -- τ=85: 1 nodes, 1 σ-classes
+  module τ85 where
 
-  -- ctx-777: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1633 (1×)
-  ctx-777-τ777 : τ 777 ≡ τ 777
-  ctx-777-τ777 = refl
+    -- σ=125 (1 nodes)
+    cell-0 : κ 68 ≡ κ 68
+    cell-0 = refl
 
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module product-Tuple-tuple-35 where
+-- κ=72: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-6 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=1634 (1×)
-  tuple-τ778 : τ 778 ≡ τ 778
-  tuple-τ778 = refl
+  -- τ=89: 1 nodes, 1 σ-classes
+  module τ89 where
 
+    -- σ=129 (1 nodes)
+    cell-0 : κ 72 ≡ κ 72
+    cell-0 = refl
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module index-Index-τ779 where
 
-  -- ctx-779: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1635 (1×)
-  ctx-779-τ779 : τ 779 ≡ τ 779
-  ctx-779-τ779 = refl
+-- κ=73: 1 nodes, 1 τ-classes, 1 σ-classes
+module classifier-intro-ClassDef-0 where
 
+  -- τ=90: 1 nodes, 1 σ-classes
+  module τ90 where
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=130 (1 nodes)
+    cell-0 : κ 73 ≡ κ 73
+    cell-0 = refl
 
-module subscript-Subscript-τ780 where
 
-  -- ctx-780: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1636 (1×)
-  ctx-780-τ780 : τ 780 ≡ τ 780
-  ctx-780-τ780 = refl
 
+-- κ=74: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-12 where
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=91: 1 nodes, 1 σ-classes
+  module tuple where
 
-module exponential-intro-FunctionDef-τ781 where
+    -- σ=137 (1 nodes)
+    cell-0 : κ 74 ≡ κ 74
+    cell-0 = refl
 
-  -- ctx-781: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1637 (1×)
-  ctx-781-τ781 : τ 781 ≡ τ 781
-  ctx-781-τ781 = refl
 
 
--- ── comprehension (comprehension) ──────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=75: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-24 where
 
-module comprehension-comprehension-τ783 where
+  -- τ=92: 1 nodes, 1 σ-classes
+  module τ92 where
 
-  -- ctx-783: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1646 (1×)
-  ctx-783-τ783 : τ 783 ≡ τ 783
-  ctx-783-τ783 = refl
+    -- σ=138 (1 nodes)
+    cell-0 : κ 75 ≡ κ 75
+    cell-0 = refl
 
 
--- ── free_monoid.map (ListComp) ─────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-map-ListComp-τ784 where
+-- κ=80: 1 nodes, 1 τ-classes, 1 σ-classes
+module arguments-arguments-5 where
 
-  -- ctx-784: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1647 (1×)
-  ctx-784-τ784 : τ 784 ≡ τ 784
-  ctx-784-τ784 = refl
+  -- τ=104: 1 nodes, 1 σ-classes
+  module τ104 where
 
+    -- σ=150 (1 nodes)
+    cell-0 : κ 80 ≡ κ 80
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ785 where
 
-  -- ctx-785: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1648 (1×)
-  ctx-785-τ785 : τ 785 ≡ τ 785
-  ctx-785-τ785 = refl
+-- κ=83: 9 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-literal-List-1 where
 
+  -- τ=115: 9 nodes, 1 σ-classes
+  module list where
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=164 (9 nodes)
+    cell-0 : κ 83 ≡ κ 83
+    cell-0 = refl
 
-module annassign-AnnAssign-τ788 where
 
-  -- ctx-788: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1655 (1×)
-  ctx-788-τ788 : τ 788 ≡ τ 788
-  ctx-788-τ788 = refl
 
+-- κ=85: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-7 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=117: 1 nodes, 1 σ-classes
+  module τ117 where
 
-module let-k-Assign-τ790 where
+    -- σ=166 (1 nodes)
+    cell-0 : κ 85 ≡ κ 85
+    cell-0 = refl
 
-  -- ctx-790: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1660 (1×)
-  ctx-790-τ790 : τ 790 ≡ τ 790
-  ctx-790-τ790 = refl
 
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=88: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-JoinedStr-6 where
 
-module equalizer-If-τ791 where
+  -- τ=120: 1 nodes, 1 σ-classes
+  module str where
 
-  -- ctx-791: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1666 (1×)
-  ctx-791-τ791 : τ 791 ≡ τ 791
-  ctx-791-τ791 = refl
+    -- σ=175 (1 nodes)
+    cell-0 : κ 88 ≡ κ 88
+    cell-0 = refl
 
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-τ792 where
+-- κ=89: 1 nodes, 1 τ-classes, 1 σ-classes
+module terminal-map-Return-7 where
 
-  -- ctx-792: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1667 (1×)
-  ctx-792-τ792 : τ 792 ≡ τ 792
-  ctx-792-τ792 = refl
+  -- τ=121: 1 nodes, 1 σ-classes
+  module τ121 where
 
+    -- σ=176 (1 nodes)
+    cell-0 : κ 89 ≡ κ 89
+    cell-0 = refl
 
--- ── coproduct.elim (If) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module coproduct-elim-If-τ793 where
 
-  -- ctx-793: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1673 (1×)
-  ctx-793-τ793 : τ 793 ≡ τ 793
-  ctx-793-τ793 = refl
+-- κ=90: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-8 where
 
+  -- τ=122: 1 nodes, 1 σ-classes
+  module τ122 where
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=178 (1 nodes)
+    cell-0 : κ 90 ≡ κ 90
+    cell-0 = refl
 
-module fold-For-τ794 where
 
-  -- ctx-794: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1674 (1×)
-  ctx-794-τ794 : τ 794 ≡ τ 794
-  ctx-794-τ794 = refl
 
+-- κ=91: 1 nodes, 1 τ-classes, 1 σ-classes
+module classifier-intro-ClassDef-1 where
 
--- ── projection@? (Attribute) ───────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=123: 1 nodes, 1 σ-classes
+  module τ123 where
 
-module projection-at-x3f-Attribute-τ796 where
+    -- σ=179 (1 nodes)
+    cell-0 : κ 91 ≡ κ 91
+    cell-0 = refl
 
-  -- ctx-796: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1681 (1×)
-  ctx-796-τ796 : τ 796 ≡ τ 796
-  ctx-796-τ796 = refl
 
 
--- ── projection.compute@? (Call) ────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=92: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-13 where
 
-module projection-compute-at-x3f-Call-τ797 where
+  -- τ=133: 1 nodes, 1 σ-classes
+  module tuple where
 
-  -- ctx-797: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1682 (1×)
-  ctx-797-τ797 : τ 797 ≡ τ 797
-  ctx-797-τ797 = refl
+    -- σ=194 (1 nodes)
+    cell-0 : κ 92 ≡ κ 92
+    cell-0 = refl
 
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-τ798 where
+-- κ=93: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-12 where
 
-  -- ctx-798: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1683 (1×)
-  ctx-798-τ798 : τ 798 ≡ τ 798
-  ctx-798-τ798 = refl
+  -- τ=134: 1 nodes, 1 σ-classes
+  module τ134 where
 
+    -- σ=195 (1 nodes)
+    cell-0 : κ 93 ≡ κ 93
+    cell-0 = refl
 
--- ── endomorphism (UnaryOp) ─────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module endomorphism-UnaryOp-τ799 where
 
-  -- ctx-799: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1684 (1×)
-  ctx-799-τ799 : τ 799 ≡ τ 799
-  ctx-799-τ799 = refl
+-- κ=94: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-18 where
 
+  -- τ=135: 1 nodes, 1 σ-classes
+  module τ135 where
 
--- ── lambda (Lambda) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=196 (1 nodes)
+    cell-0 : κ 94 ≡ κ 94
+    cell-0 = refl
 
-module lambda-Lambda-τ800 where
 
-  -- ctx-800: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1685 (1×)
-  ctx-800-τ800 : τ 800 ≡ τ 800
-  ctx-800-τ800 = refl
 
+-- κ=95: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-16 where
 
--- ── keyword (keyword) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=136: 1 nodes, 1 σ-classes
+  module τ136 where
 
-module keyword-keyword-τ801 where
+    -- σ=197 (1 nodes)
+    cell-0 : κ 95 ≡ κ 95
+    cell-0 = refl
 
-  -- ctx-801: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1686 (1×)
-  ctx-801-τ801 : τ 801 ≡ τ 801
-  ctx-801-τ801 = refl
 
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=99: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-9 where
 
-module apply-Call-τ802 where
+  -- τ=142: 1 nodes, 1 σ-classes
+  module τ142 where
 
-  -- ctx-802: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1687 (1×)
-  ctx-802-τ802 : τ 802 ≡ τ 802
-  ctx-802-τ802 = refl
+    -- σ=204 (1 nodes)
+    cell-0 : κ 99 ≡ κ 99
+    cell-0 = refl
 
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-τ803 where
+-- κ=100: 1 nodes, 1 τ-classes, 1 σ-classes
+module arguments-arguments-6 where
 
-  -- ctx-803: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1688 (1×)
-  ctx-803-τ803 : τ 803 ≡ τ 803
-  ctx-803-τ803 = refl
+  -- τ=143: 1 nodes, 1 σ-classes
+  module τ143 where
 
+    -- σ=206 (1 nodes)
+    cell-0 : κ 100 ≡ κ 100
+    cell-0 = refl
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-τ804 where
 
-  -- ctx-804: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1690 (1×)
-  ctx-804-τ804 : τ 804 ≡ τ 804
-  ctx-804-τ804 = refl
+-- κ=103: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-17 where
 
+  -- τ=151: 1 nodes, 1 σ-classes
+  module τ151 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=221 (1 nodes)
+    cell-0 : κ 103 ≡ κ 103
+    cell-0 = refl
 
-module let-k-Assign-τ809 where
 
-  -- ctx-809: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1707 (1×)
-  ctx-809-τ809 : τ 809 ≡ τ 809
-  ctx-809-τ809 = refl
 
+-- κ=104: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-25 where
 
--- ── free_monoid.op@? (Attribute) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=152: 1 nodes, 1 σ-classes
+  module τ152 where
 
-module free_monoid-op-at-x3f-Attribute-τ810 where
+    -- σ=222 (1 nodes)
+    cell-0 : κ 104 ≡ κ 104
+    cell-0 = refl
 
-  -- ctx-810: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1712 (1×)
-  ctx-810-τ810 : τ 810 ≡ τ 810
-  ctx-810-τ810 = refl
 
 
--- ── free_monoid.snoc@? (Call) ──────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=108: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-10 where
 
-module free_monoid-snoc-at-x3f-Call-τ811 where
+  -- τ=156: 1 nodes, 1 σ-classes
+  module τ156 where
 
-  -- ctx-811: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1713 (1×)
-  ctx-811-τ811 : τ 811 ≡ τ 811
-  ctx-811-τ811 = refl
+    -- σ=227 (1 nodes)
+    cell-0 : κ 108 ≡ κ 108
+    cell-0 = refl
 
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-τ812 where
+-- κ=111: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-x3f-Call-2 where
 
-  -- ctx-812: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1714 (1×)
-  ctx-812-τ812 : τ 812 ≡ τ 812
-  ctx-812-τ812 = refl
+  -- τ=160: 1 nodes, 1 σ-classes
+  module τ160 where
 
+    -- σ=232 (1 nodes)
+    cell-0 : κ 111 ≡ κ 111
+    cell-0 = refl
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-τ813 where
 
-  -- ctx-813: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1715 (1×)
-  ctx-813-τ813 : τ 813 ≡ τ 813
-  ctx-813-τ813 = refl
+-- κ=112: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-11 where
 
+  -- τ=161: 1 nodes, 1 σ-classes
+  module τ161 where
 
--- ── product (Tuple) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=233 (1 nodes)
+    cell-0 : κ 112 ≡ κ 112
+    cell-0 = refl
 
-module product-Tuple-tuple-36 where
 
-  -- tuple: 1 nodes, 1 forms
-  -- [tuple]
-  --   σ=1718 (1×)
-  tuple-τ814 : τ 814 ≡ τ 814
-  tuple-τ814 = refl
 
+-- κ=113: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-10 where
 
--- ── index (Index) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=163: 1 nodes, 1 σ-classes
+  module τ163 where
 
-module index-Index-τ815 where
+    -- σ=235 (1 nodes)
+    cell-0 : κ 113 ≡ κ 113
+    cell-0 = refl
 
-  -- ctx-815: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1719 (1×)
-  ctx-815-τ815 : τ 815 ≡ τ 815
-  ctx-815-τ815 = refl
 
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=115: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-11 where
 
-module subscript-Subscript-τ816 where
+  -- τ=167: 1 nodes, 1 σ-classes
+  module τ167 where
 
-  -- ctx-816: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1720 (1×)
-  ctx-816-τ816 : τ 816 ≡ τ 816
-  ctx-816-τ816 = refl
+    -- σ=242 (1 nodes)
+    cell-0 : κ 115 ≡ κ 115
+    cell-0 = refl
 
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-τ817 where
+-- κ=116: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-14 where
 
-  -- ctx-817: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1721 (1×)
-  ctx-817-τ817 : τ 817 ≡ τ 817
-  ctx-817-τ817 = refl
+  -- τ=171: 1 nodes, 1 σ-classes
+  module tuple where
 
+    -- σ=250 (1 nodes)
+    cell-0 : κ 116 ≡ κ 116
+    cell-0 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-τ823 where
 
-  -- ctx-823: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1729 (1×)
-  ctx-823-τ823 : τ 823 ≡ τ 823
-  ctx-823-τ823 = refl
+-- κ=117: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-26 where
 
+  -- τ=172: 1 nodes, 1 σ-classes
+  module τ172 where
 
--- ── exponential.map (DictComp) ─────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=251 (1 nodes)
+    cell-0 : κ 117 ≡ κ 117
+    cell-0 = refl
 
-module exponential-map-DictComp-τ825 where
 
-  -- ctx-825: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1742 (1×)
-  ctx-825-τ825 : τ 825 ≡ τ 825
-  ctx-825-τ825 = refl
 
+-- κ=119: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-17 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=175: 1 nodes, 1 σ-classes
+  module τ175 where
 
-module let-k-Assign-τ826 where
+    -- σ=255 (1 nodes)
+    cell-0 : κ 119 ≡ κ 119
+    cell-0 = refl
 
-  -- ctx-826: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1743 (1×)
-  ctx-826-τ826 : τ 826 ≡ τ 826
-  ctx-826-τ826 = refl
 
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=120: 1 nodes, 1 τ-classes, 1 σ-classes
+module ifexp-IfExp-1 where
 
-module equalizer-If-τ829 where
+  -- τ=176: 1 nodes, 1 σ-classes
+  module τ176 where
 
-  -- ctx-829: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1755 (1×)
-  ctx-829-τ829 : τ 829 ≡ τ 829
-  ctx-829-τ829 = refl
+    -- σ=259 (1 nodes)
+    cell-0 : κ 120 ≡ κ 120
+    cell-0 = refl
 
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module fold-For-τ830 where
+-- κ=121: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-27 where
 
-  -- ctx-830: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1756 (1×)
-  ctx-830-τ830 : τ 830 ≡ τ 830
-  ctx-830-τ830 = refl
+  -- τ=177: 1 nodes, 1 σ-classes
+  module τ177 where
 
+    -- σ=260 (1 nodes)
+    cell-0 : κ 121 ≡ κ 121
+    cell-0 = refl
 
--- ── endomorphism (UnaryOp) ─────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module endomorphism-UnaryOp-τ831 where
 
-  -- ctx-831: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1760 (1×)
-  ctx-831-τ831 : τ 831 ≡ τ 831
-  ctx-831-τ831 = refl
+-- κ=122: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-18 where
 
+  -- τ=180: 1 nodes, 1 σ-classes
+  module τ180 where
 
--- ── lambda (Lambda) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=269 (1 nodes)
+    cell-0 : κ 122 ≡ κ 122
+    cell-0 = refl
 
-module lambda-Lambda-τ832 where
 
-  -- ctx-832: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1761 (1×)
-  ctx-832-τ832 : τ 832 ≡ τ 832
-  ctx-832-τ832 = refl
 
+-- κ=123: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-12 where
 
--- ── keyword (keyword) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=181: 1 nodes, 1 σ-classes
+  module τ181 where
 
-module keyword-keyword-τ833 where
+    -- σ=270 (1 nodes)
+    cell-0 : κ 123 ≡ κ 123
+    cell-0 = refl
 
-  -- ctx-833: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1762 (1×)
-  ctx-833-τ833 : τ 833 ≡ τ 833
-  ctx-833-τ833 = refl
 
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=124: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-12 where
 
-module apply-Call-τ834 where
+  -- τ=182: 1 nodes, 1 σ-classes
+  module τ182 where
 
-  -- ctx-834: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1763 (1×)
-  ctx-834-τ834 : τ 834 ≡ τ 834
-  ctx-834-τ834 = refl
+    -- σ=272 (1 nodes)
+    cell-0 : κ 124 ≡ κ 124
+    cell-0 = refl
 
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-τ835 where
+-- κ=125: 22 nodes, 1 τ-classes, 1 σ-classes
+module powerset-Call-1 where
 
-  -- ctx-835: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1764 (1×)
-  ctx-835-τ835 : τ 835 ≡ τ 835
-  ctx-835-τ835 = refl
+  -- τ=184: 22 nodes, 1 σ-classes
+  module τ184 where
 
+    -- σ=278 (22 nodes)
+    cell-0 : κ 125 ≡ κ 125
+    cell-0 = refl
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-intro-FunctionDef-τ836 where
 
-  -- ctx-836: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1766 (1×)
-  ctx-836-τ836 : τ 836 ≡ τ 836
-  ctx-836-τ836 = refl
+-- κ=132: 1 nodes, 1 τ-classes, 1 σ-classes
+module cofree-Yield where
 
+  -- τ=191: 1 nodes, 1 σ-classes
+  module τ191 where
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=288 (1 nodes)
+    cell-0 : κ 132 ≡ κ 132
+    cell-0 = refl
 
-module free_monoid-fold-JoinedStr-str-12 where
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=1790 (1×)
-  str-τ841 : τ 841 ≡ τ 841
-  str-τ841 = refl
 
+-- κ=133: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-13 where
 
--- ── terminal.map (Return) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=192: 1 nodes, 1 σ-classes
+  module τ192 where
 
-module terminal-map-Return-τ842 where
+    -- σ=289 (1 nodes)
+    cell-0 : κ 133 ≡ κ 133
+    cell-0 = refl
 
-  -- ctx-842: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1791 (1×)
-  ctx-842-τ842 : τ 842 ≡ τ 842
-  ctx-842-τ842 = refl
 
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=134: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-11 where
 
-module exponential-intro-FunctionDef-τ843 where
+  -- τ=193: 1 nodes, 1 σ-classes
+  module τ193 where
 
-  -- ctx-843: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1792 (1×)
-  ctx-843-τ843 : τ 843 ≡ τ 843
-  ctx-843-τ843 = refl
+    -- σ=290 (1 nodes)
+    cell-0 : κ 134 ≡ κ 134
+    cell-0 = refl
 
 
--- ── equalizer (Compare) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-Compare-τ844 where
+-- κ=135: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-4 where
 
-  -- ctx-844: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1798 (1×)
-  ctx-844-τ844 : τ 844 ≡ τ 844
-  ctx-844-τ844 = refl
+  -- τ=194: 1 nodes, 1 σ-classes
+  module τ194 where
 
+    -- σ=291 (1 nodes)
+    cell-0 : κ 135 ≡ κ 135
+    cell-0 = refl
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-τ845 where
 
-  -- ctx-845: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1801 (1×)
-  ctx-845-τ845 : τ 845 ≡ τ 845
-  ctx-845-τ845 = refl
+-- κ=136: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-13 where
 
+  -- τ=196: 1 nodes, 1 σ-classes
+  module τ196 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=293 (1 nodes)
+    cell-0 : κ 136 ≡ κ 136
+    cell-0 = refl
 
-module let-k-Assign-τ847 where
 
-  -- ctx-847: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1810 (1×)
-  ctx-847-τ847 : τ 847 ≡ τ 847
-  ctx-847-τ847 = refl
 
+-- κ=138: 1 nodes, 1 τ-classes, 1 σ-classes
+module comprehension-comprehension-3 where
 
--- ── coerce (FormattedValue) ────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=199: 1 nodes, 1 σ-classes
+  module τ199 where
 
-module coerce-FormattedValue-τ862 where
+    -- σ=298 (1 nodes)
+    cell-0 : κ 138 ≡ κ 138
+    cell-0 = refl
 
-  -- ctx-862: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1864 (1×)
-  ctx-862-τ862 : τ 862 ≡ τ 862
-  ctx-862-τ862 = refl
 
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=139: 1 nodes, 1 τ-classes, 1 σ-classes
+module lazy_fold-GeneratorExp-1 where
 
-module free_monoid-fold-JoinedStr-str-13 where
+  -- τ=200: 1 nodes, 1 σ-classes
+  module τ200 where
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=1865 (1×)
-  str-τ863 : τ 863 ≡ τ 863
-  str-τ863 = refl
+    -- σ=299 (1 nodes)
+    cell-0 : κ 139 ≡ κ 139
+    cell-0 = refl
 
 
--- ── free_monoid.literal (List) ─────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-literal-List-list-3 where
+-- κ=140: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-19 where
 
-  -- list: 1 nodes, 1 forms
-  -- [list]
-  --   σ=1866 (1×)
-  list-τ864 : τ 864 ≡ τ 864
-  list-τ864 = refl
+  -- τ=201: 1 nodes, 1 σ-classes
+  module τ201 where
 
+    -- σ=300 (1 nodes)
+    cell-0 : κ 140 ≡ κ 140
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ865 where
 
-  -- ctx-865: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1867 (1×)
-  ctx-865-τ865 : τ 865 ≡ τ 865
-  ctx-865-τ865 = refl
+-- κ=141: 1 nodes, 1 τ-classes, 1 σ-classes
+module terminal-map-Return-8 where
 
+  -- τ=202: 1 nodes, 1 σ-classes
+  module τ202 where
 
--- ── subobject (Attribute) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=301 (1 nodes)
+    cell-0 : κ 141 ≡ κ 141
+    cell-0 = refl
 
-module subobject-Attribute-τ796 where
 
-  -- ctx-796: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1873 (1×)
-  ctx-796-τ796 : τ 796 ≡ τ 796
-  ctx-796-τ796 = refl
 
+-- κ=142: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-14 where
 
--- ── subobject.test (Call) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=203: 1 nodes, 1 σ-classes
+  module τ203 where
 
-module subobject-test-Call-τ866 where
+    -- σ=302 (1 nodes)
+    cell-0 : κ 142 ≡ κ 142
+    cell-0 = refl
 
-  -- ctx-866: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1875 (1×)
-  ctx-866-τ866 : τ 866 ≡ τ 866
-  ctx-866-τ866 = refl
 
 
--- ── meet (BoolOp) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=143: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-13 where
 
-module meet-BoolOp-τ867 where
+  -- τ=204: 1 nodes, 1 σ-classes
+  module τ204 where
 
-  -- ctx-867: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1876 (1×)
-  ctx-867-τ867 : τ 867 ≡ τ 867
-  ctx-867-τ867 = refl
+    -- σ=303 (1 nodes)
+    cell-0 : κ 143 ≡ κ 143
+    cell-0 = refl
 
 
--- ── comprehension (comprehension) ──────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module comprehension-comprehension-τ868 where
+-- κ=144: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-19 where
 
-  -- ctx-868: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1877 (1×)
-  ctx-868-τ868 : τ 868 ≡ τ 868
-  ctx-868-τ868 = refl
+  -- τ=205: 1 nodes, 1 σ-classes
+  module τ205 where
 
+    -- σ=304 (1 nodes)
+    cell-0 : κ 144 ≡ κ 144
+    cell-0 = refl
 
--- ── lazy_fold (GeneratorExp) ───────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module lazy_fold-GeneratorExp-τ869 where
 
-  -- ctx-869: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1878 (1×)
-  ctx-869-τ869 : τ 869 ≡ τ 869
-  ctx-869-τ869 = refl
+-- κ=145: 1 nodes, 1 τ-classes, 1 σ-classes
+module terminal-map-Return-9 where
 
+  -- τ=206: 1 nodes, 1 σ-classes
+  module τ206 where
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=305 (1 nodes)
+    cell-0 : κ 145 ≡ κ 145
+    cell-0 = refl
 
-module apply-Call-τ870 where
 
-  -- ctx-870: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1879 (1×)
-  ctx-870-τ870 : τ 870 ≡ τ 870
-  ctx-870-τ870 = refl
 
+-- κ=146: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-15 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=207: 1 nodes, 1 σ-classes
+  module τ207 where
 
-module let-k-Assign-τ871 where
+    -- σ=306 (1 nodes)
+    cell-0 : κ 146 ≡ κ 146
+    cell-0 = refl
 
-  -- ctx-871: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1880 (1×)
-  ctx-871-τ871 : τ 871 ≡ τ 871
-  ctx-871-τ871 = refl
 
 
--- ── powerset (Call) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=147: 1 nodes, 1 τ-classes, 1 σ-classes
+module terminal-map-Return-10 where
 
-module powerset-Call-τ872 where
+  -- τ=208: 1 nodes, 1 σ-classes
+  module τ208 where
 
-  -- ctx-872: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1882 (1×)
-  ctx-872-τ872 : τ 872 ≡ τ 872
-  ctx-872-τ872 = refl
+    -- σ=307 (1 nodes)
+    cell-0 : κ 147 ≡ κ 147
+    cell-0 = refl
 
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-τ873 where
+-- κ=148: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-16 where
 
-  -- ctx-873: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1883 (1×)
-  ctx-873-τ873 : τ 873 ≡ τ 873
-  ctx-873-τ873 = refl
+  -- τ=209: 1 nodes, 1 σ-classes
+  module τ209 where
 
+    -- σ=308 (1 nodes)
+    cell-0 : κ 148 ≡ κ 148
+    cell-0 = refl
 
--- ── ifexp (IfExp) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module ifexp-IfExp-τ874 where
 
-  -- ctx-874: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1890 (1×)
-  ctx-874-τ874 : τ 874 ≡ τ 874
-  ctx-874-τ874 = refl
+-- κ=151: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-JoinedStr-7 where
 
+  -- τ=212: 1 nodes, 1 σ-classes
+  module str where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=315 (1 nodes)
+    cell-0 : κ 151 ≡ κ 151
+    cell-0 = refl
 
-module let-k-Assign-τ875 where
 
-  -- ctx-875: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1891 (1×)
-  ctx-875-τ875 : τ 875 ≡ τ 875
-  ctx-875-τ875 = refl
 
+-- κ=152: 1 nodes, 1 τ-classes, 1 σ-classes
+module terminal-map-Return-11 where
 
--- ── bimap (BinOp) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=213: 1 nodes, 1 σ-classes
+  module τ213 where
 
-module bimap-BinOp-τ876 where
+    -- σ=316 (1 nodes)
+    cell-0 : κ 152 ≡ κ 152
+    cell-0 = refl
 
-  -- ctx-876: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1896 (1×)
-  ctx-876-τ876 : τ 876 ≡ τ 876
-  ctx-876-τ876 = refl
 
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=153: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-17 where
 
-module let-k-Assign-τ877 where
+  -- τ=214: 1 nodes, 1 σ-classes
+  module τ214 where
 
-  -- ctx-877: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1897 (1×)
-  ctx-877-τ877 : τ 877 ≡ τ 877
-  ctx-877-τ877 = refl
+    -- σ=317 (1 nodes)
+    cell-0 : κ 153 ≡ κ 153
+    cell-0 = refl
 
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-τ879 where
+-- κ=154: 1 nodes, 1 τ-classes, 1 σ-classes
+module classifier-intro-ClassDef-2 where
 
-  -- ctx-879: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1900 (1×)
-  ctx-879-τ879 : τ 879 ≡ τ 879
-  ctx-879-τ879 = refl
+  -- τ=215: 1 nodes, 1 σ-classes
+  module τ215 where
 
+    -- σ=318 (1 nodes)
+    cell-0 : κ 154 ≡ κ 154
+    cell-0 = refl
 
--- ── annassign (AnnAssign) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module annassign-AnnAssign-τ880 where
 
-  -- ctx-880: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1903 (1×)
-  ctx-880-τ880 : τ 880 ≡ τ 880
-  ctx-880-τ880 = refl
+-- κ=160: 10 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-15 where
 
+  -- τ=226: 10 nodes, 1 σ-classes
+  module tuple where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=342 (10 nodes)
+    cell-0 : κ 160 ≡ κ 160
+    cell-0 = refl
 
-module let-k-Assign-τ881 where
 
-  -- ctx-881: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1908 (1×)
-  ctx-881-τ881 : τ 881 ≡ τ 881
-  ctx-881-τ881 = refl
 
+-- κ=161: 10 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-14 where
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=227: 10 nodes, 1 σ-classes
+  module τ227 where
 
-module equalizer-If-τ882 where
+    -- σ=343 (10 nodes)
+    cell-0 : κ 161 ≡ κ 161
+    cell-0 = refl
 
-  -- ctx-882: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1909 (1×)
-  ctx-882-τ882 : τ 882 ≡ τ 882
-  ctx-882-τ882 = refl
 
 
--- ── monoid.op@? (Attribute) ────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=162: 10 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-20 where
 
-module monoid-op-at-x3f-Attribute-τ810 where
+  -- τ=228: 10 nodes, 1 σ-classes
+  module τ228 where
 
-  -- ctx-810: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1911 (1×)
-  ctx-810-τ810 : τ 810 ≡ τ 810
-  ctx-810-τ810 = refl
+    -- σ=344 (10 nodes)
+    cell-0 : κ 162 ≡ κ 162
+    cell-0 = refl
 
 
--- ── partial.apply@? (Call) ─────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module partial-apply-at-x3f-Call-τ883 where
+-- κ=163: 6 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-16 where
 
-  -- ctx-883: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1913 (1×)
-  ctx-883-τ883 : τ 883 ≡ τ 883
-  ctx-883-τ883 = refl
+  -- τ=229: 6 nodes, 1 σ-classes
+  module tuple where
 
+    -- σ=348 (6 nodes)
+    cell-0 : κ 163 ≡ κ 163
+    cell-0 = refl
 
--- ── monoid.op@? (Call) ─────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module monoid-op-at-x3f-Call-τ884 where
 
-  -- ctx-884: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1914 (1×)
-  ctx-884-τ884 : τ 884 ≡ τ 884
-  ctx-884-τ884 = refl
+-- κ=164: 6 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-15 where
 
+  -- τ=230: 6 nodes, 1 σ-classes
+  module τ230 where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=349 (6 nodes)
+    cell-0 : κ 164 ≡ κ 164
+    cell-0 = refl
 
-module effect-seq-Expr-τ885 where
 
-  -- ctx-885: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1915 (1×)
-  ctx-885-τ885 : τ 885 ≡ τ 885
-  ctx-885-τ885 = refl
 
+-- κ=165: 6 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-21 where
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=231: 6 nodes, 1 σ-classes
+  module τ231 where
 
-module fold-For-τ886 where
+    -- σ=350 (6 nodes)
+    cell-0 : κ 165 ≡ κ 165
+    cell-0 = refl
 
-  -- ctx-886: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1916 (1×)
-  ctx-886-τ886 : τ 886 ≡ τ 886
-  ctx-886-τ886 = refl
 
 
--- ── comprehension (comprehension) ──────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=166: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-17 where
 
-module comprehension-comprehension-τ887 where
+  -- τ=232: 1 nodes, 1 σ-classes
+  module tuple where
 
-  -- ctx-887: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1921 (1×)
-  ctx-887-τ887 : τ 887 ≡ τ 887
-  ctx-887-τ887 = refl
+    -- σ=351 (1 nodes)
+    cell-0 : κ 166 ≡ κ 166
+    cell-0 = refl
 
 
--- ── lazy_fold (GeneratorExp) ───────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module lazy_fold-GeneratorExp-τ888 where
+-- κ=167: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-16 where
 
-  -- ctx-888: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1922 (1×)
-  ctx-888-τ888 : τ 888 ≡ τ 888
-  ctx-888-τ888 = refl
+  -- τ=233: 1 nodes, 1 σ-classes
+  module τ233 where
 
+    -- σ=352 (1 nodes)
+    cell-0 : κ 167 ≡ κ 167
+    cell-0 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-τ889 where
 
-  -- ctx-889: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1923 (1×)
-  ctx-889-τ889 : τ 889 ≡ τ 889
-  ctx-889-τ889 = refl
+-- κ=168: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-22 where
 
+  -- τ=234: 1 nodes, 1 σ-classes
+  module τ234 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=353 (1 nodes)
+    cell-0 : κ 168 ≡ κ 168
+    cell-0 = refl
 
-module let-k-Assign-τ890 where
 
-  -- ctx-890: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1924 (1×)
-  ctx-890-τ890 : τ 890 ≡ τ 890
-  ctx-890-τ890 = refl
 
+-- κ=169: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-18 where
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=235: 1 nodes, 1 σ-classes
+  module τ235 where
 
-module free_monoid-fold-JoinedStr-str-14 where
+    -- σ=354 (1 nodes)
+    cell-0 : κ 169 ≡ κ 169
+    cell-0 = refl
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=1930 (1×)
-  str-τ892 : τ 892 ≡ τ 892
-  str-τ892 = refl
 
 
--- ── free_monoid.snoc@sequence (Call) ───────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=170: 6 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-17 where
 
-module free_monoid-snoc-at-sequence-Call-None-0 where
+  -- τ=237: 6 nodes, 1 σ-classes
+  module τ237 where
 
-  -- None: 1 nodes, 1 forms
-  -- [None]
-  --   σ=1931 (1×)
-  None-τ893 : τ 893 ≡ τ 893
-  None-τ893 = refl
+    -- σ=357 (6 nodes)
+    cell-0 : κ 170 ≡ κ 170
+    cell-0 = refl
 
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-τ894 where
+-- κ=171: 6 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-23 where
 
-  -- ctx-894: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1932 (1×)
-  ctx-894-τ894 : τ 894 ≡ τ 894
-  ctx-894-τ894 = refl
+  -- τ=238: 6 nodes, 1 σ-classes
+  module τ238 where
 
+    -- σ=358 (6 nodes)
+    cell-0 : κ 171 ≡ κ 171
+    cell-0 = refl
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-str-15 where
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=1940 (1×)
-  str-τ895 : τ 895 ≡ τ 895
-  str-τ895 = refl
+-- κ=172: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-18 where
 
+  -- τ=239: 1 nodes, 1 σ-classes
+  module tuple where
 
--- ── free_monoid.snoc@sequence (Call) ───────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=359 (1 nodes)
+    cell-0 : κ 172 ≡ κ 172
+    cell-0 = refl
 
-module free_monoid-snoc-at-sequence-Call-None-1 where
 
-  -- None: 1 nodes, 1 forms
-  -- [None]
-  --   σ=1941 (1×)
-  None-τ896 : τ 896 ≡ τ 896
-  None-τ896 = refl
 
+-- κ=173: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-18 where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=240: 1 nodes, 1 σ-classes
+  module τ240 where
 
-module effect-seq-Expr-τ897 where
+    -- σ=360 (1 nodes)
+    cell-0 : κ 173 ≡ κ 173
+    cell-0 = refl
 
-  -- ctx-897: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1942 (1×)
-  ctx-897-τ897 : τ 897 ≡ τ 897
-  ctx-897-τ897 = refl
 
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=174: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-24 where
 
-module free_monoid-fold-JoinedStr-str-16 where
+  -- τ=241: 1 nodes, 1 σ-classes
+  module τ241 where
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=1952 (1×)
-  str-τ898 : τ 898 ≡ τ 898
-  str-τ898 = refl
+    -- σ=361 (1 nodes)
+    cell-0 : κ 174 ≡ κ 174
+    cell-0 = refl
 
 
--- ── free_monoid.snoc@sequence (Call) ───────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-sequence-Call-None-2 where
+-- κ=176: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-19 where
 
-  -- None: 1 nodes, 1 forms
-  -- [None]
-  --   σ=1953 (1×)
-  None-τ899 : τ 899 ≡ τ 899
-  None-τ899 = refl
+  -- τ=243: 1 nodes, 1 σ-classes
+  module τ243 where
 
+    -- σ=363 (1 nodes)
+    cell-0 : κ 176 ≡ κ 176
+    cell-0 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-τ900 where
 
-  -- ctx-900: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1954 (1×)
-  ctx-900-τ900 : τ 900 ≡ τ 900
-  ctx-900-τ900 = refl
+-- κ=177: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-19 where
 
+  -- τ=245: 1 nodes, 1 σ-classes
+  module tuple where
 
--- ── mult (Mult) ────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=365 (1 nodes)
+    cell-0 : κ 177 ≡ κ 177
+    cell-0 = refl
 
-module mult-Mult-τ901 where
 
-  -- ctx-901: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1961 (1×)
-  ctx-901-τ901 : τ 901 ≡ τ 901
-  ctx-901-τ901 = refl
 
+-- κ=178: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-19 where
 
--- ── bimap (BinOp) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=246: 1 nodes, 1 σ-classes
+  module τ246 where
 
-module bimap-BinOp-τ903 where
+    -- σ=366 (1 nodes)
+    cell-0 : κ 178 ≡ κ 178
+    cell-0 = refl
 
-  -- ctx-903: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1963 (1×)
-  ctx-903-τ903 : τ 903 ≡ τ 903
-  ctx-903-τ903 = refl
 
 
--- ── equalizer (Compare) ────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=179: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-25 where
 
-module equalizer-Compare-τ904 where
+  -- τ=247: 1 nodes, 1 σ-classes
+  module τ247 where
 
-  -- ctx-904: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1964 (1×)
-  ctx-904-τ904 : τ 904 ≡ τ 904
-  ctx-904-τ904 = refl
+    -- σ=367 (1 nodes)
+    cell-0 : κ 179 ≡ κ 179
+    cell-0 = refl
 
 
--- ── ifexp (IfExp) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module ifexp-IfExp-τ905 where
+-- κ=180: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-20 where
 
-  -- ctx-905: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1967 (1×)
-  ctx-905-τ905 : τ 905 ≡ τ 905
-  ctx-905-τ905 = refl
+  -- τ=248: 1 nodes, 1 σ-classes
+  module τ248 where
 
+    -- σ=368 (1 nodes)
+    cell-0 : κ 180 ≡ κ 180
+    cell-0 = refl
 
--- ── coerce (FormattedValue) ────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module coerce-FormattedValue-τ906 where
 
-  -- ctx-906: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1968 (1×)
-  ctx-906-τ906 : τ 906 ≡ τ 906
-  ctx-906-τ906 = refl
+-- κ=186: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-21 where
 
+  -- τ=263: 1 nodes, 1 σ-classes
+  module τ263 where
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=385 (1 nodes)
+    cell-0 : κ 186 ≡ κ 186
+    cell-0 = refl
 
-module free_monoid-fold-JoinedStr-str-17 where
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=1969 (1×)
-  str-τ907 : τ 907 ≡ τ 907
-  str-τ907 = refl
 
+-- κ=189: 2 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-20 where
 
--- ── free_monoid.snoc@sequence (Call) ───────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=267: 2 nodes, 1 σ-classes
+  module tuple where
 
-module free_monoid-snoc-at-sequence-Call-None-3 where
+    -- σ=389 (2 nodes)
+    cell-0 : κ 189 ≡ κ 189
+    cell-0 = refl
 
-  -- None: 1 nodes, 1 forms
-  -- [None]
-  --   σ=1970 (1×)
-  None-τ908 : τ 908 ≡ τ 908
-  None-τ908 = refl
 
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=190: 2 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-20 where
 
-module effect-seq-Expr-τ909 where
+  -- τ=268: 2 nodes, 1 σ-classes
+  module τ268 where
 
-  -- ctx-909: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1971 (1×)
-  ctx-909-τ909 : τ 909 ≡ τ 909
-  ctx-909-τ909 = refl
+    -- σ=390 (2 nodes)
+    cell-0 : κ 190 ≡ κ 190
+    cell-0 = refl
 
 
--- ── exponential.literal (Dict) ─────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module exponential-literal-Dict-dict-5 where
+-- κ=192: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-22 where
 
-  -- dict: 1 nodes, 1 forms
-  -- [dict]
-  --   σ=1979 (1×)
-  dict-τ910 : τ 910 ≡ τ 910
-  dict-τ910 = refl
+  -- τ=270: 1 nodes, 1 σ-classes
+  module τ270 where
 
+    -- σ=392 (1 nodes)
+    cell-0 : κ 192 ≡ κ 192
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ911 where
 
-  -- ctx-911: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1980 (1×)
-  ctx-911-τ911 : τ 911 ≡ τ 911
-  ctx-911-τ911 = refl
+-- κ=196: 1 nodes, 1 τ-classes, 1 σ-classes
+module arguments-arguments-7 where
 
+  -- τ=285: 1 nodes, 1 σ-classes
+  module τ285 where
 
--- ── partial.apply@state (Call) ─────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=408 (1 nodes)
+    cell-0 : κ 196 ≡ κ 196
+    cell-0 = refl
 
-module partial-apply-at-state-Call-T-5 where
 
-  -- T: 1 nodes, 1 forms
-  -- [T]
-  --   σ=1983 (1×)
-  T-τ913 : τ 913 ≡ τ 913
-  T-τ913 = refl
 
+-- κ=197: 1 nodes, 1 τ-classes, 1 σ-classes
+module lambda-Lambda-0 where
 
--- ── cardinality (Call) ─────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=286: 1 nodes, 1 σ-classes
+  module τ286 where
 
-module cardinality-Call-int-3 where
+    -- σ=410 (1 nodes)
+    cell-0 : κ 197 ≡ κ 197
+    cell-0 = refl
 
-  -- int: 1 nodes, 1 forms
-  -- [int]
-  --   σ=1984 (1×)
-  int-τ914 : τ 914 ≡ τ 914
-  int-τ914 = refl
 
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=198: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-20 where
 
-module let-k-Assign-τ915 where
+  -- τ=287: 1 nodes, 1 σ-classes
+  module τ287 where
 
-  -- ctx-915: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1985 (1×)
-  ctx-915-τ915 : τ 915 ≡ τ 915
-  ctx-915-τ915 = refl
+    -- σ=411 (1 nodes)
+    cell-0 : κ 198 ≡ κ 198
+    cell-0 = refl
 
 
--- ── bimap (BinOp) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module bimap-BinOp-τ916 where
+-- κ=199: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-23 where
 
-  -- ctx-916: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1988 (1×)
-  ctx-916-τ916 : τ 916 ≡ τ 916
-  ctx-916-τ916 = refl
+  -- τ=288: 1 nodes, 1 σ-classes
+  module τ288 where
 
+    -- σ=412 (1 nodes)
+    cell-0 : κ 199 ≡ κ 199
+    cell-0 = refl
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ917 where
 
-  -- ctx-917: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1989 (1×)
-  ctx-917-τ917 : τ 917 ≡ τ 917
-  ctx-917-τ917 = refl
+-- κ=203: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-24 where
 
+  -- τ=293: 1 nodes, 1 σ-classes
+  module τ293 where
 
--- ── free_monoid.snoc@sequence (Call) ───────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=421 (1 nodes)
+    cell-0 : κ 203 ≡ κ 203
+    cell-0 = refl
 
-module free_monoid-snoc-at-sequence-Call-None-4 where
 
-  -- None: 1 nodes, 1 forms
-  -- [None]
-  --   σ=1991 (1×)
-  None-τ918 : τ 918 ≡ τ 918
-  None-τ918 = refl
 
+-- κ=204: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-18 where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=294: 1 nodes, 1 σ-classes
+  module τ294 where
 
-module effect-seq-Expr-τ919 where
+    -- σ=422 (1 nodes)
+    cell-0 : κ 204 ≡ κ 204
+    cell-0 = refl
 
-  -- ctx-919: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=1992 (1×)
-  ctx-919-τ919 : τ 919 ≡ τ 919
-  ctx-919-τ919 = refl
 
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=205: 1 nodes, 1 τ-classes, 1 σ-classes
+module arg-arg-4 where
 
-module free_monoid-fold-JoinedStr-str-18 where
+  -- τ=297: 1 nodes, 1 σ-classes
+  module τ297 where
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=2003 (1×)
-  str-τ923 : τ 923 ≡ τ 923
-  str-τ923 = refl
+    -- σ=427 (1 nodes)
+    cell-0 : κ 205 ≡ κ 205
+    cell-0 = refl
 
 
--- ── free_monoid.snoc@sequence (Call) ───────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-sequence-Call-None-5 where
+-- κ=206: 1 nodes, 1 τ-classes, 1 σ-classes
+module arguments-arguments-8 where
 
-  -- None: 1 nodes, 1 forms
-  -- [None]
-  --   σ=2004 (1×)
-  None-τ924 : τ 924 ≡ τ 924
-  None-τ924 = refl
+  -- τ=298: 1 nodes, 1 σ-classes
+  module τ298 where
 
+    -- σ=428 (1 nodes)
+    cell-0 : κ 206 ≡ κ 206
+    cell-0 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-τ925 where
 
-  -- ctx-925: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2005 (1×)
-  ctx-925-τ925 : τ 925 ≡ τ 925
-  ctx-925-τ925 = refl
+-- κ=207: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-26 where
 
+  -- τ=299: 1 nodes, 1 σ-classes
+  module τ299 where
 
--- ── projection@state (Attribute) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=437 (1 nodes)
+    cell-0 : κ 207 ≡ κ 207
+    cell-0 = refl
 
-module projection-at-state-Attribute-Self-_cell_obs-keys where
 
-  -- Self-_cell_obs-keys: 1 nodes, 1 forms
-  -- [Self._cell_contents.get, Self._cell_obs.get, Self._cell_obs.keys, Self._cleavage_fibers.append, Self._cleavage_levels.append]
-  --   σ=2006 (1×)
-  Self-_cell_obs-keys-τ153 : τ 153 ≡ τ 153
-  Self-_cell_obs-keys-τ153 = refl
 
+-- κ=208: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-accum-AugAssign-2 where
 
--- ── projection.compute@state (Call) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=300: 1 nodes, 1 σ-classes
+  module τ300 where
 
-module projection-compute-at-state-Call-Iter where
+    -- σ=438 (1 nodes)
+    cell-0 : κ 208 ≡ κ 208
+    cell-0 = refl
 
-  -- Iter: 1 nodes, 1 forms
-  -- [Iter]
-  --   σ=2007 (1×)
-  Iter-τ927 : τ 927 ≡ τ 927
-  Iter-τ927 = refl
 
 
--- ── total_order (Call) ─────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=214: 1 nodes, 1 τ-classes, 1 σ-classes
+module coproduct-elim-If-0 where
 
-module total_order-Call-list-2 where
+  -- τ=306: 1 nodes, 1 σ-classes
+  module τ306 where
 
-  -- list: 1 nodes, 1 forms
-  -- [list]
-  --   σ=2008 (1×)
-  list-τ928 : τ 928 ≡ τ 928
-  list-τ928 = refl
+    -- σ=453 (1 nodes)
+    cell-0 : κ 214 ≡ κ 214
+    cell-0 = refl
 
 
--- ── complement (If) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module complement-If-τ929 where
+-- κ=215: 9 nodes, 1 τ-classes, 1 σ-classes
+module gt-Gt where
 
-  -- ctx-929: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2011 (1×)
-  ctx-929-τ929 : τ 929 ≡ τ 929
-  ctx-929-τ929 = refl
+  -- τ=307: 9 nodes, 1 σ-classes
+  module τ307 where
 
+    -- σ=454 (9 nodes)
+    cell-0 : κ 215 ≡ κ 215
+    cell-0 = refl
 
--- ── partial@mapping (Attribute) ────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module partial-at-mapping-Attribute-dict-get where
 
-  -- dict-get: 1 nodes, 1 forms
-  -- [Self._cascade_abstraction_merge, Self._cascade_eta, Self._cell_contents, Self._cell_obs, Self._cleavage_fibers]
-  --   σ=2013 (1×)
-  dict-get-τ34 : τ 34 ≡ τ 34
-  dict-get-τ34 = refl
+-- κ=218: 2 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-21 where
 
+  -- τ=310: 2 nodes, 1 σ-classes
+  module tuple where
 
--- ── partial.apply@mapping (Call) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=458 (2 nodes)
+    cell-0 : κ 218 ≡ κ 218
+    cell-0 = refl
 
-module partial-apply-at-mapping-Call-T where
 
-  -- T: 1 nodes, 1 forms
-  -- [T]
-  --   σ=2017 (1×)
-  T-τ932 : τ 932 ≡ τ 932
-  T-τ932 = refl
 
+-- κ=220: 8 nodes, 1 τ-classes, 1 σ-classes
+module sub-Sub where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=313: 8 nodes, 1 σ-classes
+  module τ313 where
 
-module let-k-Assign-τ933 where
+    -- σ=461 (8 nodes)
+    cell-0 : κ 220 ≡ κ 220
+    cell-0 = refl
 
-  -- ctx-933: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2018 (1×)
-  ctx-933-τ933 : τ 933 ≡ τ 933
-  ctx-933-τ933 = refl
 
 
--- ── lambda (Lambda) ────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=221: 1 nodes, 1 τ-classes, 1 σ-classes
+module bimap-BinOp-4 where
 
-module lambda-Lambda-τ934 where
+  -- τ=314: 1 nodes, 1 σ-classes
+  module τ314 where
 
-  -- ctx-934: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2024 (1×)
-  ctx-934-τ934 : τ 934 ≡ τ 934
-  ctx-934-τ934 = refl
+    -- σ=462 (1 nodes)
+    cell-0 : κ 221 ≡ κ 221
+    cell-0 = refl
 
 
--- ── keyword (keyword) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module keyword-keyword-τ935 where
+-- κ=222: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-21 where
 
-  -- ctx-935: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2025 (1×)
-  ctx-935-τ935 : τ 935 ≡ τ 935
-  ctx-935-τ935 = refl
+  -- τ=315: 1 nodes, 1 σ-classes
+  module τ315 where
 
+    -- σ=464 (1 nodes)
+    cell-0 : κ 222 ≡ κ 222
+    cell-0 = refl
 
--- ── apply (Call) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module apply-Call-τ936 where
 
-  -- ctx-936: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2026 (1×)
-  ctx-936-τ936 : τ 936 ≡ τ 936
-  ctx-936-τ936 = refl
+-- κ=223: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-14 where
 
+  -- τ=316: 1 nodes, 1 σ-classes
+  module τ316 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=465 (1 nodes)
+    cell-0 : κ 223 ≡ κ 223
+    cell-0 = refl
 
-module let-k-Assign-τ937 where
 
-  -- ctx-937: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2027 (1×)
-  ctx-937-τ937 : τ 937 ≡ τ 937
-  ctx-937-τ937 = refl
 
+-- κ=224: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-5 where
 
--- ── coerce (Call) ──────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=317: 1 nodes, 1 σ-classes
+  module τ317 where
 
-module coerce-Call-τ404 where
+    -- σ=466 (1 nodes)
+    cell-0 : κ 224 ≡ κ 224
+    cell-0 = refl
 
-  -- ctx-404: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2030 (1×)
-  ctx-404-τ404 : τ 404 ≡ τ 404
-  ctx-404-τ404 = refl
 
 
--- ── subscript (Subscript) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=225: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-12 where
 
-module subscript-Subscript-τ938 where
+  -- τ=318: 1 nodes, 1 σ-classes
+  module τ318 where
 
-  -- ctx-938: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2033 (1×)
-  ctx-938-τ938 : τ 938 ≡ τ 938
-  ctx-938-τ938 = refl
+    -- σ=467 (1 nodes)
+    cell-0 : κ 225 ≡ κ 225
+    cell-0 = refl
 
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module let-k-Assign-τ939 where
+-- κ=226: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-19 where
 
-  -- ctx-939: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2034 (1×)
-  ctx-939-τ939 : τ 939 ≡ τ 939
-  ctx-939-τ939 = refl
+  -- τ=319: 1 nodes, 1 σ-classes
+  module τ319 where
 
+    -- σ=468 (1 nodes)
+    cell-0 : κ 226 ≡ κ 226
+    cell-0 = refl
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-JoinedStr-str-19 where
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=2047 (1×)
-  str-τ940 : τ 940 ≡ τ 940
-  str-τ940 = refl
+-- κ=229: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-28 where
 
+  -- τ=325: 1 nodes, 1 σ-classes
+  module τ325 where
 
--- ── free_monoid.snoc@sequence (Call) ───────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=486 (1 nodes)
+    cell-0 : κ 229 ≡ κ 229
+    cell-0 = refl
 
-module free_monoid-snoc-at-sequence-Call-None-6 where
 
-  -- None: 1 nodes, 1 forms
-  -- [None]
-  --   σ=2048 (1×)
-  None-τ941 : τ 941 ≡ τ 941
-  None-τ941 = refl
 
+-- κ=230: 1 nodes, 1 τ-classes, 1 σ-classes
+module or-Or where
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=327: 1 nodes, 1 σ-classes
+  module τ327 where
 
-module effect-seq-Expr-τ942 where
+    -- σ=489 (1 nodes)
+    cell-0 : κ 230 ≡ κ 230
+    cell-0 = refl
 
-  -- ctx-942: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2049 (1×)
-  ctx-942-τ942 : τ 942 ≡ τ 942
-  ctx-942-τ942 = refl
 
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=231: 1 nodes, 1 τ-classes, 1 σ-classes
+module join-BoolOp where
 
-module fold-For-τ943 where
+  -- τ=329: 1 nodes, 1 σ-classes
+  module τ329 where
 
-  -- ctx-943: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2050 (1×)
-  ctx-943-τ943 : τ 943 ≡ τ 943
-  ctx-943-τ943 = refl
+    -- σ=493 (1 nodes)
+    cell-0 : κ 231 ≡ κ 231
+    cell-0 = refl
 
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module equalizer-If-τ944 where
+-- κ=233: 1 nodes, 1 τ-classes, 1 σ-classes
+module lazy_fold-GeneratorExp-2 where
 
-  -- ctx-944: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2053 (1×)
-  ctx-944-τ944 : τ 944 ≡ τ 944
-  ctx-944-τ944 = refl
+  -- τ=331: 1 nodes, 1 σ-classes
+  module τ331 where
 
+    -- σ=497 (1 nodes)
+    cell-0 : κ 233 ≡ κ 233
+    cell-0 = refl
 
--- ── partial.apply@? (Call) ─────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module partial-apply-at-x3f-Call-τ946 where
 
-  -- ctx-946: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2059 (1×)
-  ctx-946-τ946 : τ 946 ≡ τ 946
-  ctx-946-τ946 = refl
+-- κ=234: 1 nodes, 1 τ-classes, 1 σ-classes
+module total_order-Call-0 where
 
+  -- τ=332: 1 nodes, 1 σ-classes
+  module list where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=498 (1 nodes)
+    cell-0 : κ 234 ≡ κ 234
+    cell-0 = refl
 
-module let-k-Assign-τ947 where
 
-  -- ctx-947: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2060 (1×)
-  ctx-947-τ947 : τ 947 ≡ τ 947
-  ctx-947-τ947 = refl
 
+-- κ=235: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-22 where
 
--- ── let (Assign) ───────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=333: 1 nodes, 1 σ-classes
+  module τ333 where
 
-module let-k-Assign-τ948 where
+    -- σ=499 (1 nodes)
+    cell-0 : κ 235 ≡ κ 235
+    cell-0 = refl
 
-  -- ctx-948: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2068 (1×)
-  ctx-948-τ948 : τ 948 ≡ τ 948
-  ctx-948-τ948 = refl
 
 
--- ── free_monoid.fold (JoinedStr) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=236: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-29 where
 
-module free_monoid-fold-JoinedStr-str-20 where
+  -- τ=334: 1 nodes, 1 σ-classes
+  module τ334 where
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=2084 (1×)
-  str-τ951 : τ 951 ≡ τ 951
-  str-τ951 = refl
+    -- σ=500 (1 nodes)
+    cell-0 : κ 236 ≡ κ 236
+    cell-0 = refl
 
 
--- ── free_monoid.snoc@sequence (Call) ───────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-snoc-at-sequence-Call-None-7 where
+-- κ=237: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-Compare-14 where
 
-  -- None: 1 nodes, 1 forms
-  -- [None]
-  --   σ=2085 (1×)
-  None-τ952 : τ 952 ≡ τ 952
-  None-τ952 = refl
+  -- τ=336: 1 nodes, 1 σ-classes
+  module τ336 where
 
+    -- σ=504 (1 nodes)
+    cell-0 : κ 237 ≡ κ 237
+    cell-0 = refl
 
--- ── effect.seq (Expr) ──────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module effect-seq-Expr-τ953 where
 
-  -- ctx-953: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2086 (1×)
-  ctx-953-τ953 : τ 953 ≡ τ 953
-  ctx-953-τ953 = refl
+-- κ=238: 1 nodes, 1 τ-classes, 1 σ-classes
+module terminal-map-Return-12 where
 
+  -- τ=337: 1 nodes, 1 σ-classes
+  module τ337 where
 
--- ── equalizer (If) ─────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=505 (1 nodes)
+    cell-0 : κ 238 ≡ κ 238
+    cell-0 = refl
 
-module equalizer-If-τ954 where
 
-  -- ctx-954: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2087 (1×)
-  ctx-954-τ954 : τ 954 ≡ τ 954
-  ctx-954-τ954 = refl
 
+-- κ=239: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-13 where
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=338: 1 nodes, 1 σ-classes
+  module τ338 where
 
-module fold-For-τ955 where
+    -- σ=506 (1 nodes)
+    cell-0 : κ 239 ≡ κ 239
+    cell-0 = refl
 
-  -- ctx-955: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2088 (1×)
-  ctx-955-τ955 : τ 955 ≡ τ 955
-  ctx-955-τ955 = refl
 
 
--- ── fold (For) ─────────────────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=240: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-30 where
 
-module fold-For-τ956 where
+  -- τ=339: 1 nodes, 1 σ-classes
+  module τ339 where
 
-  -- ctx-956: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2089 (1×)
-  ctx-956-τ956 : τ 956 ≡ τ 956
-  ctx-956-τ956 = refl
+    -- σ=513 (1 nodes)
+    cell-0 : κ 240 ≡ κ 240
+    cell-0 = refl
 
 
--- ── free_monoid.fold (Attribute) ───────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-Attribute-str-join where
+-- κ=241: 4 nodes, 1 τ-classes, 1 σ-classes
+module gte-GtE where
 
-  -- str-join: 1 nodes, 1 forms
-  -- [str.join]
-  --   σ=2091 (1×)
-  str-join-τ957 : τ 957 ≡ τ 957
-  str-join-τ957 = refl
+  -- τ=340: 4 nodes, 1 σ-classes
+  module τ340 where
 
+    -- σ=515 (4 nodes)
+    cell-0 : κ 241 ≡ κ 241
+    cell-0 = refl
 
--- ── free_monoid.fold (Call) ────────────────────
--- 1 nodes, 1 type contexts, 1 forms
 
-module free_monoid-fold-Call-str where
 
-  -- str: 1 nodes, 1 forms
-  -- [str]
-  --   σ=2092 (1×)
-  str-τ958 : τ 958 ≡ τ 958
-  str-τ958 = refl
+-- κ=244: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-state-Call-2 where
 
+  -- τ=343: 1 nodes, 1 σ-classes
+  module None where
 
--- ── terminal.map (Return) ──────────────────────
--- 1 nodes, 1 type contexts, 1 forms
+    -- σ=520 (1 nodes)
+    cell-0 : κ 244 ≡ κ 244
+    cell-0 = refl
 
-module terminal-map-Return-τ959 where
 
-  -- ctx-959: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2093 (1×)
-  ctx-959-τ959 : τ 959 ≡ τ 959
-  ctx-959-τ959 = refl
 
+-- κ=245: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-15 where
 
--- ── exponential.intro (FunctionDef) ────────────
--- 1 nodes, 1 type contexts, 1 forms
+  -- τ=344: 1 nodes, 1 σ-classes
+  module τ344 where
 
-module exponential-intro-FunctionDef-τ960 where
+    -- σ=521 (1 nodes)
+    cell-0 : κ 245 ≡ κ 245
+    cell-0 = refl
 
-  -- ctx-960: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2094 (1×)
-  ctx-960-τ960 : τ 960 ≡ τ 960
-  ctx-960-τ960 = refl
 
 
--- ── classifier.intro (ClassDef) ────────────────
--- 1 nodes, 1 type contexts, 1 forms
+-- κ=246: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-JoinedStr-8 where
 
-module classifier-intro-ClassDef-τ961 where
+  -- τ=345: 1 nodes, 1 σ-classes
+  module str where
 
-  -- ctx-961: 1 nodes, 1 forms
-  -- [(untyped)]
-  --   σ=2095 (1×)
-  ctx-961-τ961 : τ 961 ≡ τ 961
-  ctx-961-τ961 = refl
+    -- σ=527 (1 nodes)
+    cell-0 : κ 246 ≡ κ 246
+    cell-0 = refl
+
+
+
+-- κ=247: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-23 where
+
+  -- τ=346: 1 nodes, 1 σ-classes
+  module τ346 where
+
+    -- σ=528 (1 nodes)
+    cell-0 : κ 247 ≡ κ 247
+    cell-0 = refl
+
+
+
+-- κ=248: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-31 where
+
+  -- τ=347: 1 nodes, 1 σ-classes
+  module τ347 where
+
+    -- σ=529 (1 nodes)
+    cell-0 : κ 248 ≡ κ 248
+    cell-0 = refl
+
+
+
+-- κ=249: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-state-Call-3 where
+
+  -- τ=349: 1 nodes, 1 σ-classes
+  module None where
+
+    -- σ=532 (1 nodes)
+    cell-0 : κ 249 ≡ κ 249
+    cell-0 = refl
+
+
+
+-- κ=250: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-16 where
+
+  -- τ=350: 1 nodes, 1 σ-classes
+  module τ350 where
+
+    -- σ=533 (1 nodes)
+    cell-0 : κ 250 ≡ κ 250
+    cell-0 = refl
+
+
+
+-- κ=251: 1 nodes, 1 τ-classes, 1 σ-classes
+module fixpoint-While-2 where
+
+  -- τ=351: 1 nodes, 1 σ-classes
+  module τ351 where
+
+    -- σ=534 (1 nodes)
+    cell-0 : κ 251 ≡ κ 251
+    cell-0 = refl
+
+
+
+-- κ=253: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-32 where
+
+  -- τ=354: 1 nodes, 1 σ-classes
+  module τ354 where
+
+    -- σ=552 (1 nodes)
+    cell-0 : κ 253 ≡ κ 253
+    cell-0 = refl
+
+
+
+-- κ=257: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-25 where
+
+  -- τ=360: 1 nodes, 1 σ-classes
+  module τ360 where
+
+    -- σ=568 (1 nodes)
+    cell-0 : κ 257 ≡ κ 257
+    cell-0 = refl
+
+
+
+-- κ=260: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-Compare-15 where
+
+  -- τ=363: 1 nodes, 1 σ-classes
+  module τ363 where
+
+    -- σ=576 (1 nodes)
+    cell-0 : κ 260 ≡ κ 260
+    cell-0 = refl
+
+
+
+-- κ=261: 2 nodes, 1 τ-classes, 1 σ-classes
+module partial-at-x3f-Attribute-1 where
+
+  -- τ=178: 2 nodes, 1 σ-classes
+  module τ178 where
+
+    -- σ=582 (2 nodes)
+    cell-0 : κ 261 ≡ κ 261
+    cell-0 = refl
+
+
+
+-- κ=265: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-Compare-16 where
+
+  -- τ=367: 1 nodes, 1 σ-classes
+  module τ367 where
+
+    -- σ=590 (1 nodes)
+    cell-0 : κ 265 ≡ κ 265
+    cell-0 = refl
+
+
+
+-- κ=266: 1 nodes, 1 τ-classes, 1 σ-classes
+module comprehension-comprehension-4 where
+
+  -- τ=368: 1 nodes, 1 σ-classes
+  module τ368 where
+
+    -- σ=591 (1 nodes)
+    cell-0 : κ 266 ≡ κ 266
+    cell-0 = refl
+
+
+
+-- κ=267: 1 nodes, 1 τ-classes, 1 σ-classes
+module lazy_fold-GeneratorExp-3 where
+
+  -- τ=369: 1 nodes, 1 σ-classes
+  module τ369 where
+
+    -- σ=592 (1 nodes)
+    cell-0 : κ 267 ≡ κ 267
+    cell-0 = refl
+
+
+
+-- κ=268: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-24 where
+
+  -- τ=370: 1 nodes, 1 σ-classes
+  module τ370 where
+
+    -- σ=593 (1 nodes)
+    cell-0 : κ 268 ≡ κ 268
+    cell-0 = refl
+
+
+
+-- κ=269: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-33 where
+
+  -- τ=371: 1 nodes, 1 σ-classes
+  module τ371 where
+
+    -- σ=594 (1 nodes)
+    cell-0 : κ 269 ≡ κ 269
+    cell-0 = refl
+
+
+
+-- κ=270: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-14 where
+
+  -- τ=372: 1 nodes, 1 σ-classes
+  module τ372 where
+
+    -- σ=600 (1 nodes)
+    cell-0 : κ 270 ≡ κ 270
+    cell-0 = refl
+
+
+
+-- κ=271: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-6 where
+
+  -- τ=373: 1 nodes, 1 σ-classes
+  module τ373 where
+
+    -- σ=601 (1 nodes)
+    cell-0 : κ 271 ≡ κ 271
+    cell-0 = refl
+
+
+
+-- κ=272: 1 nodes, 1 τ-classes, 1 σ-classes
+module lte-LtE where
+
+  -- τ=374: 1 nodes, 1 σ-classes
+  module τ374 where
+
+    -- σ=604 (1 nodes)
+    cell-0 : κ 272 ≡ κ 272
+    cell-0 = refl
+
+
+
+-- κ=273: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-Compare-17 where
+
+  -- τ=375: 1 nodes, 1 σ-classes
+  module τ375 where
+
+    -- σ=605 (1 nodes)
+    cell-0 : κ 273 ≡ κ 273
+    cell-0 = refl
+
+
+
+-- κ=274: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-34 where
+
+  -- τ=376: 1 nodes, 1 σ-classes
+  module τ376 where
+
+    -- σ=606 (1 nodes)
+    cell-0 : κ 274 ≡ κ 274
+    cell-0 = refl
+
+
+
+-- κ=278: 2 nodes, 1 τ-classes, 1 σ-classes
+module coerce-FormattedValue-9 where
+
+  -- τ=380: 2 nodes, 1 σ-classes
+  module τ380 where
+
+    -- σ=616 (2 nodes)
+    cell-0 : κ 278 ≡ κ 278
+    cell-0 = refl
+
+
+
+-- κ=281: 1 nodes, 1 τ-classes, 1 σ-classes
+module coproduct-elim-If-1 where
+
+  -- τ=383: 1 nodes, 1 σ-classes
+  module τ383 where
+
+    -- σ=622 (1 nodes)
+    cell-0 : κ 281 ≡ κ 281
+    cell-0 = refl
+
+
+
+-- κ=283: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-22 where
+
+  -- τ=386: 1 nodes, 1 σ-classes
+  module tuple where
+
+    -- σ=630 (1 nodes)
+    cell-0 : κ 283 ≡ κ 283
+    cell-0 = refl
+
+
+
+-- κ=284: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-state-Call-4 where
+
+  -- τ=387: 1 nodes, 1 σ-classes
+  module None where
+
+    -- σ=631 (1 nodes)
+    cell-0 : κ 284 ≡ κ 284
+    cell-0 = refl
+
+
+
+-- κ=285: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-17 where
+
+  -- τ=388: 1 nodes, 1 σ-classes
+  module τ388 where
+
+    -- σ=632 (1 nodes)
+    cell-0 : κ 285 ≡ κ 285
+    cell-0 = refl
+
+
+
+-- κ=286: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-op-BinOp-0 where
+
+  -- τ=389: 1 nodes, 1 σ-classes
+  module τ389 where
+
+    -- σ=634 (1 nodes)
+    cell-0 : κ 286 ≡ κ 286
+    cell-0 = refl
+
+
+
+-- κ=287: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-35 where
+
+  -- τ=390: 1 nodes, 1 σ-classes
+  module τ390 where
+
+    -- σ=635 (1 nodes)
+    cell-0 : κ 287 ≡ κ 287
+    cell-0 = refl
+
+
+
+-- κ=288: 1 nodes, 1 τ-classes, 1 σ-classes
+module partial-apply-at-state-Call-2 where
+
+  -- τ=349: 1 nodes, 1 σ-classes
+  module None where
+
+    -- σ=644 (1 nodes)
+    cell-0 : κ 288 ≡ κ 288
+    cell-0 = refl
+
+
+
+-- κ=289: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-36 where
+
+  -- τ=395: 1 nodes, 1 σ-classes
+  module τ395 where
+
+    -- σ=645 (1 nodes)
+    cell-0 : κ 289 ≡ κ 289
+    cell-0 = refl
+
+
+
+-- κ=290: 1 nodes, 1 τ-classes, 1 σ-classes
+module ifexp-IfExp-2 where
+
+  -- τ=398: 1 nodes, 1 σ-classes
+  module τ398 where
+
+    -- σ=653 (1 nodes)
+    cell-0 : κ 290 ≡ κ 290
+    cell-0 = refl
+
+
+
+-- κ=291: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-op-at-x3f-Call-2 where
+
+  -- τ=399: 1 nodes, 1 σ-classes
+  module τ399 where
+
+    -- σ=654 (1 nodes)
+    cell-0 : κ 291 ≡ κ 291
+    cell-0 = refl
+
+
+
+-- κ=292: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-18 where
+
+  -- τ=400: 1 nodes, 1 σ-classes
+  module τ400 where
+
+    -- σ=655 (1 nodes)
+    cell-0 : κ 292 ≡ κ 292
+    cell-0 = refl
+
+
+
+-- κ=293: 1 nodes, 1 τ-classes, 1 σ-classes
+module coproduct-elim-If-2 where
+
+  -- τ=401: 1 nodes, 1 σ-classes
+  module τ401 where
+
+    -- σ=656 (1 nodes)
+    cell-0 : κ 293 ≡ κ 293
+    cell-0 = refl
+
+
+
+-- κ=294: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-7 where
+
+  -- τ=402: 1 nodes, 1 σ-classes
+  module τ402 where
+
+    -- σ=657 (1 nodes)
+    cell-0 : κ 294 ≡ κ 294
+    cell-0 = refl
+
+
+
+-- κ=295: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-8 where
+
+  -- τ=403: 1 nodes, 1 σ-classes
+  module τ403 where
+
+    -- σ=658 (1 nodes)
+    cell-0 : κ 295 ≡ κ 295
+    cell-0 = refl
+
+
+
+-- κ=297: 1 nodes, 1 τ-classes, 1 σ-classes
+module ifexp-IfExp-3 where
+
+  -- τ=405: 1 nodes, 1 σ-classes
+  module τ405 where
+
+    -- σ=661 (1 nodes)
+    cell-0 : κ 297 ≡ κ 297
+    cell-0 = refl
+
+
+
+-- κ=298: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-25 where
+
+  -- τ=406: 1 nodes, 1 σ-classes
+  module τ406 where
+
+    -- σ=662 (1 nodes)
+    cell-0 : κ 298 ≡ κ 298
+    cell-0 = refl
+
+
+
+-- κ=299: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-19 where
+
+  -- τ=407: 1 nodes, 1 σ-classes
+  module τ407 where
+
+    -- σ=663 (1 nodes)
+    cell-0 : κ 299 ≡ κ 299
+    cell-0 = refl
+
+
+
+-- κ=301: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-37 where
+
+  -- τ=408: 1 nodes, 1 σ-classes
+  module τ408 where
+
+    -- σ=667 (1 nodes)
+    cell-0 : κ 301 ≡ κ 301
+    cell-0 = refl
+
+
+
+-- κ=302: 1 nodes, 1 τ-classes, 1 σ-classes
+module morphism-at-x3f-Attribute-3 where
+
+  -- τ=409: 1 nodes, 1 σ-classes
+  module τ409 where
+
+    -- σ=668 (1 nodes)
+    cell-0 : κ 302 ≡ κ 302
+    cell-0 = refl
+
+
+
+-- κ=303: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-accum-AugAssign-3 where
+
+  -- τ=410: 1 nodes, 1 σ-classes
+  module τ410 where
+
+    -- σ=669 (1 nodes)
+    cell-0 : κ 303 ≡ κ 303
+    cell-0 = refl
+
+
+
+-- κ=304: 7 nodes, 1 τ-classes, 1 σ-classes
+module fixpoint-next-Continue where
+
+  -- τ=412: 7 nodes, 1 σ-classes
+  module τ412 where
+
+    -- σ=671 (7 nodes)
+    cell-0 : κ 304 ≡ κ 304
+    cell-0 = refl
+
+
+
+-- κ=305: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-15 where
+
+  -- τ=413: 1 nodes, 1 σ-classes
+  module τ413 where
+
+    -- σ=672 (1 nodes)
+    cell-0 : κ 305 ≡ κ 305
+    cell-0 = refl
+
+
+
+-- κ=307: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-Compare-18 where
+
+  -- τ=415: 1 nodes, 1 σ-classes
+  module τ415 where
+
+    -- σ=677 (1 nodes)
+    cell-0 : κ 307 ≡ κ 307
+    cell-0 = refl
+
+
+
+-- κ=308: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-21 where
+
+  -- τ=416: 1 nodes, 1 σ-classes
+  module τ416 where
+
+    -- σ=678 (1 nodes)
+    cell-0 : κ 308 ≡ κ 308
+    cell-0 = refl
+
+
+
+-- κ=309: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-27 where
+
+  -- τ=417: 1 nodes, 1 σ-classes
+  module τ417 where
+
+    -- σ=679 (1 nodes)
+    cell-0 : κ 309 ≡ κ 309
+    cell-0 = refl
+
+
+
+-- κ=310: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-38 where
+
+  -- τ=418: 1 nodes, 1 σ-classes
+  module τ418 where
+
+    -- σ=681 (1 nodes)
+    cell-0 : κ 310 ≡ κ 310
+    cell-0 = refl
+
+
+
+-- κ=311: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-16 where
+
+  -- τ=419: 1 nodes, 1 σ-classes
+  module τ419 where
+
+    -- σ=682 (1 nodes)
+    cell-0 : κ 311 ≡ κ 311
+    cell-0 = refl
+
+
+
+-- κ=312: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-9 where
+
+  -- τ=420: 1 nodes, 1 σ-classes
+  module τ420 where
+
+    -- σ=683 (1 nodes)
+    cell-0 : κ 312 ≡ κ 312
+    cell-0 = refl
+
+
+
+-- κ=313: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-10 where
+
+  -- τ=421: 1 nodes, 1 σ-classes
+  module τ421 where
+
+    -- σ=684 (1 nodes)
+    cell-0 : κ 313 ≡ κ 313
+    cell-0 = refl
+
+
+
+-- κ=315: 1 nodes, 1 τ-classes, 1 σ-classes
+module lazy_fold-GeneratorExp-4 where
+
+  -- τ=423: 1 nodes, 1 σ-classes
+  module τ423 where
+
+    -- σ=688 (1 nodes)
+    cell-0 : κ 315 ≡ κ 315
+    cell-0 = refl
+
+
+
+-- κ=316: 1 nodes, 1 τ-classes, 1 σ-classes
+module powerset-Call-2 where
+
+  -- τ=424: 1 nodes, 1 σ-classes
+  module τ424 where
+
+    -- σ=689 (1 nodes)
+    cell-0 : κ 316 ≡ κ 316
+    cell-0 = refl
+
+
+
+-- κ=317: 1 nodes, 1 τ-classes, 1 σ-classes
+module total_order-Call-1 where
+
+  -- τ=425: 1 nodes, 1 σ-classes
+  module list where
+
+    -- σ=690 (1 nodes)
+    cell-0 : κ 317 ≡ κ 317
+    cell-0 = refl
+
+
+
+-- κ=318: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-26 where
+
+  -- τ=426: 1 nodes, 1 σ-classes
+  module τ426 where
+
+    -- σ=691 (1 nodes)
+    cell-0 : κ 318 ≡ κ 318
+    cell-0 = refl
+
+
+
+-- κ=319: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-39 where
+
+  -- τ=427: 1 nodes, 1 σ-classes
+  module τ427 where
+
+    -- σ=692 (1 nodes)
+    cell-0 : κ 319 ≡ κ 319
+    cell-0 = refl
+
+
+
+-- κ=320: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-40 where
+
+  -- τ=428: 1 nodes, 1 σ-classes
+  module τ428 where
+
+    -- σ=697 (1 nodes)
+    cell-0 : κ 320 ≡ κ 320
+    cell-0 = refl
+
+
+
+-- κ=321: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-accum-AugAssign-4 where
+
+  -- τ=429: 1 nodes, 1 σ-classes
+  module τ429 where
+
+    -- σ=698 (1 nodes)
+    cell-0 : κ 321 ≡ κ 321
+    cell-0 = refl
+
+
+
+-- κ=322: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-17 where
+
+  -- τ=430: 1 nodes, 1 σ-classes
+  module τ430 where
+
+    -- σ=699 (1 nodes)
+    cell-0 : κ 322 ≡ κ 322
+    cell-0 = refl
+
+
+
+-- κ=323: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-18 where
+
+  -- τ=431: 1 nodes, 1 σ-classes
+  module τ431 where
+
+    -- σ=700 (1 nodes)
+    cell-0 : κ 323 ≡ κ 323
+    cell-0 = refl
+
+
+
+-- κ=324: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-19 where
+
+  -- τ=432: 1 nodes, 1 σ-classes
+  module τ432 where
+
+    -- σ=701 (1 nodes)
+    cell-0 : κ 324 ≡ κ 324
+    cell-0 = refl
+
+
+
+-- κ=325: 2 nodes, 1 τ-classes, 1 σ-classes
+module fixpoint-halt-Break where
+
+  -- τ=433: 2 nodes, 1 σ-classes
+  module τ433 where
+
+    -- σ=702 (2 nodes)
+    cell-0 : κ 325 ≡ κ 325
+    cell-0 = refl
+
+
+
+-- κ=327: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-41 where
+
+  -- τ=436: 1 nodes, 1 σ-classes
+  module τ436 where
+
+    -- σ=705 (1 nodes)
+    cell-0 : κ 327 ≡ κ 327
+    cell-0 = refl
+
+
+
+-- κ=328: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-20 where
+
+  -- τ=437: 1 nodes, 1 σ-classes
+  module τ437 where
+
+    -- σ=706 (1 nodes)
+    cell-0 : κ 328 ≡ κ 328
+    cell-0 = refl
+
+
+
+-- κ=329: 1 nodes, 1 τ-classes, 1 σ-classes
+module fixpoint-While-3 where
+
+  -- τ=438: 1 nodes, 1 σ-classes
+  module τ438 where
+
+    -- σ=707 (1 nodes)
+    cell-0 : κ 329 ≡ κ 329
+    cell-0 = refl
+
+
+
+-- κ=330: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-20 where
+
+  -- τ=439: 1 nodes, 1 σ-classes
+  module τ439 where
+
+    -- σ=708 (1 nodes)
+    cell-0 : κ 330 ≡ κ 330
+    cell-0 = refl
+
+
+
+-- κ=332: 1 nodes, 1 τ-classes, 1 σ-classes
+module arguments-arguments-9 where
+
+  -- τ=441: 1 nodes, 1 σ-classes
+  module τ441 where
+
+    -- σ=711 (1 nodes)
+    cell-0 : κ 332 ≡ κ 332
+    cell-0 = refl
+
+
+
+-- κ=333: 3 nodes, 1 τ-classes, 1 σ-classes
+module isnot-IsNot where
+
+  -- τ=442: 3 nodes, 1 σ-classes
+  module τ442 where
+
+    -- σ=716 (3 nodes)
+    cell-0 : κ 333 ≡ κ 333
+    cell-0 = refl
+
+
+
+-- κ=335: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-21 where
+
+  -- τ=446: 1 nodes, 1 σ-classes
+  module τ446 where
+
+    -- σ=723 (1 nodes)
+    cell-0 : κ 335 ≡ κ 335
+    cell-0 = refl
+
+
+
+-- κ=336: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-21 where
+
+  -- τ=447: 1 nodes, 1 σ-classes
+  module τ447 where
+
+    -- σ=724 (1 nodes)
+    cell-0 : κ 336 ≡ κ 336
+    cell-0 = refl
+
+
+
+-- κ=337: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-27 where
+
+  -- τ=448: 1 nodes, 1 σ-classes
+  module τ448 where
+
+    -- σ=742 (1 nodes)
+    cell-0 : κ 337 ≡ κ 337
+    cell-0 = refl
+
+
+
+-- κ=338: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-20 where
+
+  -- τ=449: 1 nodes, 1 σ-classes
+  module τ449 where
+
+    -- σ=743 (1 nodes)
+    cell-0 : κ 338 ≡ κ 338
+    cell-0 = refl
+
+
+
+-- κ=339: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-22 where
+
+  -- τ=450: 1 nodes, 1 σ-classes
+  module τ450 where
+
+    -- σ=744 (1 nodes)
+    cell-0 : κ 339 ≡ κ 339
+    cell-0 = refl
+
+
+
+-- κ=340: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-22 where
+
+  -- τ=451: 1 nodes, 1 σ-classes
+  module τ451 where
+
+    -- σ=745 (1 nodes)
+    cell-0 : κ 340 ≡ κ 340
+    cell-0 = refl
+
+
+
+-- κ=345: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-11 where
+
+  -- τ=458: 1 nodes, 1 σ-classes
+  module τ458 where
+
+    -- σ=764 (1 nodes)
+    cell-0 : κ 345 ≡ κ 345
+    cell-0 = refl
+
+
+
+-- κ=348: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-26 where
+
+  -- τ=466: 1 nodes, 1 σ-classes
+  module τ466 where
+
+    -- σ=782 (1 nodes)
+    cell-0 : κ 348 ≡ κ 348
+    cell-0 = refl
+
+
+
+-- κ=360: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-23 where
+
+  -- τ=480: 1 nodes, 1 σ-classes
+  module τ480 where
+
+    -- σ=820 (1 nodes)
+    cell-0 : κ 360 ≡ κ 360
+    cell-0 = refl
+
+
+
+-- κ=361: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-24 where
+
+  -- τ=481: 1 nodes, 1 σ-classes
+  module τ481 where
+
+    -- σ=822 (1 nodes)
+    cell-0 : κ 361 ≡ κ 361
+    cell-0 = refl
+
+
+
+-- κ=362: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-12 where
+
+  -- τ=482: 1 nodes, 1 σ-classes
+  module τ482 where
+
+    -- σ=823 (1 nodes)
+    cell-0 : κ 362 ≡ κ 362
+    cell-0 = refl
+
+
+
+-- κ=363: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-28 where
+
+  -- τ=444: 1 nodes, 1 σ-classes
+  module τ444 where
+
+    -- σ=829 (1 nodes)
+    cell-0 : κ 363 ≡ κ 363
+    cell-0 = refl
+
+
+
+-- κ=364: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-21 where
+
+  -- τ=445: 1 nodes, 1 σ-classes
+  module τ445 where
+
+    -- σ=830 (1 nodes)
+    cell-0 : κ 364 ≡ κ 364
+    cell-0 = refl
+
+
+
+-- κ=365: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-13 where
+
+  -- τ=483: 1 nodes, 1 σ-classes
+  module τ483 where
+
+    -- σ=831 (1 nodes)
+    cell-0 : κ 365 ≡ κ 365
+    cell-0 = refl
+
+
+
+-- κ=366: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-unpack-Tuple-2 where
+
+  -- τ=484: 1 nodes, 1 σ-classes
+  module tuple where
+
+    -- σ=836 (1 nodes)
+    cell-0 : κ 366 ≡ κ 366
+    cell-0 = refl
+
+
+
+-- κ=367: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-literal-List-2 where
+
+  -- τ=485: 1 nodes, 1 σ-classes
+  module list where
+
+    -- σ=838 (1 nodes)
+    cell-0 : κ 367 ≡ κ 367
+    cell-0 = refl
+
+
+
+-- κ=368: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-23 where
+
+  -- τ=488: 1 nodes, 1 σ-classes
+  module tuple where
+
+    -- σ=842 (1 nodes)
+    cell-0 : κ 368 ≡ κ 368
+    cell-0 = refl
+
+
+
+-- κ=369: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-state-Call-5 where
+
+  -- τ=489: 1 nodes, 1 σ-classes
+  module None where
+
+    -- σ=843 (1 nodes)
+    cell-0 : κ 369 ≡ κ 369
+    cell-0 = refl
+
+
+
+-- κ=370: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-22 where
+
+  -- τ=490: 1 nodes, 1 σ-classes
+  module τ490 where
+
+    -- σ=844 (1 nodes)
+    cell-0 : κ 370 ≡ κ 370
+    cell-0 = refl
+
+
+
+-- κ=379: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-14 where
+
+  -- τ=501: 1 nodes, 1 σ-classes
+  module τ501 where
+
+    -- σ=864 (1 nodes)
+    cell-0 : κ 379 ≡ κ 379
+    cell-0 = refl
+
+
+
+-- κ=380: 1 nodes, 1 τ-classes, 1 σ-classes
+module coproduct-elim-If-3 where
+
+  -- τ=502: 1 nodes, 1 σ-classes
+  module τ502 where
+
+    -- σ=865 (1 nodes)
+    cell-0 : κ 380 ≡ κ 380
+    cell-0 = refl
+
+
+
+-- κ=381: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-15 where
+
+  -- τ=503: 1 nodes, 1 σ-classes
+  module τ503 where
+
+    -- σ=866 (1 nodes)
+    cell-0 : κ 381 ≡ κ 381
+    cell-0 = refl
+
+
+
+-- κ=382: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-23 where
+
+  -- τ=504: 1 nodes, 1 σ-classes
+  module τ504 where
+
+    -- σ=868 (1 nodes)
+    cell-0 : κ 382 ≡ κ 382
+    cell-0 = refl
+
+
+
+-- κ=383: 1 nodes, 1 τ-classes, 1 σ-classes
+module arguments-arguments-10 where
+
+  -- τ=505: 1 nodes, 1 σ-classes
+  module τ505 where
+
+    -- σ=870 (1 nodes)
+    cell-0 : κ 383 ≡ κ 383
+    cell-0 = refl
+
+
+
+-- κ=384: 1 nodes, 1 τ-classes, 1 σ-classes
+module is-Is where
+
+  -- τ=506: 1 nodes, 1 σ-classes
+  module τ506 where
+
+    -- σ=874 (1 nodes)
+    cell-0 : κ 384 ≡ κ 384
+    cell-0 = refl
+
+
+
+-- κ=385: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-Compare-19 where
+
+  -- τ=507: 1 nodes, 1 σ-classes
+  module τ507 where
+
+    -- σ=875 (1 nodes)
+    cell-0 : κ 385 ≡ κ 385
+    cell-0 = refl
+
+
+
+-- κ=387: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-25 where
+
+  -- τ=509: 1 nodes, 1 σ-classes
+  module τ509 where
+
+    -- σ=877 (1 nodes)
+    cell-0 : κ 387 ≡ κ 387
+    cell-0 = refl
+
+
+
+-- κ=388: 1 nodes, 1 τ-classes, 1 σ-classes
+module partial-apply-at-state-Call-3 where
+
+  -- τ=510: 1 nodes, 1 σ-classes
+  module T where
+
+    -- σ=878 (1 nodes)
+    cell-0 : κ 388 ≡ κ 388
+    cell-0 = refl
+
+
+
+-- κ=389: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-42 where
+
+  -- τ=511: 1 nodes, 1 σ-classes
+  module τ511 where
+
+    -- σ=879 (1 nodes)
+    cell-0 : κ 389 ≡ κ 389
+    cell-0 = refl
+
+
+
+-- κ=390: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-26 where
+
+  -- τ=513: 1 nodes, 1 σ-classes
+  module τ513 where
+
+    -- σ=881 (1 nodes)
+    cell-0 : κ 390 ≡ κ 390
+    cell-0 = refl
+
+
+
+-- κ=391: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-24 where
+
+  -- τ=514: 1 nodes, 1 σ-classes
+  module τ514 where
+
+    -- σ=883 (1 nodes)
+    cell-0 : κ 391 ≡ κ 391
+    cell-0 = refl
+
+
+
+-- κ=392: 1 nodes, 1 τ-classes, 1 σ-classes
+module arg-arg-5 where
+
+  -- τ=515: 1 nodes, 1 σ-classes
+  module τ515 where
+
+    -- σ=884 (1 nodes)
+    cell-0 : κ 392 ≡ κ 392
+    cell-0 = refl
+
+
+
+-- κ=393: 1 nodes, 1 τ-classes, 1 σ-classes
+module arguments-arguments-11 where
+
+  -- τ=516: 1 nodes, 1 σ-classes
+  module τ516 where
+
+    -- σ=885 (1 nodes)
+    cell-0 : κ 393 ≡ κ 393
+    cell-0 = refl
+
+
+
+-- κ=398: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-24 where
+
+  -- τ=523: 1 nodes, 1 σ-classes
+  module tuple where
+
+    -- σ=906 (1 nodes)
+    cell-0 : κ 398 ≡ κ 398
+    cell-0 = refl
+
+
+
+-- κ=399: 1 nodes, 1 τ-classes, 1 σ-classes
+module terminal-map-Return-13 where
+
+  -- τ=524: 1 nodes, 1 σ-classes
+  module τ524 where
+
+    -- σ=907 (1 nodes)
+    cell-0 : κ 399 ≡ κ 399
+    cell-0 = refl
+
+
+
+-- κ=400: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-25 where
+
+  -- τ=525: 1 nodes, 1 σ-classes
+  module tuple where
+
+    -- σ=908 (1 nodes)
+    cell-0 : κ 400 ≡ κ 400
+    cell-0 = refl
+
+
+
+-- κ=401: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-22 where
+
+  -- τ=526: 1 nodes, 1 σ-classes
+  module τ526 where
+
+    -- σ=909 (1 nodes)
+    cell-0 : κ 401 ≡ κ 401
+    cell-0 = refl
+
+
+
+-- κ=402: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-28 where
+
+  -- τ=527: 1 nodes, 1 σ-classes
+  module τ527 where
+
+    -- σ=910 (1 nodes)
+    cell-0 : κ 402 ≡ κ 402
+    cell-0 = refl
+
+
+
+-- κ=403: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-25 where
+
+  -- τ=528: 1 nodes, 1 σ-classes
+  module τ528 where
+
+    -- σ=911 (1 nodes)
+    cell-0 : κ 403 ≡ κ 403
+    cell-0 = refl
+
+
+
+-- κ=404: 1 nodes, 1 τ-classes, 1 σ-classes
+module arg-arg-6 where
+
+  -- τ=529: 1 nodes, 1 σ-classes
+  module τ529 where
+
+    -- σ=913 (1 nodes)
+    cell-0 : κ 404 ≡ κ 404
+    cell-0 = refl
+
+
+
+-- κ=405: 1 nodes, 1 τ-classes, 1 σ-classes
+module arguments-arguments-12 where
+
+  -- τ=530: 1 nodes, 1 σ-classes
+  module τ530 where
+
+    -- σ=914 (1 nodes)
+    cell-0 : κ 405 ≡ κ 405
+    cell-0 = refl
+
+
+
+-- κ=406: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-27 where
+
+  -- τ=532: 1 nodes, 1 σ-classes
+  module τ532 where
+
+    -- σ=930 (1 nodes)
+    cell-0 : κ 406 ≡ κ 406
+    cell-0 = refl
+
+
+
+-- κ=407: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-16 where
+
+  -- τ=533: 1 nodes, 1 σ-classes
+  module τ533 where
+
+    -- σ=931 (1 nodes)
+    cell-0 : κ 407 ≡ κ 407
+    cell-0 = refl
+
+
+
+-- κ=408: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-26 where
+
+  -- τ=534: 1 nodes, 1 σ-classes
+  module τ534 where
+
+    -- σ=932 (1 nodes)
+    cell-0 : κ 408 ≡ κ 408
+    cell-0 = refl
+
+
+
+-- κ=409: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-43 where
+
+  -- τ=536: 1 nodes, 1 σ-classes
+  module τ536 where
+
+    -- σ=948 (1 nodes)
+    cell-0 : κ 409 ≡ κ 409
+    cell-0 = refl
+
+
+
+-- κ=410: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-44 where
+
+  -- τ=537: 1 nodes, 1 σ-classes
+  module τ537 where
+
+    -- σ=949 (1 nodes)
+    cell-0 : κ 410 ≡ κ 410
+    cell-0 = refl
+
+
+
+-- κ=411: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-45 where
+
+  -- τ=539: 1 nodes, 1 σ-classes
+  module τ539 where
+
+    -- σ=961 (1 nodes)
+    cell-0 : κ 411 ≡ κ 411
+    cell-0 = refl
+
+
+
+-- κ=412: 2 nodes, 1 τ-classes, 1 σ-classes
+module not-Not where
+
+  -- τ=540: 2 nodes, 1 σ-classes
+  module τ540 where
+
+    -- σ=962 (2 nodes)
+    cell-0 : κ 412 ≡ κ 412
+    cell-0 = refl
+
+
+
+-- κ=417: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-23 where
+
+  -- τ=545: 1 nodes, 1 σ-classes
+  module τ545 where
+
+    -- σ=969 (1 nodes)
+    cell-0 : κ 417 ≡ κ 417
+    cell-0 = refl
+
+
+
+-- κ=418: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-29 where
+
+  -- τ=546: 1 nodes, 1 σ-classes
+  module τ546 where
+
+    -- σ=970 (1 nodes)
+    cell-0 : κ 418 ≡ κ 418
+    cell-0 = refl
+
+
+
+-- κ=419: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-27 where
+
+  -- τ=547: 1 nodes, 1 σ-classes
+  module τ547 where
+
+    -- σ=971 (1 nodes)
+    cell-0 : κ 419 ≡ κ 419
+    cell-0 = refl
+
+
+
+-- κ=422: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-28 where
+
+  -- τ=550: 1 nodes, 1 σ-classes
+  module τ550 where
+
+    -- σ=987 (1 nodes)
+    cell-0 : κ 422 ≡ κ 422
+    cell-0 = refl
+
+
+
+-- κ=423: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-29 where
+
+  -- τ=551: 1 nodes, 1 σ-classes
+  module τ551 where
+
+    -- σ=989 (1 nodes)
+    cell-0 : κ 423 ≡ κ 423
+    cell-0 = refl
+
+
+
+-- κ=424: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-17 where
+
+  -- τ=552: 1 nodes, 1 σ-classes
+  module τ552 where
+
+    -- σ=990 (1 nodes)
+    cell-0 : κ 424 ≡ κ 424
+    cell-0 = refl
+
+
+
+-- κ=425: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-accum-AugAssign-5 where
+
+  -- τ=553: 1 nodes, 1 σ-classes
+  module τ553 where
+
+    -- σ=992 (1 nodes)
+    cell-0 : κ 425 ≡ κ 425
+    cell-0 = refl
+
+
+
+-- κ=426: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-map-ListComp-0 where
+
+  -- τ=554: 1 nodes, 1 σ-classes
+  module τ554 where
+
+    -- σ=997 (1 nodes)
+    cell-0 : κ 426 ≡ κ 426
+    cell-0 = refl
+
+
+
+-- κ=427: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-26 where
+
+  -- τ=555: 1 nodes, 1 σ-classes
+  module tuple where
+
+    -- σ=999 (1 nodes)
+    cell-0 : κ 427 ≡ κ 427
+    cell-0 = refl
+
+
+
+-- κ=428: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-state-Call-6 where
+
+  -- τ=556: 1 nodes, 1 σ-classes
+  module None where
+
+    -- σ=1000 (1 nodes)
+    cell-0 : κ 428 ≡ κ 428
+    cell-0 = refl
+
+
+
+-- κ=429: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-23 where
+
+  -- τ=557: 1 nodes, 1 σ-classes
+  module τ557 where
+
+    -- σ=1001 (1 nodes)
+    cell-0 : κ 429 ≡ κ 429
+    cell-0 = refl
+
+
+
+-- κ=430: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-18 where
+
+  -- τ=558: 1 nodes, 1 σ-classes
+  module τ558 where
+
+    -- σ=1017 (1 nodes)
+    cell-0 : κ 430 ≡ κ 430
+    cell-0 = refl
+
+
+
+-- κ=431: 1 nodes, 1 τ-classes, 1 σ-classes
+module coproduct-elim-If-4 where
+
+  -- τ=559: 1 nodes, 1 σ-classes
+  module τ559 where
+
+    -- σ=1018 (1 nodes)
+    cell-0 : κ 431 ≡ κ 431
+    cell-0 = refl
+
+
+
+-- κ=432: 1 nodes, 1 τ-classes, 1 σ-classes
+module complement-If-0 where
+
+  -- τ=560: 1 nodes, 1 σ-classes
+  module τ560 where
+
+    -- σ=1019 (1 nodes)
+    cell-0 : κ 432 ≡ κ 432
+    cell-0 = refl
+
+
+
+-- κ=433: 1 nodes, 1 τ-classes, 1 σ-classes
+module del-Del where
+
+  -- τ=561: 1 nodes, 1 σ-classes
+  module τ561 where
+
+    -- σ=1020 (1 nodes)
+    cell-0 : κ 433 ≡ κ 433
+    cell-0 = refl
+
+
+
+-- κ=434: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-30 where
+
+  -- τ=562: 1 nodes, 1 σ-classes
+  module τ562 where
+
+    -- σ=1021 (1 nodes)
+    cell-0 : κ 434 ≡ κ 434
+    cell-0 = refl
+
+
+
+-- κ=435: 1 nodes, 1 τ-classes, 1 σ-classes
+module delete-Delete where
+
+  -- τ=563: 1 nodes, 1 σ-classes
+  module τ563 where
+
+    -- σ=1022 (1 nodes)
+    cell-0 : κ 435 ≡ κ 435
+    cell-0 = refl
+
+
+
+-- κ=436: 1 nodes, 1 τ-classes, 1 σ-classes
+module morphism-at-object-Attribute where
+
+  -- τ=564: 1 nodes, 1 σ-classes
+  module T-discard where
+
+    -- σ=1028 (1 nodes)
+    cell-0 : κ 436 ≡ κ 436
+    cell-0 = refl
+
+
+
+-- κ=437: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-29 where
+
+  -- τ=565: 1 nodes, 1 σ-classes
+  module τ565 where
+
+    -- σ=1029 (1 nodes)
+    cell-0 : κ 437 ≡ κ 437
+    cell-0 = refl
+
+
+
+-- κ=438: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-24 where
+
+  -- τ=566: 1 nodes, 1 σ-classes
+  module τ566 where
+
+    -- σ=1030 (1 nodes)
+    cell-0 : κ 438 ≡ κ 438
+    cell-0 = refl
+
+
+
+-- κ=439: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-19 where
+
+  -- τ=567: 1 nodes, 1 σ-classes
+  module τ567 where
+
+    -- σ=1031 (1 nodes)
+    cell-0 : κ 439 ≡ κ 439
+    cell-0 = refl
+
+
+
+-- κ=447: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-30 where
+
+  -- τ=575: 1 nodes, 1 σ-classes
+  module τ575 where
+
+    -- σ=1101 (1 nodes)
+    cell-0 : κ 447 ≡ κ 447
+    cell-0 = refl
+
+
+
+-- κ=448: 1 nodes, 1 τ-classes, 1 σ-classes
+module partial-apply-at-state-Call-4 where
+
+  -- τ=577: 1 nodes, 1 σ-classes
+  module T where
+
+    -- σ=1104 (1 nodes)
+    cell-0 : κ 448 ≡ κ 448
+    cell-0 = refl
+
+
+
+-- κ=449: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-46 where
+
+  -- τ=578: 1 nodes, 1 σ-classes
+  module τ578 where
+
+    -- σ=1105 (1 nodes)
+    cell-0 : κ 449 ≡ κ 449
+    cell-0 = refl
+
+
+
+-- κ=454: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-31 where
+
+  -- τ=583: 1 nodes, 1 σ-classes
+  module τ583 where
+
+    -- σ=1121 (1 nodes)
+    cell-0 : κ 454 ≡ κ 454
+    cell-0 = refl
+
+
+
+-- κ=455: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-20 where
+
+  -- τ=584: 1 nodes, 1 σ-classes
+  module τ584 where
+
+    -- σ=1122 (1 nodes)
+    cell-0 : κ 455 ≡ κ 455
+    cell-0 = refl
+
+
+
+-- κ=457: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-47 where
+
+  -- τ=586: 1 nodes, 1 σ-classes
+  module τ586 where
+
+    -- σ=1129 (1 nodes)
+    cell-0 : κ 457 ≡ κ 457
+    cell-0 = refl
+
+
+
+-- κ=458: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-48 where
+
+  -- τ=588: 1 nodes, 1 σ-classes
+  module τ588 where
+
+    -- σ=1134 (1 nodes)
+    cell-0 : κ 458 ≡ κ 458
+    cell-0 = refl
+
+
+
+-- κ=459: 2 nodes, 1 τ-classes, 1 σ-classes
+module coerce-FormattedValue-10 where
+
+  -- τ=589: 2 nodes, 1 σ-classes
+  module τ589 where
+
+    -- σ=1139 (2 nodes)
+    cell-0 : κ 459 ≡ κ 459
+    cell-0 = refl
+
+
+
+-- κ=460: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-JoinedStr-9 where
+
+  -- τ=590: 1 nodes, 1 σ-classes
+  module str where
+
+    -- σ=1140 (1 nodes)
+    cell-0 : κ 460 ≡ κ 460
+    cell-0 = refl
+
+
+
+-- κ=461: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-49 where
+
+  -- τ=591: 1 nodes, 1 σ-classes
+  module τ591 where
+
+    -- σ=1141 (1 nodes)
+    cell-0 : κ 461 ≡ κ 461
+    cell-0 = refl
+
+
+
+-- κ=462: 2 nodes, 1 τ-classes, 1 σ-classes
+module powerset-literal-Set-k where
+
+  -- τ=593: 2 nodes, 1 σ-classes
+  module set where
+
+    -- σ=1147 (2 nodes)
+    cell-0 : κ 462 ≡ κ 462
+    cell-0 = refl
+
+
+
+-- κ=464: 2 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-25 where
+
+  -- τ=598: 2 nodes, 1 σ-classes
+  module τ598 where
+
+    -- σ=1153 (2 nodes)
+    cell-0 : κ 464 ≡ κ 464
+    cell-0 = refl
+
+
+
+-- κ=469: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-32 where
+
+  -- τ=604: 1 nodes, 1 σ-classes
+  module τ604 where
+
+    -- σ=1172 (1 nodes)
+    cell-0 : κ 469 ≡ κ 469
+    cell-0 = refl
+
+
+
+-- κ=470: 2 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-50 where
+
+  -- τ=605: 2 nodes, 1 σ-classes
+  module τ605 where
+
+    -- σ=1176 (2 nodes)
+    cell-0 : κ 470 ≡ κ 470
+    cell-0 = refl
+
+
+
+-- κ=475: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-33 where
+
+  -- τ=611: 1 nodes, 1 σ-classes
+  module τ611 where
+
+    -- σ=1208 (1 nodes)
+    cell-0 : κ 475 ≡ κ 475
+    cell-0 = refl
+
+
+
+-- κ=476: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-21 where
+
+  -- τ=612: 1 nodes, 1 σ-classes
+  module τ612 where
+
+    -- σ=1209 (1 nodes)
+    cell-0 : κ 476 ≡ κ 476
+    cell-0 = refl
+
+
+
+-- κ=477: 1 nodes, 1 τ-classes, 1 σ-classes
+module fixpoint-While-4 where
+
+  -- τ=613: 1 nodes, 1 σ-classes
+  module τ613 where
+
+    -- σ=1211 (1 nodes)
+    cell-0 : κ 477 ≡ κ 477
+    cell-0 = refl
+
+
+
+-- κ=478: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-27 where
+
+  -- τ=614: 1 nodes, 1 σ-classes
+  module τ614 where
+
+    -- σ=1212 (1 nodes)
+    cell-0 : κ 478 ≡ κ 478
+    cell-0 = refl
+
+
+
+-- κ=479: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-27 where
+
+  -- τ=615: 1 nodes, 1 σ-classes
+  module tuple where
+
+    -- σ=1214 (1 nodes)
+    cell-0 : κ 479 ≡ κ 479
+    cell-0 = refl
+
+
+
+-- κ=480: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-24 where
+
+  -- τ=616: 1 nodes, 1 σ-classes
+  module τ616 where
+
+    -- σ=1215 (1 nodes)
+    cell-0 : κ 480 ≡ κ 480
+    cell-0 = refl
+
+
+
+-- κ=481: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-31 where
+
+  -- τ=617: 1 nodes, 1 σ-classes
+  module τ617 where
+
+    -- σ=1216 (1 nodes)
+    cell-0 : κ 481 ≡ κ 481
+    cell-0 = refl
+
+
+
+-- κ=482: 1 nodes, 1 τ-classes, 1 σ-classes
+module arg-arg-7 where
+
+  -- τ=618: 1 nodes, 1 σ-classes
+  module τ618 where
+
+    -- σ=1217 (1 nodes)
+    cell-0 : κ 482 ≡ κ 482
+    cell-0 = refl
+
+
+
+-- κ=483: 1 nodes, 1 τ-classes, 1 σ-classes
+module arguments-arguments-13 where
+
+  -- τ=619: 1 nodes, 1 σ-classes
+  module τ619 where
+
+    -- σ=1224 (1 nodes)
+    cell-0 : κ 483 ≡ κ 483
+    cell-0 = refl
+
+
+
+-- κ=485: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-51 where
+
+  -- τ=621: 1 nodes, 1 σ-classes
+  module τ621 where
+
+    -- σ=1233 (1 nodes)
+    cell-0 : κ 485 ≡ κ 485
+    cell-0 = refl
+
+
+
+-- κ=488: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-28 where
+
+  -- τ=626: 1 nodes, 1 σ-classes
+  module tuple where
+
+    -- σ=1261 (1 nodes)
+    cell-0 : κ 488 ≡ κ 488
+    cell-0 = refl
+
+
+
+-- κ=489: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-25 where
+
+  -- τ=627: 1 nodes, 1 σ-classes
+  module τ627 where
+
+    -- σ=1262 (1 nodes)
+    cell-0 : κ 489 ≡ κ 489
+    cell-0 = refl
+
+
+
+-- κ=490: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-32 where
+
+  -- τ=628: 1 nodes, 1 σ-classes
+  module τ628 where
+
+    -- σ=1263 (1 nodes)
+    cell-0 : κ 490 ≡ κ 490
+    cell-0 = refl
+
+
+
+-- κ=491: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-28 where
+
+  -- τ=629: 1 nodes, 1 σ-classes
+  module τ629 where
+
+    -- σ=1267 (1 nodes)
+    cell-0 : κ 491 ≡ κ 491
+    cell-0 = refl
+
+
+
+-- κ=492: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-29 where
+
+  -- τ=633: 1 nodes, 1 σ-classes
+  module τ633 where
+
+    -- σ=1273 (1 nodes)
+    cell-0 : κ 492 ≡ κ 492
+    cell-0 = refl
+
+
+
+-- κ=493: 2 nodes, 1 τ-classes, 1 σ-classes
+module and-And where
+
+  -- τ=634: 2 nodes, 1 σ-classes
+  module τ634 where
+
+    -- σ=1274 (2 nodes)
+    cell-0 : κ 493 ≡ κ 493
+    cell-0 = refl
+
+
+
+-- κ=494: 1 nodes, 1 τ-classes, 1 σ-classes
+module meet-BoolOp-0 where
+
+  -- τ=635: 1 nodes, 1 σ-classes
+  module τ635 where
+
+    -- σ=1277 (1 nodes)
+    cell-0 : κ 494 ≡ κ 494
+    cell-0 = refl
+
+
+
+-- κ=495: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-Compare-20 where
+
+  -- τ=636: 1 nodes, 1 σ-classes
+  module τ636 where
+
+    -- σ=1284 (1 nodes)
+    cell-0 : κ 495 ≡ κ 495
+    cell-0 = refl
+
+
+
+-- κ=496: 1 nodes, 1 τ-classes, 1 σ-classes
+module lazy_fold-GeneratorExp-5 where
+
+  -- τ=637: 1 nodes, 1 σ-classes
+  module τ637 where
+
+    -- σ=1287 (1 nodes)
+    cell-0 : κ 496 ≡ κ 496
+    cell-0 = refl
+
+
+
+-- κ=497: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-30 where
+
+  -- τ=638: 1 nodes, 1 σ-classes
+  module τ638 where
+
+    -- σ=1288 (1 nodes)
+    cell-0 : κ 497 ≡ κ 497
+    cell-0 = refl
+
+
+
+-- κ=498: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-52 where
+
+  -- τ=639: 1 nodes, 1 σ-classes
+  module τ639 where
+
+    -- σ=1289 (1 nodes)
+    cell-0 : κ 498 ≡ κ 498
+    cell-0 = refl
+
+
+
+-- κ=499: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-map-ListComp-1 where
+
+  -- τ=640: 1 nodes, 1 σ-classes
+  module τ640 where
+
+    -- σ=1291 (1 nodes)
+    cell-0 : κ 499 ≡ κ 499
+    cell-0 = refl
+
+
+
+-- κ=500: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-53 where
+
+  -- τ=641: 1 nodes, 1 σ-classes
+  module τ641 where
+
+    -- σ=1292 (1 nodes)
+    cell-0 : κ 500 ≡ κ 500
+    cell-0 = refl
+
+
+
+-- κ=501: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-x3f-Call-3 where
+
+  -- τ=189: 1 nodes, 1 σ-classes
+  module τ189 where
+
+    -- σ=1294 (1 nodes)
+    cell-0 : κ 501 ≡ κ 501
+    cell-0 = refl
+
+
+
+-- κ=502: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-26 where
+
+  -- τ=190: 1 nodes, 1 σ-classes
+  module τ190 where
+
+    -- σ=1295 (1 nodes)
+    cell-0 : κ 502 ≡ κ 502
+    cell-0 = refl
+
+
+
+-- κ=503: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-op-BinOp-1 where
+
+  -- τ=642: 1 nodes, 1 σ-classes
+  module τ642 where
+
+    -- σ=1297 (1 nodes)
+    cell-0 : κ 503 ≡ κ 503
+    cell-0 = refl
+
+
+
+-- κ=504: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-54 where
+
+  -- τ=643: 1 nodes, 1 σ-classes
+  module τ643 where
+
+    -- σ=1298 (1 nodes)
+    cell-0 : κ 504 ≡ κ 504
+    cell-0 = refl
+
+
+
+-- κ=505: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-JoinedStr-10 where
+
+  -- τ=644: 1 nodes, 1 σ-classes
+  module str where
+
+    -- σ=1302 (1 nodes)
+    cell-0 : κ 505 ≡ κ 505
+    cell-0 = refl
+
+
+
+-- κ=506: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-55 where
+
+  -- τ=645: 1 nodes, 1 σ-classes
+  module τ645 where
+
+    -- σ=1303 (1 nodes)
+    cell-0 : κ 506 ≡ κ 506
+    cell-0 = refl
+
+
+
+-- κ=507: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-map-ListComp-2 where
+
+  -- τ=649: 1 nodes, 1 σ-classes
+  module τ649 where
+
+    -- σ=1329 (1 nodes)
+    cell-0 : κ 507 ≡ κ 507
+    cell-0 = refl
+
+
+
+-- κ=508: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-31 where
+
+  -- τ=650: 1 nodes, 1 σ-classes
+  module τ650 where
+
+    -- σ=1330 (1 nodes)
+    cell-0 : κ 508 ≡ κ 508
+    cell-0 = refl
+
+
+
+-- κ=509: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-27 where
+
+  -- τ=651: 1 nodes, 1 σ-classes
+  module τ651 where
+
+    -- σ=1331 (1 nodes)
+    cell-0 : κ 509 ≡ κ 509
+    cell-0 = refl
+
+
+
+-- κ=510: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-34 where
+
+  -- τ=655: 1 nodes, 1 σ-classes
+  module τ655 where
+
+    -- σ=1341 (1 nodes)
+    cell-0 : κ 510 ≡ κ 510
+    cell-0 = refl
+
+
+
+-- κ=512: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-56 where
+
+  -- τ=521: 1 nodes, 1 σ-classes
+  module τ521 where
+
+    -- σ=1345 (1 nodes)
+    cell-0 : κ 512 ≡ κ 512
+    cell-0 = refl
+
+
+
+-- κ=513: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-op-at-x3f-Call-3 where
+
+  -- τ=656: 1 nodes, 1 σ-classes
+  module τ656 where
+
+    -- σ=1348 (1 nodes)
+    cell-0 : κ 513 ≡ κ 513
+    cell-0 = refl
+
+
+
+-- κ=514: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-28 where
+
+  -- τ=657: 1 nodes, 1 σ-classes
+  module τ657 where
+
+    -- σ=1349 (1 nodes)
+    cell-0 : κ 514 ≡ κ 514
+    cell-0 = refl
+
+
+
+-- κ=516: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-29 where
+
+  -- τ=190: 1 nodes, 1 σ-classes
+  module τ190 where
+
+    -- σ=1353 (1 nodes)
+    cell-0 : κ 516 ≡ κ 516
+    cell-0 = refl
+
+
+
+-- κ=517: 1 nodes, 1 τ-classes, 1 σ-classes
+module coproduct-elim-If-5 where
+
+  -- τ=662: 1 nodes, 1 σ-classes
+  module τ662 where
+
+    -- σ=1359 (1 nodes)
+    cell-0 : κ 517 ≡ κ 517
+    cell-0 = refl
+
+
+
+-- κ=518: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-35 where
+
+  -- τ=663: 1 nodes, 1 σ-classes
+  module τ663 where
+
+    -- σ=1368 (1 nodes)
+    cell-0 : κ 518 ≡ κ 518
+    cell-0 = refl
+
+
+
+-- κ=519: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-57 where
+
+  -- τ=664: 1 nodes, 1 σ-classes
+  module τ664 where
+
+    -- σ=1370 (1 nodes)
+    cell-0 : κ 519 ≡ κ 519
+    cell-0 = refl
+
+
+
+-- κ=520: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-36 where
+
+  -- τ=665: 1 nodes, 1 σ-classes
+  module τ665 where
+
+    -- σ=1374 (1 nodes)
+    cell-0 : κ 520 ≡ κ 520
+    cell-0 = refl
+
+
+
+-- κ=521: 1 nodes, 1 τ-classes, 1 σ-classes
+module coproduct-elim-If-6 where
+
+  -- τ=666: 1 nodes, 1 σ-classes
+  module τ666 where
+
+    -- σ=1375 (1 nodes)
+    cell-0 : κ 521 ≡ κ 521
+    cell-0 = refl
+
+
+
+-- κ=522: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-literal-Dict-2 where
+
+  -- τ=668: 1 nodes, 1 σ-classes
+  module dict where
+
+    -- σ=1387 (1 nodes)
+    cell-0 : κ 522 ≡ κ 522
+    cell-0 = refl
+
+
+
+-- κ=523: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-state-Call-7 where
+
+  -- τ=669: 1 nodes, 1 σ-classes
+  module None where
+
+    -- σ=1388 (1 nodes)
+    cell-0 : κ 523 ≡ κ 523
+    cell-0 = refl
+
+
+
+-- κ=524: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-30 where
+
+  -- τ=670: 1 nodes, 1 σ-classes
+  module τ670 where
+
+    -- σ=1389 (1 nodes)
+    cell-0 : κ 524 ≡ κ 524
+    cell-0 = refl
+
+
+
+-- κ=525: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-29 where
+
+  -- τ=671: 1 nodes, 1 σ-classes
+  module tuple where
+
+    -- σ=1393 (1 nodes)
+    cell-0 : κ 525 ≡ κ 525
+    cell-0 = refl
+
+
+
+-- κ=526: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-26 where
+
+  -- τ=672: 1 nodes, 1 σ-classes
+  module τ672 where
+
+    -- σ=1394 (1 nodes)
+    cell-0 : κ 526 ≡ κ 526
+    cell-0 = refl
+
+
+
+-- κ=527: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-33 where
+
+  -- τ=673: 1 nodes, 1 σ-classes
+  module τ673 where
+
+    -- σ=1395 (1 nodes)
+    cell-0 : κ 527 ≡ κ 527
+    cell-0 = refl
+
+
+
+-- κ=528: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-op-at-x3f-Attribute-2 where
+
+  -- τ=674: 1 nodes, 1 σ-classes
+  module τ674 where
+
+    -- σ=1396 (1 nodes)
+    cell-0 : κ 528 ≡ κ 528
+    cell-0 = refl
+
+
+
+-- κ=529: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-op-at-x3f-Call-4 where
+
+  -- τ=675: 1 nodes, 1 σ-classes
+  module τ675 where
+
+    -- σ=1397 (1 nodes)
+    cell-0 : κ 529 ≡ κ 529
+    cell-0 = refl
+
+
+
+-- κ=530: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-31 where
+
+  -- τ=676: 1 nodes, 1 σ-classes
+  module τ676 where
+
+    -- σ=1398 (1 nodes)
+    cell-0 : κ 530 ≡ κ 530
+    cell-0 = refl
+
+
+
+-- κ=532: 1 nodes, 1 τ-classes, 1 σ-classes
+module terminal-map-Return-14 where
+
+  -- τ=678: 1 nodes, 1 σ-classes
+  module τ678 where
+
+    -- σ=1400 (1 nodes)
+    cell-0 : κ 532 ≡ κ 532
+    cell-0 = refl
+
+
+
+-- κ=533: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-27 where
+
+  -- τ=680: 1 nodes, 1 σ-classes
+  module τ680 where
+
+    -- σ=1402 (1 nodes)
+    cell-0 : κ 533 ≡ κ 533
+    cell-0 = refl
+
+
+
+-- κ=534: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-34 where
+
+  -- τ=681: 1 nodes, 1 σ-classes
+  module τ681 where
+
+    -- σ=1403 (1 nodes)
+    cell-0 : κ 534 ≡ κ 534
+    cell-0 = refl
+
+
+
+-- κ=535: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-28 where
+
+  -- τ=682: 1 nodes, 1 σ-classes
+  module τ682 where
+
+    -- σ=1404 (1 nodes)
+    cell-0 : κ 535 ≡ κ 535
+    cell-0 = refl
+
+
+
+-- κ=536: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-29 where
+
+  -- τ=683: 1 nodes, 1 σ-classes
+  module τ683 where
+
+    -- σ=1407 (1 nodes)
+    cell-0 : κ 536 ≡ κ 536
+    cell-0 = refl
+
+
+
+-- κ=537: 1 nodes, 1 τ-classes, 1 σ-classes
+module arg-arg-8 where
+
+  -- τ=684: 1 nodes, 1 σ-classes
+  module τ684 where
+
+    -- σ=1408 (1 nodes)
+    cell-0 : κ 537 ≡ κ 537
+    cell-0 = refl
+
+
+
+-- κ=538: 1 nodes, 1 τ-classes, 1 σ-classes
+module arguments-arguments-14 where
+
+  -- τ=685: 1 nodes, 1 σ-classes
+  module τ685 where
+
+    -- σ=1410 (1 nodes)
+    cell-0 : κ 538 ≡ κ 538
+    cell-0 = refl
+
+
+
+-- κ=539: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-30 where
+
+  -- τ=687: 1 nodes, 1 σ-classes
+  module τ687 where
+
+    -- σ=1414 (1 nodes)
+    cell-0 : κ 539 ≡ κ 539
+    cell-0 = refl
+
+
+
+-- κ=542: 1 nodes, 1 τ-classes, 1 σ-classes
+module terminal-map-Return-15 where
+
+  -- τ=691: 1 nodes, 1 σ-classes
+  module τ691 where
+
+    -- σ=1420 (1 nodes)
+    cell-0 : κ 542 ≡ κ 542
+    cell-0 = refl
+
+
+
+-- κ=543: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-30 where
+
+  -- τ=692: 1 nodes, 1 σ-classes
+  module τ692 where
+
+    -- σ=1421 (1 nodes)
+    cell-0 : κ 543 ≡ κ 543
+    cell-0 = refl
+
+
+
+-- κ=544: 2 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-28 where
+
+  -- τ=694: 2 nodes, 1 σ-classes
+  module τ694 where
+
+    -- σ=1426 (2 nodes)
+    cell-0 : κ 544 ≡ κ 544
+    cell-0 = refl
+
+
+
+-- κ=545: 2 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-35 where
+
+  -- τ=695: 2 nodes, 1 σ-classes
+  module τ695 where
+
+    -- σ=1427 (2 nodes)
+    cell-0 : κ 545 ≡ κ 545
+    cell-0 = refl
+
+
+
+-- κ=546: 2 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-30 where
+
+  -- τ=696: 2 nodes, 1 σ-classes
+  module tuple where
+
+    -- σ=1428 (2 nodes)
+    cell-0 : κ 546 ≡ κ 546
+    cell-0 = refl
+
+
+
+-- κ=547: 2 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-29 where
+
+  -- τ=697: 2 nodes, 1 σ-classes
+  module τ697 where
+
+    -- σ=1429 (2 nodes)
+    cell-0 : κ 547 ≡ κ 547
+    cell-0 = refl
+
+
+
+-- κ=549: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-31 where
+
+  -- τ=699: 1 nodes, 1 σ-classes
+  module τ699 where
+
+    -- σ=1432 (1 nodes)
+    cell-0 : κ 549 ≡ κ 549
+    cell-0 = refl
+
+
+
+-- κ=551: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-31 where
+
+  -- τ=702: 1 nodes, 1 σ-classes
+  module tuple where
+
+    -- σ=1444 (1 nodes)
+    cell-0 : κ 551 ≡ κ 551
+    cell-0 = refl
+
+
+
+-- κ=552: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-30 where
+
+  -- τ=703: 1 nodes, 1 σ-classes
+  module τ703 where
+
+    -- σ=1445 (1 nodes)
+    cell-0 : κ 552 ≡ κ 552
+    cell-0 = refl
+
+
+
+-- κ=553: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-36 where
+
+  -- τ=704: 1 nodes, 1 σ-classes
+  module τ704 where
+
+    -- σ=1446 (1 nodes)
+    cell-0 : κ 553 ≡ κ 553
+    cell-0 = refl
+
+
+
+-- κ=554: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-op-at-x3f-Attribute-2 where
+
+  -- τ=705: 1 nodes, 1 σ-classes
+  module τ705 where
+
+    -- σ=1447 (1 nodes)
+    cell-0 : κ 554 ≡ κ 554
+    cell-0 = refl
+
+
+
+-- κ=555: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-x3f-Call-4 where
+
+  -- τ=706: 1 nodes, 1 σ-classes
+  module τ706 where
+
+    -- σ=1449 (1 nodes)
+    cell-0 : κ 555 ≡ κ 555
+    cell-0 = refl
+
+
+
+-- κ=556: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-32 where
+
+  -- τ=707: 1 nodes, 1 σ-classes
+  module τ707 where
+
+    -- σ=1450 (1 nodes)
+    cell-0 : κ 556 ≡ κ 556
+    cell-0 = refl
+
+
+
+-- κ=557: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-22 where
+
+  -- τ=708: 1 nodes, 1 σ-classes
+  module τ708 where
+
+    -- σ=1451 (1 nodes)
+    cell-0 : κ 557 ≡ κ 557
+    cell-0 = refl
+
+
+
+-- κ=560: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-31 where
+
+  -- τ=711: 1 nodes, 1 σ-classes
+  module τ711 where
+
+    -- σ=1455 (1 nodes)
+    cell-0 : κ 560 ≡ κ 560
+    cell-0 = refl
+
+
+
+-- κ=561: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-32 where
+
+  -- τ=715: 1 nodes, 1 σ-classes
+  module τ715 where
+
+    -- σ=1467 (1 nodes)
+    cell-0 : κ 561 ≡ κ 561
+    cell-0 = refl
+
+
+
+-- κ=562: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-32 where
+
+  -- τ=716: 1 nodes, 1 σ-classes
+  module tuple where
+
+    -- σ=1472 (1 nodes)
+    cell-0 : κ 562 ≡ κ 562
+    cell-0 = refl
+
+
+
+-- κ=563: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-31 where
+
+  -- τ=717: 1 nodes, 1 σ-classes
+  module τ717 where
+
+    -- σ=1473 (1 nodes)
+    cell-0 : κ 563 ≡ κ 563
+    cell-0 = refl
+
+
+
+-- κ=564: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-37 where
+
+  -- τ=718: 1 nodes, 1 σ-classes
+  module τ718 where
+
+    -- σ=1474 (1 nodes)
+    cell-0 : κ 564 ≡ κ 564
+    cell-0 = refl
+
+
+
+-- κ=565: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-op-at-x3f-Attribute-3 where
+
+  -- τ=719: 1 nodes, 1 σ-classes
+  module τ719 where
+
+    -- σ=1475 (1 nodes)
+    cell-0 : κ 565 ≡ κ 565
+    cell-0 = refl
+
+
+
+-- κ=566: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-x3f-Call-5 where
+
+  -- τ=720: 1 nodes, 1 σ-classes
+  module τ720 where
+
+    -- σ=1476 (1 nodes)
+    cell-0 : κ 566 ≡ κ 566
+    cell-0 = refl
+
+
+
+-- κ=567: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-33 where
+
+  -- τ=721: 1 nodes, 1 σ-classes
+  module τ721 where
+
+    -- σ=1477 (1 nodes)
+    cell-0 : κ 567 ≡ κ 567
+    cell-0 = refl
+
+
+
+-- κ=568: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-23 where
+
+  -- τ=722: 1 nodes, 1 σ-classes
+  module τ722 where
+
+    -- σ=1478 (1 nodes)
+    cell-0 : κ 568 ≡ κ 568
+    cell-0 = refl
+
+
+
+-- κ=569: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-32 where
+
+  -- τ=724: 1 nodes, 1 σ-classes
+  module τ724 where
+
+    -- σ=1480 (1 nodes)
+    cell-0 : κ 569 ≡ κ 569
+    cell-0 = refl
+
+
+
+-- κ=572: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-38 where
+
+  -- τ=731: 1 nodes, 1 σ-classes
+  module τ731 where
+
+    -- σ=1498 (1 nodes)
+    cell-0 : κ 572 ≡ κ 572
+    cell-0 = refl
+
+
+
+-- κ=573: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-39 where
+
+  -- τ=732: 1 nodes, 1 σ-classes
+  module τ732 where
+
+    -- σ=1502 (1 nodes)
+    cell-0 : κ 573 ≡ κ 573
+    cell-0 = refl
+
+
+
+-- κ=574: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-accum-AugAssign-6 where
+
+  -- τ=733: 1 nodes, 1 σ-classes
+  module τ733 where
+
+    -- σ=1503 (1 nodes)
+    cell-0 : κ 574 ≡ κ 574
+    cell-0 = refl
+
+
+
+-- κ=575: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-24 where
+
+  -- τ=734: 1 nodes, 1 σ-classes
+  module τ734 where
+
+    -- σ=1504 (1 nodes)
+    cell-0 : κ 575 ≡ κ 575
+    cell-0 = refl
+
+
+
+-- κ=577: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-map-DictComp-0 where
+
+  -- τ=736: 1 nodes, 1 σ-classes
+  module τ736 where
+
+    -- σ=1514 (1 nodes)
+    cell-0 : κ 577 ≡ κ 577
+    cell-0 = refl
+
+
+
+-- κ=578: 1 nodes, 1 τ-classes, 1 σ-classes
+module terminal-map-Return-16 where
+
+  -- τ=737: 1 nodes, 1 σ-classes
+  module τ737 where
+
+    -- σ=1515 (1 nodes)
+    cell-0 : κ 578 ≡ κ 578
+    cell-0 = refl
+
+
+
+-- κ=579: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-33 where
+
+  -- τ=741: 1 nodes, 1 σ-classes
+  module τ741 where
+
+    -- σ=1520 (1 nodes)
+    cell-0 : κ 579 ≡ κ 579
+    cell-0 = refl
+
+
+
+-- κ=580: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-58 where
+
+  -- τ=742: 1 nodes, 1 σ-classes
+  module τ742 where
+
+    -- σ=1535 (1 nodes)
+    cell-0 : κ 580 ≡ κ 580
+    cell-0 = refl
+
+
+
+-- κ=581: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-40 where
+
+  -- τ=743: 1 nodes, 1 σ-classes
+  module τ743 where
+
+    -- σ=1540 (1 nodes)
+    cell-0 : κ 581 ≡ κ 581
+    cell-0 = refl
+
+
+
+-- κ=582: 1 nodes, 1 τ-classes, 1 σ-classes
+module morphism-at-x3f-Attribute-4 where
+
+  -- τ=744: 1 nodes, 1 σ-classes
+  module τ744 where
+
+    -- σ=1541 (1 nodes)
+    cell-0 : κ 582 ≡ κ 582
+    cell-0 = refl
+
+
+
+-- κ=583: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-32 where
+
+  -- τ=745: 1 nodes, 1 σ-classes
+  module τ745 where
+
+    -- σ=1548 (1 nodes)
+    cell-0 : κ 583 ≡ κ 583
+    cell-0 = refl
+
+
+
+-- κ=584: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-op-at-x3f-Call-5 where
+
+  -- τ=746: 1 nodes, 1 σ-classes
+  module τ746 where
+
+    -- σ=1549 (1 nodes)
+    cell-0 : κ 584 ≡ κ 584
+    cell-0 = refl
+
+
+
+-- κ=585: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-34 where
+
+  -- τ=747: 1 nodes, 1 σ-classes
+  module τ747 where
+
+    -- σ=1550 (1 nodes)
+    cell-0 : κ 585 ≡ κ 585
+    cell-0 = refl
+
+
+
+-- κ=586: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-25 where
+
+  -- τ=748: 1 nodes, 1 σ-classes
+  module τ748 where
+
+    -- σ=1551 (1 nodes)
+    cell-0 : κ 586 ≡ κ 586
+    cell-0 = refl
+
+
+
+-- κ=587: 1 nodes, 1 τ-classes, 1 σ-classes
+module terminal-map-Return-17 where
+
+  -- τ=749: 1 nodes, 1 σ-classes
+  module τ749 where
+
+    -- σ=1553 (1 nodes)
+    cell-0 : κ 587 ≡ κ 587
+    cell-0 = refl
+
+
+
+-- κ=588: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-34 where
+
+  -- τ=750: 1 nodes, 1 σ-classes
+  module τ750 where
+
+    -- σ=1554 (1 nodes)
+    cell-0 : κ 588 ≡ κ 588
+    cell-0 = refl
+
+
+
+-- κ=590: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-32 where
+
+  -- τ=753: 1 nodes, 1 σ-classes
+  module τ753 where
+
+    -- σ=1564 (1 nodes)
+    cell-0 : κ 590 ≡ κ 590
+    cell-0 = refl
+
+
+
+-- κ=591: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-41 where
+
+  -- τ=754: 1 nodes, 1 σ-classes
+  module τ754 where
+
+    -- σ=1565 (1 nodes)
+    cell-0 : κ 591 ≡ κ 591
+    cell-0 = refl
+
+
+
+-- κ=592: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-accum-AugAssign-7 where
+
+  -- τ=755: 1 nodes, 1 σ-classes
+  module τ755 where
+
+    -- σ=1566 (1 nodes)
+    cell-0 : κ 592 ≡ κ 592
+    cell-0 = refl
+
+
+
+-- κ=593: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-26 where
+
+  -- τ=756: 1 nodes, 1 σ-classes
+  module τ756 where
+
+    -- σ=1567 (1 nodes)
+    cell-0 : κ 593 ≡ κ 593
+    cell-0 = refl
+
+
+
+-- κ=594: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-35 where
+
+  -- τ=757: 1 nodes, 1 σ-classes
+  module τ757 where
+
+    -- σ=1569 (1 nodes)
+    cell-0 : κ 594 ≡ κ 594
+    cell-0 = refl
+
+
+
+-- κ=595: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-33 where
+
+  -- τ=760: 1 nodes, 1 σ-classes
+  module τ760 where
+
+    -- σ=1581 (1 nodes)
+    cell-0 : κ 595 ≡ κ 595
+    cell-0 = refl
+
+
+
+-- κ=598: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-literal-Dict-3 where
+
+  -- τ=765: 1 nodes, 1 σ-classes
+  module dict where
+
+    -- σ=1607 (1 nodes)
+    cell-0 : κ 598 ≡ κ 598
+    cell-0 = refl
+
+
+
+-- κ=599: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-34 where
+
+  -- τ=766: 1 nodes, 1 σ-classes
+  module τ766 where
+
+    -- σ=1608 (1 nodes)
+    cell-0 : κ 599 ≡ κ 599
+    cell-0 = refl
+
+
+
+-- κ=601: 1 nodes, 1 τ-classes, 1 σ-classes
+module keyword-keyword-0 where
+
+  -- τ=767: 1 nodes, 1 σ-classes
+  module τ767 where
+
+    -- σ=1613 (1 nodes)
+    cell-0 : κ 601 ≡ κ 601
+    cell-0 = refl
+
+
+
+-- κ=602: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-33 where
+
+  -- τ=768: 1 nodes, 1 σ-classes
+  module τ768 where
+
+    -- σ=1614 (1 nodes)
+    cell-0 : κ 602 ≡ κ 602
+    cell-0 = refl
+
+
+
+-- κ=603: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-59 where
+
+  -- τ=769: 1 nodes, 1 σ-classes
+  module τ769 where
+
+    -- σ=1615 (1 nodes)
+    cell-0 : κ 603 ≡ κ 603
+    cell-0 = refl
+
+
+
+-- κ=604: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-accum-AugAssign-8 where
+
+  -- τ=770: 1 nodes, 1 σ-classes
+  module τ770 where
+
+    -- σ=1620 (1 nodes)
+    cell-0 : κ 604 ≡ κ 604
+    cell-0 = refl
+
+
+
+-- κ=605: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-literal-Dict-4 where
+
+  -- τ=771: 1 nodes, 1 σ-classes
+  module dict where
+
+    -- σ=1622 (1 nodes)
+    cell-0 : κ 605 ≡ κ 605
+    cell-0 = refl
+
+
+
+-- κ=606: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-60 where
+
+  -- τ=772: 1 nodes, 1 σ-classes
+  module τ772 where
+
+    -- σ=1623 (1 nodes)
+    cell-0 : κ 606 ≡ κ 606
+    cell-0 = refl
+
+
+
+-- κ=607: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-op-at-x3f-Call-6 where
+
+  -- τ=774: 1 nodes, 1 σ-classes
+  module τ774 where
+
+    -- σ=1629 (1 nodes)
+    cell-0 : κ 607 ≡ κ 607
+    cell-0 = refl
+
+
+
+-- κ=608: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-35 where
+
+  -- τ=775: 1 nodes, 1 σ-classes
+  module τ775 where
+
+    -- σ=1630 (1 nodes)
+    cell-0 : κ 608 ≡ κ 608
+    cell-0 = refl
+
+
+
+-- κ=609: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-27 where
+
+  -- τ=776: 1 nodes, 1 σ-classes
+  module τ776 where
+
+    -- σ=1631 (1 nodes)
+    cell-0 : κ 609 ≡ κ 609
+    cell-0 = refl
+
+
+
+-- κ=610: 1 nodes, 1 τ-classes, 1 σ-classes
+module terminal-map-Return-18 where
+
+  -- τ=777: 1 nodes, 1 σ-classes
+  module τ777 where
+
+    -- σ=1633 (1 nodes)
+    cell-0 : κ 610 ≡ κ 610
+    cell-0 = refl
+
+
+
+-- κ=611: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-33 where
+
+  -- τ=778: 1 nodes, 1 σ-classes
+  module tuple where
+
+    -- σ=1634 (1 nodes)
+    cell-0 : κ 611 ≡ κ 611
+    cell-0 = refl
+
+
+
+-- κ=612: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-33 where
+
+  -- τ=779: 1 nodes, 1 σ-classes
+  module τ779 where
+
+    -- σ=1635 (1 nodes)
+    cell-0 : κ 612 ≡ κ 612
+    cell-0 = refl
+
+
+
+-- κ=613: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-42 where
+
+  -- τ=780: 1 nodes, 1 σ-classes
+  module τ780 where
+
+    -- σ=1636 (1 nodes)
+    cell-0 : κ 613 ≡ κ 613
+    cell-0 = refl
+
+
+
+-- κ=614: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-36 where
+
+  -- τ=781: 1 nodes, 1 σ-classes
+  module τ781 where
+
+    -- σ=1637 (1 nodes)
+    cell-0 : κ 614 ≡ κ 614
+    cell-0 = refl
+
+
+
+-- κ=615: 3 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-34 where
+
+  -- τ=782: 3 nodes, 1 σ-classes
+  module tuple where
+
+    -- σ=1644 (3 nodes)
+    cell-0 : κ 615 ≡ κ 615
+    cell-0 = refl
+
+
+
+-- κ=616: 1 nodes, 1 τ-classes, 1 σ-classes
+module comprehension-comprehension-5 where
+
+  -- τ=783: 1 nodes, 1 σ-classes
+  module τ783 where
+
+    -- σ=1646 (1 nodes)
+    cell-0 : κ 616 ≡ κ 616
+    cell-0 = refl
+
+
+
+-- κ=617: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-map-ListComp-3 where
+
+  -- τ=784: 1 nodes, 1 σ-classes
+  module τ784 where
+
+    -- σ=1647 (1 nodes)
+    cell-0 : κ 617 ≡ κ 617
+    cell-0 = refl
+
+
+
+-- κ=618: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-61 where
+
+  -- τ=785: 1 nodes, 1 σ-classes
+  module τ785 where
+
+    -- σ=1648 (1 nodes)
+    cell-0 : κ 618 ≡ κ 618
+    cell-0 = refl
+
+
+
+-- κ=619: 2 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-34 where
+
+  -- τ=786: 2 nodes, 1 σ-classes
+  module τ786 where
+
+    -- σ=1653 (2 nodes)
+    cell-0 : κ 619 ≡ κ 619
+    cell-0 = refl
+
+
+
+-- κ=620: 2 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-43 where
+
+  -- τ=787: 2 nodes, 1 σ-classes
+  module τ787 where
+
+    -- σ=1654 (2 nodes)
+    cell-0 : κ 620 ≡ κ 620
+    cell-0 = refl
+
+
+
+-- κ=621: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-35 where
+
+  -- τ=788: 1 nodes, 1 σ-classes
+  module τ788 where
+
+    -- σ=1655 (1 nodes)
+    cell-0 : κ 621 ≡ κ 621
+    cell-0 = refl
+
+
+
+-- κ=622: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-62 where
+
+  -- τ=790: 1 nodes, 1 σ-classes
+  module τ790 where
+
+    -- σ=1660 (1 nodes)
+    cell-0 : κ 622 ≡ κ 622
+    cell-0 = refl
+
+
+
+-- κ=623: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-37 where
+
+  -- τ=791: 1 nodes, 1 σ-classes
+  module τ791 where
+
+    -- σ=1666 (1 nodes)
+    cell-0 : κ 623 ≡ κ 623
+    cell-0 = refl
+
+
+
+-- κ=624: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-28 where
+
+  -- τ=792: 1 nodes, 1 σ-classes
+  module τ792 where
+
+    -- σ=1667 (1 nodes)
+    cell-0 : κ 624 ≡ κ 624
+    cell-0 = refl
+
+
+
+-- κ=625: 1 nodes, 1 τ-classes, 1 σ-classes
+module coproduct-elim-If-7 where
+
+  -- τ=793: 1 nodes, 1 σ-classes
+  module τ793 where
+
+    -- σ=1673 (1 nodes)
+    cell-0 : κ 625 ≡ κ 625
+    cell-0 = refl
+
+
+
+-- κ=626: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-29 where
+
+  -- τ=794: 1 nodes, 1 σ-classes
+  module τ794 where
+
+    -- σ=1674 (1 nodes)
+    cell-0 : κ 626 ≡ κ 626
+    cell-0 = refl
+
+
+
+-- κ=627: 2 nodes, 1 τ-classes, 1 σ-classes
+module usub-USub where
+
+  -- τ=795: 2 nodes, 1 σ-classes
+  module τ795 where
+
+    -- σ=1678 (2 nodes)
+    cell-0 : κ 627 ≡ κ 627
+    cell-0 = refl
+
+
+
+-- κ=628: 1 nodes, 1 τ-classes, 1 σ-classes
+module projection-at-x3f-Attribute-1 where
+
+  -- τ=796: 1 nodes, 1 σ-classes
+  module τ796 where
+
+    -- σ=1681 (1 nodes)
+    cell-0 : κ 628 ≡ κ 628
+    cell-0 = refl
+
+
+
+-- κ=629: 1 nodes, 1 τ-classes, 1 σ-classes
+module projection-compute-at-x3f-Call-1 where
+
+  -- τ=797: 1 nodes, 1 σ-classes
+  module τ797 where
+
+    -- σ=1682 (1 nodes)
+    cell-0 : κ 629 ≡ κ 629
+    cell-0 = refl
+
+
+
+-- κ=630: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-34 where
+
+  -- τ=798: 1 nodes, 1 σ-classes
+  module τ798 where
+
+    -- σ=1683 (1 nodes)
+    cell-0 : κ 630 ≡ κ 630
+    cell-0 = refl
+
+
+
+-- κ=631: 1 nodes, 1 τ-classes, 1 σ-classes
+module endomorphism-UnaryOp-0 where
+
+  -- τ=799: 1 nodes, 1 σ-classes
+  module τ799 where
+
+    -- σ=1684 (1 nodes)
+    cell-0 : κ 631 ≡ κ 631
+    cell-0 = refl
+
+
+
+-- κ=632: 1 nodes, 1 τ-classes, 1 σ-classes
+module lambda-Lambda-1 where
+
+  -- τ=800: 1 nodes, 1 σ-classes
+  module τ800 where
+
+    -- σ=1685 (1 nodes)
+    cell-0 : κ 632 ≡ κ 632
+    cell-0 = refl
+
+
+
+-- κ=633: 1 nodes, 1 τ-classes, 1 σ-classes
+module keyword-keyword-1 where
+
+  -- τ=801: 1 nodes, 1 σ-classes
+  module τ801 where
+
+    -- σ=1686 (1 nodes)
+    cell-0 : κ 633 ≡ κ 633
+    cell-0 = refl
+
+
+
+-- κ=634: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-35 where
+
+  -- τ=802: 1 nodes, 1 σ-classes
+  module τ802 where
+
+    -- σ=1687 (1 nodes)
+    cell-0 : κ 634 ≡ κ 634
+    cell-0 = refl
+
+
+
+-- κ=635: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-36 where
+
+  -- τ=803: 1 nodes, 1 σ-classes
+  module τ803 where
+
+    -- σ=1688 (1 nodes)
+    cell-0 : κ 635 ≡ κ 635
+    cell-0 = refl
+
+
+
+-- κ=636: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-37 where
+
+  -- τ=804: 1 nodes, 1 σ-classes
+  module τ804 where
+
+    -- σ=1690 (1 nodes)
+    cell-0 : κ 636 ≡ κ 636
+    cell-0 = refl
+
+
+
+-- κ=637: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-63 where
+
+  -- τ=809: 1 nodes, 1 σ-classes
+  module τ809 where
+
+    -- σ=1707 (1 nodes)
+    cell-0 : κ 637 ≡ κ 637
+    cell-0 = refl
+
+
+
+-- κ=638: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-op-at-x3f-Attribute-4 where
+
+  -- τ=810: 1 nodes, 1 σ-classes
+  module τ810 where
+
+    -- σ=1712 (1 nodes)
+    cell-0 : κ 638 ≡ κ 638
+    cell-0 = refl
+
+
+
+-- κ=639: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-x3f-Call-6 where
+
+  -- τ=811: 1 nodes, 1 σ-classes
+  module τ811 where
+
+    -- σ=1713 (1 nodes)
+    cell-0 : κ 639 ≡ κ 639
+    cell-0 = refl
+
+
+
+-- κ=640: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-37 where
+
+  -- τ=812: 1 nodes, 1 σ-classes
+  module τ812 where
+
+    -- σ=1714 (1 nodes)
+    cell-0 : κ 640 ≡ κ 640
+    cell-0 = refl
+
+
+
+-- κ=641: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-30 where
+
+  -- τ=813: 1 nodes, 1 σ-classes
+  module τ813 where
+
+    -- σ=1715 (1 nodes)
+    cell-0 : κ 641 ≡ κ 641
+    cell-0 = refl
+
+
+
+-- κ=642: 1 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-35 where
+
+  -- τ=814: 1 nodes, 1 σ-classes
+  module tuple where
+
+    -- σ=1718 (1 nodes)
+    cell-0 : κ 642 ≡ κ 642
+    cell-0 = refl
+
+
+
+-- κ=643: 1 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-35 where
+
+  -- τ=815: 1 nodes, 1 σ-classes
+  module τ815 where
+
+    -- σ=1719 (1 nodes)
+    cell-0 : κ 643 ≡ κ 643
+    cell-0 = refl
+
+
+
+-- κ=644: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-44 where
+
+  -- τ=816: 1 nodes, 1 σ-classes
+  module τ816 where
+
+    -- σ=1720 (1 nodes)
+    cell-0 : κ 644 ≡ κ 644
+    cell-0 = refl
+
+
+
+-- κ=645: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-38 where
+
+  -- τ=817: 1 nodes, 1 σ-classes
+  module τ817 where
+
+    -- σ=1721 (1 nodes)
+    cell-0 : κ 645 ≡ κ 645
+    cell-0 = refl
+
+
+
+-- κ=646: 2 nodes, 1 τ-classes, 1 σ-classes
+module product-Tuple-36 where
+
+  -- τ=818: 2 nodes, 1 σ-classes
+  module tuple where
+
+    -- σ=1724 (2 nodes)
+    cell-0 : κ 646 ≡ κ 646
+    cell-0 = refl
+
+
+
+-- κ=647: 2 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-36 where
+
+  -- τ=819: 2 nodes, 1 σ-classes
+  module τ819 where
+
+    -- σ=1725 (2 nodes)
+    cell-0 : κ 647 ≡ κ 647
+    cell-0 = refl
+
+
+
+-- κ=648: 2 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-45 where
+
+  -- τ=820: 2 nodes, 1 σ-classes
+  module τ820 where
+
+    -- σ=1726 (2 nodes)
+    cell-0 : κ 648 ≡ κ 648
+    cell-0 = refl
+
+
+
+-- κ=649: 2 nodes, 1 τ-classes, 1 σ-classes
+module index-Index-37 where
+
+  -- τ=821: 2 nodes, 1 σ-classes
+  module τ821 where
+
+    -- σ=1727 (2 nodes)
+    cell-0 : κ 649 ≡ κ 649
+    cell-0 = refl
+
+
+
+-- κ=650: 2 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-46 where
+
+  -- τ=822: 2 nodes, 1 σ-classes
+  module τ822 where
+
+    -- σ=1728 (2 nodes)
+    cell-0 : κ 650 ≡ κ 650
+    cell-0 = refl
+
+
+
+-- κ=651: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-36 where
+
+  -- τ=823: 1 nodes, 1 σ-classes
+  module τ823 where
+
+    -- σ=1729 (1 nodes)
+    cell-0 : κ 651 ≡ κ 651
+    cell-0 = refl
+
+
+
+-- κ=652: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-map-DictComp-1 where
+
+  -- τ=825: 1 nodes, 1 σ-classes
+  module τ825 where
+
+    -- σ=1742 (1 nodes)
+    cell-0 : κ 652 ≡ κ 652
+    cell-0 = refl
+
+
+
+-- κ=653: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-64 where
+
+  -- τ=826: 1 nodes, 1 σ-classes
+  module τ826 where
+
+    -- σ=1743 (1 nodes)
+    cell-0 : κ 653 ≡ κ 653
+    cell-0 = refl
+
+
+
+-- κ=656: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-38 where
+
+  -- τ=829: 1 nodes, 1 σ-classes
+  module τ829 where
+
+    -- σ=1755 (1 nodes)
+    cell-0 : κ 656 ≡ κ 656
+    cell-0 = refl
+
+
+
+-- κ=657: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-31 where
+
+  -- τ=830: 1 nodes, 1 σ-classes
+  module τ830 where
+
+    -- σ=1756 (1 nodes)
+    cell-0 : κ 657 ≡ κ 657
+    cell-0 = refl
+
+
+
+-- κ=658: 1 nodes, 1 τ-classes, 1 σ-classes
+module endomorphism-UnaryOp-1 where
+
+  -- τ=831: 1 nodes, 1 σ-classes
+  module τ831 where
+
+    -- σ=1760 (1 nodes)
+    cell-0 : κ 658 ≡ κ 658
+    cell-0 = refl
+
+
+
+-- κ=659: 1 nodes, 1 τ-classes, 1 σ-classes
+module lambda-Lambda-2 where
+
+  -- τ=832: 1 nodes, 1 σ-classes
+  module τ832 where
+
+    -- σ=1761 (1 nodes)
+    cell-0 : κ 659 ≡ κ 659
+    cell-0 = refl
+
+
+
+-- κ=660: 1 nodes, 1 τ-classes, 1 σ-classes
+module keyword-keyword-2 where
+
+  -- τ=833: 1 nodes, 1 σ-classes
+  module τ833 where
+
+    -- σ=1762 (1 nodes)
+    cell-0 : κ 660 ≡ κ 660
+    cell-0 = refl
+
+
+
+-- κ=661: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-36 where
+
+  -- τ=834: 1 nodes, 1 σ-classes
+  module τ834 where
+
+    -- σ=1763 (1 nodes)
+    cell-0 : κ 661 ≡ κ 661
+    cell-0 = refl
+
+
+
+-- κ=662: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-38 where
+
+  -- τ=835: 1 nodes, 1 σ-classes
+  module τ835 where
+
+    -- σ=1764 (1 nodes)
+    cell-0 : κ 662 ≡ κ 662
+    cell-0 = refl
+
+
+
+-- κ=663: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-39 where
+
+  -- τ=836: 1 nodes, 1 σ-classes
+  module τ836 where
+
+    -- σ=1766 (1 nodes)
+    cell-0 : κ 663 ≡ κ 663
+    cell-0 = refl
+
+
+
+-- κ=664: 2 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-65 where
+
+  -- τ=838: 2 nodes, 1 σ-classes
+  module τ838 where
+
+    -- σ=1772 (2 nodes)
+    cell-0 : κ 664 ≡ κ 664
+    cell-0 = refl
+
+
+
+-- κ=665: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-JoinedStr-11 where
+
+  -- τ=841: 1 nodes, 1 σ-classes
+  module str where
+
+    -- σ=1790 (1 nodes)
+    cell-0 : κ 665 ≡ κ 665
+    cell-0 = refl
+
+
+
+-- κ=666: 1 nodes, 1 τ-classes, 1 σ-classes
+module terminal-map-Return-19 where
+
+  -- τ=842: 1 nodes, 1 σ-classes
+  module τ842 where
+
+    -- σ=1791 (1 nodes)
+    cell-0 : κ 666 ≡ κ 666
+    cell-0 = refl
+
+
+
+-- κ=667: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-40 where
+
+  -- τ=843: 1 nodes, 1 σ-classes
+  module τ843 where
+
+    -- σ=1792 (1 nodes)
+    cell-0 : κ 667 ≡ κ 667
+    cell-0 = refl
+
+
+
+-- κ=668: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-Compare-21 where
+
+  -- τ=844: 1 nodes, 1 σ-classes
+  module τ844 where
+
+    -- σ=1798 (1 nodes)
+    cell-0 : κ 668 ≡ κ 668
+    cell-0 = refl
+
+
+
+-- κ=669: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-39 where
+
+  -- τ=845: 1 nodes, 1 σ-classes
+  module τ845 where
+
+    -- σ=1801 (1 nodes)
+    cell-0 : κ 669 ≡ κ 669
+    cell-0 = refl
+
+
+
+-- κ=670: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-66 where
+
+  -- τ=847: 1 nodes, 1 σ-classes
+  module τ847 where
+
+    -- σ=1810 (1 nodes)
+    cell-0 : κ 670 ≡ κ 670
+    cell-0 = refl
+
+
+
+-- κ=672: 2 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-JoinedStr-12 where
+
+  -- τ=849: 2 nodes, 1 σ-classes
+  module str where
+
+    -- σ=1816 (2 nodes)
+    cell-0 : κ 672 ≡ κ 672
+    cell-0 = refl
+
+
+
+-- κ=675: 8 nodes, 1 τ-classes, 1 σ-classes
+module div-Div where
+
+  -- τ=852: 8 nodes, 1 σ-classes
+  module τ852 where
+
+    -- σ=1823 (8 nodes)
+    cell-0 : κ 675 ≡ κ 675
+    cell-0 = refl
+
+
+
+-- κ=685: 1 nodes, 1 τ-classes, 1 σ-classes
+module coerce-FormattedValue-11 where
+
+  -- τ=862: 1 nodes, 1 σ-classes
+  module τ862 where
+
+    -- σ=1864 (1 nodes)
+    cell-0 : κ 685 ≡ κ 685
+    cell-0 = refl
+
+
+
+-- κ=686: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-JoinedStr-13 where
+
+  -- τ=863: 1 nodes, 1 σ-classes
+  module str where
+
+    -- σ=1865 (1 nodes)
+    cell-0 : κ 686 ≡ κ 686
+    cell-0 = refl
+
+
+
+-- κ=687: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-literal-List-3 where
+
+  -- τ=864: 1 nodes, 1 σ-classes
+  module list where
+
+    -- σ=1866 (1 nodes)
+    cell-0 : κ 687 ≡ κ 687
+    cell-0 = refl
+
+
+
+-- κ=688: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-67 where
+
+  -- τ=865: 1 nodes, 1 σ-classes
+  module τ865 where
+
+    -- σ=1867 (1 nodes)
+    cell-0 : κ 688 ≡ κ 688
+    cell-0 = refl
+
+
+
+-- κ=689: 1 nodes, 1 τ-classes, 1 σ-classes
+module subobject-Attribute where
+
+  -- τ=796: 1 nodes, 1 σ-classes
+  module τ796 where
+
+    -- σ=1873 (1 nodes)
+    cell-0 : κ 689 ≡ κ 689
+    cell-0 = refl
+
+
+
+-- κ=690: 1 nodes, 1 τ-classes, 1 σ-classes
+module subobject-test-Call where
+
+  -- τ=866: 1 nodes, 1 σ-classes
+  module τ866 where
+
+    -- σ=1875 (1 nodes)
+    cell-0 : κ 690 ≡ κ 690
+    cell-0 = refl
+
+
+
+-- κ=691: 1 nodes, 1 τ-classes, 1 σ-classes
+module meet-BoolOp-1 where
+
+  -- τ=867: 1 nodes, 1 σ-classes
+  module τ867 where
+
+    -- σ=1876 (1 nodes)
+    cell-0 : κ 691 ≡ κ 691
+    cell-0 = refl
+
+
+
+-- κ=692: 1 nodes, 1 τ-classes, 1 σ-classes
+module comprehension-comprehension-6 where
+
+  -- τ=868: 1 nodes, 1 σ-classes
+  module τ868 where
+
+    -- σ=1877 (1 nodes)
+    cell-0 : κ 692 ≡ κ 692
+    cell-0 = refl
+
+
+
+-- κ=693: 1 nodes, 1 τ-classes, 1 σ-classes
+module lazy_fold-GeneratorExp-6 where
+
+  -- τ=869: 1 nodes, 1 σ-classes
+  module τ869 where
+
+    -- σ=1878 (1 nodes)
+    cell-0 : κ 693 ≡ κ 693
+    cell-0 = refl
+
+
+
+-- κ=694: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-37 where
+
+  -- τ=870: 1 nodes, 1 σ-classes
+  module τ870 where
+
+    -- σ=1879 (1 nodes)
+    cell-0 : κ 694 ≡ κ 694
+    cell-0 = refl
+
+
+
+-- κ=695: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-68 where
+
+  -- τ=871: 1 nodes, 1 σ-classes
+  module τ871 where
+
+    -- σ=1880 (1 nodes)
+    cell-0 : κ 695 ≡ κ 695
+    cell-0 = refl
+
+
+
+-- κ=696: 1 nodes, 1 τ-classes, 1 σ-classes
+module powerset-Call-3 where
+
+  -- τ=872: 1 nodes, 1 σ-classes
+  module τ872 where
+
+    -- σ=1882 (1 nodes)
+    cell-0 : κ 696 ≡ κ 696
+    cell-0 = refl
+
+
+
+-- κ=697: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-37 where
+
+  -- τ=873: 1 nodes, 1 σ-classes
+  module τ873 where
+
+    -- σ=1883 (1 nodes)
+    cell-0 : κ 697 ≡ κ 697
+    cell-0 = refl
+
+
+
+-- κ=698: 1 nodes, 1 τ-classes, 1 σ-classes
+module ifexp-IfExp-4 where
+
+  -- τ=874: 1 nodes, 1 σ-classes
+  module τ874 where
+
+    -- σ=1890 (1 nodes)
+    cell-0 : κ 698 ≡ κ 698
+    cell-0 = refl
+
+
+
+-- κ=699: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-69 where
+
+  -- τ=875: 1 nodes, 1 σ-classes
+  module τ875 where
+
+    -- σ=1891 (1 nodes)
+    cell-0 : κ 699 ≡ κ 699
+    cell-0 = refl
+
+
+
+-- κ=700: 1 nodes, 1 τ-classes, 1 σ-classes
+module bimap-BinOp-5 where
+
+  -- τ=876: 1 nodes, 1 σ-classes
+  module τ876 where
+
+    -- σ=1896 (1 nodes)
+    cell-0 : κ 700 ≡ κ 700
+    cell-0 = refl
+
+
+
+-- κ=701: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-70 where
+
+  -- τ=877: 1 nodes, 1 σ-classes
+  module τ877 where
+
+    -- σ=1897 (1 nodes)
+    cell-0 : κ 701 ≡ κ 701
+    cell-0 = refl
+
+
+
+-- κ=702: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-38 where
+
+  -- τ=879: 1 nodes, 1 σ-classes
+  module τ879 where
+
+    -- σ=1900 (1 nodes)
+    cell-0 : κ 702 ≡ κ 702
+    cell-0 = refl
+
+
+
+-- κ=703: 1 nodes, 1 τ-classes, 1 σ-classes
+module annassign-AnnAssign-39 where
+
+  -- τ=880: 1 nodes, 1 σ-classes
+  module τ880 where
+
+    -- σ=1903 (1 nodes)
+    cell-0 : κ 703 ≡ κ 703
+    cell-0 = refl
+
+
+
+-- κ=704: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-71 where
+
+  -- τ=881: 1 nodes, 1 σ-classes
+  module τ881 where
+
+    -- σ=1908 (1 nodes)
+    cell-0 : κ 704 ≡ κ 704
+    cell-0 = refl
+
+
+
+-- κ=705: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-40 where
+
+  -- τ=882: 1 nodes, 1 σ-classes
+  module τ882 where
+
+    -- σ=1909 (1 nodes)
+    cell-0 : κ 705 ≡ κ 705
+    cell-0 = refl
+
+
+
+-- κ=706: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-op-at-x3f-Attribute-3 where
+
+  -- τ=810: 1 nodes, 1 σ-classes
+  module τ810 where
+
+    -- σ=1911 (1 nodes)
+    cell-0 : κ 706 ≡ κ 706
+    cell-0 = refl
+
+
+
+-- κ=707: 1 nodes, 1 τ-classes, 1 σ-classes
+module partial-apply-at-x3f-Call-1 where
+
+  -- τ=883: 1 nodes, 1 σ-classes
+  module τ883 where
+
+    -- σ=1913 (1 nodes)
+    cell-0 : κ 707 ≡ κ 707
+    cell-0 = refl
+
+
+
+-- κ=708: 1 nodes, 1 τ-classes, 1 σ-classes
+module monoid-op-at-x3f-Call-7 where
+
+  -- τ=884: 1 nodes, 1 σ-classes
+  module τ884 where
+
+    -- σ=1914 (1 nodes)
+    cell-0 : κ 708 ≡ κ 708
+    cell-0 = refl
+
+
+
+-- κ=709: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-39 where
+
+  -- τ=885: 1 nodes, 1 σ-classes
+  module τ885 where
+
+    -- σ=1915 (1 nodes)
+    cell-0 : κ 709 ≡ κ 709
+    cell-0 = refl
+
+
+
+-- κ=710: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-32 where
+
+  -- τ=886: 1 nodes, 1 σ-classes
+  module τ886 where
+
+    -- σ=1916 (1 nodes)
+    cell-0 : κ 710 ≡ κ 710
+    cell-0 = refl
+
+
+
+-- κ=711: 1 nodes, 1 τ-classes, 1 σ-classes
+module comprehension-comprehension-7 where
+
+  -- τ=887: 1 nodes, 1 σ-classes
+  module τ887 where
+
+    -- σ=1921 (1 nodes)
+    cell-0 : κ 711 ≡ κ 711
+    cell-0 = refl
+
+
+
+-- κ=712: 1 nodes, 1 τ-classes, 1 σ-classes
+module lazy_fold-GeneratorExp-7 where
+
+  -- τ=888: 1 nodes, 1 σ-classes
+  module τ888 where
+
+    -- σ=1922 (1 nodes)
+    cell-0 : κ 712 ≡ κ 712
+    cell-0 = refl
+
+
+
+-- κ=713: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-38 where
+
+  -- τ=889: 1 nodes, 1 σ-classes
+  module τ889 where
+
+    -- σ=1923 (1 nodes)
+    cell-0 : κ 713 ≡ κ 713
+    cell-0 = refl
+
+
+
+-- κ=714: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-72 where
+
+  -- τ=890: 1 nodes, 1 σ-classes
+  module τ890 where
+
+    -- σ=1924 (1 nodes)
+    cell-0 : κ 714 ≡ κ 714
+    cell-0 = refl
+
+
+
+-- κ=715: 8 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-op-at-sequence-Attribute where
+
+  -- τ=34: 8 nodes, 1 σ-classes
+  module Self-_parent where
+
+    -- σ=1926 (8 nodes)
+    cell-0 : κ 715 ≡ κ 715
+    cell-0 = refl
+
+
+
+-- κ=716: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-JoinedStr-14 where
+
+  -- τ=892: 1 nodes, 1 σ-classes
+  module str where
+
+    -- σ=1930 (1 nodes)
+    cell-0 : κ 716 ≡ κ 716
+    cell-0 = refl
+
+
+
+-- κ=717: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-sequence-Call-0 where
+
+  -- τ=893: 1 nodes, 1 σ-classes
+  module None where
+
+    -- σ=1931 (1 nodes)
+    cell-0 : κ 717 ≡ κ 717
+    cell-0 = refl
+
+
+
+-- κ=718: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-40 where
+
+  -- τ=894: 1 nodes, 1 σ-classes
+  module τ894 where
+
+    -- σ=1932 (1 nodes)
+    cell-0 : κ 718 ≡ κ 718
+    cell-0 = refl
+
+
+
+-- κ=719: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-JoinedStr-15 where
+
+  -- τ=895: 1 nodes, 1 σ-classes
+  module str where
+
+    -- σ=1940 (1 nodes)
+    cell-0 : κ 719 ≡ κ 719
+    cell-0 = refl
+
+
+
+-- κ=720: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-sequence-Call-1 where
+
+  -- τ=896: 1 nodes, 1 σ-classes
+  module None where
+
+    -- σ=1941 (1 nodes)
+    cell-0 : κ 720 ≡ κ 720
+    cell-0 = refl
+
+
+
+-- κ=721: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-41 where
+
+  -- τ=897: 1 nodes, 1 σ-classes
+  module τ897 where
+
+    -- σ=1942 (1 nodes)
+    cell-0 : κ 721 ≡ κ 721
+    cell-0 = refl
+
+
+
+-- κ=722: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-JoinedStr-16 where
+
+  -- τ=898: 1 nodes, 1 σ-classes
+  module str where
+
+    -- σ=1952 (1 nodes)
+    cell-0 : κ 722 ≡ κ 722
+    cell-0 = refl
+
+
+
+-- κ=723: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-sequence-Call-2 where
+
+  -- τ=899: 1 nodes, 1 σ-classes
+  module None where
+
+    -- σ=1953 (1 nodes)
+    cell-0 : κ 723 ≡ κ 723
+    cell-0 = refl
+
+
+
+-- κ=724: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-42 where
+
+  -- τ=900: 1 nodes, 1 σ-classes
+  module τ900 where
+
+    -- σ=1954 (1 nodes)
+    cell-0 : κ 724 ≡ κ 724
+    cell-0 = refl
+
+
+
+-- κ=725: 1 nodes, 1 τ-classes, 1 σ-classes
+module mult-Mult where
+
+  -- τ=901: 1 nodes, 1 σ-classes
+  module τ901 where
+
+    -- σ=1961 (1 nodes)
+    cell-0 : κ 725 ≡ κ 725
+    cell-0 = refl
+
+
+
+-- κ=726: 1 nodes, 1 τ-classes, 1 σ-classes
+module bimap-BinOp-6 where
+
+  -- τ=903: 1 nodes, 1 σ-classes
+  module τ903 where
+
+    -- σ=1963 (1 nodes)
+    cell-0 : κ 726 ≡ κ 726
+    cell-0 = refl
+
+
+
+-- κ=727: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-Compare-22 where
+
+  -- τ=904: 1 nodes, 1 σ-classes
+  module τ904 where
+
+    -- σ=1964 (1 nodes)
+    cell-0 : κ 727 ≡ κ 727
+    cell-0 = refl
+
+
+
+-- κ=728: 1 nodes, 1 τ-classes, 1 σ-classes
+module ifexp-IfExp-5 where
+
+  -- τ=905: 1 nodes, 1 σ-classes
+  module τ905 where
+
+    -- σ=1967 (1 nodes)
+    cell-0 : κ 728 ≡ κ 728
+    cell-0 = refl
+
+
+
+-- κ=729: 1 nodes, 1 τ-classes, 1 σ-classes
+module coerce-FormattedValue-12 where
+
+  -- τ=906: 1 nodes, 1 σ-classes
+  module τ906 where
+
+    -- σ=1968 (1 nodes)
+    cell-0 : κ 729 ≡ κ 729
+    cell-0 = refl
+
+
+
+-- κ=730: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-JoinedStr-17 where
+
+  -- τ=907: 1 nodes, 1 σ-classes
+  module str where
+
+    -- σ=1969 (1 nodes)
+    cell-0 : κ 730 ≡ κ 730
+    cell-0 = refl
+
+
+
+-- κ=731: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-sequence-Call-3 where
+
+  -- τ=908: 1 nodes, 1 σ-classes
+  module None where
+
+    -- σ=1970 (1 nodes)
+    cell-0 : κ 731 ≡ κ 731
+    cell-0 = refl
+
+
+
+-- κ=732: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-43 where
+
+  -- τ=909: 1 nodes, 1 σ-classes
+  module τ909 where
+
+    -- σ=1971 (1 nodes)
+    cell-0 : κ 732 ≡ κ 732
+    cell-0 = refl
+
+
+
+-- κ=733: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-literal-Dict-5 where
+
+  -- τ=910: 1 nodes, 1 σ-classes
+  module dict where
+
+    -- σ=1979 (1 nodes)
+    cell-0 : κ 733 ≡ κ 733
+    cell-0 = refl
+
+
+
+-- κ=734: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-73 where
+
+  -- τ=911: 1 nodes, 1 σ-classes
+  module τ911 where
+
+    -- σ=1980 (1 nodes)
+    cell-0 : κ 734 ≡ κ 734
+    cell-0 = refl
+
+
+
+-- κ=735: 1 nodes, 1 τ-classes, 1 σ-classes
+module partial-apply-at-state-Call-5 where
+
+  -- τ=913: 1 nodes, 1 σ-classes
+  module T where
+
+    -- σ=1983 (1 nodes)
+    cell-0 : κ 735 ≡ κ 735
+    cell-0 = refl
+
+
+
+-- κ=736: 1 nodes, 1 τ-classes, 1 σ-classes
+module cardinality-Call-3 where
+
+  -- τ=914: 1 nodes, 1 σ-classes
+  module int where
+
+    -- σ=1984 (1 nodes)
+    cell-0 : κ 736 ≡ κ 736
+    cell-0 = refl
+
+
+
+-- κ=737: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-74 where
+
+  -- τ=915: 1 nodes, 1 σ-classes
+  module τ915 where
+
+    -- σ=1985 (1 nodes)
+    cell-0 : κ 737 ≡ κ 737
+    cell-0 = refl
+
+
+
+-- κ=738: 1 nodes, 1 τ-classes, 1 σ-classes
+module bimap-BinOp-7 where
+
+  -- τ=916: 1 nodes, 1 σ-classes
+  module τ916 where
+
+    -- σ=1988 (1 nodes)
+    cell-0 : κ 738 ≡ κ 738
+    cell-0 = refl
+
+
+
+-- κ=739: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-75 where
+
+  -- τ=917: 1 nodes, 1 σ-classes
+  module τ917 where
+
+    -- σ=1989 (1 nodes)
+    cell-0 : κ 739 ≡ κ 739
+    cell-0 = refl
+
+
+
+-- κ=740: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-sequence-Call-4 where
+
+  -- τ=918: 1 nodes, 1 σ-classes
+  module None where
+
+    -- σ=1991 (1 nodes)
+    cell-0 : κ 740 ≡ κ 740
+    cell-0 = refl
+
+
+
+-- κ=741: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-44 where
+
+  -- τ=919: 1 nodes, 1 σ-classes
+  module τ919 where
+
+    -- σ=1992 (1 nodes)
+    cell-0 : κ 741 ≡ κ 741
+    cell-0 = refl
+
+
+
+-- κ=743: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-JoinedStr-18 where
+
+  -- τ=923: 1 nodes, 1 σ-classes
+  module str where
+
+    -- σ=2003 (1 nodes)
+    cell-0 : κ 743 ≡ κ 743
+    cell-0 = refl
+
+
+
+-- κ=744: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-sequence-Call-5 where
+
+  -- τ=924: 1 nodes, 1 σ-classes
+  module None where
+
+    -- σ=2004 (1 nodes)
+    cell-0 : κ 744 ≡ κ 744
+    cell-0 = refl
+
+
+
+-- κ=745: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-45 where
+
+  -- τ=925: 1 nodes, 1 σ-classes
+  module τ925 where
+
+    -- σ=2005 (1 nodes)
+    cell-0 : κ 745 ≡ κ 745
+    cell-0 = refl
+
+
+
+-- κ=746: 1 nodes, 1 τ-classes, 1 σ-classes
+module projection-at-state-Attribute where
+
+  -- τ=153: 1 nodes, 1 σ-classes
+  module Self-tau-canonical where
+
+    -- σ=2006 (1 nodes)
+    cell-0 : κ 746 ≡ κ 746
+    cell-0 = refl
+
+
+
+-- κ=747: 1 nodes, 1 τ-classes, 1 σ-classes
+module projection-compute-at-state-Call where
+
+  -- τ=927: 1 nodes, 1 σ-classes
+  module Iter where
+
+    -- σ=2007 (1 nodes)
+    cell-0 : κ 747 ≡ κ 747
+    cell-0 = refl
+
+
+
+-- κ=748: 1 nodes, 1 τ-classes, 1 σ-classes
+module total_order-Call-2 where
+
+  -- τ=928: 1 nodes, 1 σ-classes
+  module list where
+
+    -- σ=2008 (1 nodes)
+    cell-0 : κ 748 ≡ κ 748
+    cell-0 = refl
+
+
+
+-- κ=749: 1 nodes, 1 τ-classes, 1 σ-classes
+module complement-If-1 where
+
+  -- τ=929: 1 nodes, 1 σ-classes
+  module τ929 where
+
+    -- σ=2011 (1 nodes)
+    cell-0 : κ 749 ≡ κ 749
+    cell-0 = refl
+
+
+
+-- κ=750: 1 nodes, 1 τ-classes, 1 σ-classes
+module partial-at-mapping-Attribute where
+
+  -- τ=34: 1 nodes, 1 σ-classes
+  module Self-_parent where
+
+    -- σ=2013 (1 nodes)
+    cell-0 : κ 750 ≡ κ 750
+    cell-0 = refl
+
+
+
+-- κ=751: 1 nodes, 1 τ-classes, 1 σ-classes
+module partial-apply-at-mapping-Call where
+
+  -- τ=932: 1 nodes, 1 σ-classes
+  module T where
+
+    -- σ=2017 (1 nodes)
+    cell-0 : κ 751 ≡ κ 751
+    cell-0 = refl
+
+
+
+-- κ=752: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-76 where
+
+  -- τ=933: 1 nodes, 1 σ-classes
+  module τ933 where
+
+    -- σ=2018 (1 nodes)
+    cell-0 : κ 752 ≡ κ 752
+    cell-0 = refl
+
+
+
+-- κ=753: 1 nodes, 1 τ-classes, 1 σ-classes
+module lambda-Lambda-3 where
+
+  -- τ=934: 1 nodes, 1 σ-classes
+  module τ934 where
+
+    -- σ=2024 (1 nodes)
+    cell-0 : κ 753 ≡ κ 753
+    cell-0 = refl
+
+
+
+-- κ=754: 1 nodes, 1 τ-classes, 1 σ-classes
+module keyword-keyword-3 where
+
+  -- τ=935: 1 nodes, 1 σ-classes
+  module τ935 where
+
+    -- σ=2025 (1 nodes)
+    cell-0 : κ 754 ≡ κ 754
+    cell-0 = refl
+
+
+
+-- κ=755: 1 nodes, 1 τ-classes, 1 σ-classes
+module apply-Call-39 where
+
+  -- τ=936: 1 nodes, 1 σ-classes
+  module τ936 where
+
+    -- σ=2026 (1 nodes)
+    cell-0 : κ 755 ≡ κ 755
+    cell-0 = refl
+
+
+
+-- κ=756: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-77 where
+
+  -- τ=937: 1 nodes, 1 σ-classes
+  module τ937 where
+
+    -- σ=2027 (1 nodes)
+    cell-0 : κ 756 ≡ κ 756
+    cell-0 = refl
+
+
+
+-- κ=757: 1 nodes, 1 τ-classes, 1 σ-classes
+module coerce-Call-1 where
+
+  -- τ=404: 1 nodes, 1 σ-classes
+  module τ404 where
+
+    -- σ=2030 (1 nodes)
+    cell-0 : κ 757 ≡ κ 757
+    cell-0 = refl
+
+
+
+-- κ=758: 1 nodes, 1 τ-classes, 1 σ-classes
+module subscript-Subscript-47 where
+
+  -- τ=938: 1 nodes, 1 σ-classes
+  module τ938 where
+
+    -- σ=2033 (1 nodes)
+    cell-0 : κ 758 ≡ κ 758
+    cell-0 = refl
+
+
+
+-- κ=759: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-78 where
+
+  -- τ=939: 1 nodes, 1 σ-classes
+  module τ939 where
+
+    -- σ=2034 (1 nodes)
+    cell-0 : κ 759 ≡ κ 759
+    cell-0 = refl
+
+
+
+-- κ=760: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-JoinedStr-19 where
+
+  -- τ=940: 1 nodes, 1 σ-classes
+  module str where
+
+    -- σ=2047 (1 nodes)
+    cell-0 : κ 760 ≡ κ 760
+    cell-0 = refl
+
+
+
+-- κ=761: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-sequence-Call-6 where
+
+  -- τ=941: 1 nodes, 1 σ-classes
+  module None where
+
+    -- σ=2048 (1 nodes)
+    cell-0 : κ 761 ≡ κ 761
+    cell-0 = refl
+
+
+
+-- κ=762: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-46 where
+
+  -- τ=942: 1 nodes, 1 σ-classes
+  module τ942 where
+
+    -- σ=2049 (1 nodes)
+    cell-0 : κ 762 ≡ κ 762
+    cell-0 = refl
+
+
+
+-- κ=763: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-33 where
+
+  -- τ=943: 1 nodes, 1 σ-classes
+  module τ943 where
+
+    -- σ=2050 (1 nodes)
+    cell-0 : κ 763 ≡ κ 763
+    cell-0 = refl
+
+
+
+-- κ=764: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-41 where
+
+  -- τ=944: 1 nodes, 1 σ-classes
+  module τ944 where
+
+    -- σ=2053 (1 nodes)
+    cell-0 : κ 764 ≡ κ 764
+    cell-0 = refl
+
+
+
+-- κ=765: 1 nodes, 1 τ-classes, 1 σ-classes
+module partial-apply-at-x3f-Call-2 where
+
+  -- τ=946: 1 nodes, 1 σ-classes
+  module τ946 where
+
+    -- σ=2059 (1 nodes)
+    cell-0 : κ 765 ≡ κ 765
+    cell-0 = refl
+
+
+
+-- κ=766: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-79 where
+
+  -- τ=947: 1 nodes, 1 σ-classes
+  module τ947 where
+
+    -- σ=2060 (1 nodes)
+    cell-0 : κ 766 ≡ κ 766
+    cell-0 = refl
+
+
+
+-- κ=767: 1 nodes, 1 τ-classes, 1 σ-classes
+module let-k-Assign-80 where
+
+  -- τ=948: 1 nodes, 1 σ-classes
+  module τ948 where
+
+    -- σ=2068 (1 nodes)
+    cell-0 : κ 767 ≡ κ 767
+    cell-0 = refl
+
+
+
+-- κ=768: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-JoinedStr-20 where
+
+  -- τ=951: 1 nodes, 1 σ-classes
+  module str where
+
+    -- σ=2084 (1 nodes)
+    cell-0 : κ 768 ≡ κ 768
+    cell-0 = refl
+
+
+
+-- κ=769: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-snoc-at-sequence-Call-7 where
+
+  -- τ=952: 1 nodes, 1 σ-classes
+  module None where
+
+    -- σ=2085 (1 nodes)
+    cell-0 : κ 769 ≡ κ 769
+    cell-0 = refl
+
+
+
+-- κ=770: 1 nodes, 1 τ-classes, 1 σ-classes
+module effect-seq-Expr-47 where
+
+  -- τ=953: 1 nodes, 1 σ-classes
+  module τ953 where
+
+    -- σ=2086 (1 nodes)
+    cell-0 : κ 770 ≡ κ 770
+    cell-0 = refl
+
+
+
+-- κ=771: 1 nodes, 1 τ-classes, 1 σ-classes
+module equalizer-If-42 where
+
+  -- τ=954: 1 nodes, 1 σ-classes
+  module τ954 where
+
+    -- σ=2087 (1 nodes)
+    cell-0 : κ 771 ≡ κ 771
+    cell-0 = refl
+
+
+
+-- κ=772: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-34 where
+
+  -- τ=955: 1 nodes, 1 σ-classes
+  module τ955 where
+
+    -- σ=2088 (1 nodes)
+    cell-0 : κ 772 ≡ κ 772
+    cell-0 = refl
+
+
+
+-- κ=773: 1 nodes, 1 τ-classes, 1 σ-classes
+module fold-For-35 where
+
+  -- τ=956: 1 nodes, 1 σ-classes
+  module τ956 where
+
+    -- σ=2089 (1 nodes)
+    cell-0 : κ 773 ≡ κ 773
+    cell-0 = refl
+
+
+
+-- κ=774: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-Attribute where
+
+  -- τ=957: 1 nodes, 1 σ-classes
+  module str-join where
+
+    -- σ=2091 (1 nodes)
+    cell-0 : κ 774 ≡ κ 774
+    cell-0 = refl
+
+
+
+-- κ=775: 1 nodes, 1 τ-classes, 1 σ-classes
+module free_monoid-fold-Call where
+
+  -- τ=958: 1 nodes, 1 σ-classes
+  module str where
+
+    -- σ=2092 (1 nodes)
+    cell-0 : κ 775 ≡ κ 775
+    cell-0 = refl
+
+
+
+-- κ=776: 1 nodes, 1 τ-classes, 1 σ-classes
+module terminal-map-Return-20 where
+
+  -- τ=959: 1 nodes, 1 σ-classes
+  module τ959 where
+
+    -- σ=2093 (1 nodes)
+    cell-0 : κ 776 ≡ κ 776
+    cell-0 = refl
+
+
+
+-- κ=777: 1 nodes, 1 τ-classes, 1 σ-classes
+module exponential-intro-FunctionDef-41 where
+
+  -- τ=960: 1 nodes, 1 σ-classes
+  module τ960 where
+
+    -- σ=2094 (1 nodes)
+    cell-0 : κ 777 ≡ κ 777
+    cell-0 = refl
+
+
+
+-- κ=778: 1 nodes, 1 τ-classes, 1 σ-classes
+module classifier-intro-ClassDef-3 where
+
+  -- τ=961: 1 nodes, 1 σ-classes
+  module τ961 where
+
+    -- σ=2095 (1 nodes)
+    cell-0 : κ 778 ≡ κ 778
+    cell-0 = refl
+
 
 
 -- ══════════════════════════════════════════════════════════
--- Cleavage planes (module boundaries / case splits)
+-- Cleavage planes (forced case splits)
 -- ══════════════════════════════════════════════════════════
 
 -- Case split: Attribute with 25 type witnesses
@@ -10790,8 +15542,8 @@ module Call-split-6 where
 -- ══════════════════════════════════════════════════════════
 -- Summary:
 --   7500 AST nodes → 2109 proof cells
---   779 construction modules
+--   Rotation: (κ → τ → σ) depth=2
+--   779 top-level modules
 --   13 η-proofs
 --   7 cleavage planes
---   Compression: 71.9%
 -- ══════════════════════════════════════════════════════════
