@@ -35,6 +35,7 @@ of these dataclasses by `core.SPPF` (Step 2 of the realignment).
 
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import (
     Any,
@@ -268,6 +269,17 @@ class Addr0:
     """An order-0 address: identity for a node observed across ranks.
 
     Segment ranks within an Addr0 are strictly increasing (WF-1).
+
+    **Identity-on-objects convention.**  Under cstz's
+    identity-on-objects discipline, an Addr0 with id ``X`` IS
+    the identity morphism ``id_X : X → X``.  The ``endpoints``
+    property exposes this projection: ``(self.id, self.id)``.
+    Consumers that walk cells uniformly as morphisms can use
+    ``cell.endpoints`` instead of branching on ``isinstance``.
+    See conception matrix cells ``IdentityOnObjects``,
+    ``Addr0IsIdentityMorphism``, and
+    ``DimensionalTowerIsUnified``, plus the feedback memory
+    ``feedback_reframe_as_projection.md``.
     """
 
     id: str
@@ -276,6 +288,17 @@ class Addr0:
     discoveryRank: Optional[str] = None
     payload: Any = None
     meta: Optional[Dict[str, Any]] = None
+
+    @property
+    def endpoints(self) -> Tuple[str, str]:
+        """Identity-morphism endpoints: ``(self.id, self.id)``.
+
+        An Addr0 represents the identity morphism ``id_X : X → X``,
+        so its source and destination are both its own id.  This
+        projection lets consumers walk cells uniformly as
+        morphisms with the same shape as Addr1/Addr2.
+        """
+        return (self.id, self.id)
 
     def to_json(self) -> Dict[str, Any]:
         out: Dict[str, Any] = {
@@ -299,6 +322,10 @@ class Addr1:
 
     `ctor: glue` corresponds to cstz's η-merges; `ctor: refl` to identity;
     `ctor: compose` to chained glue.
+
+    The ``endpoints`` property returns ``(self.src, self.dst)``,
+    matching ``Addr0.endpoints`` and ``Addr2.endpoints`` so
+    consumers can walk cells uniformly as morphisms.
     """
 
     id: str
@@ -311,6 +338,11 @@ class Addr1:
     premises: List[str] = field(default_factory=list)
     label: Optional[str] = None
     args: Optional[Dict[str, Any]] = None
+
+    @property
+    def endpoints(self) -> Tuple[str, str]:
+        """``(self.src, self.dst)`` — the morphism endpoints."""
+        return (self.src, self.dst)
 
     def to_json(self) -> Dict[str, Any]:
         out: Dict[str, Any] = {
@@ -337,6 +369,10 @@ class Addr2:
     """An order-2 path: a coherence between two Addr1s.
 
     `ctor: coh` corresponds to cstz's abstraction-merge confluences.
+
+    The ``endpoints`` property returns ``(self.src, self.dst)``,
+    matching ``Addr0.endpoints`` and ``Addr1.endpoints`` so
+    consumers can walk cells uniformly as morphisms.
     """
 
     id: str
@@ -347,6 +383,11 @@ class Addr2:
     patch: Optional[str] = None
     label: Optional[str] = None
     args: Optional[Dict[str, Any]] = None
+
+    @property
+    def endpoints(self) -> Tuple[str, str]:
+        """``(self.src, self.dst)`` — the morphism endpoints."""
+        return (self.src, self.dst)
 
     def to_json(self) -> Dict[str, Any]:
         out: Dict[str, Any] = {
@@ -386,16 +427,115 @@ class Addr2:
 Cell = Union[Addr0, Addr1, Addr2]
 
 
-def sigma_key(cell: Cell) -> Tuple[Any, ...]:
-    """Compute the hash-cons signature of a Cell.
+# ── Perspective lattice (Step 1.5.1 Pass 1) ─────────────────────────
+#
+# NOTE on labeling — basis choice, not normative.
+#
+# The names σ/τ/κ encode a relational labeling convention.  Two
+# valid readings of "κ is the coproduct of σ and τ" exist:
+#
+#   (A) κ as the MERGER of named partitions   → κ has fewer cells
+#       than σ ⊔ τ — κ is **coarser**.
+#   (B) κ as the AMBIENT SPACE of partitions  → κ has more
+#       distinctions than either alone — κ is **finer**.
+#
+# We pick Reading A here to match the legacy reference SPPF in
+# ``src/cstz/core.py`` (which labels κ-key as the most-merged
+# fiber: ``(kappa_tag, child_kappas)``).  The dual reading is
+# always available via a basis change in the symmetry group on
+# labeling conventions; future code that re-labels these
+# perspectives is performing a basis change, not a redesign.
+#
+# See plan-file conception matrix cells:
+#   - KappaCoproductHasDualReading
+#   - Step151PerspectiveOrderIsBasisChoice
+#   - LabelingIsRelationalNotNormative
+#
+# Each perspective is a **set of discriminator names** — atomic
+# questions the perspective asks about a cell.  ``sigma_key``
+# walks the active discriminators and projects the cell onto
+# them.  The perspective constants define the canonical lattice;
+# ad-hoc perspectives can be passed at call sites as raw
+# ``frozenset`` literals.
+
+# Discriminator names — the questions a perspective can ask:
+DISCRIM_SORT = "sort"
+"""Rank-0 cells: include the ``sort`` field in the signature."""
+
+DISCRIM_SEGMENTS = "segments"
+"""Rank-0 cells: include the full segment-pair-route-boundary
+signature in the signature."""
+
+DISCRIM_CTOR = "ctor"
+"""Rank-1+ cells: include the constructor name (``glue`` /
+``coh`` / ``transport`` / etc.) in the signature."""
+
+DISCRIM_ENDPOINTS = "endpoints"
+"""Rank-1+ cells: include both ``src`` and ``dst`` ids in the
+signature."""
+
+DISCRIM_PREMISES = "premises"
+"""Rank-1+ cells: include the premises tuple in the signature."""
+
+
+PERSPECTIVE_SIGMA: FrozenSet[str] = frozenset({
+    DISCRIM_SORT,
+    DISCRIM_SEGMENTS,
+    DISCRIM_CTOR,
+    DISCRIM_ENDPOINTS,
+    DISCRIM_PREMISES,
+})
+"""Reading A: σ is the LABEL for the most-discriminating
+perspective — full structural fingerprint with every
+discriminator active.  This is exactly the Step 1.5 default
+behavior of ``sigma_key``, preserved as the new default so
+existing call sites are byte-compatible."""
+
+PERSPECTIVE_TAU: FrozenSet[str] = frozenset({
+    DISCRIM_SORT,
+    DISCRIM_CTOR,
+    DISCRIM_ENDPOINTS,
+})
+"""Reading A: τ is the LABEL for the middle perspective —
+structural ctor and endpoints survive, but premises are dropped
+and rank-0 segment internals are abstracted away.  The
+analogue of core.py's τ-key (which drops ``params`` and resolves
+children through the τ-fiber's union-find)."""
+
+PERSPECTIVE_KAPPA: FrozenSet[str] = frozenset({
+    DISCRIM_SORT,
+    DISCRIM_ENDPOINTS,
+})
+"""Reading A: κ is the LABEL for the most-merged perspective —
+only sort and endpoints survive.  Two cells with the same sort
+and the same (src, dst) endpoints are identified regardless of
+constructor or premises.  The analogue of core.py's κ-key
+(which is ``(kappa_tag, child_kappas)``, ast_type-agnostic)."""
+
+
+def sigma_key(
+    cell: Cell,
+    perspective: FrozenSet[str] = PERSPECTIVE_SIGMA,
+) -> Tuple[Any, ...]:
+    """Compute the hash-cons signature of a Cell under a perspective.
 
     Rank-agnostic: the same function handles Addr0s, Addr1s, and
     Addr2s by inspecting which fields are populated.  Two cells
-    with equal sigma_keys are considered structurally equivalent
-    under the cascade's equivalence relation — they should be
-    merged (or, at emission time, hash-consed to a single Cell).
+    with equal sigma_keys (under the same perspective) are
+    considered structurally equivalent under that perspective's
+    equivalence relation — they should be merged (or, at
+    emission time, hash-consed to a single Cell).
 
-    The signature shape depends on the cell's rank:
+    The ``perspective`` argument selects which discriminators
+    contribute to the signature.  Three named perspectives are
+    provided: ``PERSPECTIVE_SIGMA`` (the default; full structural
+    fingerprint), ``PERSPECTIVE_TAU`` (middle; drops premises and
+    segment internals), and ``PERSPECTIVE_KAPPA`` (most merged;
+    keeps only sort and endpoints).  See module-level docstrings
+    on the perspective constants and the dual-reading caveat.
+
+    Default behavior under ``PERSPECTIVE_SIGMA`` is byte-compatible
+    with the Step 1.5 ``sigma_key`` (no perspective parameter):
 
     - **Addr0** — ``("addr0", sort, segments-signature)``
     - **Addr1/Addr2** — ``("morphism", ctor, src, dst, premises-tuple)``
@@ -405,30 +545,71 @@ def sigma_key(cell: Cell) -> Tuple[Any, ...]:
     canonicalizing them via the cascade's union-find before
     calling ``sigma_key`` if canonicalization matters at the
     call site (normal cascade emission does this).
+
+    Pass 1 implementation note: Pass 1 of Step 1.5.1 introduces
+    the perspective parameter and the three named constants but
+    does not yet teach the cascade engine to maintain three
+    separate Fibers (that's Pass 2's job — porting the legacy
+    ``core.py:Fiber`` structure).  Until Pass 2 lands, the
+    non-default perspectives produce coarser signatures over
+    raw (un-canonicalized) endpoints, which is enough for
+    callers that want to query the lattice manually but not
+    enough for the cascade to maintain a multi-perspective
+    fixed point.
     """
     if isinstance(cell, Addr0):
-        # Rank-0 signature: sort + segments
-        seg_sig = tuple(
-            (s.rank, s.phase, s.patch,
-             tuple((p.chart, p.root, p.role,
-                    tuple((st.kind, st.arg) for st in p.route),
-                    tuple((h.boundary, h.side, h.port) for h in p.boundary))
-                   for p in s.pairs))
-            for s in cell.segments
-        )
-        return ("addr0", cell.sort, seg_sig)
+        # Rank-0 signature.  Build incrementally so the default
+        # case (PERSPECTIVE_SIGMA, all discriminators active)
+        # produces exactly the Step 1.5 tuple shape.
+        if perspective == PERSPECTIVE_SIGMA:
+            seg_sig = tuple(
+                (s.rank, s.phase, s.patch,
+                 tuple((p.chart, p.root, p.role,
+                        tuple((st.kind, st.arg) for st in p.route),
+                        tuple((h.boundary, h.side, h.port) for h in p.boundary))
+                       for p in s.pairs))
+                for s in cell.segments
+            )
+            return ("addr0", cell.sort, seg_sig)
 
-    # Rank-1+ signature: morphism data
+        parts: List[Any] = ["addr0"]
+        if DISCRIM_SORT in perspective:
+            parts.append(cell.sort)
+        if DISCRIM_SEGMENTS in perspective:
+            seg_sig = tuple(
+                (s.rank, s.phase, s.patch,
+                 tuple((p.chart, p.root, p.role,
+                        tuple((st.kind, st.arg) for st in p.route),
+                        tuple((h.boundary, h.side, h.port) for h in p.boundary))
+                       for p in s.pairs))
+                for s in cell.segments
+            )
+            parts.append(seg_sig)
+        return tuple(parts)
+
+    # Rank-1+ signature: morphism data.
     # Both Addr1 and Addr2 have (ctor, src, dst); only Addr1 has
     # premises.  We unify by treating absent premises as empty.
-    premises = getattr(cell, "premises", ())
-    return (
-        "morphism",
-        cell.ctor,
-        cell.src,
-        cell.dst,
-        tuple(premises),
-    )
+    if perspective == PERSPECTIVE_SIGMA:
+        premises = getattr(cell, "premises", ())
+        return (
+            "morphism",
+            cell.ctor,
+            cell.src,
+            cell.dst,
+            tuple(premises),
+        )
+
+    parts = ["morphism"]
+    if DISCRIM_CTOR in perspective:
+        parts.append(cell.ctor)
+    if DISCRIM_ENDPOINTS in perspective:
+        parts.append(cell.src)
+        parts.append(cell.dst)
+    if DISCRIM_PREMISES in perspective:
+        premises = getattr(cell, "premises", ())
+        parts.append(tuple(premises))
+    return tuple(parts)
 
 
 # ── Derived views (non-authoritative) ───────────────────────────────
@@ -1397,6 +1578,189 @@ class Document:
 
         return removed_cells
 
+    # ── Perspective-lattice queries (Step 1.5.1 Pass 3) ─────────────
+    #
+    # The three named perspectives σ/τ/κ partition the cell space at
+    # different granularities (Reading A: σ finest, κ coarsest — see
+    # the dual-reading caveat in pff.py module-level docstrings on
+    # the perspective constants).  Pass 3 adds three pure-read-only
+    # query methods on Document:
+    #
+    #   - wedge(*perspectives)        — N-fiber wedge product
+    #   - wedge_2(per_a, per_b)       — convenience 2-fiber wedge
+    #   - hom_set(src, dst, ...)      — perspective-aware morphism query
+    #
+    # **Topological completeness:** these queries compute from the
+    # raw cells in the document; they do NOT require engine state.
+    # AUDIT.md §Slicer's "the topology is Document-computable"
+    # corollary means a serialized Document captures everything the
+    # cascade's fixed-point produces, so any query that the engine
+    # can answer using its in-memory Fibers can also be answered
+    # from the Document directly.  These three methods are the
+    # Document-side realization of that promise.
+    #
+    # The cascade engine maintains parallel materializations of
+    # the same partitions (``self.sigma_fiber`` / ``tau_fiber`` /
+    # ``kappa_fiber`` from Pass 2) for fast streaming queries; at
+    # cascade convergence under correct usage they agree with these
+    # Document methods.  See conception matrix cells:
+    #   - WedgeIsNDFixedPoint
+    #   - Wedge2IsHomSet
+    #   - DocumentIsTopologicallyComplete
+    #   - HomSetIsWedge2Specialization
+
+    def wedge(
+        self,
+        *perspectives: FrozenSet[str],
+    ) -> Dict[Tuple[Tuple[Any, ...], ...], List[str]]:
+        """Project every cell through each given perspective and
+        group cells by the resulting tuple-of-signatures.
+
+        This is the Document-side analogue of ``core.py:SPPF.wedge``,
+        ported under Step 1.5.1 Pass 3.  It computes the wedge
+        product `p_1 ∧ p_2 ∧ ... ∧ p_n` over the supplied
+        perspectives by:
+
+          1. Iterating over every cell in the document
+          2. Computing each cell's perspective-parameterized
+             ``sigma_key`` once per perspective in the order given
+          3. Using the resulting tuple-of-signatures as a dict key,
+             accumulating the cell ids that share that tuple
+
+        With **no perspectives** supplied, defaults to the canonical
+        three-perspective wedge `σ ∧ τ ∧ κ` (Reading A).
+
+        Returns a dict mapping each occupied position in the
+        product space to the list of cell ids at that position.
+        Equivalent positions in the product space are merged in
+        the dict because dict keys are tuples-of-tuples (hashable
+        by structural equality).
+
+        This is a pure read-only query: it does not mutate the
+        document or rely on any engine state.  Two calls with the
+        same perspectives on the same document return equal dicts.
+        """
+        if not perspectives:
+            perspectives = (
+                PERSPECTIVE_SIGMA, PERSPECTIVE_TAU, PERSPECTIVE_KAPPA,
+            )
+        out: Dict[Tuple[Tuple[Any, ...], ...], List[str]] = defaultdict(list)
+        for cell in self.cells():
+            key = tuple(
+                sigma_key(cell, perspective=p) for p in perspectives
+            )
+            out[key].append(cell.id)
+        return dict(out)
+
+    def wedge_2(
+        self,
+        perspective_a: FrozenSet[str],
+        perspective_b: FrozenSet[str],
+    ) -> Dict[Tuple[Tuple[Any, ...], Tuple[Any, ...]], List[str]]:
+        """Two-perspective wedge product → ``{(key_a, key_b): [cell_ids]}``.
+
+        Convenience specialization of ``wedge`` for the common
+        2-perspective case.  Returns a dict whose keys are
+        (signature-under-A, signature-under-B) pairs and whose
+        values are lists of cell ids that project to that pair.
+
+        Mirrors ``core.py:SPPF.wedge_2`` from the legacy reference
+        implementation.  Useful for computing how a partition under
+        one perspective refines or coarsens under another (e.g.,
+        ``wedge_2(PERSPECTIVE_KAPPA, PERSPECTIVE_SIGMA)`` shows
+        which σ-classes lie inside each κ-class).
+        """
+        out: Dict[Tuple[Tuple[Any, ...], Tuple[Any, ...]], List[str]] = (
+            defaultdict(list)
+        )
+        for cell in self.cells():
+            key = (
+                sigma_key(cell, perspective=perspective_a),
+                sigma_key(cell, perspective=perspective_b),
+            )
+            out[key].append(cell.id)
+        return dict(out)
+
+    def hom_set(
+        self,
+        src_id: str,
+        dst_id: str,
+        *,
+        perspective: FrozenSet[str] = PERSPECTIVE_KAPPA,
+    ) -> FrozenSet[str]:
+        """Return the set of Cell ids that are morphisms from
+        ``src_id`` to ``dst_id``, modulo the equivalence
+        relation induced by ``perspective``.
+
+        **Identity-on-objects convention (n-category theory).**
+        Under cstz's identity-on-objects discipline, an Addr0
+        with id ``X`` IS the identity morphism ``id_X : X → X`` —
+        a degenerate morphism whose source equals its destination.
+        Dimension 0 cells are not "objects without morphism
+        structure"; they are morphisms whose endpoints coincide.
+        Consequently, ``hom_set(X, X)`` always includes the Addr0
+        with id ``X`` (the identity self-loop) plus any
+        non-identity morphisms with matching endpoints.
+
+        For each cell whose endpoints match the query (where an
+        Addr0's "endpoints" are both its own id), computes its
+        perspective-projected ``sigma_key``.  Cells whose keys
+        agree are in the same equivalence class under the
+        perspective; the result contains **one representative
+        cell id per equivalence class** (the first-encountered
+        one in document order).
+
+        Under the canonical Reading-A labeling:
+
+          - **PERSPECTIVE_SIGMA** (finest, default of ``sigma_key``)
+            — every distinct (ctor, src, dst, premises, ...) tuple
+            is its own class; the result returns *all* matching
+            morphisms because each is its own σ-class.
+          - **PERSPECTIVE_TAU** (middle) — drops premises;
+            morphisms with the same (ctor, src, dst) collapse.
+          - **PERSPECTIVE_KAPPA** (coarsest, default here) — drops
+            ctor and premises; under most readings, any morphism
+            between (src, dst) collapses regardless of constructor.
+            Note that the Addr0 identity morphism on X has a
+            distinct sigma_key from a non-identity self-loop on
+            X (an Addr1 with src=dst=X), so both can appear
+            separately in ``hom_set(X, X, perspective=κ)`` —
+            they are distinct morphisms even though both have the
+            same endpoints.  See research-log-step-1.5.1.md
+            "deferred Pass 1 question on κ-key for Addr0" for
+            the open semantic question this raises.
+
+        The default ``perspective=PERSPECTIVE_KAPPA`` matches the
+        most natural reading of "are there any distinct morphisms
+        between these endpoints?"
+
+        Returns ``frozenset()`` if no morphism between the
+        endpoints exists (which can only happen when ``src_id !=
+        dst_id`` and no glue/coh/etc. has been emitted between
+        them; ``hom_set(X, X)`` always returns at least the
+        identity ``{X}`` if X is an Addr0 in the document).
+
+        This is a pure read-only query: no engine state, no
+        mutation.  AUDIT.md §Slicer's "the topology is
+        Document-computable" corollary guarantees this answer is
+        complete relative to the cascade's fixed-point output.
+        """
+        # Branchless under the dimension-as-projection reframe
+        # (FRICTION-7 + the Pass 3 minimum scope): each cell
+        # type exposes an `endpoints` property that returns
+        # `(src, dst)` uniformly, with Addr0 returning
+        # `(self.id, self.id)` per the identity-on-objects
+        # convention.  No isinstance branching needed.
+        seen_keys: Dict[Tuple[Any, ...], str] = {}
+        target = (src_id, dst_id)
+        for cell in self.cells():
+            if cell.endpoints != target:
+                continue
+            key = sigma_key(cell, perspective=perspective)
+            if key not in seen_keys:
+                seen_keys[key] = cell.id
+        return frozenset(seen_keys.values())
+
     # ── τ-cascade: auto-coh fixed-point pass ────────────────────────
     #
     # The σ-cascade (in pff_cascade.PFFCascadeEngine) auto-emits Addr1s
@@ -1805,6 +2169,14 @@ __all__ = [
     "Addr2",
     "Cell",
     "sigma_key",
+    "DISCRIM_SORT",
+    "DISCRIM_SEGMENTS",
+    "DISCRIM_CTOR",
+    "DISCRIM_ENDPOINTS",
+    "DISCRIM_PREMISES",
+    "PERSPECTIVE_SIGMA",
+    "PERSPECTIVE_TAU",
+    "PERSPECTIVE_KAPPA",
     "ClassMember",
     "ClassView",
     "ShadowNode",

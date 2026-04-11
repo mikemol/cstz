@@ -80,6 +80,7 @@ from collections import defaultdict
 from typing import (
     Any,
     Dict,
+    FrozenSet,
     Iterator,
     List,
     Optional,
@@ -97,9 +98,13 @@ from .pff import (
     Document,
     Pair,
     Patch,
+    PERSPECTIVE_KAPPA,
+    PERSPECTIVE_SIGMA,
+    PERSPECTIVE_TAU,
     Rank,
     Segment,
     Step,
+    sigma_key,
 )
 
 
@@ -157,6 +162,145 @@ class _UnionFind:
 
     def __len__(self) -> int:
         return len(self._parent)
+
+
+# ── Fiber — perspective-indexed equivalence-class registry ──────────
+#
+# Pass 2 of Step 1.5.1 ports the three-Fiber structure from
+# ``src/cstz/core.py`` (the legacy SPPF reference) into the PFF
+# cascade engine.  Each Fiber is a registry of equivalence classes
+# under one perspective: cells with the same `sigma_key` under that
+# perspective collapse into the same FiberClass.
+#
+# **Pass 2 scope is additive and passive:** the Fibers accumulate
+# cells alongside the existing Step 1.5 ``_uf`` and
+# ``_morphism_signature_index`` machinery, but they do not yet drive
+# emission decisions.  The existing σ-perspective hash-cons (in
+# ``_emit_glue`` and ``add_observation``) remains the load-bearing
+# path; the Fibers are populated as a parallel observation so Pass
+# 3's ``Document.hom_set`` query can read from them.  Pass 2 thus
+# preserves byte-equivalence with Step 1.5 by construction.
+#
+# Reading A labeling (matching ``core.py``):
+#   - σ-fiber (finest) — full structural fingerprint via
+#     ``PERSPECTIVE_SIGMA``.  Two cells in the same FiberClass have
+#     the same sort, segments, ctor, endpoints, and premises.
+#   - τ-fiber (middle) — drops segments and premises.  Two cells
+#     in the same FiberClass have the same sort, ctor, and endpoints.
+#   - κ-fiber (coarsest) — drops ctor and premises.  Two cells in
+#     the same FiberClass have the same sort and endpoints (any
+#     morphism between the same pair of objects, regardless of
+#     constructor).
+#
+# See plan-file conception matrix cells:
+#   - CoreFiberIsParallelUF — the spatial-basis implementation
+#     choice (one mutable UF per Fiber).
+#   - SpatialAndTemporalAreBasisChange — the basis-change reframe
+#     of the persistent-vs-parallel question.
+#   - WedgeIsNDFixedPoint — the wedge product σ ∧ τ ∧ κ as the
+#     N-D fixed point.
+
+
+class _FiberClass:
+    """A single equivalence class in one Fiber.
+
+    The class is identified by its ``signature`` (the perspective-
+    parameterized sigma_key tuple) and tracks the set of cell ids
+    that share that signature.  ``representative`` is the
+    first-ingested cell id (used for canonical-id queries).
+    """
+
+    __slots__ = ("signature", "representative", "members")
+
+    def __init__(
+        self,
+        signature: Tuple[Any, ...],
+        representative: str,
+    ) -> None:
+        self.signature: Tuple[Any, ...] = signature
+        self.representative: str = representative
+        self.members: Set[str] = {representative}
+
+    def add(self, cell_id: str) -> None:
+        """Add a cell id to this class.  Idempotent."""
+        self.members.add(cell_id)
+
+    def __repr__(self) -> str:
+        return (
+            f"_FiberClass(rep={self.representative!r}, "
+            f"size={len(self.members)})"
+        )
+
+
+class _Fiber:
+    """One perspective's equivalence-class registry over cell ids.
+
+    Mirrors ``core.py:Fiber`` adapted to PFF cell ids (which are
+    strings, not opaque ints).  Each Fiber owns:
+
+      - ``perspective`` — the discriminator frozenset that defines
+        which questions this Fiber asks about a cell
+      - ``classes`` — signature → _FiberClass map
+      - ``class_of`` — cell id → signature reverse index
+      - ``uf`` — a mutable union-find over signatures, used by
+        Pass 4+ if the cascade ever grows the ability to merge
+        FiberClasses (for example, when an η-cascade discovers
+        that two τ-keyed classes should be unified).  In Pass 2,
+        the union-find is created but never unioned; this is the
+        spatial-basis-only realization.
+
+    Pass 2 instantiates one ``_Fiber`` per named perspective on
+    the engine and ``observe()``s every newly-emitted cell into
+    all three Fibers.  The Fibers are read-only from the cascade's
+    emission logic; only ``observe()`` mutates them.
+    """
+
+    __slots__ = ("name", "perspective", "classes", "class_of", "uf")
+
+    def __init__(self, name: str, perspective: FrozenSet[str]) -> None:
+        self.name: str = name
+        self.perspective: FrozenSet[str] = perspective
+        self.classes: Dict[Tuple[Any, ...], _FiberClass] = {}
+        self.class_of: Dict[str, Tuple[Any, ...]] = {}
+        self.uf: _UnionFind = _UnionFind()
+
+    def observe(self, cell: Cell) -> _FiberClass:
+        """Register a cell in this Fiber under its perspective.
+
+        Computes ``sigma_key(cell, perspective=self.perspective)``,
+        looks up or creates the matching _FiberClass, and adds
+        the cell's id to its members.  Returns the _FiberClass
+        the cell landed in.
+
+        Idempotent: observing the same cell twice is a no-op
+        because ``_FiberClass.add`` is set-membership.
+        """
+        signature = sigma_key(cell, perspective=self.perspective)
+        fc = self.classes.get(signature)
+        if fc is None:
+            fc = _FiberClass(signature=signature, representative=cell.id)
+            self.classes[signature] = fc
+            self.uf.make(signature)
+        fc.add(cell.id)
+        self.class_of[cell.id] = signature
+        return fc
+
+    def class_for(self, cell_id: str) -> Optional[_FiberClass]:
+        """Return the _FiberClass containing this cell id, or None."""
+        sig = self.class_of.get(cell_id)
+        if sig is None:
+            return None
+        return self.classes[sig]
+
+    def __len__(self) -> int:
+        return len(self.classes)
+
+    def __repr__(self) -> str:
+        return (
+            f"_Fiber({self.name!r}, "
+            f"{len(self.classes)} classes, "
+            f"{len(self.class_of)} cells)"
+        )
 
 
 # ── Helpers for hashable Pair signatures ────────────────────────────
@@ -303,7 +447,48 @@ class PFFCascadeEngine:
         # ── Id counters ──
         self._next_id: Dict[str, int] = defaultdict(int)
 
+        # ── Three-Fiber perspective lattice (Pass 2 of Step 1.5.1) ──
+        # Pass 2 ports the legacy core.py three-Fiber structure into
+        # the PFF cascade engine.  Each Fiber is a registry of
+        # equivalence classes under one perspective; cells with the
+        # same sigma_key under that perspective collapse into the
+        # same FiberClass.
+        #
+        # **Pass 2 is additive and passive:** the Fibers accumulate
+        # cells in parallel with the existing Step 1.5 _uf and
+        # _morphism_signature_index machinery, but they do NOT yet
+        # drive emission decisions.  The existing σ-perspective
+        # hash-cons remains the load-bearing path; Pass 3 will
+        # consume the Fibers via Document.hom_set queries.
+        #
+        # See plan-file conception matrix cells:
+        #   - Step151IsAPort
+        #   - CoreFiberIsParallelUF
+        #   - WedgeIsNDFixedPoint
+        self.sigma_fiber: _Fiber = _Fiber("sigma", PERSPECTIVE_SIGMA)
+        self.tau_fiber: _Fiber = _Fiber("tau", PERSPECTIVE_TAU)
+        self.kappa_fiber: _Fiber = _Fiber("kappa", PERSPECTIVE_KAPPA)
+
     # ── Id minting ──────────────────────────────────────────────
+
+    # ── Three-Fiber observation helper (Pass 2) ─────────────────
+
+    def _observe_into_fibers(self, cell: Cell) -> None:
+        """Register a cell in all three Fibers under their respective
+        perspectives.
+
+        Pass 2: this is the *only* mutation point for the Fiber
+        registries, called from each emission site exactly once
+        per newly-minted cell.  The call is idempotent because
+        ``_Fiber.observe`` uses set membership for class members,
+        so re-observing an already-registered cell is a no-op.
+        Hash-cons hits in ``_emit_glue`` and ``add_observation``
+        return existing cells *before* this method is called, so
+        the Fibers see each cell exactly once at first emission.
+        """
+        self.sigma_fiber.observe(cell)
+        self.tau_fiber.observe(cell)
+        self.kappa_fiber.observe(cell)
 
     def _mint_id(self, prefix: str) -> str:
         n = self._next_id[prefix]
@@ -489,6 +674,12 @@ class PFFCascadeEngine:
         for child in canon_sigma_children:
             self._sigma_keys_by_child[child].add(sigma_key)
 
+        # Pass 2: register the new Addr0 in all three Fibers.
+        # The Fibers accumulate alongside the existing _uf and
+        # _addr0_signature_index machinery; they are passive in
+        # Pass 2 and do not influence emission decisions.
+        self._observe_into_fibers(addr0)
+
         # ── Streaming glue cascade ──
         same_shape = self._addr0s_by_sigma_key[sigma_key]
         if len(same_shape) >= 2:
@@ -594,6 +785,8 @@ class PFFCascadeEngine:
             label=label or f"coh:{src}~{dst}",
         )
         self.document.paths2.append(addr2)
+        # Pass 2: register the new Addr2 in all three Fibers.
+        self._observe_into_fibers(addr2)
         self._uf.union(src, dst)
         return addr2
 
@@ -703,6 +896,9 @@ class PFFCascadeEngine:
         self.document.paths1.append(addr1)
         self._uf.make(addr1.id)
         self._morphism_signature_index[key] = addr1
+        # Pass 2: register the new Addr1 in all three Fibers.
+        # See _observe_into_fibers and the Fiber section docstring.
+        self._observe_into_fibers(addr1)
         # Apply the union AFTER registering the sigma_key in the
         # index, because unioning changes the canonical map and
         # any future _emit_glue call computing a sigma_key would

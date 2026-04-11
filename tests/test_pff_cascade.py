@@ -2006,6 +2006,789 @@ class TestSigmaKeyFunction:
         assert sigma_key(a1)[0] == "morphism"
 
 
+class TestSigmaKeyPerspectives:
+    """Cover the perspective lattice added by Step 1.5.1 Pass 1.
+
+    sigma_key now takes a ``perspective`` parameter (a frozenset of
+    discriminator names).  Three named perspectives are provided:
+    PERSPECTIVE_SIGMA (finest, default), PERSPECTIVE_TAU (middle),
+    PERSPECTIVE_KAPPA (coarsest).  These tests cover the non-default
+    branches and the dual-reading basis-choice contract.
+
+    The labels σ/τ/κ are a relational naming convention (Reading A
+    matching ``core.py``); the discriminator content is what's
+    load-bearing.  See the dual-reading caveat in the
+    ``sigma_key`` module-level docstring.
+    """
+
+    def test_default_perspective_is_sigma(self) -> None:
+        """``sigma_key(cell)`` (no perspective arg) is byte-identical
+        to ``sigma_key(cell, perspective=PERSPECTIVE_SIGMA)``."""
+        from cstz.pff import (
+            Addr0, Addr1, Pair, Segment, sigma_key, PERSPECTIVE_SIGMA,
+        )
+        a0 = Addr0(
+            id="a", sort="X",
+            segments=[Segment(
+                rank="r0", phase="ingest", patch="p0",
+                pairs=[Pair(chart="c", root="r", role="principal")],
+            )],
+        )
+        a1 = Addr1(
+            id="g", rank="r0", ctor="glue", src="x", dst="y",
+            premises=["p1"],
+        )
+        assert sigma_key(a0) == sigma_key(a0, perspective=PERSPECTIVE_SIGMA)
+        assert sigma_key(a1) == sigma_key(a1, perspective=PERSPECTIVE_SIGMA)
+
+    def test_addr0_perspective_tau_drops_segments(self) -> None:
+        """Under PERSPECTIVE_TAU, an Addr0's segments are NOT in the key.
+        Two Addr0s with the same sort but different segments are
+        identified at τ."""
+        from cstz.pff import (
+            Addr0, Pair, Segment, sigma_key, PERSPECTIVE_TAU,
+        )
+        a = Addr0(
+            id="a", sort="X",
+            segments=[Segment(
+                rank="r0", phase="ingest", patch="p0",
+                pairs=[Pair(chart="c0", root="r", role="principal")],
+            )],
+        )
+        b = Addr0(
+            id="b", sort="X",
+            segments=[Segment(
+                rank="r0", phase="ingest", patch="p1",
+                pairs=[Pair(chart="c1", root="r2", role="aux")],
+            )],
+        )
+        assert sigma_key(a, perspective=PERSPECTIVE_TAU) == \
+            sigma_key(b, perspective=PERSPECTIVE_TAU)
+        # σ-perspective still distinguishes them
+        assert sigma_key(a) != sigma_key(b)
+
+    def test_addr0_perspective_kappa_keeps_only_sort(self) -> None:
+        """Under PERSPECTIVE_KAPPA, only sort survives for an Addr0."""
+        from cstz.pff import (
+            Addr0, Pair, Segment, sigma_key, PERSPECTIVE_KAPPA,
+        )
+        a = Addr0(
+            id="a", sort="X",
+            segments=[Segment(
+                rank="r0", phase="ingest", patch="p0",
+                pairs=[Pair(chart="c", root="r", role="principal")],
+            )],
+        )
+        # κ-key for an Addr0 is ("addr0", sort)
+        assert sigma_key(a, perspective=PERSPECTIVE_KAPPA) == ("addr0", "X")
+
+    def test_addr0_kappa_distinguishes_different_sorts(self) -> None:
+        """Two Addr0s with different sorts have different κ-keys."""
+        from cstz.pff import (
+            Addr0, Pair, Segment, sigma_key, PERSPECTIVE_KAPPA,
+        )
+        mk = lambda sort: Addr0(
+            id="a", sort=sort,
+            segments=[Segment(
+                rank="r0", phase="ingest", patch="p0",
+                pairs=[Pair(chart="c", root="r", role="principal")],
+            )],
+        )
+        assert sigma_key(mk("X"), perspective=PERSPECTIVE_KAPPA) \
+            != sigma_key(mk("Y"), perspective=PERSPECTIVE_KAPPA)
+
+    def test_addr1_perspective_tau_drops_premises(self) -> None:
+        """Under PERSPECTIVE_TAU, premises are NOT in the morphism key.
+        Two Addr1s with the same (ctor, src, dst) but different
+        premises are identified at τ."""
+        from cstz.pff import Addr1, sigma_key, PERSPECTIVE_TAU
+        a = Addr1(
+            id="g1", rank="r0", ctor="glue", src="x", dst="y",
+            premises=["p1", "p2"],
+        )
+        b = Addr1(
+            id="g2", rank="r0", ctor="glue", src="x", dst="y",
+            premises=["p3"],
+        )
+        assert sigma_key(a, perspective=PERSPECTIVE_TAU) == \
+            sigma_key(b, perspective=PERSPECTIVE_TAU)
+        # σ-perspective still distinguishes them
+        assert sigma_key(a) != sigma_key(b)
+
+    def test_addr1_perspective_kappa_drops_ctor_and_premises(self) -> None:
+        """Under PERSPECTIVE_KAPPA, only endpoints survive for a
+        morphism.  Any morphism between the same (src, dst) pair is
+        identified at κ regardless of constructor."""
+        from cstz.pff import Addr1, Addr2, sigma_key, PERSPECTIVE_KAPPA
+        a1 = Addr1(id="g", rank="r0", ctor="glue", src="x", dst="y")
+        a2 = Addr2(id="c", rank="r0", ctor="coh", src="x", dst="y")
+        # Both collapse to ("morphism", "x", "y") at κ
+        assert sigma_key(a1, perspective=PERSPECTIVE_KAPPA) == \
+            sigma_key(a2, perspective=PERSPECTIVE_KAPPA)
+        assert sigma_key(a1, perspective=PERSPECTIVE_KAPPA) == \
+            ("morphism", "x", "y")
+        # σ-perspective distinguishes them (different ctors)
+        assert sigma_key(a1) != sigma_key(a2)
+
+    def test_addr1_kappa_distinguishes_different_endpoints(self) -> None:
+        """Two morphisms with different endpoints have different κ-keys."""
+        from cstz.pff import Addr1, sigma_key, PERSPECTIVE_KAPPA
+        a = Addr1(id="g1", rank="r0", ctor="glue", src="x", dst="y")
+        b = Addr1(id="g2", rank="r0", ctor="glue", src="x", dst="z")
+        assert sigma_key(a, perspective=PERSPECTIVE_KAPPA) \
+            != sigma_key(b, perspective=PERSPECTIVE_KAPPA)
+
+    def test_perspective_lattice_refinement_order(self) -> None:
+        """Reading A: σ ⊏ τ ⊏ κ.  σ has the most discriminators
+        and produces the strictest equivalence relation; κ has the
+        fewest and produces the loosest.
+
+        Concretely: any two cells equal under σ are also equal
+        under τ, and any two cells equal under τ are also equal
+        under κ.  The converse fails."""
+        from cstz.pff import (
+            PERSPECTIVE_SIGMA, PERSPECTIVE_TAU, PERSPECTIVE_KAPPA,
+        )
+        # σ is a strict superset of τ which is a strict superset of κ
+        assert PERSPECTIVE_SIGMA > PERSPECTIVE_TAU
+        assert PERSPECTIVE_TAU > PERSPECTIVE_KAPPA
+        assert PERSPECTIVE_SIGMA > PERSPECTIVE_KAPPA
+
+    def test_ad_hoc_perspective_via_frozenset_literal(self) -> None:
+        """Callers can pass a custom perspective as a raw
+        frozenset literal — the constants are convenience names,
+        not a closed set."""
+        from cstz.pff import (
+            Addr1, sigma_key, DISCRIM_CTOR, DISCRIM_PREMISES,
+        )
+        # Custom perspective: only ctor + premises (no endpoints)
+        custom = frozenset({DISCRIM_CTOR, DISCRIM_PREMISES})
+        a = Addr1(
+            id="g", rank="r0", ctor="glue", src="x", dst="y",
+            premises=["p"],
+        )
+        key = sigma_key(a, perspective=custom)
+        assert key == ("morphism", "glue", ("p",))
+
+    def test_empty_perspective_yields_only_type_tag(self) -> None:
+        """An empty perspective drops every discriminator, leaving
+        only the rank-tag prefix.  This is the degenerate
+        bottom-of-the-lattice case."""
+        from cstz.pff import (
+            Addr0, Addr1, Pair, Segment, sigma_key,
+        )
+        empty = frozenset()
+        a0 = Addr0(
+            id="a", sort="X",
+            segments=[Segment(
+                rank="r0", phase="ingest", patch="p0",
+                pairs=[Pair(chart="c", root="r", role="principal")],
+            )],
+        )
+        a1 = Addr1(id="g", rank="r0", ctor="glue", src="x", dst="y")
+        assert sigma_key(a0, perspective=empty) == ("addr0",)
+        assert sigma_key(a1, perspective=empty) == ("morphism",)
+
+    def test_addr0_segments_only_perspective(self) -> None:
+        """A custom perspective containing DISCRIM_SEGMENTS but
+        NOT equal to PERSPECTIVE_SIGMA exercises the segments-
+        signature branch inside the non-default rank-0 path.
+        This is the inverse of the τ/κ pattern: instead of
+        dropping segments, drop everything else and keep
+        segments alone."""
+        from cstz.pff import (
+            Addr0, Pair, Segment, Step, Hop, sigma_key,
+            DISCRIM_SEGMENTS,
+        )
+        segments_only = frozenset({DISCRIM_SEGMENTS})
+        a = Addr0(
+            id="a", sort="X",
+            segments=[Segment(
+                rank="r0", phase="ingest", patch="p0",
+                pairs=[Pair(
+                    chart="c0", root="root",
+                    route=[Step(kind="child", arg=0)],
+                    boundary=[Hop(
+                        boundary="b0", side="left", port="lhs",
+                    )],
+                    role="principal",
+                )],
+            )],
+        )
+        key = sigma_key(a, perspective=segments_only)
+        # Tuple shape: ("addr0", segments-tuple) — sort is dropped
+        assert key[0] == "addr0"
+        assert len(key) == 2
+        # Two Addr0s with the same segments but different sorts
+        # are identified under this perspective
+        b = Addr0(
+            id="b", sort="Y",
+            segments=list(a.segments),
+        )
+        assert sigma_key(a, perspective=segments_only) == \
+            sigma_key(b, perspective=segments_only)
+
+
+class TestPassTwoFibers:
+    """Cover the three-Fiber port added by Step 1.5.1 Pass 2.
+
+    Pass 2 ports the legacy core.py three-Fiber structure into
+    the PFF cascade engine: ``self.sigma_fiber``, ``self.tau_fiber``,
+    and ``self.kappa_fiber`` are populated alongside the existing
+    ``_uf`` and ``_morphism_signature_index`` machinery as cells
+    are emitted.
+
+    Pass 2 is **passive**: the Fibers accumulate but do not yet
+    drive emission decisions.  These tests verify the Fibers
+    accumulate correctly and that their internal helpers
+    (``class_for``, ``__len__``, ``__repr__``) work as documented.
+    Pass 3 will add ``Document.hom_set`` queries that consume
+    them.
+    """
+
+    def _engine_with_one_addr0(self):
+        from cstz.pff import Chart
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        sigma_chart = e.ensure_chart(
+            patch=e.ensure_patch(),
+            root="r0",
+            kind="sigma",
+        )
+        tau_chart = e.ensure_chart(
+            patch=e.ensure_patch(),
+            root="r0",
+            kind="tau",
+        )
+        addr0 = e.add_observation(
+            sigma_chart=sigma_chart,
+            tau_chart=tau_chart,
+            sort="X",
+        )
+        return e, addr0
+
+    def test_engine_has_three_fibers(self) -> None:
+        """The engine instantiates three named Fibers in __init__."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.pff import (
+            PERSPECTIVE_SIGMA, PERSPECTIVE_TAU, PERSPECTIVE_KAPPA,
+        )
+        e = PFFCascadeEngine()
+        assert e.sigma_fiber.name == "sigma"
+        assert e.sigma_fiber.perspective == PERSPECTIVE_SIGMA
+        assert e.tau_fiber.name == "tau"
+        assert e.tau_fiber.perspective == PERSPECTIVE_TAU
+        assert e.kappa_fiber.name == "kappa"
+        assert e.kappa_fiber.perspective == PERSPECTIVE_KAPPA
+
+    def test_fresh_engine_fibers_are_empty(self) -> None:
+        """A freshly-constructed engine has zero Fiber classes."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        assert len(e.sigma_fiber) == 0
+        assert len(e.tau_fiber) == 0
+        assert len(e.kappa_fiber) == 0
+
+    def test_add_observation_populates_all_three_fibers(self) -> None:
+        """Each new Addr0 is registered in σ, τ, and κ Fibers."""
+        e, addr0 = self._engine_with_one_addr0()
+        # All three Fibers should contain exactly one class.
+        assert len(e.sigma_fiber) == 1
+        assert len(e.tau_fiber) == 1
+        assert len(e.kappa_fiber) == 1
+        # The cell id should be findable in each Fiber's
+        # class_for reverse index.
+        for f in (e.sigma_fiber, e.tau_fiber, e.kappa_fiber):
+            cls = f.class_for(addr0.id)
+            assert cls is not None
+            assert addr0.id in cls.members
+
+    def test_class_for_unknown_id_returns_none(self) -> None:
+        """``_Fiber.class_for`` on an unregistered cell id is None."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        assert e.sigma_fiber.class_for("nonexistent-id") is None
+        assert e.tau_fiber.class_for("nonexistent-id") is None
+        assert e.kappa_fiber.class_for("nonexistent-id") is None
+
+    def test_glue_emission_populates_fibers_with_addr1(self) -> None:
+        """``_emit_glue`` registers the new Addr1 in all three Fibers.
+
+        Two Addr0s with the same sigma_chart but different tau_charts
+        produce two distinct addr0s plus one auto-emitted glue Addr1.
+        That Addr1 should appear in every Fiber."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.pff import Addr1
+        e = PFFCascadeEngine()
+        patch = e.ensure_patch()
+        sigma_chart = e.ensure_chart(patch=patch, root="r0", kind="sigma")
+        tau_a = e.ensure_chart(patch=patch, root="r0", kind="tau-a")
+        tau_b = e.ensure_chart(patch=patch, root="r0", kind="tau-b")
+        # Two observations with the same sigma key trigger an
+        # auto-emitted glue Addr1.
+        e.add_observation(
+            sigma_chart=sigma_chart, tau_chart=tau_a, sort="X")
+        e.add_observation(
+            sigma_chart=sigma_chart, tau_chart=tau_b, sort="X")
+        # The engine should have minted at least one Addr1 by glue.
+        addr1s = [c for c in e.document.cells() if isinstance(c, Addr1)]
+        assert len(addr1s) >= 1
+        # Each Addr1 should be in all three Fibers
+        for a1 in addr1s:
+            for f in (e.sigma_fiber, e.tau_fiber, e.kappa_fiber):
+                assert f.class_for(a1.id) is not None
+
+    def test_kappa_fiber_collapses_morphisms_with_same_endpoints(
+        self,
+    ) -> None:
+        """Two morphisms (one Addr1 glue, one Addr2 coh) between the
+        same (src, dst) endpoints collapse to one κ-class — that's
+        the κ-perspective semantics ("any morphism between these
+        endpoints").  Under σ they remain distinct because they
+        have different ctors."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.pff import Addr1, Addr2
+        e = PFFCascadeEngine()
+        # Construct an Addr1 and an Addr2 with matching endpoints.
+        a1 = Addr1(
+            id="g1", rank="r0", ctor="glue", src="x", dst="y",
+            premises=[],
+        )
+        a2 = Addr2(
+            id="c1", rank="r0", ctor="coh", src="x", dst="y",
+        )
+        e.sigma_fiber.observe(a1)
+        e.sigma_fiber.observe(a2)
+        e.kappa_fiber.observe(a1)
+        e.kappa_fiber.observe(a2)
+        # Under σ, the two cells have different signatures (different
+        # ctors), so they sit in different classes.
+        assert len(e.sigma_fiber) == 2
+        # Under κ, they share a signature ("morphism", "x", "y") so
+        # they collapse to one class.
+        assert len(e.kappa_fiber) == 1
+        kappa_class = e.kappa_fiber.class_for(a1.id)
+        assert kappa_class is not None
+        assert a1.id in kappa_class.members
+        assert a2.id in kappa_class.members
+
+    def test_observe_is_idempotent(self) -> None:
+        """Observing the same cell twice in the same Fiber is a
+        no-op (set membership)."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.pff import Addr1
+        e = PFFCascadeEngine()
+        a1 = Addr1(
+            id="g1", rank="r0", ctor="glue", src="x", dst="y",
+        )
+        e.sigma_fiber.observe(a1)
+        assert len(e.sigma_fiber) == 1
+        e.sigma_fiber.observe(a1)  # second observe
+        assert len(e.sigma_fiber) == 1
+        cls = e.sigma_fiber.class_for(a1.id)
+        assert cls is not None
+        assert cls.members == {a1.id}
+
+    def test_fiberclass_repr_includes_representative_and_size(
+        self,
+    ) -> None:
+        """``_FiberClass.__repr__`` shows representative + size."""
+        from cstz.pff_cascade import _FiberClass
+        fc = _FiberClass(
+            signature=("addr0", "X", ()),
+            representative="addr0-0",
+        )
+        s = repr(fc)
+        assert "addr0-0" in s
+        assert "size=1" in s
+
+    def test_fiber_repr_includes_name_and_counts(self) -> None:
+        """``_Fiber.__repr__`` shows name + class count + cell count."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        e, addr0 = self._engine_with_one_addr0()
+        s = repr(e.sigma_fiber)
+        assert "sigma" in s
+        assert "1 classes" in s
+        assert "1 cells" in s
+
+
+class TestPassThreeDocumentQueries:
+    """Cover ``Document.wedge``, ``Document.wedge_2``, and
+    ``Document.hom_set`` added by Step 1.5.1 Pass 3.
+
+    These three methods are pure read-only queries on the
+    Document — they compute perspective-parameterized partitions
+    from raw cells without consulting any engine state.  This is
+    the Document-side realization of AUDIT.md §Slicer's "the
+    topology is Document-computable" corollary.
+
+    The cascade engine maintains parallel materializations of
+    the same partitions in its three Fibers (Pass 2); at cascade
+    convergence under correct usage these methods agree with
+    ``engine.{sigma,tau,kappa}_fiber.classes``.
+    """
+
+    def _doc_with_two_morphisms_same_endpoints(self):
+        """Build a tiny document with two distinct morphisms
+        between the same (src, dst) endpoints — one Addr1 with
+        ctor=glue, one Addr2 with ctor=coh.  Used by several
+        tests below to exercise the κ-collapse semantics."""
+        from cstz.pff import (
+            Document, Rank, Patch, Addr0, Addr1, Addr2,
+            Pair, Segment,
+        )
+        d = Document(
+            documentId="hom-set-fixture",
+            ranks=[Rank(id="r0", ordinal=0)],
+            patches=[Patch(id="p0", rank="r0", phase="ingest")],
+            addresses0=[
+                Addr0(
+                    id="src",
+                    sort="X",
+                    segments=[Segment(
+                        rank="r0", phase="ingest", patch="p0",
+                        pairs=[Pair(
+                            chart="c0", root="r",
+                            role="principal",
+                        )],
+                    )],
+                ),
+                Addr0(
+                    id="dst",
+                    sort="Y",
+                    segments=[Segment(
+                        rank="r0", phase="ingest", patch="p0",
+                        pairs=[Pair(
+                            chart="c0", root="r",
+                            role="principal",
+                        )],
+                    )],
+                ),
+            ],
+            paths1=[
+                Addr1(
+                    id="g1", rank="r0", ctor="glue",
+                    src="src", dst="dst", premises=[],
+                ),
+            ],
+            paths2=[
+                Addr2(
+                    id="c1", rank="r0", ctor="coh",
+                    src="src", dst="dst",
+                ),
+            ],
+        )
+        return d
+
+    # ── wedge() — N-perspective product ──
+
+    def test_wedge_default_uses_three_canonical_perspectives(self) -> None:
+        """``wedge()`` with no arguments defaults to (σ, τ, κ).
+
+        Each cell in the document gets projected through three
+        perspectives, and the result groups by the resulting
+        triple-of-signatures."""
+        from cstz.pff import sigma_key, PERSPECTIVE_SIGMA
+        d = self._doc_with_two_morphisms_same_endpoints()
+        wedge = d.wedge()
+        # Each cell occupies one wedge cell (no two cells happen
+        # to coincide on all three perspectives in this fixture).
+        total_cells = (
+            len(d.addresses0) + len(d.paths1) + len(d.paths2)
+        )
+        all_ids = []
+        for ids in wedge.values():
+            all_ids.extend(ids)
+        assert sorted(all_ids) == sorted(c.id for c in d.cells())
+        # Default has 3 perspectives → keys are 3-tuples.
+        for key in wedge:
+            assert len(key) == 3
+
+    def test_wedge_two_explicit_perspectives_yields_two_tuples(self) -> None:
+        """``wedge(σ, κ)`` with explicit perspectives produces
+        2-tuple keys."""
+        from cstz.pff import (
+            PERSPECTIVE_SIGMA, PERSPECTIVE_KAPPA,
+        )
+        d = self._doc_with_two_morphisms_same_endpoints()
+        wedge = d.wedge(PERSPECTIVE_SIGMA, PERSPECTIVE_KAPPA)
+        for key in wedge:
+            assert len(key) == 2
+
+    def test_wedge_one_perspective_groups_like_partition(self) -> None:
+        """``wedge(p)`` with a single perspective produces a
+        partition: each cell appears in exactly one bucket, and
+        cells with equal sigma_keys under p are in the same
+        bucket."""
+        from cstz.pff import sigma_key, PERSPECTIVE_KAPPA
+        d = self._doc_with_two_morphisms_same_endpoints()
+        wedge = d.wedge(PERSPECTIVE_KAPPA)
+        # Two morphisms (Addr1 glue + Addr2 coh) with same
+        # (src, dst) collapse under κ → they share a bucket.
+        morphism_buckets = [
+            ids for key, ids in wedge.items()
+            if key[0][0] == "morphism"
+        ]
+        assert len(morphism_buckets) == 1
+        bucket = morphism_buckets[0]
+        assert "g1" in bucket
+        assert "c1" in bucket
+
+    # ── wedge_2() — convenience two-perspective product ──
+
+    def test_wedge_2_returns_two_tuple_keys(self) -> None:
+        """``wedge_2(σ, κ)`` returns dict with 2-tuple keys
+        and cells grouped by their (σ_key, κ_key) pair."""
+        from cstz.pff import (
+            PERSPECTIVE_SIGMA, PERSPECTIVE_KAPPA, sigma_key,
+        )
+        d = self._doc_with_two_morphisms_same_endpoints()
+        w2 = d.wedge_2(PERSPECTIVE_SIGMA, PERSPECTIVE_KAPPA)
+        for key in w2:
+            assert isinstance(key, tuple)
+            assert len(key) == 2
+        # The two morphisms (g1, c1) have different σ keys
+        # (different ctors) but the same κ key (only endpoints
+        # survive), so they sit in different (σ, κ) buckets but
+        # those buckets share a κ-coordinate.
+        morphism_keys = [
+            key for key in w2
+            if key[0][0] == "morphism"
+        ]
+        assert len(morphism_keys) == 2
+        kappa_coords = {key[1] for key in morphism_keys}
+        assert len(kappa_coords) == 1
+
+    # ── hom_set() — perspective-aware morphism query ──
+
+    def test_hom_set_default_perspective_is_kappa(self) -> None:
+        """``hom_set(src, dst)`` with no perspective defaults to
+        PERSPECTIVE_KAPPA — at most one representative per
+        (src, dst) pair."""
+        d = self._doc_with_two_morphisms_same_endpoints()
+        hom = d.hom_set("src", "dst")
+        # Under κ, the Addr1 glue and Addr2 coh collapse to
+        # one equivalence class → frozenset has one element.
+        assert len(hom) == 1
+        # The element is one of the two morphism ids
+        only = next(iter(hom))
+        assert only in ("g1", "c1")
+
+    def test_hom_set_under_sigma_returns_all_distinct_morphisms(
+        self,
+    ) -> None:
+        """``hom_set(src, dst, perspective=σ)`` returns one
+        representative per σ-equivalence class — for two morphisms
+        with different ctors, that's two distinct elements."""
+        from cstz.pff import PERSPECTIVE_SIGMA
+        d = self._doc_with_two_morphisms_same_endpoints()
+        hom = d.hom_set("src", "dst", perspective=PERSPECTIVE_SIGMA)
+        # Under σ, the Addr1 and Addr2 are distinct → both
+        # appear in the result.
+        assert len(hom) == 2
+        assert hom == frozenset({"g1", "c1"})
+
+    def test_hom_set_under_tau_groups_by_ctor(self) -> None:
+        """Under τ, two morphisms with the same (ctor, src, dst)
+        but different premises collapse; two with different
+        ctors stay distinct."""
+        from cstz.pff import (
+            Document, Rank, Patch, Addr0, Addr1,
+            Pair, Segment, PERSPECTIVE_TAU,
+        )
+        d = Document(
+            documentId="tau-fixture",
+            ranks=[Rank(id="r0", ordinal=0)],
+            patches=[Patch(id="p0", rank="r0", phase="ingest")],
+            addresses0=[
+                Addr0(
+                    id=name,
+                    sort="X",
+                    segments=[Segment(
+                        rank="r0", phase="ingest", patch="p0",
+                        pairs=[Pair(
+                            chart="c0", root="r",
+                            role="principal",
+                        )],
+                    )],
+                ) for name in ("a", "b")
+            ],
+            paths1=[
+                # Three glue Addr1s between the same (a, b):
+                # two with the same premises, one with different
+                Addr1(
+                    id="g1", rank="r0", ctor="glue",
+                    src="a", dst="b", premises=["p1"],
+                ),
+                Addr1(
+                    id="g2", rank="r0", ctor="glue",
+                    src="a", dst="b", premises=["p2"],
+                ),
+                # And one with a different ctor:
+                Addr1(
+                    id="t1", rank="r0", ctor="transport",
+                    src="a", dst="b", premises=["p1"],
+                ),
+            ],
+        )
+        hom_tau = d.hom_set("a", "b", perspective=PERSPECTIVE_TAU)
+        # Under τ, premises drop out → g1 and g2 (same ctor=glue)
+        # collapse, and t1 (ctor=transport) stays distinct.
+        # Expected: 2 equivalence classes.
+        assert len(hom_tau) == 2
+
+    def test_hom_set_no_matching_endpoints_returns_empty(self) -> None:
+        """If no morphism has the queried endpoints, the
+        result is the empty frozenset.
+
+        Note: this only holds when src_id != dst_id.  Under the
+        identity-on-objects convention, ``hom_set(X, X)`` for
+        any Addr0 X always contains at least the identity (the
+        Addr0 itself), so it cannot be empty if X is in the
+        document.  See ``test_hom_set_includes_identity_morphism``
+        below."""
+        d = self._doc_with_two_morphisms_same_endpoints()
+        assert d.hom_set("nonexistent", "dst") == frozenset()
+        assert d.hom_set("src", "nonexistent") == frozenset()
+
+    def test_hom_set_includes_identity_morphism(self) -> None:
+        """Identity-on-objects: an Addr0 with id X represents the
+        morphism ``id_X : X → X`` and must appear in
+        ``hom_set(X, X)``.
+
+        Per the user's Pass 3 correction (FRICTION-7 in the
+        research log): 0-dimensional cells should be identity
+        morphisms; paths with self as start and end.  Dimension 0
+        is not "objects without morphism structure" but rather
+        "morphisms whose source equals their destination."
+        """
+        d = self._doc_with_two_morphisms_same_endpoints()
+        # The fixture's Addr0 with id "src" represents id_src.
+        hom_src = d.hom_set("src", "src")
+        assert "src" in hom_src, (
+            "Addr0 'src' must appear as the identity morphism "
+            "id_src in hom_set('src', 'src')"
+        )
+        # Same for "dst"
+        hom_dst = d.hom_set("dst", "dst")
+        assert "dst" in hom_dst
+
+    def test_hom_set_identity_distinct_from_distinct_endpoint_query(
+        self,
+    ) -> None:
+        """``hom_set(X, X)`` (identity self-loop) and ``hom_set(X, Y)``
+        for X != Y are different queries.
+
+        The former returns the identity morphism plus any
+        non-identity self-loops at X; the latter returns
+        non-identity morphisms with distinct endpoints (or
+        nothing).  Their intersection is empty when X != Y."""
+        d = self._doc_with_two_morphisms_same_endpoints()
+        identity_at_src = d.hom_set("src", "src")
+        crosswise = d.hom_set("src", "dst")
+        # The identity at "src" must NOT appear in the
+        # cross-endpoints query.
+        assert "src" not in crosswise
+        # And the cross-endpoint morphisms must NOT appear in the
+        # self-loop query (they have distinct endpoints).
+        assert "g1" not in identity_at_src
+        assert "c1" not in identity_at_src
+
+    def test_hom_set_addr0_identity_visible_under_all_perspectives(
+        self,
+    ) -> None:
+        """The identity-morphism membership of an Addr0 in
+        ``hom_set(X, X)`` is invariant across perspectives — the
+        Addr0 always represents id_X regardless of which
+        discriminator subset the perspective uses to compute
+        sigma_key.
+
+        Note: this exposes a deferred Pass 1 question.  The
+        Addr0's κ-key is currently ``("addr0", sort)`` (Pass 1's
+        choice), which under the identity reading should
+        arguably be ``("morphism", X.id, X.id)``.  See research
+        log "deferred Pass 1 question on κ-key for Addr0".
+        Until that question is resolved, this test asserts only
+        the membership invariant, not any specific tuple shape.
+        """
+        from cstz.pff import (
+            PERSPECTIVE_SIGMA, PERSPECTIVE_TAU, PERSPECTIVE_KAPPA,
+        )
+        d = self._doc_with_two_morphisms_same_endpoints()
+        for p in (
+            PERSPECTIVE_SIGMA, PERSPECTIVE_TAU, PERSPECTIVE_KAPPA,
+        ):
+            hom = d.hom_set("src", "src", perspective=p)
+            assert "src" in hom, (
+                f"Addr0 'src' missing from hom_set under {p}"
+            )
+
+    def test_hom_set_kappa_count_le_sigma_count(self) -> None:
+        """The lattice refinement law: |hom_set under κ| ≤
+        |hom_set under σ| for the same (src, dst).  More
+        discriminators ⇒ finer equivalence ⇒ more classes."""
+        from cstz.pff import PERSPECTIVE_SIGMA, PERSPECTIVE_KAPPA
+        d = self._doc_with_two_morphisms_same_endpoints()
+        sigma_hom = d.hom_set(
+            "src", "dst", perspective=PERSPECTIVE_SIGMA,
+        )
+        kappa_hom = d.hom_set(
+            "src", "dst", perspective=PERSPECTIVE_KAPPA,
+        )
+        assert len(kappa_hom) <= len(sigma_hom)
+
+    def test_document_query_agrees_with_engine_fiber(self) -> None:
+        """At cascade convergence, ``Document.hom_set`` and
+        the engine's ``kappa_fiber.class_for`` should agree on
+        the same morphism cells.
+
+        This is the property test that ties the Document-side
+        topological-completeness query to the engine-side
+        cached materialization (Pass 2's Fibers).  At cascade
+        convergence under correct usage they must agree."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.pff import Addr1, PERSPECTIVE_KAPPA
+        e = PFFCascadeEngine()
+        patch = e.ensure_patch()
+        sigma_chart = e.ensure_chart(
+            patch=patch, root="r0", kind="sigma",
+        )
+        tau_a = e.ensure_chart(
+            patch=patch, root="r0", kind="tau-a",
+        )
+        tau_b = e.ensure_chart(
+            patch=patch, root="r0", kind="tau-b",
+        )
+        # Two observations with the same sigma key trigger an
+        # auto-emitted glue Addr1.
+        e.add_observation(
+            sigma_chart=sigma_chart, tau_chart=tau_a, sort="X",
+        )
+        e.add_observation(
+            sigma_chart=sigma_chart, tau_chart=tau_b, sort="X",
+        )
+        addr1s = [
+            c for c in e.document.cells()
+            if isinstance(c, Addr1)
+        ]
+        assert len(addr1s) == 1
+        a1 = addr1s[0]
+        # Engine-side materialization
+        kappa_class = e.kappa_fiber.class_for(a1.id)
+        assert kappa_class is not None
+        # Document-side query
+        doc_hom = e.document.hom_set(
+            a1.src, a1.dst, perspective=PERSPECTIVE_KAPPA,
+        )
+        # Both should agree that there is exactly one κ-class
+        # of morphism between (src, dst).
+        assert len(doc_hom) == 1
+        assert a1.id in kappa_class.members
+        # And the document's representative for that class is
+        # the same morphism the engine put in the κ-class.
+        assert next(iter(doc_hom)) in kappa_class.members
+
+
 class TestDocumentCells:
     """Cover ``Document.cells()`` iterator added by HIT collapse."""
 

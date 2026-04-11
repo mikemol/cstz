@@ -1510,6 +1510,371 @@ would be structurally dishonest.
 
 ---
 
+## Postscript: Perspective-lattice refinement (Step 1.5.1) — recovering κ/τ/σ as the legacy reference
+
+A fifth correction, related to the HIT collapse but at one level
+above it.  The HIT collapse postscript above argued that
+"morphism duplicates can't exist when emission is hash-consed,"
+which is true at the σ-perspective level but **incomplete**: it
+committed to one perspective (canonical endpoints, full
+discriminator set) at emission time and lost the ability to
+distinguish cells that agree under one perspective and disagree
+under another.
+
+This postscript records the Step 1.5.1 follow-up that recovered
+the legacy κ/τ/σ three-fiber model from `src/cstz/core.py` as
+the reference implementation, ported its three-Fiber structure
+into `pff_cascade.py`, and added perspective-aware query methods
+on `Document`.  Step 1.5.1 lands as a **port**, not a rewrite —
+the additive port discipline preserves byte-equivalence with the
+HIT collapse's emission paths while making the perspective
+lattice first-class.
+
+### What Pass 0 found in `core.py`
+
+Step 1.5.1's first action was to read `src/cstz/core.py` (the
+legacy SPPF reference) under the perspective-lattice framing.
+The findings are dispositive: every structure Step 1.5.1
+proposed to build *already exists in core.py* as the legacy
+three-Fiber model.
+
+- **Three Fibers exist by exact name** at
+  [core.py:157-161](../src/cstz/core.py#L157), with the module
+  docstring stating the three-fiber semantics literally:
+
+  > Three fibers:
+  > σ (syntax)      — what it looks like structurally
+  > τ (type)        — what it carries (context, dependent type)
+  > κ (categorical) — what it does (universal construction)
+
+- **The wedge product `σ ∧ τ ∧ κ` is the named N-D fixed
+  point** at [core.py:706](../src/cstz/core.py#L706).  Each
+  cell occupies a position `(σ_id, τ_id, κ_id)` in the
+  product fibration; `wedge()` returns the dict of occupied
+  cells.  This is the multi-perspective product space the HIT
+  collapse postscript treated as implicit.
+
+- **`_cascade_eta` and `_cascade_abstraction_merge` exist by
+  exact name** at [core.py:405](../src/cstz/core.py#L405) and
+  [core.py:325](../src/cstz/core.py#L325).  They are the legacy
+  worklist machinery for τ-cascade and η-side adjoint cascade.
+
+- **Per-Fiber discriminator sets in `_ingest_node`** at
+  [core.py:593-603](../src/cstz/core.py#L593):
+
+  ```python
+  sigma_sig = (ast_type, params, child_sigmas)            # finest
+  tau_sig   = (ast_type, abs_type, canon_child_taus)      # middle
+  kappa_sig = (kappa_tag, child_kappas)                   # coarsest
+  ```
+
+  σ has the most discriminators (it's the most-merging-resistant
+  perspective), κ has the fewest (it's the most-merging
+  perspective).  Two cells with the same shape but different
+  params get different σ-keys; under κ, ast_type is dropped
+  entirely.
+
+- **Speculative-rotation infrastructure already exists** —
+  `rotate(from_fiber, to_fiber)` at [core.py:724](../src/cstz/core.py#L724),
+  `natural_transformations(fiber)` at [core.py:773](../src/cstz/core.py#L773),
+  and a seven-kind `_eta_tower` recording (∀η, η-cascade
+  dep-abstract, η-cascade key-collision, η-cascade
+  rekey-collision, ∀η², η-transitive, η-cleavage / ghost-cleavage).
+  AUDIT.md's earlier "speculative rotation" sketch (above, in
+  the cstz-on-cstz experiment section) was claiming as future
+  work what core.py already implements.
+
+- **Recursive cleavage with dynamic Fibers** —
+  `_cleavage_fibers: list[Fiber]` at
+  [core.py:181](../src/cstz/core.py#L181) is a list that grows
+  during cascade as κ-tag-diverging residues are detected.
+  Each new cleavage level appends a new Fiber.  This is the
+  legacy's answer to the open question "what is the third
+  cascade axis beyond cell-dimension and perspective?": the
+  third axis is **cleavage level**, dynamic and recursive,
+  rather than stage-rank (which is a coordinate set at cell
+  birth via the `max` law and not a cascade axis at all).
+
+- **Per-cell observation framework, hybrid (best-fiber-per-node)
+  perspective, provenance fields (`'line'` and `'file'`) on
+  every node, and raw-vs-canonical distinction
+  (`dep_type_raw` / `dep_type`)** all already exist.  The
+  original cstz-on-cstz Step 2 plan was going to add provenance
+  fields; they're already there in core.py.
+
+The conclusion: `core.py` is the reference implementation of
+everything Step 1.5.1 set out to build.  Step 1.5.1 reframed
+itself from "rewrite the cascade with a perspective lattice"
+to "port core.py's three-Fiber structure into the PFF stack
+alongside the existing HIT-collapsed `_uf`."
+
+### Pass 1 — parameterize `sigma_key` with named perspective constants
+
+Pass 1 introduced three named perspective constants in `pff.py`
+matching core.py's discriminator sets, and rewrote
+`sigma_key(cell)` as `sigma_key(cell, perspective=...)` with
+the default preserving Step 1.5's byte-equivalence.
+
+```python
+PERSPECTIVE_SIGMA = frozenset({
+    "sort", "segments", "ctor", "endpoints", "premises",
+})  # finest
+PERSPECTIVE_TAU = frozenset({
+    "sort", "ctor", "endpoints",
+})  # middle
+PERSPECTIVE_KAPPA = frozenset({
+    "sort", "endpoints",
+})  # coarsest
+```
+
+The labeling here follows **Reading A** of the κ-coproduct: σ
+is the most-discriminating perspective, κ is the most-merged.
+The dual reading (Reading B, where κ is the ambient space and
+hence finer than σ) is also valid and is documented in the
+constant docstrings; the choice of Reading A matches core.py's
+labeling for porting consistency, but it is a relational
+convention, not a normative claim.  See conception matrix
+cells `KappaCoproductHasDualReading` and
+`Step151PerspectiveOrderIsBasisChoice` in the plan file.
+
+The default branch (`if perspective == PERSPECTIVE_SIGMA`)
+produces the literal Step 1.5 tuple shape, byte-identical, so
+every existing test that asserts `sigma_key(cell) == ("addr0",
+sort, segments)` or `("morphism", ctor, src, dst, premises)`
+continues to pass.
+
+### Pass 2 — port `_Fiber` and `_FiberClass` from core.py into the engine
+
+Pass 2 ported `core.py:Fiber` and `core.py:FiberClass` into
+`pff_cascade.py` (renamed `_Fiber` and `_FiberClass` per cstz's
+private-prefix convention) and instantiated three Fiber objects
+on `PFFCascadeEngine.__init__`:
+
+```python
+self.sigma_fiber: _Fiber = _Fiber("sigma", PERSPECTIVE_SIGMA)
+self.tau_fiber: _Fiber = _Fiber("tau", PERSPECTIVE_TAU)
+self.kappa_fiber: _Fiber = _Fiber("kappa", PERSPECTIVE_KAPPA)
+```
+
+Each Fiber owns its own `classes: Dict[Tuple, _FiberClass]`
+registry, its own `class_of: Dict[str, Tuple]` reverse index,
+and its own mutable union-find over signatures.  The three
+Fibers run in parallel (the spatial-basis implementation; see
+the FRICTION-1 reframe below for the basis-change rationale).
+
+A new helper `_observe_into_fibers(cell)` registers a fresh
+cell in all three Fibers in one call, and the three emission
+sites (`add_observation` for Addr0, `_emit_glue` for Addr1,
+`coh` for Addr2) call it on the fresh-mint path.  Hash-cons
+hits return early *before* the helper, so each cell is observed
+exactly once at first emission.
+
+**Pass 2 is purely additive and passive.**  The Fibers
+accumulate alongside the existing `_uf` and
+`_morphism_signature_index` machinery without yet driving
+emission decisions.  The existing σ-perspective hash-cons
+remains the load-bearing path; Pass 3's `Document.hom_set`
+queries consume the Fibers passively.  This guarantees
+byte-equivalence with the HIT collapse.
+
+### Pass 3 — `Document.wedge` / `wedge_2` / `hom_set` query methods
+
+Pass 3 added three pure read-only query methods on `Document`:
+
+- **`Document.wedge(*perspectives)`** — N-perspective wedge
+  product, defaulting to the canonical 3-perspective `(σ, τ,
+  κ)` triple when no arguments are supplied.  Mirrors
+  `core.py:SPPF.wedge`.
+- **`Document.wedge_2(perspective_a, perspective_b)`** —
+  convenience 2-perspective specialization.  Mirrors
+  `core.py:SPPF.wedge_2`.
+- **`Document.hom_set(src_id, dst_id, *,
+  perspective=PERSPECTIVE_KAPPA)`** — perspective-aware
+  morphism query returning one representative cell id per
+  equivalence class.  Default perspective is **κ** (most-
+  collapsed) for query ergonomics, distinct from `sigma_key`'s
+  default of **σ** (most-discriminating, for hash-cons
+  correctness).  This default-discrepancy is intentional:
+  `sigma_key` is a hash-cons primitive and should default to
+  the most-distinguishing perspective for correctness;
+  `hom_set` is a query and should default to the most-merged
+  perspective for ergonomics.
+
+These three methods are **pure read-only queries on the
+Document** — they compute from raw cells and do NOT consult
+any engine state.  This is the Document-side realization of
+the Slicer postscript's "the topology is Document-computable"
+corollary: a serialized Document captures everything the
+cascade's fixed-point produces, so any query the engine can
+answer using its in-memory Fibers can also be answered from
+the Document directly.
+
+The cascade engine maintains parallel materializations of the
+same partitions (Pass 2's Fibers) for fast streaming queries;
+at cascade convergence under correct usage they agree with
+these Document methods.  A `test_document_query_agrees_with_engine_fiber`
+property test verifies the agreement at convergence.
+
+### Pass 3.1 — dimension-as-projection: `endpoints` property and branchless hom_set
+
+After Pass 3 landed, the user observed that
+**0-dimensional cells should be identity morphisms; paths with
+self as start and end.**  This is the n-categorical
+identity-on-objects convention: an Addr0 with id `X` IS the
+identity morphism `id_X : X → X`, with both endpoints equal
+to its own id.  Dimension-0 cells are not "objects without
+morphism structure" but rather "morphisms whose source equals
+their destination."
+
+Pass 3.1 captures this insight as a **substrate-level
+projection**: each Cell type gets an `endpoints: Tuple[str,
+str]` property, with `Addr0.endpoints` returning `(self.id,
+self.id)` and `Addr1.endpoints` / `Addr2.endpoints` returning
+`(self.src, self.dst)`.  The `hom_set` method then becomes
+branchless:
+
+```python
+target = (src_id, dst_id)
+for cell in self.cells():
+    if cell.endpoints != target:
+        continue
+    ...
+```
+
+The Addr0 special case lives entirely in the substrate as a
+property; consumers walk cells uniformly as morphisms.
+
+**The intensional/extensional distinction is preserved at the
+substrate level.**  Stored Addr0 dataclasses do not gain
+`src` or `dst` fields; the projection lives only in the
+property.  Two readers of the same Document can read it as
+"object-and-morphism category" (by ignoring `endpoints` on
+Addr0) or as "morphism-category with identity self-loops" (by
+calling `endpoints` uniformly), and both readings are
+correct under their respective intensions.
+
+### The basis-change meta-pattern (recurring four times in Step 1.5.1)
+
+Step 1.5.1's plan went through four "I framed two
+representations as fundamentally different" / "user pointed out
+they're related by a basis change" cycles.  Each was a real
+correction; the recurrence is structural, not noise.
+
+| Friction | Layer | Distinction | Common substrate Z |
+|---|---|---|---|
+| **FRICTION-1** | implementation | spatial vs temporal UFs | perspective product space (time as group action on space) |
+| **FRICTION-2** | labeling | σ-finest vs κ-finest | discriminator-set lattice (Reading A vs Reading B of κ-coproduct) |
+| **FRICTION-7** | substrate projection | dim-0 vs dim-1+ | "morphism" notion (identity-on-objects convention) |
+| **FRICTION-10** | type-shape | "addr0" tag vs "morphism" tag | arrow-category lattice (`C → C^→` is two-sided) |
+
+Each level has the same shape: a hard distinction turns out to
+be a projection on a common underlying object.  The pattern is
+**recursive** — at each new level, the previous distinction
+becomes a labeling convention on the new substrate, and a new
+"hard distinction" appears one level up that may also be a
+basis change in disguise.
+
+The fourth instance (FRICTION-10, the arrow-category reframe)
+explicitly notes that the legacy `("addr0", ...)` tag and the
+unified `("morphism", ...)` tag are **simultaneously true**
+under the arrow-category construction `C → C^→`.  Every object
+of C appears in C^→ as its identity morphism; every morphism of
+C appears in C^→ as its own object.  Neither tag is canonical;
+both are intensions of the same extension.
+
+This fact is **gap #8** in the plan-file cofibrational gaps
+list and is **resolved-by-reframe**: medium-scope and
+maximum-scope plans recorded in the research log will
+parameterize the projection rather than picking a side.  Pass
+3.1's minimum-scope refactor is sufficient for the immediate
+consumer (`Document.hom_set`); deeper integration is deferred
+to Step 1.5.2.
+
+### What gets corrected from the HIT collapse postscript (above)
+
+The HIT collapse postscript made several claims that Step
+1.5.1 has now refined:
+
+1. **"morphism duplicates can't exist when emission is
+   hash-consed"** — true at the σ-perspective level, but the
+   HIT collapse committed to ONE perspective at emission and
+   lost the ability to distinguish cells that agree under
+   κ but disagree under τ.  Step 1.5.1's perspective lattice
+   recovers all three perspectives; the HIT collapse is now
+   the σ-perspective specialization of a more general
+   structure.
+
+2. **"In-memory, there is ONE thing — a Cell"** — true, but
+   the *quotient* over Cells is not unique; it depends on the
+   perspective.  Three Fibers maintain three quotients; the
+   "ONE thing" is the Cell, the perspectives are the
+   different ways to ask "are these two cells equivalent?".
+
+3. **"The auto_coh pass has no work to do and is deleted"** —
+   true at the σ-level (which is what auto_coh was always
+   doing).  Under the perspective lattice, the τ-fiber's
+   cascade is the legacy auto_coh dual, and Step 1.5.2 (or
+   later) may need to rebuild some τ-cascade machinery if
+   the τ-perspective grows non-trivial dynamics.  Pass 2's
+   parallel Fibers are passive in Step 1.5.1; making them
+   load-bearing for τ-side merges is deferred work.
+
+4. **"The shared structure IS the Cell / _uf / _cascade
+   trinity"** — true under the σ-perspective, but the actual
+   shared structure is the **three-Fiber wedge product** that
+   `core.py` already implements and that Step 1.5.1 now ports
+   into the PFF stack.  The empirical cstz-on-cstz tool the
+   original Steps 2-4 would have built is still unnecessary,
+   but for a deeper reason than the HIT collapse postscript
+   claimed: the σ/τ/κ structure was already in `core.py` all
+   along, and recognizing it requires reading the legacy, not
+   running an experiment.
+
+### Test result and exit criterion
+
+Step 1.5.1 passes through four sub-passes (Pass 0 read,
+Pass 1 sigma_key parameterization, Pass 2 Fiber port, Pass 3
+Document queries, Pass 3.1 endpoints projection) with the
+final test count at **842 passed** (was 809 at the HIT
+collapse baseline; +33 new tests across
+`TestSigmaKeyPerspectives`, `TestPassTwoFibers`, and
+`TestPassThreeDocumentQueries`).  All six modules at 100%
+line + branch coverage throughout.  Zero regressions on the
+809 baseline tests.
+
+### Implications for the codebase
+
+Three follow-up actions land in the recommended-follow-ups list
+below:
+
+- **0g.** Update `inference.agda`'s Step 6 PFF correspondence
+  comments to reference the perspective lattice and the
+  arrow-category framing.  Comment-only; no proof bodies
+  change.
+- **0h.** Resolve gap #8 (Pass 1 κ-key for Addr0 under the
+  identity-on-objects reading) by implementing the
+  medium-scope plan from research-log-step-1.5.1.md.  Adds a
+  `tag_projection` parameter to `sigma_key` exposing both
+  the legacy three-tag and unified one-tag projections
+  orthogonally to the perspective parameter.  Estimated cost
+  ~4 hours.
+- **0i.** (Long-term) implement the maximum-scope plan from
+  research-log-step-1.5.1.md, which makes the arrow-category
+  coordinate (`arrow_id`) a first-class field on every cell.
+  Closes gap #8 by identification rather than parameterization.
+  Estimated cost ~8-10 hours.
+
+These items, together with the HIT collapse postscript
+above, complete the perspective-lattice realignment of the
+PFF stack.  The cstz cascade now has three named Fibers, a
+perspective-aware sigma_key, three Document-side query
+methods, and a substrate-level `endpoints` projection that
+honors the identity-on-objects convention — all preserved by
+the additive-port discipline that guarantees byte-equivalence
+with the HIT collapse's emission paths.
+
+---
+
 ## Recommended follow-ups
 
 Items that the audit thinks are worth closing, in priority order:
