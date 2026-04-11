@@ -1060,15 +1060,213 @@ the σ-cascade and τ-cascade share a merge-emission loop at the
 AST level, which is the specific question (C3) was supposed to
 answer.
 
-The next commit implements `src/cstz/ast_alpha.py` with minimal
-α-normalization (local variable renaming via first-appearance
-ordering per scope), applies it to `pff.py + pff_cascade.py`,
-re-runs the cstz-on-cstz experiment, and documents whether the
-normalized view identifies the merge-emission loops as shared.
-Depending on the result, (C2b) — the actual shared-helper
-extraction — will be either empirically-guided (by the
-α-normalized equivalences) or done as a visual extraction with
-the experimental result cited as a negative empirical finding.
+### Query specification (Step 0)
+
+Before building the machinery that would answer the
+cstz-on-cstz question empirically, this section writes down the
+*exact query* that the eventual experiment will execute.  Pinning
+the query down first — before any α-normalization, provenance
+tracking, or factorization plumbing exists — gives every
+subsequent step a precise specification to implement against.
+See [replicated-popping-bentley.md](../../../.claude/plans/replicated-popping-bentley.md)
+§"Step 0 — Query specification" for the DAG framing.
+
+**The unifying question:**
+
+> For a given source tree, which AST subtrees are referenced from
+> more than one function after hash-consing under α-equivalence?
+
+**The query signature (target for Step 3):**
+
+```python
+def shared_across_functions(
+    self: Document,
+    min_span: int = 2,
+) -> List[AddrShareRecord]:
+    """Return Addr0s whose hash-cons backings span ≥ min_span
+    distinct enclosing functions.
+
+    The return is ordered by span count descending, then by
+    Addr0.id ascending.  Caller is expected to filter the result
+    by AST sort type to surface structurally-interesting matches
+    (For / If / While / ListComp / etc.) and hide trivial leaf
+    matches (Name / Constant / etc.)
+    """
+```
+
+with
+
+```python
+@dataclass
+class AddrShareRecord:
+    """One Addr0 that was referenced from multiple functions
+    during factorization.
+
+    Built by Document.shared_across_functions from the provenance
+    metadata that add_observation records on each Addr0's
+    meta["backings"] list during ingest.
+    """
+
+    addr0_id: str
+    sort: str                              # AST node type
+    backings: List[Tuple[str, str, int]]   # (file, scope_path, line)
+    function_span: FrozenSet[str]          # distinct scope_paths
+```
+
+**Prerequisites for the query to be meaningful:**
+
+1. The input Document must be built by factorizing an
+   **α-normalized** AST, so that two lexically-distinct
+   subtrees with the same α-equivalence class collapse to a
+   single hash-consed Addr0 at ingest time.  **This is Step 1.**
+2. Each hash-cons dedup event in `add_observation` must record
+   the colliding caller's location on the existing Addr0's
+   metadata, rather than silently discarding it.  Without this,
+   the `function_span` field would only reflect the first
+   ingestor and every Addr0 would appear singleton-scoped.
+   **This is Step 2.**
+
+Only after both prerequisites land can the query be implemented
+as a pure filter over `doc.addresses0` (~20 lines), as specified
+in Step 3 of the plan.
+
+**Worked example.**  Consider the synthetic input from the
+cstz-on-cstz experiment that produced the `fac14a1` finding:
+
+```python
+def sigma_inner(ids, engine, rank, patch, label):
+    collect = []
+    anchor = ids[0]
+    for other in ids[1:]:
+        if engine.find(anchor) == engine.find(other):
+            continue
+        collect.append(engine.emit(anchor, other, rank, patch, label))
+    return collect
+
+def tau_inner(items, eng, r, p, tag):
+    results = []
+    head = items[0]
+    for elem in items[1:]:
+        if eng.find(head) == eng.find(elem):
+            continue
+        results.append(eng.emit(head, elem, r, p, tag))
+    return results
+```
+
+After α-normalization (Step 1), both functions' bodies become
+byte-for-byte identical modulo their FunctionDef names: every
+parameter is `v0..v4`, every local is `v5..v7`, the `for` loops
+are lexically identical, the `if` conditions are lexically
+identical, the `append` calls are lexically identical.
+
+After factorizing the normalized AST with provenance tracking
+enabled (Step 2), cstz's hash-consing merges the `For` subtree,
+the `If` subtree, the `Call` subtrees, and every intermediate
+node into single Addr0s — with `meta["backings"]` on each
+recording BOTH `sigma_inner` and `tau_inner` as the functions
+that contributed ingests.
+
+Calling `doc.shared_across_functions(min_span=2)` (Step 3) then
+returns (something close to):
+
+```python
+[
+    AddrShareRecord(
+        addr0_id="addr0-40",
+        sort="For",
+        backings=[
+            ("synthetic.py", "<module>:sigma_inner", 5),
+            ("synthetic.py", "<module>:tau_inner", 14),
+        ],
+        function_span=frozenset({
+            "<module>:sigma_inner",
+            "<module>:tau_inner",
+        }),
+    ),
+    AddrShareRecord(
+        addr0_id="addr0-35",
+        sort="If",
+        backings=[
+            ("synthetic.py", "<module>:sigma_inner", 6),
+            ("synthetic.py", "<module>:tau_inner", 15),
+        ],
+        function_span=frozenset({
+            "<module>:sigma_inner",
+            "<module>:tau_inner",
+        }),
+    ),
+    # ... more records, one per shared subtree ...
+]
+```
+
+The top-ranked result is the `For` loop (the largest shared
+subtree by structural reach), followed by its children (`If`,
+`Call`, `Compare`, ...) which are also shared but rank lower
+because they cover fewer lines.  The `FunctionDef` nodes
+themselves do NOT appear in the result because their names
+differ (`sigma_inner` ≠ `tau_inner`), so they aren't
+hash-consed, so each remains singleton-scoped.
+
+**This is exactly the structure we want to find.**  If Step 4's
+empirical experiment run on `src/cstz/pff.py` + `pff_cascade.py`
+produces an analogous result — a top-ranked `For` Addr0 whose
+`function_span` is `{PFFCascadeEngine._glue_set_and_cascade,
+Document.auto_coh_closure}` — then the merge-emission loop is
+empirically confirmed as shared structure, and Step 5's
+extraction is mechanically guided by the backings list.
+
+**What the query does not claim.**  The query answers "does
+shared structure exist at the AST level?"  It does not answer
+"should this shared structure be factored into a helper?" — that
+is a human-judgment call informed by the result.  A shared
+`Subscript("optional type annotation")` Addr0 spanning 10
+functions is structurally shared but semantically trivial and
+should not trigger a refactor; a shared `For` loop spanning 2
+functions is structurally rarer and semantically meaningful.
+The filter-by-interesting-sort step in Step 4 is where that
+judgment lives.
+
+**Risk (Step 0 only).**  The query shape as written here might
+be wrong.  If the empirical experiment in Step 4 produces
+unexpected output — too many trivial leaves, too few
+structural matches, or matches that group things that shouldn't
+be grouped — the residual tells us which of Steps 1-3 drifted.
+The worked example above is the concrete target every
+implementation step below is reaching for, and the Step 4
+report will cite this example as the validation baseline.
+
+### Implementation steps 1-5 (deferred to follow-up commits)
+
+With the query specification fixed, the five implementation
+steps can proceed in order.  Each step's commit message will
+cite its role in the DAG described in
+[replicated-popping-bentley.md](../../../.claude/plans/replicated-popping-bentley.md):
+
+- **Step 1** — `src/cstz/ast_alpha.py` with the α-normalization
+  pass.  Renames locals to `v0`, `v1`, ... by first-appearance
+  order per scope.  Module scope unchanged.  Free variables
+  left as-is for this bounded experiment.
+- **Step 2** — provenance tracking in
+  `PFFCascadeEngine.add_observation` via
+  `Addr0.meta["backings"]`.  New optional `scope_path` parameter
+  threaded through `pff_python_classifier._walk`.
+- **Step 3** — `Document.shared_across_functions` method and
+  `AddrShareRecord` dataclass, implementing the signature
+  above.
+- **Step 4** — `tools/find_shared_structure.py` experiment
+  script + `tests/test_cstz_on_cstz.py` integration test,
+  running the pipeline on `src/cstz/pff.py` and
+  `src/cstz/pff_cascade.py`.
+- **Step 5** — shared helper extraction (originally C2b),
+  empirically guided by Step 4's output.  The refactor's
+  observable signature in cstz's equivalence notion is that
+  Step 4 re-run after the refactor produces at least one more
+  shared Addr0 than before.
+
+Each step's commit message will include an explicit
+"retroactive refinement" note updating earlier artifacts with
+what the current step learned.  See the plan file for the full
+DAG and leverage analysis.
 
 ---
 
