@@ -913,6 +913,163 @@ Once both cascades are tested in their current form, extracting
 the generic iteration becomes a pure refactor that preserves
 behavior.
 
+### Experiment: cstz-on-cstz as a refactor oracle
+
+With both cascades (σ-cascade in
+`PFFCascadeEngine._glue_set_and_cascade` /
+`_cascade_after_merge`, τ-cascade in
+`Document.auto_coh_closure` / `PFFCascadeEngine.auto_coh_closure`)
+present in the tree as of commit `d72acb5`, a cstz-on-cstz
+experiment became possible: factorize the source files through
+`pff_python_classifier.factorize`, inspect the resulting
+`path1_classes()`, and look for structural equivalences between
+the two cascades' inner loops.  If cstz's AST-level equivalence
+notion identified the merge-emission pattern as shared, that
+shared structure could directly guide the helper extraction for
+item (C2b).
+
+**Result: cstz finds zero structural equivalence between the two
+cascades at the loop-or-conditional level.**  The combined
+factorization of `pff.py + pff_cascade.py` produces 62
+non-singleton path1 classes spanning 3297 Addr0s, but querying
+those classes by AST node type yields:
+
+| AST type queried | Cross-cascade classes |
+| --- | --- |
+| `For` | 0 |
+| `If` | 0 |
+| `Call` | 0 |
+| `Compare` | 0 |
+| `AugAssign` | 0 |
+| `ListComp` | 0 |
+| `Subscript` | 4 (all trivial type-annotation matches) |
+
+The only cross-file equivalences are trivial shared-identifier
+patterns: `Name("self")` references, `Attribute` chains like
+`self.document.paths1.append(...)`, and isomorphic type
+annotations in function signatures.  None of them capture the
+"merge-emission loop" structure we were looking for.
+
+**Diagnosis.**  cstz's `_addr0_signature_index` hash-consing is
+**lexical**, not α-equivalent.  A sigma-key for a `Name` node
+includes the identifier string as a param, so
+`Name("ids")` and `Name("sorted_members")` are distinct Addr0s,
+their parent `Subscript` nodes differ, and everything above
+those two leaves differs all the way up to the enclosing
+function definitions.  The only way two Addr0s ever end up in
+the same path1 class is if their sigma-keys (including all
+nested leaf identifiers) match exactly.
+
+A synthetic experiment confirmed this is the limiting factor:
+two functions with **identical bodies and identical local
+variable names** collapse to ONE For Addr0 via hash-consing
+(because their full sigma-keys match), but when the same two
+functions have identical bodies and DIFFERENT local variable
+names (`ids` vs `sorted_members`), the For nodes stay in
+separate path1 classes.  Equality-up-to-local-renaming is not
+something cstz's current cascade can detect.
+
+This is **not a bug** in cstz — α-equivalence vs lexical
+equivalence is a meaningful design choice, and the lexical
+choice preserves valuable information (a refactor that renames
+a variable is NOT a no-op under cstz's equivalence relation,
+which is exactly right for many refactor-tracking use cases).
+But it does mean that cstz-on-cstz cannot directly identify the
+merge-emission loops as shared structure, and the templating
+helper extraction for item (C2b) cannot be empirically guided
+by the current cascade alone.
+
+### The deeper finding: speculative rotation + natural transformation
+
+The α-equivalence limit points at a more general extension of
+the cascade.  Two Addr0s that fail to sigma-key-collide but
+differ only by a local rewriting should be connectable via a
+**speculative rotation** of one cell's hash-consed representation
+onto the other's — and the successful rotation, recorded as a
+structured morphism, is exactly what a **natural transformation**
+captures in the category-theoretic sense.
+
+Concrete framing:
+
+- A **hash-consed cell** is an Addr0 with its sigma-key
+  `(ast_type, params, canonical_children)`.
+- A **rotation** is a substitution / permutation / rewriting
+  applied to the cell's params or children that produces a new
+  sigma-key.  The rotation is "speculative" because we apply it
+  without yet knowing whether it produces a collision.
+- A **shape collision** is the success condition: after rotation,
+  the new sigma-key matches an existing cell's sigma-key.
+- A **natural transformation** is the Addr1 record that captures
+  the collision: its `ctor` names the rotation kind (e.g.,
+  `ctor="alpha-rename"`), its `args` record the substitution
+  (e.g., `args={"rename": {"ids": "sorted_members"}}`), and its
+  `src` / `dst` are the two connected Addr0s.
+
+Generalizing across the different rotation groups:
+
+| Rotation kind | Rotation group | Resulting Addr1 ctor |
+| --- | --- | --- |
+| α-equivalence | local variable renaming (substitution group on bound names) | `alpha-rename` |
+| β-equivalence | inlining + common subexpression elimination | `beta-reduce` |
+| η-equivalence | extensionality application | `eta-expand` |
+| commutativity | argument reordering for commutative binops | `commute` |
+| associativity | re-parenthesization of associative operators | `reassociate` |
+
+Each rotation kind corresponds to a functor from a **syntactic
+category** (morphisms are literal identity) to a **quotient
+category** (morphisms are equivalences under that rotation).
+Natural transformations between these functors materialize as
+Addr1 records connecting the pre-rotation cell to the
+post-rotation cell.
+
+This is the "quotient category lifting" pattern, and α-equivalence
+is the simplest nontrivial instance.  Implementing it inside the
+existing cascade amounts to:
+
+1. Adding a **rotation pass** that runs after `_cascade_after_merge`
+   settles, scanning for cells whose structures differ only by a
+   chosen rotation group.
+2. Emitting Addr1 records with the rotation-specific ctor for each
+   collision found.
+3. Including those Addr1s in the path1 closure so downstream
+   Grothendieck-topology queries see the extended equivalence.
+
+This is substantially more machinery than the plain cascade has,
+and it's explicitly deferred as a **future feature** beyond the
+current audit scope.  The bounded experiment below tests whether
+a simpler approach — α-normalization before factorization — is
+sufficient for the specific empirical goal of finding the shared
+structure between the two cascades.
+
+### Bounded experiment: α-normalization before factorization
+
+Rather than adding a rotation pass inside the cascade, a simpler
+preprocessing step is to **α-normalize the AST before
+factorization**: rewrite every local variable binding to a
+canonical name (`v0`, `v1`, ...) determined by first-appearance
+order within its scope, then feed the normalized AST to
+`factorize`.  Under α-normalization, two functions with
+identical bodies and different local variable names produce
+identical normalized ASTs, and cstz's lexical hash-consing
+correctly identifies them as structurally equivalent.
+
+This is not as general as the speculative-rotation approach — it
+only handles α-equivalence, not β / η / commutativity /
+associativity — but it is enough to empirically verify whether
+the σ-cascade and τ-cascade share a merge-emission loop at the
+AST level, which is the specific question (C3) was supposed to
+answer.
+
+The next commit implements `src/cstz/ast_alpha.py` with minimal
+α-normalization (local variable renaming via first-appearance
+ordering per scope), applies it to `pff.py + pff_cascade.py`,
+re-runs the cstz-on-cstz experiment, and documents whether the
+normalized view identifies the merge-emission loops as shared.
+Depending on the result, (C2b) — the actual shared-helper
+extraction — will be either empirically-guided (by the
+α-normalized equivalences) or done as a visual extraction with
+the experimental result cited as a negative empirical finding.
+
 ---
 
 ## Recommended follow-ups
