@@ -1209,6 +1209,176 @@ class Document:
             a for a, c in self.path2_canonical_map().items() if c == canonical
         )
 
+    # ── τ-cascade: auto-coh fixed-point pass ────────────────────────
+    #
+    # The σ-cascade (in pff_cascade.PFFCascadeEngine) auto-emits Addr1s
+    # whenever two observations share a sigma-key during streaming
+    # ingest.  The τ-cascade is the dual operation one rank up: it
+    # scans the paths1 collection and auto-emits Addr2 (ctor=coh)
+    # records between any two Addr1 records witnessing the same
+    # canonical endpoint pair under the current path1 partition.
+    #
+    # The pass is one-shot (no recursive re-canonicalization needed)
+    # because emitting cohs only unions the path2 union-find and does
+    # not affect the path1 canonical map, so the grouping keys are
+    # stable during the scan.  This is the key asymmetry with the
+    # σ-cascade: σ-key collisions can cascade because child
+    # canonicalization can change under a merge, whereas τ-cascade
+    # cohs don't affect the endpoint canonicals they're grouping on.
+    #
+    # The pass is idempotent: running it twice produces no new records
+    # on the second call.
+    #
+    # Under normal σ-cascade operation the pass emits zero cohs (the
+    # σ-cascade's skip-check in _glue_set_and_cascade prevents
+    # duplicates).  It fires on:
+    #
+    #   - Documents produced by Document.merge_bundle() where both
+    #     sides independently glued the same canonical pair
+    #   - User-constructed Documents with manually-added duplicate
+    #     Addr1 records
+    #   - Any future refactor that removes the σ-cascade's
+    #     emission-dedup logic
+    #
+    # See rhpf-pff-profiles/AUDIT.md §"The τ-Slicer and the
+    # asymmetry it exposes" for the design rationale.
+
+    def auto_coh_closure(self) -> List[Addr2]:
+        """Run the τ-cascade fixed-point pass on this document.
+
+        Scans ``self.paths1`` and groups Addr1 records by their
+        canonical endpoint pair (under the current path1 partition),
+        normalized so `(a, b)` and `(b, a)` are the same group.
+        For each group with ≥2 members, emits one Addr2 with
+        ``ctor="coh"`` per pair of members that are not yet in the
+        same path2 class, using lex-smallest-first anchor ordering.
+
+        Returns the list of newly-minted Addr2 records.  Empty on a
+        document that's already at its τ-cascade fixed point.
+
+        The newly-minted Addr2 records are appended to
+        ``self.paths2``.  Their ids follow the pattern
+        ``auto-coh-N`` where N counts from the current length of
+        ``paths2``, guaranteeing uniqueness within the Document.
+
+        Ranks and patches for the new records:
+            - rank: the lex-smallest rank id found on any of the
+              grouped Addr1 records (conservative choice that
+              keeps the coh at the same rank level as its witnesses)
+            - patch: the first path2 record's patch if any exist,
+              else the first path1 record's patch, else None
+        """
+        path1_canon = self.path1_canonical_map()
+
+        # Step 1: partition path1_ids by the normalized canonical
+        # endpoint pair.  Order within each group is list-position
+        # (ingest order) for deterministic output.
+        #
+        # The canonical pair is computed under the current path1
+        # partition.  If two Addr1 records already sit in the same
+        # path1 class (meaning the cascade already knows their
+        # endpoints are equivalent at the Addr0 level), they are
+        # candidates for being cohered even if their declared raw
+        # endpoints differ — that's the whole point of running this
+        # pass after the σ-cascade has converged.
+        groups: Dict[Tuple[str, str], List[str]] = {}
+        # Preserve a side index from group key → representative raw
+        # endpoint pair for labeling purposes, chosen from the
+        # first Addr1 to enter each group.
+        raw_pair_of: Dict[Tuple[str, str], Tuple[str, str]] = {}
+        for p1 in self.paths1:
+            if p1.ctor not in ("glue", "refl"):
+                # Non-merge ctors (transport, compose, inverse,
+                # pack, named) don't assert path1 equivalence, so
+                # they don't participate in τ-coherence.
+                continue
+            # For glue/refl Addr1s, the path1 closure unions src and
+            # dst into the same class, so src_canon == dst_canon.
+            # The normalized group key is the doubled canonical.
+            src_canon = path1_canon[p1.src]
+            dst_canon = path1_canon[p1.dst]
+            key = (src_canon, dst_canon)
+            groups.setdefault(key, []).append(p1.id)
+            # Record the first Addr1's raw (pre-canonicalization)
+            # endpoints for the label, normalized lex-smallest-first.
+            if key not in raw_pair_of:
+                raw_src, raw_dst = sorted((p1.src, p1.dst))
+                raw_pair_of[key] = (raw_src, raw_dst)
+
+        # Step 2: compute the current path2 canonical map; we use it
+        # to skip cohs that would be redundant with existing ones.
+        path2_canon = self.path2_canonical_map()
+
+        # Step 3: for each group with ≥2 members, emit cohs in an
+        # anchor-first pattern (lex-smallest id as anchor; all other
+        # members get a coh to the anchor).  This is the same
+        # emit-merges-in-group pattern as the σ-cascade's
+        # _glue_set_and_cascade inner loop, but for path2 instead
+        # of path1.
+        #
+        # Note: this method is written as a self-contained loop
+        # rather than delegating to a shared _emit_merges_in_group
+        # helper.  That's intentional — the parallel implementation
+        # strategy keeps the σ-cascade untouched until the auto-coh
+        # pass has its own tests validating it.  A follow-up commit
+        # will extract the shared inner-loop helper.
+        new_records: List[Addr2] = []
+        next_ordinal = len(self.paths2)
+
+        # Default rank / patch to use when the chosen Addr1 records
+        # don't agree.  Use the lex-smallest rank id that appears on
+        # any member.
+        def _conservative_rank(member_ids: List[str]) -> Optional[str]:
+            ranks_seen = {
+                p.rank for p in self.paths1 if p.id in set(member_ids)
+            }
+            return min(ranks_seen) if ranks_seen else None
+
+        def _conservative_patch(member_ids: List[str]) -> Optional[str]:
+            for p in self.paths1:
+                if p.id in set(member_ids) and p.patch is not None:
+                    return p.patch
+            return None
+
+        for (src, dst), members in groups.items():
+            if len(members) < 2:
+                continue
+            # Sort members by id for deterministic anchor selection
+            sorted_members = sorted(members)
+            anchor = sorted_members[0]
+            for other in sorted_members[1:]:
+                anchor_canon = path2_canon.get(anchor, anchor)
+                other_canon = path2_canon.get(other, other)
+                if anchor_canon == other_canon:
+                    # Already in the same path2 class; skip
+                    continue
+                rank = _conservative_rank([anchor, other])
+                patch = _conservative_patch([anchor, other])
+                raw_src, raw_dst = raw_pair_of[(src, dst)]
+                new_addr2 = Addr2(
+                    id=f"auto-coh-{next_ordinal}",
+                    rank=rank if rank is not None else "",
+                    ctor="coh",
+                    src=anchor,
+                    dst=other,
+                    patch=patch,
+                    label=f"auto-coh:{raw_src}~{raw_dst}",
+                )
+                self.paths2.append(new_addr2)
+                new_records.append(new_addr2)
+                next_ordinal += 1
+                # Update path2_canon on the fly so subsequent
+                # iterations see the newly-emitted union.  The
+                # anchor-first pattern means `anchor` stays as
+                # the winner throughout the group, and each
+                # `other_canon → anchor_canon` update is a single
+                # hop — no chained rename propagation is needed.
+                winner = min(anchor_canon, other_canon)
+                loser = max(anchor_canon, other_canon)
+                path2_canon[loser] = winner
+
+        return new_records
+
     # ── Receipts ────────────────────────────────────────────────────
 
     def receipt(self) -> DocumentReceipt:

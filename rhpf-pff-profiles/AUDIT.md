@@ -792,16 +792,35 @@ SPPF cleavages.
 The auto-coh pass is idempotent and converges in one scan because
 cohs only affect `_addr1_uf` (the path2 union-find), not
 `_addr0_uf` (the path1 union-find), so the canonical pairs
-computed during the scan are stable.  In normal σ-cascade
-operation the pass emits zero cohs (the cascade's skip-check
-prevents multiple Addr1s with the same raw pair from being
-emitted in a single run), but it fires correctly on:
+computed during the scan are stable.
+
+A subtlety that the first draft of this postscript missed: the
+σ-cascade's skip-check prevents duplicate Addr1s with the same
+**raw** (src, dst) pair from being emitted in a single run, but
+it does not prevent distinct raw pairs from canonicalizing to
+the same canonical pair after the cascade closes.  For a path1
+class of `n` addr0s the σ-cascade emits `n-1` glues (anchor-first
+pattern), and auto-coh emits `n-2` cohs to unify them.
+
+That is, auto-coh fires even on normal σ-cascade output whenever
+a path1 class has more than two members.  This is correct
+behavior: each of the n-1 glues witnesses the equivalence from a
+different raw-endpoint angle, and all of them are coherent by
+construction.  The cohs make that coherence explicit in the
+Document, symmetric with how the σ-cascade makes the glue
+coherence explicit.
+
+Auto-coh also fires on:
 
 - Documents produced by `Document.merge_bundle` when both sides
   independently glued the same canonical pair
 - User-constructed Documents with manually-added duplicate Addr1s
 - Any future refactor that removes the σ-cascade's
   emission-dedup logic
+
+The pass emits **zero** cohs only when every path1 class is a
+singleton or a pair — i.e., no path1 class has enough witnesses
+to produce a coherence relationship among them.
 
 ### Earley is also in the fixed-point calculation
 

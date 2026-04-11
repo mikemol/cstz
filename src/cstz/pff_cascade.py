@@ -479,6 +479,14 @@ class PFFCascadeEngine:
                 collect_addr1s=[],  # streaming caller discards the list
             )
 
+        # ── Streaming τ-cascade (auto-coh) ──
+        # After the σ-cascade settles its path1 state, run the dual
+        # τ-cascade at path2: group Addr1 records by canonical endpoint
+        # pair and emit cohs to unify witnesses.  See auto_coh_closure
+        # docstring and rhpf-pff-profiles/AUDIT.md §"The τ-Slicer and
+        # the asymmetry it exposes" for design rationale.
+        self.auto_coh_closure()
+
         return addr0
 
     # ── Public glue / coh ───────────────────────────────────────
@@ -566,6 +574,39 @@ class PFFCascadeEngine:
         self.document.paths2.append(addr2)
         self._addr1_uf.union(src, dst)
         return addr2
+
+    # ── τ-cascade: auto-coh fixed-point pass ────────────────────
+
+    def auto_coh_closure(self) -> List[Addr2]:
+        """Run the τ-cascade fixed-point pass on the engine's Document.
+
+        Delegates to ``self.document.auto_coh_closure()`` for the
+        coh-emission logic, then also unions the resulting Addr1
+        class identifiers in the engine's internal ``_addr1_uf``
+        union-find so the engine's path2 state stays consistent with
+        the Document's.
+
+        Called automatically at the end of ``add_observation`` after
+        the σ-cascade settles.  Also callable manually after bulk
+        operations like ``merge_bundle`` or raw Document construction.
+        The pass is idempotent: running it twice produces no new
+        records on the second call.
+
+        Returns the list of newly-minted Addr2 records.
+        """
+        new_records = self.document.auto_coh_closure()
+        # Sync the engine's path2 union-find with the new cohs.
+        # Most Addr1 ids were registered in _addr1_uf by _emit_glue
+        # during streaming ingest, but this method is also callable
+        # after manual document construction (e.g., JSON import,
+        # merge_bundle, or direct append to document.paths1), so we
+        # register any new ids defensively.  These .make() calls are
+        # idempotent on already-known ids.
+        for addr2 in new_records:
+            self._addr1_uf.make(addr2.src)
+            self._addr1_uf.make(addr2.dst)
+            self._addr1_uf.union(addr2.src, addr2.dst)
+        return new_records
 
     # ── Cascade internals ───────────────────────────────────────
 
