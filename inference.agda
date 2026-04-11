@@ -8,12 +8,106 @@
 --   SPPF.FiberClass       — equivalence classes inside a fiber
 --   SPPF.Kappa            — κ as coproduct of σ and τ (adjunction proof)
 --   SPPF.Eta              — η-equivalence as a natural transformation
+--   SPPF.ClosureProofs    — pathological-input cascade convergence
 --   SPPF.Cleavage         — cleavage planes as pullbacks
 --   SPPF.CellObs          — graded observation lattice
+--   SPPF.Huffman          — sibling-property bound on rewrite windows
 --   SPPF.Core             — the SPPF record tying everything together
+--   SPPF.Ingest           — pre/post contract for the ingest function
 --
 -- Proof obligations that require postulates are marked POSTULATE and
 -- carry a comment explaining what the real proof would need.
+--
+------------------------------------------------------------------------
+-- PFF / RHPF correspondence
+--
+-- This formal specification is the metamathematical reference for the
+-- legacy three-fiber SPPF stack in cstz.core / cstz.python_classifier
+-- / cstz.byte_classifier.  It is also faithful to the parallel PFF
+-- stack in cstz.pff / cstz.pff_cascade / cstz.pff_python_classifier:
+-- the two stacks encode the same mathematical content in different
+-- vocabulary, and every Agda module here has a direct counterpart in
+-- the PFF data model defined by `rhpf-pff-profiles/pff.schema.json`.
+--
+--   This Agda module        ↔  PFF construct (rhpf-pff-profiles/)
+--   ─────────────────────────  ─────────────────────────────────────
+--   SPPF.GF2                ↔  Pair.role discriminator (the 2-element
+--                              orientation torsor on principal/aux is
+--                              GF(2) acting on the κ = σ ⊎_τ σ
+--                              coproduct under reading (a))
+--   SPPF.UnionFind          ↔  pff_cascade._UnionFind, used for the
+--                              path1 closure (over Addr0 ids) and the
+--                              path2 closure (over Addr1 ids)
+--   SPPF.FiberClass         ↔  the in-memory backing for a Chart: the
+--                              `node-list` field corresponds to the
+--                              addr0 ids whose role-matching pair
+--                              points at the chart
+--   SPPF.Fiber              ↔  the partition of Charts by Chart.kind;
+--                              one Fiber instance per kind ∈ {sigma,
+--                              tau, kappa-derived-from-role}
+--   SPPF.Kappa              ↔  the κ = σ ⊎_τ σ coproduct itself.
+--                              Reading (b): Chart.kind ∈ {sigma, tau}
+--                              IS the coproduct discriminator and is
+--                              the implementation primary in pff.py.
+--                              Reading (a): every Pair carries the
+--                              same discrimination via Pair.role ∈
+--                              {principal, aux}; pff_cascade exposes
+--                              this via PFFCascadeEngine
+--                              .role_coproduct_view as a derived
+--                              projection.
+--   SPPF.Eta                ↔  Addr1 with ctor = "glue".  An η-merge
+--                              event is exactly one path1 record;
+--                              the η-tower is the doc.paths1 list;
+--                              η-naturality is the path1 closure
+--                              property under union-find.
+--   SPPF.ClosureProofs      ↔  the streaming + recursive cascade in
+--                              PFFCascadeEngine.add_observation /
+--                              _glue_set_and_cascade /
+--                              _cascade_after_merge.  The flat-2,
+--                              chain-2, and pathological cases here
+--                              correspond directly to scenarios
+--                              exercised by tests/test_pff_cascade.py.
+--   SPPF.Cleavage           ↔  pff.Boundary with Ports.  The cleavage
+--                              cospan apex is a Boundary record; its
+--                              two left/right τ-classes are the
+--                              Ports referenced by leftBoundary /
+--                              rightBoundary on a Patch.  (The
+--                              current PFF cascade engine does not
+--                              auto-emit boundaries; they are emitted
+--                              by classifiers that observe ambiguity
+--                              explicitly.)
+--   SPPF.CellObs            ↔  the layered Addr0 / Addr1 / Addr2
+--                              structure.  The k-cell observation
+--                              count corresponds to the multiplicity
+--                              with which an Addr_k record is
+--                              referenced by higher-rank records.
+--   SPPF.Huffman            ↔  no direct PFF construct.  The sibling
+--                              property here characterizes the
+--                              streaming-emission window for partial
+--                              SPPFs and is orthogonal to the PFF
+--                              data model; it constrains *when* a
+--                              cascade engine may flush observations
+--                              to a Document, not the Document shape.
+--   SPPF.Core               ↔  pff.Document.  The SPPF record's
+--                              fields (sigma, tau, kappa, nodes, …)
+--                              correspond to (charts grouped by
+--                              kind, addresses0).  Document.ranks /
+--                              .patches add the rank-and-phase
+--                              metadata that the legacy SPPF leaves
+--                              implicit.
+--   SPPF.Ingest             ↔  PFFCascadeEngine.add_observation
+--                              (the per-node ingest contract) plus
+--                              the streaming-glue closure invariant.
+--                              The pre/post conditions stated here
+--                              hold of the PFF cascade engine by
+--                              construction; see test_pff_cascade.py
+--                              ::TestDocumentWellFormedness.
+--
+-- The proofs below do not change with the PFF realignment because the
+-- underlying mathematical content is identical.  Only the vocabulary
+-- maps over.  The Python implementations on both sides
+-- (cstz.core for the legacy SPPF, cstz.pff + cstz.pff_cascade for the
+-- PFF parallel) satisfy the obligations stated here.
 ------------------------------------------------------------------------
 
 module SPPF where
@@ -50,6 +144,8 @@ open import Relation.Nullary     using (¬_; Dec; yes; no)
 --   element.  For |X| = 2 this is the ±1 orbit you described.
 ------------------------------------------------------------------------
 
+-- PFF: the GF(2) torsor here is the orientation discipline for
+-- Pair.role ∈ {principal, aux}; reading (a) of the κ-coproduct.
 module SPPF.GF2 where
 
   -- The ring -------------------------------------------------------
@@ -146,6 +242,10 @@ module SPPF.GF2 where
 -- provides the correctness guarantee directly.
 ------------------------------------------------------------------------
 
+-- PFF: this is the abstract specification of pff_cascade._UnionFind,
+-- used by PFFCascadeEngine for the path1 closure (Addr0 quotient
+-- emitting Addr1 ctor=glue) and the path2 closure (Addr1 quotient
+-- emitting Addr2 ctor=coh).
 module SPPF.UnionFind where
 
   -- Boolean equality on ℕ (used to construct union's find')
@@ -311,6 +411,11 @@ module SPPF.UnionFind where
 -- 3.  FiberClass  —  an equivalence class inside one fiber
 ------------------------------------------------------------------------
 
+-- PFF: a FiberClass is the in-memory backing for a pff.Chart.  The
+-- (signature : Label × List ℕ) corresponds to (Chart.kind, Chart.root,
+-- payload-signature) — what pff_cascade._chart_registry hashes on for
+-- ensure_chart idempotency.  The node-list is the set of Addr0 ids
+-- whose role-matching pair points at this chart.
 module SPPF.FiberClass where
 
   -- A signature is a list of "child class ids" together with a label.
@@ -330,6 +435,12 @@ module SPPF.FiberClass where
 -- records, and whose equivalence is the union-find induced one.
 ------------------------------------------------------------------------
 
+-- PFF: a Fiber is the partition of pff.Charts by Chart.kind.  The
+-- σ-fiber is {chart : Chart | chart.kind = "sigma"}; the τ-fiber is
+-- {chart : Chart | chart.kind = "tau"}; the κ-fiber is the disjoint
+-- union of the two (the coproduct, see SPPF.Kappa).  In pff_cascade
+-- the partition is implicit: PFFCascadeEngine.role_coproduct_view
+-- recovers it from the chart system.
 module SPPF.Fiber where
 
   open SPPF.UnionFind
@@ -556,6 +667,11 @@ module SPPF.Fiber where
 -- property (the mediating morphism).
 ------------------------------------------------------------------------
 
+-- PFF: the κ = σ ⊎_τ σ coproduct lives on Chart.kind in the PFF
+-- implementation primary (reading b).  The two projections π-σ and
+-- π-τ correspond to filtering charts by their kind field.  Reading
+-- (a) projects the same coproduct via Pair.role; both readings are
+-- materialized in pff_cascade.PFFCascadeEngine.
 module SPPF.Kappa where
 
   open SPPF.Fiber
@@ -624,6 +740,12 @@ module SPPF.Kappa where
 -- and naturality says the collapse commutes with all fiber morphisms.
 ------------------------------------------------------------------------
 
+-- PFF: the StructKey here corresponds to pff_cascade's
+-- (sigma_chart_id, canonical_child_addr0_ids) tuple keyed by
+-- _addr0s_by_sigma_key.  An η-merge event is exactly one Addr1 with
+-- ctor=glue (label / premises optional); the η-tower is doc.paths1.
+-- Naturality is the path1 closure invariant maintained by the
+-- streaming + recursive cascade.
 module SPPF.Eta where
 
   open SPPF.Fiber
@@ -849,6 +971,12 @@ module SPPF.Eta where
 -- fiber-operations abstraction barrier.
 ------------------------------------------------------------------------
 
+-- PFF: the cascade-convergence shapes proven here (flat-2-merge,
+-- chain-2-merge, the pathological R1-R5 cases) all hold of
+-- pff_cascade.PFFCascadeEngine via _glue_set_and_cascade and
+-- _cascade_after_merge.  The corresponding test scenarios are in
+-- tests/test_pff_cascade.py::TestStreamingGlueCascade and
+-- ::TestRecursiveCascade.
 module SPPF.ClosureProofs where
 
   open SPPF.Fiber
@@ -1092,6 +1220,12 @@ module SPPF.ClosureProofs where
 -- ambiguity (the two classes are κ-indistinguishable).
 ------------------------------------------------------------------------
 
+-- PFF: a CleavagePlane is a pff.Boundary record with two Ports.
+-- The struct-key apex of the cospan is the Boundary.id; left-τ /
+-- right-τ are the Ports referenced by leftBoundary / rightBoundary
+-- on adjacent Patches.  The current PFF cascade engine does not
+-- auto-emit boundaries (coh is user-initiated); classifiers that
+-- observe genuine ambiguity emit them explicitly.
 module SPPF.Cleavage where
 
   open SPPF.FiberClass
@@ -1325,6 +1459,13 @@ module SPPF.Cleavage where
 -- The "highest-ordered structures" query is: argmax_{level ≥ 2} count.
 ------------------------------------------------------------------------
 
+-- PFF: the k-cell ↔ Addr_k correspondence is direct.  A 0-cell is a
+-- pff.Pair (one observation under one chart at one route); a 1-cell
+-- is a pff.Addr0 (collection of pairs at the same identity); a
+-- 2-cell is a pff.Addr1 (a glue between two Addr0s); a 3-cell is a
+-- pff.Addr2 (a coh between two Addr1s).  The graded observation
+-- count corresponds to how many times each Addr_k record is
+-- referenced by an Addr_{k+1}.
 module SPPF.CellObs where
 
   -- A cell at level ℓ with an observation count
@@ -1448,6 +1589,11 @@ module SPPF.CellObs where
 --   Setting k = budget / cost-per-step gives a deterministic bound.
 ------------------------------------------------------------------------
 
+-- PFF: SPPF.Huffman has no direct PFF data-model construct.  It
+-- characterizes a streaming-emission discipline (when a partial
+-- cascade may flush observations to its Document) which is
+-- orthogonal to the Document shape itself.  The bound here applies
+-- equally to a future streaming pff_cascade.flush() implementation.
 module SPPF.Huffman where
 
   open SPPF.CellObs
@@ -1539,6 +1685,12 @@ module SPPF.Huffman where
 --   diag : Nodes → Fib_σ × Fib_τ × Fib_κ
 ------------------------------------------------------------------------
 
+-- PFF: the SPPF record is pff.Document.  Node ↔ Addr0; the σ/τ/κ
+-- fibers ↔ the chart partition by Chart.kind.  Document.ranks /
+-- .patches add the rank-and-phase metadata that the legacy SPPF
+-- leaves implicit.  Document.classViews / .shadows are the derived
+-- non-authoritative projections that the legacy SPPF computes
+-- on-demand via wedge() / cleavage().
 module SPPF.Core where
 
   open SPPF.Fiber
@@ -1648,6 +1800,12 @@ module SPPF.Core where
 -- express as a pre/post contract on the SPPF state.
 ------------------------------------------------------------------------
 
+-- PFF: the ingest contract proven here is satisfied by
+-- pff_cascade.PFFCascadeEngine.add_observation by construction.
+-- Pre/post conditions on the SPPF state correspond to invariants
+-- on the underlying pff.Document; tests/test_pff_cascade.py::
+-- TestDocumentWellFormedness verifies the receipt is clean at
+-- every observable cascade step.
 module SPPF.Ingest where
 
   open SPPF.Core
