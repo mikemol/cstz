@@ -449,65 +449,20 @@ def _emit_canonical_map(w, sppf: SPPF, fiber_name: str, symbol: str) -> None:
 
 
 def _path1_closure(doc: Document) -> Dict[str, str]:
-    """Compute the path1 union-find over Addr0 ids from the Document.
+    """Compute the path1 canonical map over Addr0 ids from the Document.
 
-    Returns a map ``addr0_id → canonical_addr0_id``.  Every Addr1
-    with ``ctor=glue`` (and the symmetric ``refl`` ctor) contributes
-    one union; all other Addr1 ctors are ignored.
+    Thin wrapper around ``Document.path1_canonical_map()``.  Kept for
+    clarity at the Agda-synth call sites.
     """
-    parent: Dict[str, str] = {a.id: a.id for a in doc.addresses0}
-
-    def find(x: str) -> str:
-        r = x
-        while parent[r] != r:
-            r = parent[r]
-        while parent[x] != r:
-            parent[x], x = r, parent[x]
-        return r
-
-    def union(a: str, b: str) -> None:
-        ra, rb = find(a), find(b)
-        if ra == rb:
-            return
-        # Lex-smallest wins, for deterministic Agda output.
-        if ra < rb:
-            parent[rb] = ra
-        else:
-            parent[ra] = rb
-
-    for p1 in doc.paths1:
-        if p1.ctor in ("glue", "refl"):
-            union(p1.src, p1.dst)
-
-    return {a: find(a) for a in parent}
+    return doc.path1_canonical_map()
 
 
 def _path2_closure(doc: Document) -> Dict[str, str]:
-    """Compute the path2 union-find over Addr1 ids from the Document."""
-    parent: Dict[str, str] = {a.id: a.id for a in doc.paths1}
+    """Compute the path2 canonical map over Addr1 ids from the Document.
 
-    def find(x: str) -> str:
-        r = x
-        while parent[r] != r:
-            r = parent[r]
-        while parent[x] != r:
-            parent[x], x = r, parent[x]
-        return r
-
-    def union(a: str, b: str) -> None:
-        ra, rb = find(a), find(b)
-        if ra == rb:
-            return
-        if ra < rb:
-            parent[rb] = ra
-        else:
-            parent[ra] = rb
-
-    for p2 in doc.paths2:
-        if p2.ctor == "coh":
-            union(p2.src, p2.dst)
-
-    return {a: find(a) for a in parent}
+    Thin wrapper around ``Document.path2_canonical_map()``.
+    """
+    return doc.path2_canonical_map()
 
 
 def _addr0_index_map(doc: Document) -> Dict[str, int]:

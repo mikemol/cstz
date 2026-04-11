@@ -40,6 +40,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    FrozenSet,
     Iterable,
     Iterator,
     List,
@@ -573,6 +574,67 @@ class PatchBundle:
         }
 
 
+# ── Linear-algebraic helpers ────────────────────────────────────────
+#
+# These two functions implement the F₂ kernel computation that
+# Document.path1_classes / path2_classes (and their canonical-map
+# variants) sit on top of.  They are module-level so the methods
+# can stay short and read declaratively.
+
+
+def _kernel_projection(
+    elements: Iterable[str],
+    edges: Iterable[Tuple[str, str]],
+) -> Dict[str, str]:
+    """Compute the kernel projection of an F₂ boundary map.
+
+    Given a finite set of vertex ids and a list of edges, returns a
+    map from each vertex to the lex-smallest member of its connected
+    component.  This is the kernel of the boundary map ∂ : F₂^E →
+    F₂^V projected onto representatives, computed by union-find with
+    path compression.
+
+    Lex-smallest is chosen as the canonical representative for
+    deterministic, choice-independent output across runs.
+    """
+    parent: Dict[str, str] = {e: e for e in elements}
+
+    def find(x: str) -> str:
+        r = x
+        while parent[r] != r:
+            r = parent[r]
+        while parent[x] != r:
+            parent[x], x = r, parent[x]
+        return r
+
+    def union(a: str, b: str) -> None:
+        ra, rb = find(a), find(b)
+        if ra == rb:
+            return
+        if ra < rb:
+            parent[rb] = ra
+        else:
+            parent[ra] = rb
+
+    for a, b in edges:
+        union(a, b)
+
+    return {x: find(x) for x in parent}
+
+
+def _classes_from_canonical_map(
+    canonical: Dict[str, str],
+) -> List[FrozenSet[str]]:
+    """Group a canonical map into a sorted list of equivalence classes."""
+    classes: Dict[str, set] = {}
+    for member, canon in canonical.items():
+        classes.setdefault(canon, set()).add(member)
+    return sorted(
+        (frozenset(s) for s in classes.values()),
+        key=lambda s: min(s),
+    )
+
+
 # ── Document ────────────────────────────────────────────────────────
 
 
@@ -1002,6 +1064,88 @@ class Document:
                     message="Shadow must declare isAuthoritative=false",
                 ))
         return issues
+
+    # ── Linear-algebraic view (F₂ boundary maps) ────────────────────
+    #
+    # A pff.Document encodes its path1 / path2 closures in two
+    # equivalent ways:
+    #
+    #   - Operationally, as the sequence of Addr1(glue) / Addr2(coh)
+    #     records in `self.paths1` / `self.paths2`.
+    #
+    #   - Mathematically, as the kernel of an F₂ boundary map.  For
+    #     a graph G with V = Addr0 ids and E = Addr1(glue) edges,
+    #     the path1 partition is the basis of H₀(G; F₂) = F₂^V /
+    #     im(∂), where ∂ : F₂^E → F₂^V sends each glue (a, b) to the
+    #     formal sum e_a + e_b.  Computing connected components =
+    #     computing the cokernel of ∂ = solving Ax = 0 over F₂.
+    #
+    # The methods below surface the second view directly.  They
+    # compute the partition from a Document's `paths1` / `paths2`
+    # collection alone, with no dependence on PFFCascadeEngine, and
+    # are guaranteed by construction to agree with the cascade's
+    # `_addr0_uf` / `_addr1_uf` partitions when the document was
+    # produced by an engine.  This is verified by tests in
+    # tests/test_pff_cascade.py::TestLinearViewCrossCheck.
+
+    def path1_constraint_rows(self) -> List[Tuple[str, str]]:
+        """The rows of the F₂ boundary map ∂_1 : F₂^{glues} → F₂^{addr0s}.
+
+        Each row is the formal sum e_src + e_dst for an Addr1 with
+        ``ctor ∈ {glue, refl}``.  Other ctors (transport, compose,
+        inverse, pack, named) are not part of the path1 closure and
+        are skipped.
+        """
+        return [
+            (p1.src, p1.dst)
+            for p1 in self.paths1
+            if p1.ctor in ("glue", "refl")
+        ]
+
+    def path1_canonical_map(self) -> Dict[str, str]:
+        """Return ``addr0_id → canonical_addr0_id`` for the path1 closure.
+
+        The canonical representative of each equivalence class is the
+        lex-smallest member, chosen for deterministic output.  This
+        is the kernel projection of the F₂ boundary map ∂_1.
+        """
+        return _kernel_projection(
+            (a.id for a in self.addresses0),
+            self.path1_constraint_rows(),
+        )
+
+    def path1_classes(self) -> List[FrozenSet[str]]:
+        """Return the path1 partition as a list of equivalence classes.
+
+        Equivalent to ``H_0(G_glue; F_2)`` where G_glue has Addr0
+        vertices and Addr1(glue) edges.  The list is sorted by the
+        lex-smallest id in each class for deterministic output.
+        """
+        return _classes_from_canonical_map(self.path1_canonical_map())
+
+    def path2_constraint_rows(self) -> List[Tuple[str, str]]:
+        """The rows of the F₂ boundary map ∂_2 : F₂^{cohs} → F₂^{path1s}.
+
+        Each row is the formal sum e_src + e_dst for an Addr2 with
+        ``ctor = coh``.  Other ctors (vcomp, hcomp, whisker, named2)
+        are not part of the path2 closure and are skipped.
+        """
+        return [
+            (p2.src, p2.dst)
+            for p2 in self.paths2
+            if p2.ctor == "coh"
+        ]
+
+    def path2_canonical_map(self) -> Dict[str, str]:
+        """Return ``addr1_id → canonical_addr1_id`` for the path2 closure."""
+        return _kernel_projection(
+            (p1.id for p1 in self.paths1),
+            self.path2_constraint_rows(),
+        )
+
+    def path2_classes(self) -> List[FrozenSet[str]]:
+        """Return the path2 partition as a list of equivalence classes."""
+        return _classes_from_canonical_map(self.path2_canonical_map())
 
     # ── Receipts ────────────────────────────────────────────────────
 

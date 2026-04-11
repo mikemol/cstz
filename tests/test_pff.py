@@ -842,6 +842,243 @@ def test_merge_into_empty_doc():
     assert len(d.patches) == 1
 
 
+# ── Linear-algebraic view (F₂ boundary maps) ────────────────────────
+
+
+def _doc_with_addrs(*addr0_ids: str) -> Document:
+    """Build a minimal Document with the given Addr0 ids."""
+    d = _minimal_doc()
+    # Replace the lone "a0" addr0 with the requested set
+    d.addresses0 = [
+        Addr0(
+            id=aid,
+            sort="X",
+            discoveryRank="r0",
+            segments=[Segment(
+                rank="r0", phase="ingest", patch="p0",
+                pairs=[Pair(chart="c0", root="x", role="principal")],
+            )],
+        )
+        for aid in addr0_ids
+    ]
+    return d
+
+
+class TestPath1ConstraintRows:
+    def test_no_paths(self):
+        d = _doc_with_addrs("a", "b", "c")
+        assert d.path1_constraint_rows() == []
+
+    def test_glue_contributes_a_row(self):
+        d = _doc_with_addrs("a", "b")
+        d.paths1.append(Addr1(
+            id="g", rank="r0", ctor="glue", src="a", dst="b",
+        ))
+        assert d.path1_constraint_rows() == [("a", "b")]
+
+    def test_refl_also_contributes(self):
+        d = _doc_with_addrs("a")
+        d.paths1.append(Addr1(
+            id="r", rank="r0", ctor="refl", src="a", dst="a",
+        ))
+        assert d.path1_constraint_rows() == [("a", "a")]
+
+    def test_other_ctors_skipped(self):
+        d = _doc_with_addrs("a", "b")
+        for ctor in ("transport", "compose", "inverse", "pack", "named"):
+            d.paths1.append(Addr1(
+                id=f"x-{ctor}", rank="r0", ctor=ctor, src="a", dst="b",
+            ))
+        assert d.path1_constraint_rows() == []
+
+    def test_mixed_ctors_filters_correctly(self):
+        d = _doc_with_addrs("a", "b", "c")
+        d.paths1.append(Addr1(id="g1", rank="r0", ctor="glue",
+                              src="a", dst="b"))
+        d.paths1.append(Addr1(id="t1", rank="r0", ctor="transport",
+                              src="b", dst="c"))
+        d.paths1.append(Addr1(id="g2", rank="r0", ctor="glue",
+                              src="b", dst="c"))
+        assert d.path1_constraint_rows() == [("a", "b"), ("b", "c")]
+
+
+class TestPath1CanonicalMap:
+    def test_singletons(self):
+        d = _doc_with_addrs("a", "b", "c")
+        canon = d.path1_canonical_map()
+        assert canon == {"a": "a", "b": "b", "c": "c"}
+
+    def test_one_glue_collapses(self):
+        d = _doc_with_addrs("a", "b")
+        d.paths1.append(Addr1(id="g", rank="r0", ctor="glue",
+                              src="a", dst="b"))
+        canon = d.path1_canonical_map()
+        # lex-smallest wins
+        assert canon == {"a": "a", "b": "a"}
+
+    def test_chain_of_glues_propagates(self):
+        d = _doc_with_addrs("a", "b", "c", "d")
+        # Build chain b~c, c~d, a~b in non-sorted order so we exercise
+        # path-compression and the lex-smallest tiebreaker.
+        d.paths1.append(Addr1(id="g1", rank="r0", ctor="glue",
+                              src="b", dst="c"))
+        d.paths1.append(Addr1(id="g2", rank="r0", ctor="glue",
+                              src="c", dst="d"))
+        d.paths1.append(Addr1(id="g3", rank="r0", ctor="glue",
+                              src="a", dst="b"))
+        canon = d.path1_canonical_map()
+        # All four converge on "a" (the lex-smallest)
+        assert set(canon.values()) == {"a"}
+
+    def test_disconnected_components_stay_separate(self):
+        d = _doc_with_addrs("a", "b", "c", "d")
+        d.paths1.append(Addr1(id="g1", rank="r0", ctor="glue",
+                              src="a", dst="b"))
+        d.paths1.append(Addr1(id="g2", rank="r0", ctor="glue",
+                              src="c", dst="d"))
+        canon = d.path1_canonical_map()
+        # Two components: {a, b} → "a", {c, d} → "c"
+        assert canon == {"a": "a", "b": "a", "c": "c", "d": "c"}
+
+
+class TestPath1Classes:
+    def test_singletons(self):
+        d = _doc_with_addrs("a", "b")
+        classes = d.path1_classes()
+        assert classes == [frozenset({"a"}), frozenset({"b"})]
+
+    def test_collapsed(self):
+        d = _doc_with_addrs("a", "b", "c")
+        d.paths1.append(Addr1(id="g1", rank="r0", ctor="glue",
+                              src="a", dst="b"))
+        d.paths1.append(Addr1(id="g2", rank="r0", ctor="glue",
+                              src="b", dst="c"))
+        classes = d.path1_classes()
+        assert classes == [frozenset({"a", "b", "c"})]
+
+    def test_two_components_sorted_by_min(self):
+        d = _doc_with_addrs("a", "b", "y", "z")
+        d.paths1.append(Addr1(id="g1", rank="r0", ctor="glue",
+                              src="a", dst="b"))
+        d.paths1.append(Addr1(id="g2", rank="r0", ctor="glue",
+                              src="y", dst="z"))
+        classes = d.path1_classes()
+        # Sorted by lex-smallest member of each class
+        assert classes == [
+            frozenset({"a", "b"}),
+            frozenset({"y", "z"}),
+        ]
+
+    def test_classes_are_frozensets(self):
+        d = _doc_with_addrs("a", "b")
+        d.paths1.append(Addr1(id="g", rank="r0", ctor="glue",
+                              src="a", dst="b"))
+        classes = d.path1_classes()
+        assert all(isinstance(c, frozenset) for c in classes)
+
+
+class TestPath2View:
+    def _doc_with_path1s(self, *path1_ids: str) -> Document:
+        """Build a doc with the given path1 ids over a single addr0."""
+        d = _doc_with_addrs("a")
+        for pid in path1_ids:
+            d.paths1.append(Addr1(
+                id=pid, rank="r0", ctor="glue", src="a", dst="a",
+            ))
+        return d
+
+    def test_path2_constraint_rows_no_paths(self):
+        d = self._doc_with_path1s("p1", "p2")
+        assert d.path2_constraint_rows() == []
+
+    def test_path2_constraint_rows_coh(self):
+        d = self._doc_with_path1s("p1", "p2")
+        d.paths2.append(Addr2(id="c", rank="r0", ctor="coh",
+                              src="p1", dst="p2"))
+        assert d.path2_constraint_rows() == [("p1", "p2")]
+
+    def test_path2_other_ctors_skipped(self):
+        d = self._doc_with_path1s("p1", "p2")
+        for ctor in ("vcomp", "hcomp", "whisker", "named2"):
+            d.paths2.append(Addr2(
+                id=f"x-{ctor}", rank="r0", ctor=ctor, src="p1", dst="p2",
+            ))
+        assert d.path2_constraint_rows() == []
+
+    def test_path2_canonical_map_collapses(self):
+        d = self._doc_with_path1s("p1", "p2", "p3")
+        d.paths2.append(Addr2(id="c1", rank="r0", ctor="coh",
+                              src="p1", dst="p2"))
+        d.paths2.append(Addr2(id="c2", rank="r0", ctor="coh",
+                              src="p2", dst="p3"))
+        canon = d.path2_canonical_map()
+        assert canon == {"p1": "p1", "p2": "p1", "p3": "p1"}
+
+    def test_path2_classes(self):
+        d = self._doc_with_path1s("p1", "p2", "p3", "p4")
+        d.paths2.append(Addr2(id="c1", rank="r0", ctor="coh",
+                              src="p1", dst="p2"))
+        d.paths2.append(Addr2(id="c2", rank="r0", ctor="coh",
+                              src="p3", dst="p4"))
+        classes = d.path2_classes()
+        assert classes == [
+            frozenset({"p1", "p2"}),
+            frozenset({"p3", "p4"}),
+        ]
+
+
+class TestKernelHelpers:
+    """Direct tests for the module-level helper functions."""
+
+    def test_kernel_projection_empty(self):
+        from cstz.pff import _kernel_projection
+        assert _kernel_projection([], []) == {}
+
+    def test_kernel_projection_singletons(self):
+        from cstz.pff import _kernel_projection
+        result = _kernel_projection(["a", "b", "c"], [])
+        assert result == {"a": "a", "b": "b", "c": "c"}
+
+    def test_kernel_projection_idempotent_union(self):
+        """Calling union on already-merged elements is a no-op."""
+        from cstz.pff import _kernel_projection
+        result = _kernel_projection(
+            ["a", "b"],
+            [("a", "b"), ("a", "b"), ("b", "a")],
+        )
+        assert result == {"a": "a", "b": "a"}
+
+    def test_kernel_projection_lex_decreasing_union(self):
+        """Edge with lex-larger src first triggers the swap branch."""
+        from cstz.pff import _kernel_projection
+        result = _kernel_projection(["a", "b"], [("b", "a")])
+        assert result == {"a": "a", "b": "a"}
+
+    def test_kernel_projection_path_compression(self):
+        """A 3-deep chain triggers the path-compression inner loop."""
+        from cstz.pff import _kernel_projection
+        # Build edges so that parent[c]=b, parent[b]=a after the
+        # naive union order.
+        result = _kernel_projection(
+            ["a", "b", "c"],
+            [("b", "c"), ("a", "b")],
+        )
+        assert result == {"a": "a", "b": "a", "c": "a"}
+
+    def test_classes_from_canonical_map_empty(self):
+        from cstz.pff import _classes_from_canonical_map
+        assert _classes_from_canonical_map({}) == []
+
+    def test_classes_from_canonical_map_groups_by_canonical(self):
+        from cstz.pff import _classes_from_canonical_map
+        canon = {"a": "a", "b": "a", "x": "x", "y": "x"}
+        classes = _classes_from_canonical_map(canon)
+        assert classes == [
+            frozenset({"a", "b"}),
+            frozenset({"x", "y"}),
+        ]
+
+
 # ── all_identifiers iterator ────────────────────────────────────────
 
 

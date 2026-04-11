@@ -860,3 +860,197 @@ class TestDocumentWellFormedness:
         assert "addr0=2" in s
         assert "path1=1" in s
         assert "charts=3" in s
+
+
+# ── Linear-view ↔ cascade cross-check ───────────────────────────────
+
+
+def _partition_from_cascade_classes(cascade_classes):
+    """Convert cascade.all_addr0_classes() output to a sorted list of
+    frozensets, matching Document.path1_classes() format."""
+    return sorted(
+        (frozenset(s) for s in cascade_classes.values()),
+        key=lambda s: min(s),
+    )
+
+
+class TestLinearViewCrossCheck:
+    """Verify that Document.path1_classes() / path2_classes() agree
+    with PFFCascadeEngine's union-find by construction.
+
+    This is item 0c from the AUDIT.md GF(2) postscript: it makes
+    the H₀ ↔ cascade equivalence a verified runtime invariant
+    rather than just a comment.  For any populated engine, the
+    document's standalone linear-algebraic partition computation
+    must produce the same partition as the cascade's incremental
+    union-find.
+    """
+
+    def _assert_path1_agreement(self, e: PFFCascadeEngine) -> None:
+        doc_classes = e.document.path1_classes()
+        cascade_classes = _partition_from_cascade_classes(
+            e.all_addr0_classes()
+        )
+        assert doc_classes == cascade_classes
+
+    def _assert_path2_agreement(self, e: PFFCascadeEngine) -> None:
+        doc_classes = e.document.path2_classes()
+        cascade_classes = _partition_from_cascade_classes(
+            e.all_addr1_classes()
+        )
+        assert doc_classes == cascade_classes
+
+    # ── path1 cross-checks ──
+
+    def test_empty_engine_no_addr0s(self) -> None:
+        e = PFFCascadeEngine()
+        # No addr0s yet → empty partition on both sides
+        assert e.document.path1_classes() == []
+
+    def test_single_observation(self) -> None:
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau = e.ensure_chart("tau", "T")
+        e.add_observation(sigma, tau)
+        self._assert_path1_agreement(e)
+
+    def test_two_disjoint_observations(self) -> None:
+        e = PFFCascadeEngine()
+        sigma_a = e.ensure_chart("sigma", "A")
+        sigma_b = e.ensure_chart("sigma", "B")
+        tau = e.ensure_chart("tau", "T")
+        e.add_observation(sigma_a, tau)
+        e.add_observation(sigma_b, tau)
+        self._assert_path1_agreement(e)
+
+    def test_streaming_glue_at_leaves(self) -> None:
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau_a = e.ensure_chart("tau", "A")
+        tau_b = e.ensure_chart("tau", "B")
+        e.add_observation(sigma, tau_a)
+        e.add_observation(sigma, tau_b)
+        # Streaming cascade glued them
+        self._assert_path1_agreement(e)
+
+    def test_three_way_streaming_glue(self) -> None:
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau_a = e.ensure_chart("tau", "A")
+        tau_b = e.ensure_chart("tau", "B")
+        tau_c = e.ensure_chart("tau", "C")
+        e.add_observation(sigma, tau_a)
+        e.add_observation(sigma, tau_b)
+        e.add_observation(sigma, tau_c)
+        self._assert_path1_agreement(e)
+
+    def test_recursive_cascade_two_levels(self) -> None:
+        e = PFFCascadeEngine()
+        sLa = e.ensure_chart("sigma", "LeafA")
+        sLb = e.ensure_chart("sigma", "LeafB")
+        sP = e.ensure_chart("sigma", "Parent")
+        tA = e.ensure_chart("tau", "A")
+        tB = e.ensure_chart("tau", "B")
+        tPa = e.ensure_chart("tau", "Pa")
+        tPb = e.ensure_chart("tau", "Pb")
+        la = e.add_observation(sLa, tA)
+        lb = e.add_observation(sLb, tB)
+        e.add_observation(sP, tPa, sigma_children=[la.id])
+        e.add_observation(sP, tPb, sigma_children=[lb.id])
+        e.glue(la.id, lb.id)
+        self._assert_path1_agreement(e)
+
+    def test_recursive_cascade_three_levels(self) -> None:
+        e = PFFCascadeEngine()
+        sLi = e.ensure_chart("sigma", "LeafInt")
+        sLs = e.ensure_chart("sigma", "LeafStr")
+        sM = e.ensure_chart("sigma", "Mid")
+        sR = e.ensure_chart("sigma", "Root")
+        tA = e.ensure_chart("tau", "A")
+        tB = e.ensure_chart("tau", "B")
+        tC = e.ensure_chart("tau", "C")
+        tD = e.ensure_chart("tau", "D")
+        tE = e.ensure_chart("tau", "E")
+        tF = e.ensure_chart("tau", "F")
+        li = e.add_observation(sLi, tA)
+        ls = e.add_observation(sLs, tB)
+        mi = e.add_observation(sM, tC, sigma_children=[li.id])
+        e.add_observation(sM, tD, sigma_children=[ls.id])
+        e.add_observation(sR, tE, sigma_children=[mi.id])
+        e.add_observation(sR, tF, sigma_children=[mi.id])
+        e.glue(li.id, ls.id)
+        self._assert_path1_agreement(e)
+
+    def test_disjoint_components_preserved(self) -> None:
+        """Two completely independent η-merges produce two disjoint
+        path1 classes; both views should agree on the partition."""
+        e = PFFCascadeEngine()
+        sigma_a = e.ensure_chart("sigma", "A")
+        sigma_b = e.ensure_chart("sigma", "B")
+        tau_x = e.ensure_chart("tau", "X")
+        tau_y = e.ensure_chart("tau", "Y")
+        e.add_observation(sigma_a, tau_x)
+        e.add_observation(sigma_a, tau_y)
+        e.add_observation(sigma_b, tau_x)
+        e.add_observation(sigma_b, tau_y)
+        self._assert_path1_agreement(e)
+
+    # ── path2 cross-checks ──
+
+    def test_path2_empty(self) -> None:
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau = e.ensure_chart("tau", "T")
+        e.add_observation(sigma, tau)
+        # No path1s yet, so path2 partition is also empty
+        assert e.document.path2_classes() == []
+
+    def test_path2_singleton_after_streaming_glue(self) -> None:
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau_a = e.ensure_chart("tau", "A")
+        tau_b = e.ensure_chart("tau", "B")
+        e.add_observation(sigma, tau_a)
+        e.add_observation(sigma, tau_b)
+        # One path1 from streaming glue; no cohs → singleton class
+        self._assert_path2_agreement(e)
+
+    def test_path2_after_explicit_coh(self) -> None:
+        from cstz.pff import Addr1
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau_a = e.ensure_chart("tau", "A")
+        tau_b = e.ensure_chart("tau", "B")
+        e.add_observation(sigma, tau_a)
+        e.add_observation(sigma, tau_b)
+        first_id = e.document.paths1[0].id
+        ids = [a.id for a in e.document.addresses0]
+        # Mint a second redundant glue manually so we have two
+        # distinct Addr1s on which to coh
+        rank = e.ensure_rank(0)
+        patch = e.ensure_patch(rank=rank)
+        second = e._emit_glue(
+            ids[0], ids[1], rank, patch,
+            label="alt", premises=[],
+        )
+        # Coh the two glues
+        e.coh(first_id, second.id)
+        self._assert_path2_agreement(e)
+
+    # ── Linear-view operates on Document alone ──
+
+    def test_linear_view_independent_of_engine(self) -> None:
+        """The Document.path1_classes() computation needs no
+        cascade engine — only the document's paths1 collection.
+        Verify by tearing down the engine and exercising the doc."""
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau_a = e.ensure_chart("tau", "A")
+        tau_b = e.ensure_chart("tau", "B")
+        e.add_observation(sigma, tau_a)
+        e.add_observation(sigma, tau_b)
+        doc = e.document  # Capture the doc
+        del e  # Drop the engine
+        # The document's accessors still work
+        assert len(doc.path1_classes()) == 1
+        assert len(doc.path1_constraint_rows()) == 1
