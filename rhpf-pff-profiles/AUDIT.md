@@ -614,6 +614,201 @@ empirically computes.
 
 ---
 
+## Postscript: The Slicer is in the fixed-point calculation, and its output is in the Document
+
+A second conceptual correction, same shape as the GF(2) one.
+
+The original draft of this audit dismissed the "Slicer" mechanism
+from §2.1 of `Topos-Theoretic Grammar Induction and PRNG.md` as
+absent from cstz: the document described a Slicer generating a
+Grothendieck topology via "overlapping open sets", and I read
+"overlapping open sets" as "sliding window" and concluded cstz has
+no such component (the Python classifier walks the AST recursively
+and the byte classifier consumes one byte at a time).
+
+That reading was wrong for the same reason the GF(2) dismissal
+was wrong: the Slicer is not a sliding-window generator, it's a
+**covering-sieve generator** that happens to satisfy the
+Grothendieck-topology axioms, and **the cascade's fixed-point
+iteration is exactly that generator.**
+
+### Mapping the three Grothendieck-topology axioms to cascade invariants
+
+For the σ-Slicer — which operates on Addr0s via the sigma-key
+`(sigma_chart_id, canonical_sigma_children)` — the three axioms of
+a Grothendieck topology correspond directly to invariants the
+cascade already maintains:
+
+| Grothendieck axiom | Cascade invariant |
+| --- | --- |
+| **Identity cover** — maximal sieve covers every object | Every Addr0 starts in its own singleton sigma-key class the moment it's added via `add_observation` |
+| **Stability under pullback** — pullback of a covering sieve is a covering sieve | Monotonicity: the cascade only *adds* to `_addr0s_by_sigma_key` buckets, never removes.  Adding a new observation never invalidates an existing equivalence |
+| **Transitivity** — local covers compose into global covers | Recursive cascade: when a glue changes `canon_children` for a parent sigma_key, `_cascade_after_merge` re-canonicalizes parent keys and detects cascading collisions.  The worklist iteration IS the transitive closure of the covering sieve system |
+
+The "Slicer" lives in the three-line sigma-key computation inside
+[`add_observation`](../src/cstz/pff_cascade.py):
+
+```python
+canon_sigma_children = tuple(
+    self._addr0_uf.find(c) for c in sigma_children
+)
+sigma_key = (sigma_chart.id, canon_sigma_children)
+# ...
+self._addr0s_by_sigma_key[sigma_key].add(addr0_id)
+```
+
+And the "topology-building iteration" — the part that takes the
+initial flat assignment of sigma-keys and refines it to the fixed
+point where the three axioms hold — is [`_cascade_after_merge`](../src/cstz/pff_cascade.py).
+
+### Theorem: at the fixed point, σ-key equivalence = path1 equivalence
+
+Let `E` be a `PFFCascadeEngine` at convergence.  Let `Σ(E)` be the
+partition of Addr0 ids induced by sigma-key equivalence (two Addr0s
+are equivalent iff they have the same `(sigma_chart, canonical_children)`
+tuple under the final path1 partition).  Let `P(E)` be the partition
+induced by the path1 closure (two Addr0s are equivalent iff they're
+connected by a chain of glues).
+
+Then **`Σ(E) = P(E)`**.
+
+*Proof sketch.*
+
+**(`Σ ⊆ P`)** If `A` and `B` have the same sigma-key at convergence,
+the cascade's sigma-key-collision detection fired on them — otherwise
+there would be an unprocessed collision, contradicting the
+fixed-point hypothesis.  So they were glued. ✓
+
+**(`P ⊆ Σ`)** If `A` and `B` are in the same path1 class, there's a
+chain `A = A_0 ~ A_1 ~ ... ~ A_n = B` of glue events.  Each link
+was emitted because at that round the two endpoints had the same
+sigma-key: `(σ, (find(p_1), find(p_2), ...)) = (σ, (find(q_1),
+find(q_2), ...))`.
+
+Monotonicity of the path1 union-find guarantees that **once
+`find(p_j) = find(q_j)`, that equality is preserved forever** —
+both sides are in the same path1 class from that moment, and any
+further merges include both equally.  So the canonical-children
+tuples remain equal for `A_i` and `A_{i+1}` throughout the rest
+of the cascade.  By transitivity along the chain, `A_0` and `A_n`
+have identical sigma-keys at the fixed point. ✓
+
+Therefore `Σ(E) = P(E)` at convergence.  ∎
+
+### Corollary: the topology is Document-computable
+
+The σ-Grothendieck topology at the cascade fixed point IS
+`Document.path1_classes()`.  It does not require `sigma_children`
+(which is cascade-internal state not serialized to the Document).
+It does not require any rotation or coproduct identity to
+"reconstruct" missing information, because nothing is missing.
+
+The PFF serialization is **topologically complete**: a Document
+captures everything observable about the cascade's fixed-point
+output, even though the cascade's internal machinery (sigma-key
+dicts, parent indices, child tuples) is not serialized.
+
+### The τ-Slicer and the asymmetry it exposes
+
+The GF(2) postscript established that F₂ appears in cstz in two
+places (κ-coproduct discriminator, sheafification linear algebra).
+Once that double-use is in scope, the Slicer picture has to be
+symmetric as well: there should be a **σ-Slicer** over Addr0s and
+a **τ-Slicer** over Addr1s, each using both F₂ places.
+
+| Slicer | Uses F₂ place 1 (orientation) for… | Uses F₂ place 2 (kernel) for… | Fixed-point output |
+| --- | --- | --- | --- |
+| **σ-Slicer** | picking out the principal pair's σ-chart per Addr0 (`pair.role == "principal"` / `chart.kind == "sigma"`) | computing `H_0` of the Addr0 glue graph (path1 union-find) | `path1_classes()` — σ-Grothendieck topology over Addr0 ids |
+| **τ-Slicer** | picking out the aux pair's τ-chart per Addr0 (`pair.role == "aux"` / `chart.kind == "tau"`) | computing `H_0` of the Addr1 coh graph (path2 union-find) | `path2_classes()` — τ-Grothendieck topology over Addr1 ids |
+
+### Implementation asymmetry: the cascade currently has half of this
+
+The σ-Slicer is implemented with full streaming semantics: the
+cascade auto-emits Addr1s whenever sigma-keys collide, recursively
+re-canonicalizes parents, and iterates to a fixed point.
+
+The τ-Slicer is currently **user-initiated**: `engine.coh(src, dst)`
+records a coh Addr2 between two existing Addr1s, but the engine
+does not scan `paths1` for raw-pair duplicates and auto-emit cohs.
+The path2 partition at any point is just the transitive closure of
+user-declared coh equivalences.
+
+This asymmetry has a clean fix that aligns with the "by
+construction" principle underlying PFF: **implement an auto-coh
+fixed-point pass** that scans `paths1`, groups by sorted raw
+`(src, dst)` pair, and emits cohs within each group.  When two
+Addr1 records witness the same equivalence (by raw pair) they are
+coherent by construction — and the equivalence exists.  If a
+discriminator is later introduced that distinguishes them, that
+distinction manifests as a cleavage plane in the SPPF sense
+(a forced case split), which is exactly the right semantics for
+SPPF cleavages.
+
+The auto-coh pass is idempotent and converges in one scan because
+cohs only affect `_addr1_uf` (the path2 union-find), not
+`_addr0_uf` (the path1 union-find), so the canonical pairs
+computed during the scan are stable.  In normal σ-cascade
+operation the pass emits zero cohs (the cascade's skip-check
+prevents multiple Addr1s with the same raw pair from being
+emitted in a single run), but it fires correctly on:
+
+- Documents produced by `Document.merge_bundle` when both sides
+  independently glued the same canonical pair
+- User-constructed Documents with manually-added duplicate Addr1s
+- Any future refactor that removes the σ-cascade's
+  emission-dedup logic
+
+### Slicer-postscript implications for the codebase
+
+Three follow-up actions, landing as items 0d, 0e, 0f at top
+priority (prepended to the recommended-follow-ups list):
+
+- **0d.** Update the `inference.agda` Step 6 PFF correspondence
+  comments above `SPPF.Eta` and `SPPF.ClosureProofs` to mention
+  the Grothendieck topology axiom correspondence and the σ-key
+  equals path1 theorem.  Comment-only; no proof bodies change.
+- **0e.** Add explicit Slicer accessors on `pff.Document` and
+  `PFFCascadeEngine`: `covering_sieves_over_addr0()` (σ-Slicer)
+  and `covering_sieves_over_addr1()` (τ-Slicer), both as
+  semantically-named aliases for `path1_classes()` /
+  `path2_classes()`.  Plus property-based tests in
+  `TestGrothendieckTopology` verifying the three axioms hold
+  at both levels, and a `test_sigma_key_equals_path1_at_fixed_point`
+  test that empirically verifies the theorem above.
+- **0f.** Implement the **auto-coh fixed-point pass** as
+  `Document.auto_coh_closure()` (standalone) and
+  `PFFCascadeEngine.auto_coh_closure()` (engine wrapper), with
+  the engine's `add_observation` calling it automatically at the
+  end of each ingest.  This makes the σ-cascade and τ-cascade
+  symmetric at the implementation level, not just mathematically.
+  Tests cover: normal no-op (no duplicates from σ-cascade alone),
+  manual duplicates, merge duplicates, idempotency, and
+  integration with the σ-cascade's existing output.
+
+### A note on templating (deferred)
+
+The σ-cascade's `_glue_set_and_cascade` inner loop and the τ-cascade's
+auto-coh pass share the same shape: *"for each key with ≥2
+elements, emit merges within the group."*  These are candidates
+for templating into a generic `CascadeIteration[Element, Key]`
+helper that both cascades instantiate.
+
+The σ-cascade additionally requires recursive re-canonicalization
+of parent sigma-keys — a self-referential fixed-point not present
+in the τ-cascade.  A generic template would expose
+`recanonicalize_on_merge` as an optional callback, with the
+σ-cascade providing it and the τ-cascade passing `None`.
+
+This refactor is **intentionally deferred** to a follow-up of
+item 0f.  The initial auto-coh implementation will mirror the
+σ-cascade's inner-loop pattern in a new method without extracting
+a shared helper, to keep the risk low and the tests independent.
+Once both cascades are tested in their current form, extracting
+the generic iteration becomes a pure refactor that preserves
+behavior.
+
+---
+
 ## Recommended follow-ups
 
 Items that the audit thinks are worth closing, in priority order:
