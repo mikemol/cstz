@@ -1054,3 +1054,376 @@ class TestLinearViewCrossCheck:
         # The document's accessors still work
         assert len(doc.path1_classes()) == 1
         assert len(doc.path1_constraint_rows()) == 1
+
+
+# ── Grothendieck topology axioms + σ-key ≡ path1 theorem ────────────
+
+
+def _sigma_key_partition_from_engine(
+    engine: PFFCascadeEngine,
+) -> list:
+    """Extract the sigma-key partition from the engine's internal
+    ``_addr0s_by_sigma_key`` state.
+
+    Returns a sorted list of frozen sets, matching the shape of
+    ``Document.path1_classes()``.  Used by
+    ``TestSigmaKeyEqualsPath1AtFixedPoint`` to compare the engine's
+    internal sigma-key bookkeeping against the Document-level
+    path1 partition.
+    """
+    classes = [
+        frozenset(bucket)
+        for bucket in engine._addr0s_by_sigma_key.values()
+        if bucket
+    ]
+    return sorted(classes, key=lambda s: min(s))
+
+
+class TestGrothendieckTopology:
+    """Verify the three Grothendieck-topology axioms as runtime
+    invariants on the σ-Slicer and the τ-Slicer.
+
+    The σ-Slicer operates on Addr0 ids via sigma-key equivalence
+    and produces the path1 partition.  The τ-Slicer operates on
+    Addr1 ids via raw-pair equivalence and produces the path2
+    partition.  Both should satisfy:
+
+      1. Identity cover: every element is in a sieve containing itself
+      2. Stability under pullback: adding observations never removes
+         an element from its sieve (monotonicity)
+      3. Transitivity: the sieves are closed under transitive closure
+
+    These are the same properties the cascade engine maintains as
+    invariants, but tested directly against the Slicer accessors on
+    Document (not against the engine internals).  They are the
+    topological-interpretation counterpart of the linear-algebraic
+    cross-check tests in TestLinearViewCrossCheck above.
+    """
+
+    # ── σ-Slicer axioms ──
+
+    def test_sigma_identity_cover_for_every_addr0(self) -> None:
+        """Axiom 1 (σ): every Addr0 is in the sieve containing itself."""
+        e = PFFCascadeEngine()
+        sigma_a = e.ensure_chart("sigma", "A")
+        sigma_b = e.ensure_chart("sigma", "B")
+        tau = e.ensure_chart("tau", "T")
+        a = e.add_observation(sigma_a, tau)
+        b = e.add_observation(sigma_b, tau)
+        for addr0_id in (a.id, b.id):
+            sieve = e.document.covering_sieve_for_addr0(addr0_id)
+            assert addr0_id in sieve
+
+    def test_sigma_stability_under_pullback_monotonicity(self) -> None:
+        """Axiom 2 (σ): adding observations never removes an Addr0
+        from its sieve.  Members can only be added, never removed."""
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau_a = e.ensure_chart("tau", "A")
+        tau_b = e.ensure_chart("tau", "B")
+        tau_c = e.ensure_chart("tau", "C")
+
+        a = e.add_observation(sigma, tau_a)
+        sieve_a_round1 = e.document.covering_sieve_for_addr0(a.id)
+
+        b = e.add_observation(sigma, tau_b)
+        sieve_a_round2 = e.document.covering_sieve_for_addr0(a.id)
+        # Every member of round1 is still a member of round2
+        assert sieve_a_round1 <= sieve_a_round2
+
+        e.add_observation(sigma, tau_c)
+        sieve_a_round3 = e.document.covering_sieve_for_addr0(a.id)
+        assert sieve_a_round2 <= sieve_a_round3
+
+    def test_sigma_transitivity_of_sieve_membership(self) -> None:
+        """Axiom 3 (σ): if A and B are in the same sieve and B and C
+        are in the same sieve, then A and C are in the same sieve."""
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau_a = e.ensure_chart("tau", "A")
+        tau_b = e.ensure_chart("tau", "B")
+        tau_c = e.ensure_chart("tau", "C")
+        a = e.add_observation(sigma, tau_a)
+        b = e.add_observation(sigma, tau_b)
+        c = e.add_observation(sigma, tau_c)
+        # All three streaming-glued; by transitivity all three
+        # must be in the same sieve
+        sieve_a = e.document.covering_sieve_for_addr0(a.id)
+        sieve_c = e.document.covering_sieve_for_addr0(c.id)
+        assert sieve_a == sieve_c
+        assert b.id in sieve_a
+
+    def test_sigma_sieves_partition_the_addr0_universe(self) -> None:
+        """The sieves form a partition: every Addr0 is in exactly
+        one sieve, and the union is the full Addr0 set."""
+        e = PFFCascadeEngine()
+        sigma_a = e.ensure_chart("sigma", "A")
+        sigma_b = e.ensure_chart("sigma", "B")
+        tau_x = e.ensure_chart("tau", "X")
+        tau_y = e.ensure_chart("tau", "Y")
+        e.add_observation(sigma_a, tau_x)
+        e.add_observation(sigma_a, tau_y)  # streaming-glued with above
+        e.add_observation(sigma_b, tau_x)
+        e.add_observation(sigma_b, tau_y)  # streaming-glued with above
+
+        sieves = e.document.covering_sieves_over_addr0()
+        all_addr0_ids = {a.id for a in e.document.addresses0}
+        # Pairwise disjoint
+        for i, s1 in enumerate(sieves):
+            for s2 in sieves[i + 1:]:
+                assert s1.isdisjoint(s2)
+        # Covering
+        union = set()
+        for s in sieves:
+            union |= s
+        assert union == all_addr0_ids
+
+    # ── τ-Slicer axioms ──
+
+    def test_tau_identity_cover_for_every_addr1(self) -> None:
+        """Axiom 1 (τ): every Addr1 is in a τ-sieve containing itself."""
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau_a = e.ensure_chart("tau", "A")
+        tau_b = e.ensure_chart("tau", "B")
+        e.add_observation(sigma, tau_a)
+        e.add_observation(sigma, tau_b)
+        # At least one path1 glue was emitted by the streaming cascade
+        assert len(e.document.paths1) >= 1
+        for p1 in e.document.paths1:
+            sieve = e.document.covering_sieve_for_addr1(p1.id)
+            assert p1.id in sieve
+
+    def test_tau_stability_under_pullback_monotonicity(self) -> None:
+        """Axiom 2 (τ): adding observations never removes an Addr1
+        from its τ-sieve."""
+        from cstz.pff import Addr1, Addr2
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau_a = e.ensure_chart("tau", "A")
+        tau_b = e.ensure_chart("tau", "B")
+        e.add_observation(sigma, tau_a)
+        e.add_observation(sigma, tau_b)
+        first = e.document.paths1[0]
+        sieve_first_round1 = e.document.covering_sieve_for_addr1(first.id)
+
+        # Add a user-declared coh that unions first with a newly-
+        # constructed Addr1
+        rank = e.ensure_rank(0)
+        patch = e.ensure_patch(rank=rank)
+        second = e._emit_glue(
+            first.src, first.dst, rank, patch,
+            label="alt", premises=[],
+        )
+        e.coh(first.id, second.id)
+
+        sieve_first_round2 = e.document.covering_sieve_for_addr1(first.id)
+        # Monotonicity: the original sieve is a subset of the new one
+        assert sieve_first_round1 <= sieve_first_round2
+        assert second.id in sieve_first_round2
+
+    def test_tau_transitivity_of_sieve_membership(self) -> None:
+        """Axiom 3 (τ): path2 cohs are transitively closed."""
+        from cstz.pff import Addr1
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau_a = e.ensure_chart("tau", "A")
+        tau_b = e.ensure_chart("tau", "B")
+        e.add_observation(sigma, tau_a)
+        e.add_observation(sigma, tau_b)
+        first = e.document.paths1[0]
+        rank = e.ensure_rank(0)
+        patch = e.ensure_patch(rank=rank)
+
+        # Manually mint two more Addr1s with the same endpoints
+        second = e._emit_glue(
+            first.src, first.dst, rank, patch,
+            label="alt-1", premises=[],
+        )
+        third = e._emit_glue(
+            first.src, first.dst, rank, patch,
+            label="alt-2", premises=[],
+        )
+
+        # Coh first~second and second~third; expect first and third
+        # in the same sieve by transitivity
+        e.coh(first.id, second.id)
+        e.coh(second.id, third.id)
+
+        sieve = e.document.covering_sieve_for_addr1(first.id)
+        assert second.id in sieve
+        assert third.id in sieve
+
+    # ── Alias equivalence with linear-view accessors ──
+
+    def test_covering_sieves_over_addr0_equals_path1_classes(self) -> None:
+        """The Slicer accessors are semantic aliases for the
+        linear-view accessors.  Same values, different names."""
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau_a = e.ensure_chart("tau", "A")
+        tau_b = e.ensure_chart("tau", "B")
+        e.add_observation(sigma, tau_a)
+        e.add_observation(sigma, tau_b)
+        assert (
+            e.document.covering_sieves_over_addr0()
+            == e.document.path1_classes()
+        )
+        assert (
+            e.document.covering_sieves_over_addr1()
+            == e.document.path2_classes()
+        )
+
+
+class TestSigmaKeyRefinesPath1:
+    """Verify the secondary (robustness) theorem: even under data
+    corruption via ``engine.glue()`` calls that force merges the
+    cascade would not otherwise derive, the sigma-key partition
+    remains a refinement of the path1 partition.
+
+    Refinement means: every bucket of ``_addr0s_by_sigma_key`` sits
+    entirely inside a single path1 class.  Two Addr0s with the same
+    sigma-key are necessarily in the same path1 class (the cascade
+    enforces this).  The converse is not true: two Addr0s can end
+    up in the same path1 class without sharing a sigma-key, if the
+    caller issued a direct ``engine.glue()`` between them.
+
+    The primary theorem (σ-key ≡ path1 equality) is tested below in
+    ``TestSigmaKeyEqualsPath1InPureCascade`` under the correct-usage
+    regime where every path1 edge comes from a sigma-key collision
+    during streaming ingest.
+
+    Per the AUDIT.md Slicer postscript, direct ``engine.glue()``
+    calls across distinct sigma-key classes are considered **data
+    corruption** under the PFF discipline: users should introduce
+    equivalences via discriminator-synthesis through the data,
+    not by forcing merges from outside the cascade.  These tests
+    verify the engine still behaves sensibly under that corruption
+    — it does not crash, and the sigma-key / path1 containment
+    remains intact.  They are robustness tests, not correctness
+    tests for the primary theorem.
+    """
+
+    def _assert_sigma_key_refines_path1(self, e: PFFCascadeEngine) -> None:
+        """Every sigma-key bucket's members must share a path1 class."""
+        canon_map = e.document.path1_canonical_map()
+        for bucket_key, bucket in e._addr0s_by_sigma_key.items():
+            if not bucket:
+                continue
+            canonicals = {canon_map[aid] for aid in bucket}
+            assert len(canonicals) == 1, (
+                f"sigma-key bucket {bucket_key!r} spans multiple path1 "
+                f"classes: {canonicals}"
+            )
+
+    def test_single_observation(self) -> None:
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau = e.ensure_chart("tau", "T")
+        e.add_observation(sigma, tau)
+        self._assert_sigma_key_refines_path1(e)
+
+    def test_streaming_glue(self) -> None:
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau_a = e.ensure_chart("tau", "A")
+        tau_b = e.ensure_chart("tau", "B")
+        e.add_observation(sigma, tau_a)
+        e.add_observation(sigma, tau_b)
+        self._assert_sigma_key_refines_path1(e)
+
+    def test_recursive_cascade_two_levels(self) -> None:
+        """Refinement holds even with user-initiated glue across
+        distinct sigma-keys.  The sigma-key partition stays finer
+        than path1 because the user's glue bridged two buckets."""
+        e = PFFCascadeEngine()
+        sLa = e.ensure_chart("sigma", "LeafA")
+        sLb = e.ensure_chart("sigma", "LeafB")
+        sP = e.ensure_chart("sigma", "Parent")
+        tA = e.ensure_chart("tau", "A")
+        tB = e.ensure_chart("tau", "B")
+        tPa = e.ensure_chart("tau", "Pa")
+        tPb = e.ensure_chart("tau", "Pb")
+        la = e.add_observation(sLa, tA)
+        lb = e.add_observation(sLb, tB)
+        e.add_observation(sP, tPa, sigma_children=[la.id])
+        e.add_observation(sP, tPb, sigma_children=[lb.id])
+        e.glue(la.id, lb.id)
+        self._assert_sigma_key_refines_path1(e)
+
+    def test_recursive_cascade_three_levels(self) -> None:
+        e = PFFCascadeEngine()
+        sLi = e.ensure_chart("sigma", "LeafInt")
+        sLs = e.ensure_chart("sigma", "LeafStr")
+        sM = e.ensure_chart("sigma", "Mid")
+        sR = e.ensure_chart("sigma", "Root")
+        tA = e.ensure_chart("tau", "A")
+        tB = e.ensure_chart("tau", "B")
+        tC = e.ensure_chart("tau", "C")
+        tD = e.ensure_chart("tau", "D")
+        tE = e.ensure_chart("tau", "E")
+        tF = e.ensure_chart("tau", "F")
+        li = e.add_observation(sLi, tA)
+        ls = e.add_observation(sLs, tB)
+        mi = e.add_observation(sM, tC, sigma_children=[li.id])
+        e.add_observation(sM, tD, sigma_children=[ls.id])
+        e.add_observation(sR, tE, sigma_children=[mi.id])
+        e.add_observation(sR, tF, sigma_children=[mi.id])
+        e.glue(li.id, ls.id)
+        self._assert_sigma_key_refines_path1(e)
+
+
+class TestSigmaKeyEqualsPath1InPureCascade:
+    """The refinement becomes an equality when no user-initiated
+    glues are issued.  Every path1 edge then comes from a streaming
+    sigma-key collision, and the two partitions coincide by the
+    monotonicity argument in the inference.agda SPPF.ClosureProofs
+    comment.
+    """
+
+    def _assert_sigma_key_equals_path1(self, e: PFFCascadeEngine) -> None:
+        sigma_key_partition = _sigma_key_partition_from_engine(e)
+        path1_partition = e.document.path1_classes()
+        assert sigma_key_partition == path1_partition
+
+    def test_single_observation_no_glue(self) -> None:
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau = e.ensure_chart("tau", "T")
+        e.add_observation(sigma, tau)
+        self._assert_sigma_key_equals_path1(e)
+
+    def test_streaming_glue_single_sigma_chart(self) -> None:
+        """Two observations with the same sigma chart, different tau
+        charts: the streaming cascade glues them via sigma-key
+        collision.  Pure-cascade scenario → equality holds."""
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau_a = e.ensure_chart("tau", "A")
+        tau_b = e.ensure_chart("tau", "B")
+        e.add_observation(sigma, tau_a)
+        e.add_observation(sigma, tau_b)
+        self._assert_sigma_key_equals_path1(e)
+
+    def test_multiple_disjoint_sigma_charts_no_glue(self) -> None:
+        """Observations under distinct sigma charts → no streaming
+        glue; no user glue either.  Each Addr0 is its own sigma-key
+        bucket AND its own path1 class.  Equality holds."""
+        e = PFFCascadeEngine()
+        sigma_a = e.ensure_chart("sigma", "A")
+        sigma_b = e.ensure_chart("sigma", "B")
+        tau = e.ensure_chart("tau", "T")
+        e.add_observation(sigma_a, tau)
+        e.add_observation(sigma_b, tau)
+        self._assert_sigma_key_equals_path1(e)
+
+    def test_three_way_streaming_glue(self) -> None:
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau_a = e.ensure_chart("tau", "A")
+        tau_b = e.ensure_chart("tau", "B")
+        tau_c = e.ensure_chart("tau", "C")
+        e.add_observation(sigma, tau_a)
+        e.add_observation(sigma, tau_b)
+        e.add_observation(sigma, tau_c)
+        self._assert_sigma_key_equals_path1(e)

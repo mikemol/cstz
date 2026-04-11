@@ -1147,6 +1147,68 @@ class Document:
         """Return the path2 partition as a list of equivalence classes."""
         return _classes_from_canonical_map(self.path2_canonical_map())
 
+    # ── Grothendieck topology view (Slicer output) ──────────────────
+    #
+    # The σ-Slicer and τ-Slicer of the topos-theoretic framing both
+    # produce Grothendieck topologies at the cascade fixed point.
+    # The σ-Slicer's topology is the path1 partition over Addr0 ids;
+    # the τ-Slicer's topology is the path2 partition over Addr1 ids.
+    # Both are fully computable from a Document alone, because at
+    # the cascade fixed point the sigma-key equivalence class
+    # partition equals the path1 partition (and analogously for τ).
+    # See rhpf-pff-profiles/AUDIT.md's Slicer postscript for the
+    # theorem + proof.
+    #
+    # These accessors are semantic aliases for path1_classes() /
+    # path2_classes() with docstrings that reframe the partition
+    # as Grothendieck-topology covering sieves.  No new computation.
+
+    def covering_sieves_over_addr0(self) -> List[FrozenSet[str]]:
+        """σ-Slicer output: the Grothendieck topology over Addr0 ids.
+
+        Each frozen set is a covering sieve — a maximal set of Addr0s
+        that were identified as structurally equivalent at the cascade
+        fixed point.  The three Grothendieck-topology axioms are
+        maintained by the cascade as invariants:
+
+          - Identity cover: every Addr0 is in a sieve containing itself
+          - Stability under pullback: adding more observations never
+            removes an existing sieve's members (monotonicity)
+          - Transitivity: the sieves are closed under the transitive
+            closure of structural-key equivalence
+
+        The return value is the same partition as ``path1_classes()``
+        (by the σ-key ≡ path1 theorem at the cascade fixed point).
+        """
+        return self.path1_classes()
+
+    def covering_sieve_for_addr0(self, addr0_id: str) -> FrozenSet[str]:
+        """Return the σ-covering sieve containing a given Addr0."""
+        canonical = self.path1_canonical_map()[addr0_id]
+        return frozenset(
+            a for a, c in self.path1_canonical_map().items() if c == canonical
+        )
+
+    def covering_sieves_over_addr1(self) -> List[FrozenSet[str]]:
+        """τ-Slicer output: the Grothendieck topology over Addr1 ids.
+
+        Each frozen set is a covering sieve at the path2 level — a
+        maximal set of Addr1 glue records that were identified as
+        coherent at the cascade fixed point (via user-declared cohs,
+        and as of a future commit, via auto-coh fixed-point closure).
+
+        Mirrors ``covering_sieves_over_addr0`` at the path2 level.
+        The return value is the same partition as ``path2_classes()``.
+        """
+        return self.path2_classes()
+
+    def covering_sieve_for_addr1(self, addr1_id: str) -> FrozenSet[str]:
+        """Return the τ-covering sieve containing a given Addr1."""
+        canonical = self.path2_canonical_map()[addr1_id]
+        return frozenset(
+            a for a, c in self.path2_canonical_map().items() if c == canonical
+        )
+
     # ── Receipts ────────────────────────────────────────────────────
 
     def receipt(self) -> DocumentReceipt:

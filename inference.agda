@@ -1073,9 +1073,12 @@ module SPPF.Eta where
 --     axiom "local covers compose to global covers."
 --
 -- Theorem (stated here, proved by the closure lemmas below):
---   At the cascade fixed point, the sigma-key equivalence partition
---   on Addr0 ids equals the path1 partition (the connected
---   components of the Addr0 glue graph).
+--   Under the correct-usage regime — where every path1 edge is
+--   derived from a sigma-key collision during streaming ingest, and
+--   no external caller forces merges via direct engine.glue() calls
+--   bridging distinct sigma-key classes — the sigma-key equivalence
+--   partition on Addr0 ids equals the path1 partition (the connected
+--   components of the Addr0 glue graph) at the cascade fixed point.
 --
 -- The forward inclusion (sigma-key ≡ → path1 ≡) is immediate from
 -- the cascade's collision-detection step: if two Addr0s share a
@@ -1089,6 +1092,18 @@ module SPPF.Eta where
 -- of the path1 union-find guarantees they remain equal throughout
 -- the rest of the cascade.  By transitivity along the chain, the
 -- endpoints have identical sigma-keys at the fixed point.
+--
+-- Secondary (robustness) theorem: even outside the correct-usage
+-- regime, when an external caller forces a merge via engine.glue()
+-- between two Addr0s with distinct sigma-keys, the sigma-key
+-- partition remains a refinement of the path1 partition.  Every
+-- sigma-key bucket still sits entirely inside a single path1 class,
+-- though a single path1 class may now contain multiple sigma-key
+-- buckets.  The cascade degrades gracefully under this corruption.
+-- See tests/test_pff_cascade.py::TestSigmaKeyRefinesPath1 for the
+-- empirical verification.  The Slicer postscript in
+-- rhpf-pff-profiles/AUDIT.md discusses the data-corruption framing
+-- and the planned deprecation of engine.glue() as a public API.
 --
 -- Corollary: the σ-Slicer's Grothendieck topology at the fixed
 -- point is recoverable from a pff.Document alone, via the

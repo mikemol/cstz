@@ -23,7 +23,7 @@ metamathematical reference and predates the PFF vocabulary.
 ## Summary
 
 | Spec file | ✅ | 🟡 | ❌ | ⚠️ | ⏸️ |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | `pff.core.md` (6 §§) | 6 | 0 | 0 | 0 | 0 |
 | `pff.schema.json` (19 $defs) | 17 | 0 | 0 | 2 | 0 |
 | `pff.shacl.ttl` (15 shapes) | 11 | 0 | 0 | 2 | 2 |
@@ -661,39 +661,84 @@ And the "topology-building iteration" — the part that takes the
 initial flat assignment of sigma-keys and refines it to the fixed
 point where the three axioms hold — is [`_cascade_after_merge`](../src/cstz/pff_cascade.py).
 
-### Theorem: at the fixed point, σ-key equivalence = path1 equivalence
+### Theorem: σ-key equivalence = path1 equivalence under correct usage
 
 Let `E` be a `PFFCascadeEngine` at convergence.  Let `Σ(E)` be the
 partition of Addr0 ids induced by sigma-key equivalence (two Addr0s
-are equivalent iff they have the same `(sigma_chart, canonical_children)`
-tuple under the final path1 partition).  Let `P(E)` be the partition
-induced by the path1 closure (two Addr0s are equivalent iff they're
-connected by a chain of glues).
+are equivalent iff they sit in the same bucket of
+``_addr0s_by_sigma_key``).  Let `P(E)` be the partition induced by
+the path1 closure (two Addr0s are equivalent iff they're connected
+by a chain of glues).
 
-Then **`Σ(E) = P(E)`**.
+**Primary theorem (correct-usage regime):** when every path1 edge
+is derived from a sigma-key collision during streaming ingest (i.e.,
+no merges are *forced* from outside the cascade's structural
+discipline), **`Σ(E) = P(E)`** at convergence.  This is proved by
+the monotone-canonical-children argument in the inference.agda
+`SPPF.ClosureProofs` comment, and empirically verified by the test
+class `TestSigmaKeyEqualsPath1InPureCascade` in
+`tests/test_pff_cascade.py`.
 
-*Proof sketch.*
+**Secondary theorem (robustness under data corruption):** even when
+a caller bypasses the cascade by issuing `engine.glue(a, b)` between
+two Addr0s with distinct sigma-keys — a pattern considered **data
+corruption** under the PFF discipline (see below) — the weaker
+refinement property still holds: **`Σ(E)` is a refinement of
+`P(E)`**.  Every sigma-key bucket sits entirely inside a single
+path1 class, though a single path1 class may now contain multiple
+sigma-key buckets.  The cascade degrades gracefully: its internal
+bookkeeping stays consistent even in the presence of external
+forced-merge corruption.
+
+*Proof sketch for the primary theorem.*
 
 **(`Σ ⊆ P`)** If `A` and `B` have the same sigma-key at convergence,
 the cascade's sigma-key-collision detection fired on them — otherwise
 there would be an unprocessed collision, contradicting the
-fixed-point hypothesis.  So they were glued. ✓
+fixed-point hypothesis.  So they were glued, and they are in the
+same path1 class. ✓
 
-**(`P ⊆ Σ`)** If `A` and `B` are in the same path1 class, there's a
-chain `A = A_0 ~ A_1 ~ ... ~ A_n = B` of glue events.  Each link
-was emitted because at that round the two endpoints had the same
-sigma-key: `(σ, (find(p_1), find(p_2), ...)) = (σ, (find(q_1),
-find(q_2), ...))`.
+**(`P ⊆ Σ`, under correct usage)** If `A` and `B` are in the same
+path1 class via a chain `A = A_0 ~ A_1 ~ ... ~ A_n = B` of glue
+events, and every link was emitted because of a sigma-key match,
+then at each link the canonical-children tuples were equal at the
+round of the glue.  Monotonicity of the path1 union-find preserves
+that equality forever.  By transitivity along the chain, `A_0` and
+`A_n` have identical sigma-keys at the fixed point. ✓
 
-Monotonicity of the path1 union-find guarantees that **once
-`find(p_j) = find(q_j)`, that equality is preserved forever** —
-both sides are in the same path1 class from that moment, and any
-further merges include both equally.  So the canonical-children
-tuples remain equal for `A_i` and `A_{i+1}` throughout the rest
-of the cascade.  By transitivity along the chain, `A_0` and `A_n`
-have identical sigma-keys at the fixed point. ✓
+### User-initiated merges as data corruption
 
-Therefore `Σ(E) = P(E)` at convergence.  ∎
+The secondary theorem exists only because the current engine
+exposes `PFFCascadeEngine.glue()` as a public API that accepts
+arbitrary (src, dst) Addr0 pairs.  Under the PFF structural
+discipline, **this API is problematic**: it lets users force
+merges that the cascade wouldn't derive from the data alone,
+effectively rewriting the categorical structure by fiat.
+
+The clean pattern for introducing equivalences in PFF is:
+
+- **Correct:** provide data that triggers sigma-key collision via
+  `add_observation`, OR introduce a new discriminator (a new chart
+  axis or sigma-key component) that causes the equivalence to
+  emerge from the data's interaction with the discriminator.  The
+  cascade then derives the merge, and the merge is justified by
+  the data.
+- **Incorrect (data corruption):** call `engine.glue(a, b)` between
+  two Addr0s that the cascade would not otherwise equate.  This
+  forces a path1 edge that's not backed by any structural
+  derivation, and the sigma-key partition drifts from the path1
+  partition as a result.
+
+If a user wants to introduce a cleavage-point discriminator — a
+new distinction that carves an equivalence class into sub-classes
+— the right move is to augment the observation data with tags that
+trigger the discrimination through the existing cascade machinery,
+not to bypass the cascade with direct glue calls.  A future commit
+should deprecate `engine.glue()` as a public API in favor of
+discriminator-synthesis helpers, leaving the current method as
+cascade-internal only.
+
+### Corollary: the σ-Slicer's output is Document-computable
 
 ### Corollary: the topology is Document-computable
 
@@ -757,6 +802,48 @@ emitted in a single run), but it fires correctly on:
 - User-constructed Documents with manually-added duplicate Addr1s
 - Any future refactor that removes the σ-cascade's
   emission-dedup logic
+
+### Earley is also in the fixed-point calculation
+
+A third "it's there in the fixed-point calculation" finding, same
+shape as the GF(2) and Slicer corrections.  The original
+Topos-Theoretic study's dismissal — *"cstz uses neither Earley nor
+GLL/GLR"* — was wrong about Earley.  Earley's chart-based parsing
+algorithm is exactly the cascade's self-referential fixed-point
+iteration, under different vocabulary.
+
+| Earley concept | cstz cascade counterpart |
+| --- | --- |
+| **Chart** — indexed table of items by input position | `_addr0s_by_sigma_key` + `_sigma_keys_by_child` — the sigma-keyed index of observations |
+| **Scanner** — reads a terminal and advances matching items | `add_observation` — ingests a new raw AST node / byte and inserts it into its sigma-key bucket |
+| **Predictor** — given `A → α · Bβ` at position i, adds `B → · γ` for each rule.  **Its grammar source is the chart itself** (self-referential) | sigma-key collision detection — when a new observation lands in an existing bucket, the cascade "predicts" the new observation will behave as the existing ones do.  The "grammar" is the accumulated sigma-key registry itself, precisely mirroring Earley's self-referential predictor |
+| **Completer** — given a completed item at position j and a waiting item at position i, advances the waiting item | `_cascade_after_merge` — when a child is glued, parent sigma-keys re-canonicalize and parent classes are discovered.  "A child parse has completed, now advance the waiting parents" |
+| **Fixed-point iteration over chart state** | `_cascade_after_merge`'s worklist loop — iterates until no more sigma-key movements |
+| **Parse success: chart contains a completed S-item spanning the input** | Cascade convergence: `_addr0s_by_sigma_key` reaches a fixed point |
+
+Earley's predictor famously uses the chart *as its own grammar* —
+it doesn't consult an external rule table; it looks up what to
+predict by inspecting accumulated chart entries.  That
+self-referential move is exactly what the cascade does when
+`_cascade_after_merge` uses `_sigma_keys_by_child` (a view over the
+chart) to drive re-canonicalization.  Neither component consults an
+external grammar; both use their own accumulated state as the
+grammar source.
+
+cstz doesn't have an Earley *implementation* in the textbook sense
+(no item records, no dot-notation, no position indices).  It has
+something more abstract: **Earley's fixed-point structure** applied
+to σ-key equivalence closure instead of context-free-grammar item
+progression.  The textbook Earley is one instantiation of this
+structure; the cstz cascade is another.
+
+The implication for the audit: the original claim *"cstz uses
+neither Earley nor GLL/GLR"* should be weakened to *"cstz does not
+have a textbook Earley implementation, but the cascade's
+fixed-point iteration realizes the same self-referential
+chart-based parsing structure that Earley does."*  (GLL and GLR
+are separate and I don't know enough about either to say whether
+the analogy extends.)
 
 ### Slicer-postscript implications for the codebase
 
