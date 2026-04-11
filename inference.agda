@@ -789,6 +789,31 @@ module SPPF.Kappa where
 -- the corresponding accessors on pff.Document
 -- (path1_constraint_rows, path1_canonical_map, path1_classes) which
 -- materialize this view from a Document's paths1 collection alone.
+--
+-- Grothendieck-topology view: the StructKey is the Slicer's
+-- covering-sieve key.  Two Addr0s with the same StructKey under
+-- the current path1 partition are in the same "open slice" — they
+-- are observations of the same local σ-pattern up to the current
+-- state of the equivalence closure.  The EtaEvent records below
+-- are the gluing events that refine the topology until the three
+-- Grothendieck axioms hold at the fixed point:
+--
+--   * Identity cover: every Addr0 starts in its own singleton
+--     sigma-key bucket upon addition (trivially a covering sieve
+--     over itself).
+--   * Stability under pullback: the cascade's union-find is
+--     monotone — once two Addr0s are in the same path1 class,
+--     they stay there.  Adding new observations never removes an
+--     existing cover.
+--   * Transitivity: SPPF.ClosureProofs' cascade convergence proofs
+--     below establish that the recursive re-canonicalization of
+--     parent sigma_keys computes the transitive closure, which is
+--     exactly the Grothendieck-topology composition axiom.
+--
+-- The σ-Slicer's output at the cascade fixed point IS the path1
+-- partition.  See SPPF.ClosureProofs for the σ-key ≡ path1 theorem.
+-- The dual τ-Slicer, analogously, operates over Addr1 ids and
+-- Addr2(coh) edges; its auto-coh closure gives the path2 partition.
 module SPPF.Eta where
 
   open SPPF.Fiber
@@ -1032,6 +1057,52 @@ module SPPF.Eta where
 -- termination + uniqueness arguments for that monotone iteration;
 -- equivalently, they prove that the cascade computes ker(A^T) for
 -- the limiting matrix A^∞.
+--
+-- Grothendieck-topology view: the closure proofs below are the
+-- three Grothendieck-topology axioms in disguise, for the σ-Slicer
+-- operating on Addr0 ids keyed by (sigma_chart, canonical_children):
+--
+--   * Identity cover ← each Addr0 starts as its own singleton
+--     sigma-key class (trivially covered by itself).
+--   * Stability under pullback ← the union-find is monotone:
+--     merge operations never split a class, so existing covering
+--     sieves survive every cascade round.
+--   * Transitivity ← the recursive re-canonicalization in the
+--     cascade computes the transitive closure of the structural-key
+--     equivalence relation, which is exactly the composition
+--     axiom "local covers compose to global covers."
+--
+-- Theorem (stated here, proved by the closure lemmas below):
+--   At the cascade fixed point, the sigma-key equivalence partition
+--   on Addr0 ids equals the path1 partition (the connected
+--   components of the Addr0 glue graph).
+--
+-- The forward inclusion (sigma-key ≡ → path1 ≡) is immediate from
+-- the cascade's collision-detection step: if two Addr0s share a
+-- sigma-key at any round, the cascade emits a glue, which adds them
+-- to the same path1 class.
+--
+-- The reverse inclusion (path1 ≡ → sigma-key ≡) follows from the
+-- monotonicity lemmas below: along any chain of direct glue events
+-- connecting two Addr0s, the canonical-children tuples of successive
+-- endpoints are equal at the round of the glue, and the monotonicity
+-- of the path1 union-find guarantees they remain equal throughout
+-- the rest of the cascade.  By transitivity along the chain, the
+-- endpoints have identical sigma-keys at the fixed point.
+--
+-- Corollary: the σ-Slicer's Grothendieck topology at the fixed
+-- point is recoverable from a pff.Document alone, via the
+-- path1_classes() accessor that computes H_0(G_glue; F_2) over the
+-- document's paths1 collection.  No access to the cascade engine's
+-- internal _addr0_children or _addr0s_by_sigma_key state is needed.
+--
+-- The dual τ-Slicer operates on Addr1 ids keyed by the sorted raw
+-- (src, dst) pair, emits cohs within each raw-pair group, and
+-- computes the path2 partition at its fixed point.  Its
+-- Grothendieck topology is `path2_classes()` on the same Document.
+-- The auto-coh fixed-point pass on pff_cascade.PFFCascadeEngine
+-- implements the τ-Slicer's iteration; see its docstring for
+-- details and for the correspondence with the σ-Slicer proofs here.
 module SPPF.ClosureProofs where
 
   open SPPF.Fiber
