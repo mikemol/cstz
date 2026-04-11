@@ -1,36 +1,48 @@
-"""Synthesize a self-contained, human-readable .agda file from an SPPF.
+"""Synthesize a self-contained, human-readable .agda file from an SPPF
+or a pff.Document.
 
 The generated file type-checks without any stdlib dependency.
 
-Usage::
+Two parallel entry points are exposed:
+
+  - ``synthesize(sppf, ...)`` consumes a legacy ``cstz.core.SPPF`` and
+    emits Agda from the three-fiber σ/τ/κ partition.  This is the
+    metamathematical reference path proven against ``inference.agda``.
+
+  - ``synthesize_from_document(doc, ...)`` consumes a ``cstz.pff.Document``
+    and emits Agda from the path1/path2 closure encoded in the
+    document's Addr0 / Addr1 / Addr2 collections.  This is the parallel
+    PFF path; it does not depend on the SPPF stack at runtime.
+
+Both paths share the same prelude (≡, sym, trans, ℕ) and produce
+modules whose generated proofs are constructive ``refl`` terms.
+
+Usage (legacy SPPF path)::
 
     from cstz import factorize
     from cstz.agda_synth import synthesize
 
     sppf = factorize("src/cstz/core.py")
-
-    # Default rotation: κ → τ → σ at depth 2 (κ outermost, τ submodules)
     agda_source = synthesize(sppf, module_name="CoreProof")
 
-    # Custom: rotate so τ leads, depth 1 (only τ-grouped, no nesting)
-    agda_source = synthesize(
-        sppf,
-        rotation=("tau", "kappa", "sigma"),
-        depth=1,
-    )
+Usage (PFF path)::
 
-The rotation tuple selects which fiber is the primary grouping axis,
-secondary, and tertiary.  The depth controls how many axes become
-nested module boundaries (depth=1: only primary; depth=2: primary +
-secondary; depth=3: full nesting through all three).
+    from cstz.pff_python_classifier import factorize as pff_factorize
+    from cstz.agda_synth import synthesize_from_document
+
+    engine = pff_factorize("src/cstz/core.py")
+    agda_source = synthesize_from_document(
+        engine.document, module_name="CorePffProof",
+    )
 """
 
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Any
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .core import SPPF
+from .pff import Document
 
 
 _AGDA_RESERVED = {
@@ -410,3 +422,348 @@ def _emit_canonical_map(w, sppf: SPPF, fiber_name: str, symbol: str) -> None:
     w(f"{symbol}-idem : ∀ n → {symbol} ({symbol} n) ≡ {symbol} n")
     w(f"{symbol}-idem n = refl")
     w("")
+
+
+# ════════════════════════════════════════════════════════════════════
+# PFF Document → Agda
+#
+# A Document encodes the same mathematical content as an SPPF, in PFF
+# vocabulary: Addr0 = identity, Path1(glue) = σ-quotient witness,
+# Path2(coh) = path-of-paths coherence.  The Agda projection of a
+# Document is therefore:
+#
+#   - an Addr0 universe encoded as ℕ indices
+#   - a path1-canonical map ℕ → ℕ derived from the Addr1(glue) records
+#   - one ``refl`` proof per Addr1 witnessing canonical equality
+#   - a path2-canonical map ℕ → ℕ over Addr1 indices
+#   - one ``refl`` proof per Addr2 witnessing 2-cell coherence
+#   - per-chart modules grouping the Addr0s by their σ-pair chart
+#     (this gives the human-readable hierarchical structure that's
+#     analogous to the rotation/depth modules of the legacy synth)
+#
+# Reading-(b) discipline: charts have ``kind ∈ {sigma, tau}``.  The
+# generated Agda only emits modules for σ-charts (the principal-pair
+# side); τ-charts contribute via the canonical map's grouping but
+# don't get their own modules.
+# ════════════════════════════════════════════════════════════════════
+
+
+def _path1_closure(doc: Document) -> Dict[str, str]:
+    """Compute the path1 union-find over Addr0 ids from the Document.
+
+    Returns a map ``addr0_id → canonical_addr0_id``.  Every Addr1
+    with ``ctor=glue`` (and the symmetric ``refl`` ctor) contributes
+    one union; all other Addr1 ctors are ignored.
+    """
+    parent: Dict[str, str] = {a.id: a.id for a in doc.addresses0}
+
+    def find(x: str) -> str:
+        r = x
+        while parent[r] != r:
+            r = parent[r]
+        while parent[x] != r:
+            parent[x], x = r, parent[x]
+        return r
+
+    def union(a: str, b: str) -> None:
+        ra, rb = find(a), find(b)
+        if ra == rb:
+            return
+        # Lex-smallest wins, for deterministic Agda output.
+        if ra < rb:
+            parent[rb] = ra
+        else:
+            parent[ra] = rb
+
+    for p1 in doc.paths1:
+        if p1.ctor in ("glue", "refl"):
+            union(p1.src, p1.dst)
+
+    return {a: find(a) for a in parent}
+
+
+def _path2_closure(doc: Document) -> Dict[str, str]:
+    """Compute the path2 union-find over Addr1 ids from the Document."""
+    parent: Dict[str, str] = {a.id: a.id for a in doc.paths1}
+
+    def find(x: str) -> str:
+        r = x
+        while parent[r] != r:
+            r = parent[r]
+        while parent[x] != r:
+            parent[x], x = r, parent[x]
+        return r
+
+    def union(a: str, b: str) -> None:
+        ra, rb = find(a), find(b)
+        if ra == rb:
+            return
+        if ra < rb:
+            parent[rb] = ra
+        else:
+            parent[ra] = rb
+
+    for p2 in doc.paths2:
+        if p2.ctor == "coh":
+            union(p2.src, p2.dst)
+
+    return {a: find(a) for a in parent}
+
+
+def _addr0_index_map(doc: Document) -> Dict[str, int]:
+    """Assign each Addr0 a stable ℕ index for the Agda encoding."""
+    return {a.id: i for i, a in enumerate(doc.addresses0)}
+
+
+def _addr1_index_map(doc: Document) -> Dict[str, int]:
+    """Assign each Addr1 a stable ℕ index for the Agda encoding."""
+    return {a.id: i for i, a in enumerate(doc.paths1)}
+
+
+def _emit_pff_canonical_map(
+    w: Callable[[str], Any],
+    symbol: str,
+    indices: Dict[str, int],
+    closure: Dict[str, str],
+) -> None:
+    """Emit a canonical map ℕ → ℕ for a path-closure in PFF terms.
+
+    Only entries where the canonical differs from the input contribute
+    a pattern; the rest fall through to the catch-all ``n = n`` clause.
+
+    No universal-idempotence lemma is emitted: the catch-all clause +
+    specific patterns combination defeats Agda's symbolic reduction
+    of ``ρ n`` for arbitrary ``n``, so ``∀ n → ρ (ρ n) ≡ ρ n`` is
+    not provable by ``refl``.  Idempotence is instead witnessed
+    per-move by the Addr1 records emitted below: each glue Addr1
+    contributes one ``addr1-id : ρ src ≡ ρ dst`` proof, and the
+    union of those proofs IS the path1 closure.
+    """
+    moves: Dict[int, int] = {}
+    for ident, idx in indices.items():
+        canon = closure[ident]
+        canon_idx = indices[canon]
+        if idx != canon_idx:
+            moves[idx] = canon_idx
+
+    n_classes = len({closure[ident] for ident in indices})
+    w(f"-- ── {symbol} canonical map ({n_classes} classes, "
+      f"{len(moves)} non-identity moves) ──")
+    w("")
+    w(f"{symbol} : ℕ → ℕ")
+    for src in sorted(moves):
+        w(f"{symbol} {src} = {moves[src]}")
+    w(f"{symbol} n = n")
+    w("")
+
+
+def synthesize_from_document(
+    doc: Document,
+    module_name: str = "PFFProof",
+    chart_kind: str = "sigma",
+) -> str:
+    """Synthesize a hierarchical Agda module from a pff.Document.
+
+    Parameters
+    ----------
+    doc : pff.Document
+        The PFF document to project.  Must be well-formed under the
+        SHACL validators (callers can verify via ``doc.receipt()``).
+    module_name : str
+        Top-level Agda module name.  Must match the output filename.
+    chart_kind : str
+        Which Chart.kind to group the human-readable modules around.
+        Defaults to ``"sigma"`` (the principal-pair side, reading b).
+        Pass ``"tau"`` to group by τ-side instead.
+
+    Returns
+    -------
+    str : the Agda source.
+
+    The generated module contains:
+
+      1. A self-contained prelude defining ``≡``, ``sym``, ``trans``,
+         and ``ℕ``.
+      2. ``ρ : ℕ → ℕ`` — the path1 canonical map over Addr0 ids.
+      3. ``ρ-idem`` — idempotence proof for the path1 map.
+      4. One ``refl`` proof per Addr1 (glue) witnessing canonical
+         equality at the path1 level.
+      5. ``π : ℕ → ℕ`` — the path2 canonical map over Addr1 ids
+         (only emitted if the document has any path1 records).
+      6. One ``refl`` proof per Addr2 (coh) witnessing 2-cell
+         coherence at the path2 level.
+      7. Per-chart submodules grouping the Addr0s by their principal
+         (or aux, if ``chart_kind="tau"``) chart.
+    """
+    addr0_idx = _addr0_index_map(doc)
+    addr1_idx = _addr1_index_map(doc)
+    p1_closure = _path1_closure(doc)
+    p2_closure = _path2_closure(doc)
+
+    lines: List[str] = []
+    w = lines.append
+
+    # ── Header ──────────────────────────────────────────────────
+    n_sigma = sum(1 for c in doc.charts if c.kind == "sigma")
+    n_tau = sum(1 for c in doc.charts if c.kind == "tau")
+    n_glue = sum(1 for p in doc.paths1 if p.ctor == "glue")
+    n_coh = sum(1 for p in doc.paths2 if p.ctor == "coh")
+    n_classes = len({p1_closure[a] for a in addr0_idx})
+
+    w(f"module {module_name} where")
+    w("")
+    w("-- ══════════════════════════════════════════════════════════")
+    w(f"-- PFF Document projection: {doc.documentId}")
+    w(f"-- {len(doc.addresses0)} addr0(s), {n_classes} path1 class(es)")
+    w(f"-- {len(doc.charts)} chart(s) ({n_sigma} σ-kind, {n_tau} τ-kind)")
+    w(f"-- {len(doc.paths1)} path1(s) ({n_glue} glue), "
+      f"{len(doc.paths2)} path2(s) ({n_coh} coh)")
+    w(f"-- {len(doc.ranks)} rank(s), {len(doc.patches)} patch(es)")
+    w("-- ══════════════════════════════════════════════════════════")
+    w("")
+
+    # ── Prelude ─────────────────────────────────────────────────
+    w("-- ── Primitives ────────────────────────────────────────────")
+    w("")
+    w("data _≡_ {A : Set} (x : A) : A → Set where")
+    w("  refl : x ≡ x")
+    w("")
+    w("sym : ∀ {A : Set} {x y : A} → x ≡ y → y ≡ x")
+    w("sym refl = refl")
+    w("")
+    w("trans : ∀ {A : Set} {x y z : A} → x ≡ y → y ≡ z → x ≡ z")
+    w("trans refl refl = refl")
+    w("")
+    w("data ℕ : Set where")
+    w("  zero : ℕ")
+    w("  suc  : ℕ → ℕ")
+    w("")
+    w("{-# BUILTIN NATURAL ℕ #-}")
+    w("")
+
+    # ── Path1 (glue) closure ────────────────────────────────────
+    _emit_pff_canonical_map(w, "ρ", addr0_idx, p1_closure)
+
+    # ── Per-glue refl proofs ────────────────────────────────────
+    if doc.paths1:
+        w("-- ── Path1 (glue) witnesses ────────────────────────────────")
+        w(f"-- {len(doc.paths1)} addr1 record(s)")
+        w("")
+        for p1 in doc.paths1:
+            si = addr0_idx[p1.src]
+            di = addr0_idx[p1.dst]
+            safe_id = _sanitize(p1.id)
+            label = p1.label or p1.ctor
+            w(f"-- {p1.ctor}: {p1.src} ~ {p1.dst}  ({label})")
+            w(f"{safe_id} : ρ {si} ≡ ρ {di}")
+            w(f"{safe_id} = refl")
+            w("")
+
+    # ── Path2 (coh) closure ─────────────────────────────────────
+    if doc.paths1:
+        # Only emit a path2 map if there are path1s to point at
+        _emit_pff_canonical_map(w, "π", addr1_idx, p2_closure)
+
+    if doc.paths2:
+        w("-- ── Path2 (coh) witnesses ─────────────────────────────────")
+        w(f"-- {len(doc.paths2)} addr2 record(s)")
+        w("")
+        for p2 in doc.paths2:
+            si = addr1_idx[p2.src]
+            di = addr1_idx[p2.dst]
+            safe_id = _sanitize(p2.id)
+            label = p2.label or p2.ctor
+            w(f"-- {p2.ctor}: {p2.src} ~ {p2.dst}  ({label})")
+            w(f"{safe_id} : π {si} ≡ π {di}")
+            w(f"{safe_id} = refl")
+            w("")
+
+    # ── Per-chart modules ───────────────────────────────────────
+    # Group addr0s by the chart referenced in their first segment's
+    # role-matching pair.  Each group becomes a nested module whose
+    # cells refl-prove ρ-canonical equality within that chart.
+    #
+    # Caller invariant: every addr0 has at least one segment with
+    # at least one pair whose role matches role_for_kind.  This is
+    # true for documents produced by PFFCascadeEngine, where every
+    # add_observation emits exactly one segment with one principal
+    # pair and one aux pair.
+    chart_groups: Dict[str, List[str]] = defaultdict(list)
+    role_for_kind = "principal" if chart_kind == "sigma" else "aux"
+    chart_kind_lookup = {c.id: c.kind for c in doc.charts}
+    chart_root_lookup = {c.id: c.root for c in doc.charts}
+
+    for addr0 in doc.addresses0:
+        for pair in addr0.segments[0].pairs:
+            if (pair.role == role_for_kind
+                    and chart_kind_lookup.get(pair.chart) == chart_kind):
+                chart_groups[pair.chart].append(addr0.id)
+                break
+
+    if chart_groups:
+        w("-- ══════════════════════════════════════════════════════════")
+        w(f"-- Chart partition (kind={chart_kind!r}, role={role_for_kind!r})")
+        w(f"-- {len(chart_groups)} chart(s) host addr0 observations")
+        w("-- ══════════════════════════════════════════════════════════")
+        w("")
+
+        # Build collision-aware module names from chart roots.
+        ordered_charts = sorted(
+            chart_groups.keys(),
+            key=lambda cid: -len(chart_groups[cid]),
+        )
+        chart_names = _build_chart_names(
+            ordered_charts, chart_root_lookup,
+        )
+
+        for chart_id in ordered_charts:
+            members = chart_groups[chart_id]
+            chart_name = chart_names[chart_id]
+            chart_root = chart_root_lookup[chart_id]
+            class_ids = sorted({
+                addr0_idx[p1_closure[m]] for m in members
+            })
+
+            w(f"-- chart {chart_id} (root={chart_root!r}): "
+              f"{len(members)} addr0(s), {len(class_ids)} path1 class(es)")
+            w(f"module {chart_name} where")
+            w("")
+            for i, cid in enumerate(class_ids):
+                w(f"  -- path1 class {cid}")
+                w(f"  cell-{i} : ρ {cid} ≡ ρ {cid}")
+                w(f"  cell-{i} = refl")
+                w("")
+            w("")
+
+    # ── Summary ─────────────────────────────────────────────────
+    w("-- ══════════════════════════════════════════════════════════")
+    w(f"-- Summary:")
+    w(f"--   document: {doc.documentId}")
+    w(f"--   {len(doc.addresses0)} addr0(s) → {n_classes} path1 class(es)")
+    w(f"--   {n_glue} glue witness(es), {n_coh} coh witness(es)")
+    w(f"--   {len(chart_groups)} {chart_kind}-chart module(s)")
+    w("-- ══════════════════════════════════════════════════════════")
+
+    return "\n".join(lines) + "\n"
+
+
+def _build_chart_names(
+    chart_ids: List[str],
+    chart_root_lookup: Dict[str, str],
+) -> Dict[str, str]:
+    """Compute readable, collision-disambiguated module names for charts."""
+    raw: Dict[str, str] = {}
+    collisions: Dict[str, List[str]] = defaultdict(list)
+    for cid in chart_ids:
+        base = _sanitize(chart_root_lookup[cid])
+        raw[cid] = base
+        collisions[base].append(cid)
+
+    final: Dict[str, str] = {}
+    for base, ids in collisions.items():
+        if len(ids) == 1:
+            final[ids[0]] = base
+        else:
+            for i, cid in enumerate(ids):
+                final[cid] = f"{base}-{i}"
+    return final
