@@ -748,3 +748,470 @@ class TestFactorizeOnRealFile:
                 assert view[chart.id]["aux"] == []
             elif chart.kind == "tau":
                 assert view[chart.id]["principal"] == []
+
+
+# ── Scope resolution (Step 1 of the cstz-on-cstz refactor oracle) ──
+
+
+class TestScopeResolution:
+    """Exercise factorize(resolve_scopes=True).
+
+    Under scope resolution, Name and ast.arg nodes emit resolved
+    semantic addresses instead of their raw identifier strings.  Two
+    functions with identical bodies and different local variable
+    names produce identical sigma keys for every Name reference, so
+    cstz's existing hash-consing merges them into a single Addr0.
+
+    See AUDIT.md §"Query specification (Step 0)" for the full
+    rationale and the worked example this test class validates
+    empirically.
+    """
+
+    def test_two_functions_identical_bodies_different_names_hashcons(
+        self,
+    ) -> None:
+        """The core Step 1 invariant: two functions with identical
+        bodies modulo variable renaming produce exactly one For
+        Addr0 in the cascade.
+
+        Uses pre-parsed ast.Module to bypass the preexisting
+        ``Path(source).is_file()`` issue for long inline source
+        strings (commit 78703d9).
+        """
+        src = textwrap.dedent("""
+            def sigma_inner(ids, engine, rank, patch, label):
+                collect = []
+                anchor = ids[0]
+                for other in ids[1:]:
+                    if engine.find(anchor) == engine.find(other):
+                        continue
+                    collect.append(
+                        engine.emit(anchor, other, rank, patch, label)
+                    )
+                return collect
+
+            def tau_inner(items, eng, r, p, tag):
+                results = []
+                head = items[0]
+                for elem in items[1:]:
+                    if eng.find(head) == eng.find(elem):
+                        continue
+                    results.append(
+                        eng.emit(head, elem, r, p, tag)
+                    )
+                return results
+        """)
+
+        # Without scope resolution: each function has its own
+        # distinct For, If, Call, Name addr0s.
+        tree_raw = ast.parse(src)
+        engine_raw = factorize(tree_raw)
+        for_raw = sum(1 for a in engine_raw.document.addresses0
+                      if a.sort == "For")
+        assert for_raw == 2
+
+        # With scope resolution: the For subtrees hash-cons into
+        # one.
+        tree_resolved = ast.parse(src)
+        engine_resolved = factorize(tree_resolved, resolve_scopes=True)
+        for_resolved = sum(1 for a in engine_resolved.document.addresses0
+                           if a.sort == "For")
+        assert for_resolved == 1
+
+    def test_flag_false_is_exactly_baseline(self) -> None:
+        """Default behavior (resolve_scopes=False) must be byte-for-byte
+        identical to the pre-Step-1 classifier output."""
+        src = "def f(x): return x + 1\n"
+        engine = factorize(src)
+        # Name "x" inside the function still resolves to the raw
+        # identifier under flag=False
+        name_addr0s = [a for a in engine.document.addresses0
+                       if a.sort == "Name"]
+        assert len(name_addr0s) >= 1
+        # Find the sigma chart for any Name addr0 and verify its
+        # payload has an 'n' param (not 'addr')
+        for addr0 in name_addr0s:
+            chart = engine.document.chart_by_id(
+                addr0.segments[0].pairs[0].chart
+            )
+            params_dict = dict(chart.payload["params"])
+            assert "n" in params_dict
+            assert "addr" not in params_dict
+
+    def test_flag_true_emits_addr_param(self) -> None:
+        """Under resolve_scopes=True, Name nodes have 'addr' params
+        instead of 'n'."""
+        src = "def f(x): return x + 1\n"
+        engine = factorize(src, resolve_scopes=True)
+        name_addr0s = [a for a in engine.document.addresses0
+                       if a.sort == "Name"]
+        assert len(name_addr0s) >= 1
+        for addr0 in name_addr0s:
+            chart = engine.document.chart_by_id(
+                addr0.segments[0].pairs[0].chart
+            )
+            params_dict = dict(chart.payload["params"])
+            assert "addr" in params_dict
+            assert "n" not in params_dict
+
+    def test_local_resolution(self) -> None:
+        """Local variables resolve to ('local', i) with i = 0 for
+        the first parameter."""
+        src = "def f(a, b, c): return a + b + c\n"
+        engine = factorize(src, resolve_scopes=True)
+        # Find the three Name(Load) nodes a, b, c — each should
+        # have ('local', 0), ('local', 1), ('local', 2)
+        loads = []
+        for addr0 in engine.document.addresses0:
+            if addr0.sort == "Name":
+                chart = engine.document.chart_by_id(
+                    addr0.segments[0].pairs[0].chart
+                )
+                params_dict = dict(chart.payload["params"])
+                if "addr" in params_dict:
+                    addr = params_dict["addr"]
+                    if addr[0] == "local":
+                        loads.append(addr)
+        # Should see addresses for positions 0, 1, 2 (the
+        # Name(Store) at the arg declarations also emit as local
+        # addresses, so we expect 6 local references total:
+        # 3 args stored + 3 args loaded, but hash-consing merges
+        # them so we see each unique address once)
+        positions = {addr[1] for addr in loads}
+        assert {0, 1, 2} <= positions
+
+    def test_global_resolution(self) -> None:
+        """References to module-level or builtin names resolve to
+        ('global', name) — the string name is preserved."""
+        src = "def f(): return len([1, 2])\n"
+        engine = factorize(src, resolve_scopes=True)
+        # len and print (if used) should be ('global', 'len')
+        for addr0 in engine.document.addresses0:
+            if addr0.sort == "Name":
+                chart = engine.document.chart_by_id(
+                    addr0.segments[0].pairs[0].chart
+                )
+                params_dict = dict(chart.payload["params"])
+                if "addr" in params_dict:
+                    addr = params_dict["addr"]
+                    if addr[0] == "global":
+                        # Must preserve the string name
+                        assert addr[1] in ("len",)
+
+    def test_nonlocal_resolution_via_closure(self) -> None:
+        """A closure's free variable reference resolves to
+        ('nonlocal', depth, position)."""
+        src = textwrap.dedent("""
+            def outer(x):
+                def inner():
+                    return x
+                return inner
+        """)
+        engine = factorize(src, resolve_scopes=True)
+        # The `return x` in inner: `x` should resolve to
+        # ('nonlocal', 1, 0) — depth 1 (one scope boundary up),
+        # position 0 (x is outer's first parameter).
+        found = False
+        for addr0 in engine.document.addresses0:
+            if addr0.sort == "Name":
+                chart = engine.document.chart_by_id(
+                    addr0.segments[0].pairs[0].chart
+                )
+                params_dict = dict(chart.payload["params"])
+                if "addr" in params_dict:
+                    addr = params_dict["addr"]
+                    if addr[0] == "nonlocal":
+                        assert addr[1] == 1  # one boundary up
+                        assert addr[2] == 0  # first parameter
+                        found = True
+        assert found, "expected a nonlocal address for `return x`"
+
+    def test_nonlocal_declaration_resolves_to_outer(self) -> None:
+        """Explicit `nonlocal x` in an inner scope makes `x`
+        resolve to the outer scope's position."""
+        src = textwrap.dedent("""
+            def outer():
+                x = 1
+                def inner():
+                    nonlocal x
+                    x = 2
+                    return x
+                return inner
+        """)
+        engine = factorize(src, resolve_scopes=True)
+        # Find any Name node inside inner that references x —
+        # it should resolve to ('nonlocal', 1, 0).
+        # (outer's x is at position 0 because it's the first local
+        # bound in outer.)
+        found_nonlocal = False
+        for addr0 in engine.document.addresses0:
+            if addr0.sort == "Name":
+                chart = engine.document.chart_by_id(
+                    addr0.segments[0].pairs[0].chart
+                )
+                params_dict = dict(chart.payload["params"])
+                if "addr" in params_dict:
+                    addr = params_dict["addr"]
+                    if addr[0] == "nonlocal":
+                        found_nonlocal = True
+                        assert addr[1] == 1
+        assert found_nonlocal
+
+    def test_global_declaration_resolves_as_global(self) -> None:
+        """Explicit `global y` makes `y` resolve to ('global', 'y')
+        even when it's being assigned inside a function body."""
+        src = textwrap.dedent("""
+            y = 0
+            def f():
+                global y
+                y = 1
+        """)
+        engine = factorize(src, resolve_scopes=True)
+        # Inside f, the reference to y should be ('global', 'y').
+        found_global_y = False
+        for addr0 in engine.document.addresses0:
+            if addr0.sort == "Name":
+                chart = engine.document.chart_by_id(
+                    addr0.segments[0].pairs[0].chart
+                )
+                params_dict = dict(chart.payload["params"])
+                if "addr" in params_dict:
+                    addr = params_dict["addr"]
+                    if addr[0] == "global" and addr[1] == "y":
+                        found_global_y = True
+        assert found_global_y
+
+    def test_comprehension_is_its_own_scope(self) -> None:
+        """A list comprehension's loop variable is local to the
+        comprehension scope, not the enclosing function."""
+        src = textwrap.dedent("""
+            def f(xs):
+                return [x for x in xs]
+        """)
+        engine = factorize(src, resolve_scopes=True)
+        # The comprehension has one local: x at position 0.
+        # The reference to x in the element expression should
+        # resolve to ('local', 0) — local to the comprehension
+        # scope, not nonlocal to f.
+        found_comp_local = False
+        for addr0 in engine.document.addresses0:
+            if addr0.sort == "Name":
+                chart = engine.document.chart_by_id(
+                    addr0.segments[0].pairs[0].chart
+                )
+                params_dict = dict(chart.payload["params"])
+                if "addr" in params_dict:
+                    addr = params_dict["addr"]
+                    if addr == ("local", 0):
+                        found_comp_local = True
+        assert found_comp_local
+
+    def test_two_comprehensions_different_names_hashcons(self) -> None:
+        """Two list comprehensions with identical bodies and
+        different variable names merge to one ListComp Addr0."""
+        src = textwrap.dedent("""
+            def f(xs):
+                return [x * 2 for x in xs]
+
+            def g(ys):
+                return [y * 2 for y in ys]
+        """)
+        engine = factorize(src, resolve_scopes=True)
+        comps = [a for a in engine.document.addresses0
+                 if a.sort == "ListComp"]
+        assert len(comps) == 1
+
+    def test_env_resolve_local_and_nonlocal_directly(self) -> None:
+        """Unit test on _Env.resolve to exercise each branch."""
+        from cstz.pff_python_classifier import _Env
+        module = _Env()
+        outer = module.open_scope()
+        outer.bind_position("a")
+        outer.bind_position("b")
+        inner = outer.open_scope()
+        inner.bind_position("c")
+        inner.mark_inherited("a")  # `nonlocal a` in inner
+
+        # Local in inner
+        assert inner.resolve("c") == ("local", 0)
+        # Nonlocal declaration: `a` is inherited, so walker goes
+        # to outer and finds a at position 0
+        assert inner.resolve("a") == ("nonlocal", 1, 0)
+        # Free variable in inner: not declared, walks up
+        # (inner is boundary → depth=1; outer has `b` at pos 1)
+        assert inner.resolve("b") == ("nonlocal", 1, 1)
+        # Global lookup: `unbound_name` doesn't exist anywhere
+        assert inner.resolve("unknown") == ("global", "unknown")
+        # From outer: `a` is locally at position 0
+        assert outer.resolve("a") == ("local", 0)
+        # From outer: `c` is not found (inner's binding)
+        assert outer.resolve("c") == ("global", "c")
+
+    def test_env_non_boundary_child_is_transparent(self) -> None:
+        """A non-boundary child env (opened via child() rather than
+        open_scope()) inherits its parent's positions and doesn't
+        count as a scope boundary for depth."""
+        from cstz.pff_python_classifier import _Env
+        module = _Env()
+        outer = module.open_scope()
+        outer.bind_position("a")
+        transparent = outer.child()  # non-boundary
+        # `a` still resolves at depth 0 (transparent is not a boundary)
+        assert transparent.resolve("a") == ("local", 0)
+
+    def test_ast_arg_emits_addr_param(self) -> None:
+        """Parameter declaration nodes (ast.arg) also get resolved
+        addresses under the flag."""
+        src = "def f(x, y, z): pass\n"
+        engine = factorize(src, resolve_scopes=True)
+        arg_addr0s = [a for a in engine.document.addresses0
+                      if a.sort == "arg"]
+        assert len(arg_addr0s) == 3
+        addresses = set()
+        for addr0 in arg_addr0s:
+            chart = engine.document.chart_by_id(
+                addr0.segments[0].pairs[0].chart
+            )
+            params_dict = dict(chart.payload["params"])
+            assert "addr" in params_dict
+            addresses.add(params_dict["addr"])
+        assert addresses == {
+            ("local", 0), ("local", 1), ("local", 2),
+        }
+
+    def test_classdef_inside_function_binds_local(self) -> None:
+        """A class definition inside a function body binds the
+        class name as a local in the enclosing function.  This
+        exercises the ClassDef branch of _scan_scope_bindings."""
+        src = textwrap.dedent("""
+            def f():
+                class Inner:
+                    pass
+                return Inner
+        """)
+        tree = ast.parse(src)
+        engine = factorize(tree, resolve_scopes=True)
+        # Inside f, `Inner` is bound as a local at position 0.
+        # The `return Inner` reference should resolve to ('local', 0).
+        found_local = False
+        for addr0 in engine.document.addresses0:
+            if addr0.sort == "Name":
+                chart = engine.document.chart_by_id(
+                    addr0.segments[0].pairs[0].chart
+                )
+                params_dict = dict(chart.payload["params"])
+                if "addr" in params_dict:
+                    if params_dict["addr"] == ("local", 0):
+                        found_local = True
+        assert found_local
+
+    def test_import_inside_function_binds_local(self) -> None:
+        """An import inside a function body binds the imported
+        name as a local in the enclosing function.  Exercises the
+        alias branch of _scan_scope_bindings."""
+        src = textwrap.dedent("""
+            def f():
+                import os
+                return os.getcwd()
+        """)
+        tree = ast.parse(src)
+        engine = factorize(tree, resolve_scopes=True)
+        # `os` is bound as a local at position 0 in f.
+        # The `os.getcwd` reference should resolve `os` to ('local', 0).
+        found_local = False
+        for addr0 in engine.document.addresses0:
+            if addr0.sort == "Name":
+                chart = engine.document.chart_by_id(
+                    addr0.segments[0].pairs[0].chart
+                )
+                params_dict = dict(chart.payload["params"])
+                if "addr" in params_dict:
+                    if params_dict["addr"] == ("local", 0):
+                        found_local = True
+        assert found_local
+
+    def test_from_import_star_ignored(self) -> None:
+        """`from x import *` should not bind `*` as a local name.
+        Exercises the ``if bound != "*"`` guard."""
+        src = textwrap.dedent("""
+            def f():
+                from os.path import *
+                return None
+        """)
+        tree = ast.parse(src)
+        engine = factorize(tree, resolve_scopes=True)
+        # Should not crash; the `*` alias is silently skipped.
+        assert engine.document.receipt().wfStatus == "clean"
+
+    def test_import_with_asname_inside_function(self) -> None:
+        """`import x as y` inside a function binds `y`, not `x`.
+        Exercises the ``node.asname`` branch of the alias case."""
+        src = textwrap.dedent("""
+            def f():
+                import os as o
+                return o.getcwd()
+        """)
+        tree = ast.parse(src)
+        engine = factorize(tree, resolve_scopes=True)
+        # `o` is local at position 0 (not `os`).
+        found_local = False
+        for addr0 in engine.document.addresses0:
+            if addr0.sort == "Name":
+                chart = engine.document.chart_by_id(
+                    addr0.segments[0].pairs[0].chart
+                )
+                params_dict = dict(chart.payload["params"])
+                if "addr" in params_dict:
+                    if params_dict["addr"] == ("local", 0):
+                        found_local = True
+        assert found_local
+
+    def test_except_handler_binding(self) -> None:
+        """An except handler's `as e` binds `e` as a local in
+        the enclosing function.  Exercises the ExceptHandler
+        branch of _scan_scope_bindings."""
+        src = textwrap.dedent("""
+            def f():
+                try:
+                    x = 1
+                except ValueError as e:
+                    y = str(e)
+                    return y
+        """)
+        tree = ast.parse(src)
+        engine = factorize(tree, resolve_scopes=True)
+        # f's locals in first-appearance order:
+        #   x (try body), e (except as-name), y (except body)
+        # The references inside the except body should resolve
+        # properly.
+        assert engine.document.receipt().wfStatus == "clean"
+        # At minimum, the `e` and `y` references should be locals
+        # at distinct positions
+        positions = set()
+        for addr0 in engine.document.addresses0:
+            if addr0.sort == "Name":
+                chart = engine.document.chart_by_id(
+                    addr0.segments[0].pairs[0].chart
+                )
+                params_dict = dict(chart.payload["params"])
+                if "addr" in params_dict:
+                    addr = params_dict["addr"]
+                    if addr[0] == "local":
+                        positions.add(addr[1])
+        # Expect at least 2 distinct local positions
+        # (x at 0, e at 1, y at 2, or similar)
+        assert len(positions) >= 2
+
+    def test_except_handler_without_as_name(self) -> None:
+        """Except handler without `as` name still works."""
+        src = textwrap.dedent("""
+            def f():
+                try:
+                    x = 1
+                except ValueError:
+                    x = 2
+                return x
+        """)
+        tree = ast.parse(src)
+        engine = factorize(tree, resolve_scopes=True)
+        assert engine.document.receipt().wfStatus == "clean"
