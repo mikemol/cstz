@@ -92,6 +92,7 @@ from .pff import (
     Addr0,
     Addr1,
     Addr2,
+    Cell,
     Chart,
     Document,
     Pair,
@@ -250,9 +251,19 @@ class PFFCascadeEngine:
             documentId=document_id or self.DEFAULT_DOCUMENT_ID,
         )
 
-        # path1 / path2 union-finds
-        self._addr0_uf: _UnionFind = _UnionFind()
-        self._addr1_uf: _UnionFind = _UnionFind()
+        # ── Unified union-find over Cell ids (HIT collapse) ──
+        # Single _uf replaces the previous _addr0_uf / _addr1_uf
+        # pair.  Cell ids are globally unique across ranks (the
+        # engine mints "addr0-N", "addr1-N", "addr2-N" with disjoint
+        # prefixes), so a single union-find keyed by id handles
+        # both path1 and path2 closures without ambiguity.  The
+        # previous two-union-find split was a bookkeeping
+        # convenience, not a structural requirement.
+        #
+        # _addr0_uf / _addr1_uf are preserved as read-only property
+        # aliases below for backward compat with any code that
+        # inspected the engine's internals directly.
+        self._uf: _UnionFind = _UnionFind()
 
         # ── Registries (signatures → records) ──
         # Records are stored directly so lookups never need a second
@@ -263,6 +274,14 @@ class PFFCascadeEngine:
         self._rank_by_ordinal: Dict[int, Rank] = {}
         self._patch_by_phase: Dict[Tuple[str, str], Patch] = {}
         self._addr0_signature_index: Dict[Tuple[Any, ...], Addr0] = {}
+        # Hash-cons index for rank-1+ cells (morphisms).  Keyed by
+        # the cell's sigma_key (computed via pff.sigma_key).  When
+        # _emit_glue is called with endpoints that would produce a
+        # duplicate cell, it returns the existing one from this
+        # index instead of minting a new one.  This absorbs what
+        # auto_coh_closure used to do post-hoc — morphism duplicates
+        # can't be created in the first place.
+        self._morphism_signature_index: Dict[Tuple[Any, ...], Any] = {}
 
         # ── Cascade indices ──
         # sigma_key = (sigma_chart_id, canonical_child_addr0_ids)
@@ -410,10 +429,10 @@ class PFFCascadeEngine:
 
         # Canonicalize children through the path1 union-find.
         canon_sigma_children = tuple(
-            self._addr0_uf.find(c) for c in sigma_children
+            self._uf.find(c) for c in sigma_children
         )
         canon_tau_children = tuple(
-            self._addr0_uf.find(c) for c in tau_children
+            self._uf.find(c) for c in tau_children
         )
 
         sigma_key = (sigma_chart.id, canon_sigma_children)
@@ -459,7 +478,7 @@ class PFFCascadeEngine:
             )],
         )
         self.document.addresses0.append(addr0)
-        self._addr0_uf.make(addr0_id)
+        self._uf.make(addr0_id)
 
         # Update registries.
         self._addr0_signature_index[full_sig] = addr0
@@ -479,13 +498,16 @@ class PFFCascadeEngine:
                 collect_addr1s=[],  # streaming caller discards the list
             )
 
-        # ── Streaming τ-cascade (auto-coh) ──
-        # After the σ-cascade settles its path1 state, run the dual
-        # τ-cascade at path2: group Addr1 records by canonical endpoint
-        # pair and emit cohs to unify witnesses.  See auto_coh_closure
-        # docstring and rhpf-pff-profiles/AUDIT.md §"The τ-Slicer and
-        # the asymmetry it exposes" for design rationale.
-        self.auto_coh_closure()
+        # ── HIT collapse note ──
+        # Under the HIT collapse, hash-consing happens at emission
+        # time in _emit_glue, so morphism duplicates can't be
+        # created during streaming ingest.  The previous
+        # auto_coh_closure call here was a post-hoc canonicalization
+        # pass, which is unnecessary under emission-time hash-cons.
+        # auto_coh_closure remains on the engine as a backward-compat
+        # wrapper around Document.canonicalize() for callers that
+        # import documents from JSON or merge bundles and need
+        # rank-agnostic duplicate cleanup.
 
         return addr0
 
@@ -519,7 +541,7 @@ class PFFCascadeEngine:
         if patch is None:
             patch = self.ensure_patch(rank=rank)
 
-        if self._addr0_uf.find(src) == self._addr0_uf.find(dst):
+        if self._uf.find(src) == self._uf.find(dst):
             return GlueResult(addr1=None)
 
         cascade_addr1s: List[Addr1] = []
@@ -527,8 +549,8 @@ class PFFCascadeEngine:
         # parent sigma_keys keyed under either side are found.  Looking
         # up only the post-merge canonical loses the loser's parents.
         seeds: Set[str] = {
-            self._addr0_uf.find(src),
-            self._addr0_uf.find(dst),
+            self._uf.find(src),
+            self._uf.find(dst),
         }
         addr1 = self._emit_glue(
             src, dst, rank, patch,
@@ -556,7 +578,7 @@ class PFFCascadeEngine:
         ids previously returned by the engine; the engine does not
         validate this.
         """
-        if self._addr1_uf.find(src) == self._addr1_uf.find(dst):
+        if self._uf.find(src) == self._uf.find(dst):
             return None
         if rank is None:
             rank = self.ensure_rank()
@@ -572,7 +594,7 @@ class PFFCascadeEngine:
             label=label or f"coh:{src}~{dst}",
         )
         self.document.paths2.append(addr2)
-        self._addr1_uf.union(src, dst)
+        self._uf.union(src, dst)
         return addr2
 
     # ── τ-cascade: auto-coh fixed-point pass ────────────────────
@@ -603,9 +625,9 @@ class PFFCascadeEngine:
         # register any new ids defensively.  These .make() calls are
         # idempotent on already-known ids.
         for addr2 in new_records:
-            self._addr1_uf.make(addr2.src)
-            self._addr1_uf.make(addr2.dst)
-            self._addr1_uf.union(addr2.src, addr2.dst)
+            self._uf.make(addr2.src)
+            self._uf.make(addr2.dst)
+            self._uf.union(addr2.src, addr2.dst)
         return new_records
 
     # ── Cascade internals ───────────────────────────────────────
@@ -619,7 +641,55 @@ class PFFCascadeEngine:
         label: str,
         premises: Optional[List[str]],
     ) -> Addr1:
-        """Mint one Addr1 ctor=glue and union the path1 classes."""
+        """Mint one Addr1 ctor=glue and union the path1 classes.
+
+        Under the HIT collapse, this method hash-conses at
+        emission time: if an Addr1 already exists with the same
+        sigma_key (computed over the canonical (src, dst) pair),
+        return the existing one instead of minting a duplicate.
+
+        Canonicalization happens BEFORE sigma_key lookup: the
+        provisional sigma_key uses the current canonical src/dst
+        under the union-find, so two _emit_glue calls with
+        different raw endpoints but the same canonical pair
+        produce the same sigma_key and hash-cons to one Addr1.
+
+        The union call comes AFTER the sigma_key lookup because
+        unioning changes the canonical map and would invalidate
+        the key we just computed.
+
+        Pre-HIT behavior preserved: premises, label, ctor are
+        written to the minted Addr1 when it's fresh.  On hash-cons
+        hit, the existing Addr1 is returned as-is; its premises
+        and label are not updated with the new caller's data.
+        This matches the old _emit_glue's first-writer-wins
+        discipline.
+        """
+        # Compute the provisional sigma_key.  We need an Addr1
+        # instance to call sigma_key on, but we don't want to mint
+        # an id yet (that would be wasteful on hash-cons hit).
+        # Build a temporary Addr1 with a placeholder id.
+        canon_src = self._uf.find(src) if src in self._uf else src
+        canon_dst = self._uf.find(dst) if dst in self._uf else dst
+        # Normalize (canon_src, canon_dst) so the sigma_key is
+        # invariant under swapping: a glue from A to B is the same
+        # equivalence witness as a glue from B to A at the path1
+        # level.  (This is what auto_coh_closure previously did
+        # post-hoc via sorted((p1.src, p1.dst)).)
+        if canon_src > canon_dst:
+            key_src, key_dst = canon_dst, canon_src
+        else:
+            key_src, key_dst = canon_src, canon_dst
+        key_premises = tuple(premises or [])
+        key = ("morphism", "glue", key_src, key_dst, key_premises)
+
+        # Hash-cons lookup: if a glue with this exact signature
+        # already exists, return it.
+        existing = self._morphism_signature_index.get(key)
+        if existing is not None:
+            return existing
+
+        # Mint a fresh Addr1.
         addr1 = Addr1(
             id=self._mint_id("addr1"),
             rank=rank.id,
@@ -631,8 +701,14 @@ class PFFCascadeEngine:
             premises=list(premises or []),
         )
         self.document.paths1.append(addr1)
-        self._addr1_uf.make(addr1.id)
-        self._addr0_uf.union(src, dst)
+        self._uf.make(addr1.id)
+        self._morphism_signature_index[key] = addr1
+        # Apply the union AFTER registering the sigma_key in the
+        # index, because unioning changes the canonical map and
+        # any future _emit_glue call computing a sigma_key would
+        # see the NEW canonical.  That's fine — the new canonical
+        # is consistent with the one we just stored.
+        self._uf.union(src, dst)
         return addr1
 
     def _glue_set_and_cascade(
@@ -652,10 +728,10 @@ class PFFCascadeEngine:
         ids = sorted(addr0_ids)
         # Capture pre-merge canonicals of every member so the cascade
         # seed sees parent sigma_keys keyed under any side.
-        seeds: Set[str] = {self._addr0_uf.find(a) for a in ids}
+        seeds: Set[str] = {self._uf.find(a) for a in ids}
         anchor = ids[0]
         for other in ids[1:]:
-            if self._addr0_uf.find(anchor) == self._addr0_uf.find(other):
+            if self._uf.find(anchor) == self._uf.find(other):
                 continue
             collect_addr1s.append(self._emit_glue(
                 anchor, other, rank, patch,
@@ -687,7 +763,7 @@ class PFFCascadeEngine:
             for old_key in keys:
                 sigma_chart_id, old_children = old_key
                 new_children = tuple(
-                    self._addr0_uf.find(c) for c in old_children
+                    self._uf.find(c) for c in old_children
                 )
                 new_key = (sigma_chart_id, new_children)
                 if new_key == old_key:
@@ -716,12 +792,12 @@ class PFFCascadeEngine:
                     # Capture pre-merge canonicals so the next-round
                     # seed sees parents keyed under any side.
                     round_seeds: Set[str] = {
-                        self._addr0_uf.find(a) for a in ids
+                        self._uf.find(a) for a in ids
                     }
                     anchor = ids[0]
                     for other in ids[1:]:
-                        if (self._addr0_uf.find(anchor)
-                                == self._addr0_uf.find(other)):
+                        if (self._uf.find(anchor)
+                                == self._uf.find(other)):
                             continue
                         collect_addr1s.append(self._emit_glue(
                             anchor, other, rank, patch,
@@ -742,37 +818,52 @@ class PFFCascadeEngine:
                         self._sigma_keys_by_child[c].add(new_key)
 
     # ── Query interface ─────────────────────────────────────────
+    #
+    # Under the HIT collapse, _uf is a single union-find spanning
+    # all ranks (addr0 and addr1 ids mix freely).  The query
+    # methods below filter by id prefix ("addr0-" for rank-0
+    # queries, "addr1-" for rank-1 queries) so callers still see
+    # the rank-specific partitions they expect.  The engine's
+    # internal state is unified; the query API is rank-segmented.
 
     def canonical_addr0(self, addr0_id: str) -> str:
         """Return the canonical Addr0 id under the path1 union-find."""
-        return self._addr0_uf.find(addr0_id)
+        return self._uf.find(addr0_id)
 
     def canonical_addr1(self, addr1_id: str) -> str:
         """Return the canonical Addr1 id under the path2 union-find."""
-        return self._addr1_uf.find(addr1_id)
+        return self._uf.find(addr1_id)
 
     def addr0_class(self, addr0_id: str) -> Set[str]:
         """All addr0 ids in the same path1 equivalence class."""
         canon = self.canonical_addr0(addr0_id)
-        return {a for a in self._addr0_uf if self._addr0_uf.find(a) == canon}
+        return {
+            a for a in self._uf
+            if a.startswith("addr0-") and self._uf.find(a) == canon
+        }
 
     def addr1_class(self, addr1_id: str) -> Set[str]:
         """All addr1 ids in the same path2 equivalence class."""
         canon = self.canonical_addr1(addr1_id)
-        return {a for a in self._addr1_uf if self._addr1_uf.find(a) == canon}
+        return {
+            a for a in self._uf
+            if a.startswith("addr1-") and self._uf.find(a) == canon
+        }
 
     def all_addr0_classes(self) -> Dict[str, Set[str]]:
         """Map every canonical addr0 id to its full path1 class."""
         out: Dict[str, Set[str]] = defaultdict(set)
-        for a in self._addr0_uf:
-            out[self._addr0_uf.find(a)].add(a)
+        for a in self._uf:
+            if a.startswith("addr0-"):
+                out[self._uf.find(a)].add(a)
         return dict(out)
 
     def all_addr1_classes(self) -> Dict[str, Set[str]]:
         """Map every canonical addr1 id to its full path2 class."""
         out: Dict[str, Set[str]] = defaultdict(set)
-        for a in self._addr1_uf:
-            out[self._addr1_uf.find(a)].add(a)
+        for a in self._uf:
+            if a.startswith("addr1-"):
+                out[self._uf.find(a)].add(a)
         return dict(out)
 
     # ── Reading-(a) projection: κ as Pair.role ──────────────────

@@ -1393,26 +1393,42 @@ def _seeded_document():
 
 
 class TestAutoCohClosure:
-    """Verify the τ-cascade (auto-coh) fixed-point pass.
+    """Verify emission-time morphism hash-cons (formerly τ-cascade
+    auto-coh fixed-point pass).
 
-    Auto-coh is the dual of the σ-cascade at the path2 level: it
-    scans the Document's paths1 collection, groups Addr1 records by
-    their canonical endpoint pair under the current path1 partition,
-    and emits Addr2 ctor=coh records unifying witnesses within each
-    group.
+    **HIT collapse note:** before the HIT collapse, this class
+    tested the ``auto_coh_closure`` post-hoc pass that ran after
+    ``add_observation`` to find duplicate morphisms and emit
+    path2 cohs between them.  Under the HIT collapse, morphisms
+    are hash-consed at emission time in ``_emit_glue``, so
+    duplicates never get created in the first place.  The class
+    is kept with its original name for git blame continuity, but
+    its invariants now describe the emission-time behavior
+    directly.
 
-    Under correct usage, auto-coh fires automatically at the end of
-    every ``add_observation`` call on PFFCascadeEngine — users never
-    invoke it directly, just like they never invoke the σ-cascade's
-    _glue_set_and_cascade directly.
+    Under correct usage, the rank-1 cascade (_glue_set_and_cascade)
+    fires automatically at the end of every ``add_observation``
+    call.  Hash-cons at emission ensures no two Addr1s in
+    ``paths1`` have the same sigma_key over the canonical
+    endpoint pair at emission time.
     """
 
-    # ── Integration with add_observation (automatic invocation) ──
+    # ── Emission-time hash-cons behavior ──
 
-    def test_auto_coh_fires_on_three_member_class(self) -> None:
+    def test_three_member_class_emits_two_distinct_glues(self) -> None:
         """Three observations glued into one path1 class → two
-        glues emitted by σ-cascade → one auto-coh emitted by τ-cascade.
-        The chain uses (n-1) glues + (n-2) cohs for n witnesses."""
+        morphisms emitted (not three).  The second and third
+        observations each produce one morphism whose canonical
+        endpoints at emission time are distinct, so emission-time
+        hash-cons does not dedupe them.
+
+        Under the HIT collapse (post commit e[TBD]), paths2 stays
+        empty because the old auto_coh_closure post-hoc dedup pass
+        is deleted.  The two morphisms remain distinct witnesses
+        of the same path1 equivalence, which is the correct HIT
+        / ∞-groupoid discipline: distinct paths with the same
+        endpoints are first-class rank-1 cells.
+        """
         e = PFFCascadeEngine()
         sigma = e.ensure_chart("sigma", "X")
         tau_a = e.ensure_chart("tau", "A")
@@ -1421,10 +1437,15 @@ class TestAutoCohClosure:
         e.add_observation(sigma, tau_a)
         e.add_observation(sigma, tau_b)
         e.add_observation(sigma, tau_c)
-        assert len(e.document.paths1) == 2  # n - 1
-        assert len(e.document.paths2) == 1  # n - 2
-        # Both Addr1s are in one path2 class
-        assert len(e.document.path2_classes()) == 1
+        # Two distinct path1 witnesses (n-1 morphisms for n
+        # equivalent addr0s, anchor-first tree structure).
+        assert len(e.document.paths1) == 2
+        # Zero path2 cohs — auto_coh_closure no longer fires
+        # automatically; morphism distinctness is preserved.
+        assert len(e.document.paths2) == 0
+        # All three addr0s in one path1 equivalence class via
+        # the union-find closure.
+        assert len(e.document.path1_classes()) == 1
 
     def test_auto_coh_noop_on_pair(self) -> None:
         """Two observations → one glue → no cohs (nothing to cohere)."""
@@ -1457,30 +1478,41 @@ class TestAutoCohClosure:
         assert len(e.document.paths1) == 0
         assert len(e.document.paths2) == 0
 
-    def test_auto_coh_fires_on_four_member_class(self) -> None:
-        """Four observations → three glues → two cohs."""
+    def test_four_member_class_emits_three_distinct_glues(self) -> None:
+        """Four observations → three distinct morphisms, zero cohs.
+
+        HIT collapse: each new observation adds one morphism
+        connecting it to the existing anchor (addr0-0), and each
+        such morphism has distinct canonical endpoints at
+        emission time, so emission-time hash-cons doesn't dedupe.
+        """
         e = PFFCascadeEngine()
         sigma = e.ensure_chart("sigma", "X")
         for name in ("A", "B", "C", "D"):
             tau = e.ensure_chart("tau", name)
             e.add_observation(sigma, tau)
         assert len(e.document.paths1) == 3
-        assert len(e.document.paths2) == 2
-        assert len(e.document.path2_classes()) == 1
+        assert len(e.document.paths2) == 0
+        assert len(e.document.path1_classes()) == 1
 
-    def test_auto_coh_fires_on_recursive_cascade(self) -> None:
-        """Observations producing a recursive σ-cascade still see
-        auto-coh close the path2 level properly."""
+    def test_recursive_cascade_still_produces_correct_morphism_count(
+        self,
+    ) -> None:
+        """Recursive σ-cascade scenarios continue to produce the
+        right morphism count under the HIT collapse: (n-1)
+        morphisms for n equivalent addr0s, anchor-first tree.
+        The HIT collapse doesn't change the σ-cascade's structure;
+        it only deletes the post-hoc auto-coh pass.
+        """
         e = PFFCascadeEngine()
         sigma_leaf = e.ensure_chart("sigma", "Leaf")
-        sigma_parent = e.ensure_chart("sigma", "Parent")
         for name in ("A", "B", "C"):
             tau = e.ensure_chart("tau", f"L-{name}")
             e.add_observation(sigma_leaf, tau)
-        # All three leaves now in one path1 class, 2 glues emitted
+        # All three leaves in one path1 class, 2 glues emitted.
         assert len(e.document.paths1) == 2
-        # 1 auto-coh unifies the 2 glues
-        assert len(e.document.paths2) == 1
+        assert len(e.document.paths2) == 0
+        assert len(e.document.path1_classes()) == 1
 
     # ── Engine-level vs Document-level parity ──
 
@@ -1871,3 +1903,523 @@ class TestSigmaKeyEqualsPath1InPureCascade:
         e.add_observation(sigma, tau_b)
         e.add_observation(sigma, tau_c)
         self._assert_sigma_key_equals_path1(e)
+
+
+# ── HIT collapse additions (Step 1.5) ──────────────────────────────
+
+
+class TestSigmaKeyFunction:
+    """Cover the module-level ``pff.sigma_key`` function added by
+    the HIT collapse (Step 1.5).
+
+    sigma_key produces a rank-agnostic hash-cons signature for any
+    Cell type (Addr0, Addr1, Addr2).  The signature shape differs
+    by rank so the function can be called on any cell without the
+    caller knowing its rank.
+    """
+
+    def test_addr0_signature_includes_sort_and_segments(self) -> None:
+        from cstz.pff import (
+            Addr0, Pair, Segment, Step, Hop, sigma_key,
+        )
+        a = Addr0(
+            id="a0",
+            sort="X",
+            segments=[
+                Segment(
+                    rank="r0", phase="ingest", patch="p0",
+                    pairs=[Pair(
+                        chart="c0", root="root",
+                        route=[Step(kind="child", arg=0)],
+                        boundary=[Hop(
+                            boundary="b0", side="left", port="lhs",
+                        )],
+                        role="principal",
+                    )],
+                ),
+            ],
+        )
+        key = sigma_key(a)
+        assert key[0] == "addr0"
+        assert key[1] == "X"
+        # The segments-signature is a tuple of (rank, phase, patch,
+        # pair-tuple) elements
+        assert len(key[2]) == 1
+        rank_phase_patch_pairs = key[2][0]
+        assert rank_phase_patch_pairs[:3] == ("r0", "ingest", "p0")
+
+    def test_addr0_signature_equal_for_equivalent_cells(self) -> None:
+        from cstz.pff import Addr0, Pair, Segment, sigma_key
+        mk = lambda _id: Addr0(
+            id=_id,
+            sort="X",
+            segments=[Segment(
+                rank="r0", phase="ingest", patch="p0",
+                pairs=[Pair(chart="c0", root="r", role="principal")],
+            )],
+        )
+        # Different ids, same structural content → same signature
+        assert sigma_key(mk("a0")) == sigma_key(mk("b0"))
+
+    def test_addr1_signature_morphism_shape(self) -> None:
+        from cstz.pff import Addr1, sigma_key
+        a1 = Addr1(
+            id="g", rank="r0", ctor="glue", src="a", dst="b",
+            premises=["p1", "p2"],
+        )
+        key = sigma_key(a1)
+        assert key == ("morphism", "glue", "a", "b", ("p1", "p2"))
+
+    def test_addr2_signature_morphism_shape(self) -> None:
+        from cstz.pff import Addr2, sigma_key
+        a2 = Addr2(
+            id="c", rank="r0", ctor="coh", src="g1", dst="g2",
+        )
+        key = sigma_key(a2)
+        # Addr2 doesn't have premises; signature gets empty tuple
+        assert key == ("morphism", "coh", "g1", "g2", ())
+
+    def test_addr1_signature_differs_from_addr2_with_same_endpoints(
+        self,
+    ) -> None:
+        """Addr1 and Addr2 with the same src/dst are different
+        morphisms because they have different ctors; sigma_key
+        must distinguish them."""
+        from cstz.pff import Addr1, Addr2, sigma_key
+        a1 = Addr1(id="g", rank="r0", ctor="glue", src="x", dst="y")
+        a2 = Addr2(id="c", rank="r0", ctor="coh", src="x", dst="y")
+        assert sigma_key(a1) != sigma_key(a2)
+
+    def test_addr0_signature_differs_from_morphism_signature(self) -> None:
+        """Addr0 signature tuple starts with 'addr0', morphism
+        signatures start with 'morphism'."""
+        from cstz.pff import Addr0, Addr1, Pair, Segment, sigma_key
+        a0 = Addr0(
+            id="a", sort="X",
+            segments=[Segment(
+                rank="r0", phase="ingest", patch="p0",
+                pairs=[Pair(chart="c", root="r", role="principal")],
+            )],
+        )
+        a1 = Addr1(id="g", rank="r0", ctor="glue", src="a", dst="b")
+        assert sigma_key(a0)[0] == "addr0"
+        assert sigma_key(a1)[0] == "morphism"
+
+
+class TestDocumentCells:
+    """Cover ``Document.cells()`` iterator added by HIT collapse."""
+
+    def test_cells_empty_document(self) -> None:
+        from cstz.pff import Document, Rank, Patch
+        d = Document(
+            documentId="empty",
+            ranks=[Rank(id="r0", ordinal=0)],
+            patches=[Patch(id="p0", rank="r0", phase="ingest")],
+        )
+        assert list(d.cells()) == []
+
+    def test_cells_iterates_all_ranks(self) -> None:
+        from cstz.pff import (
+            Document, Rank, Patch, Addr0, Addr1, Addr2,
+            Pair, Segment,
+        )
+        d = Document(
+            documentId="mixed",
+            ranks=[Rank(id="r0", ordinal=0)],
+            patches=[Patch(id="p0", rank="r0", phase="ingest")],
+            addresses0=[Addr0(
+                id="a0", sort="X",
+                segments=[Segment(
+                    rank="r0", phase="ingest", patch="p0",
+                    pairs=[Pair(
+                        chart="c0", root="a0", role="principal",
+                    )],
+                )],
+            )],
+            paths1=[Addr1(
+                id="g0", rank="r0", ctor="glue", src="a0", dst="a0",
+            )],
+            paths2=[Addr2(
+                id="c0", rank="r0", ctor="coh", src="g0", dst="g0",
+            )],
+        )
+        cells = list(d.cells())
+        assert len(cells) == 3
+        assert cells[0].id == "a0"
+        assert cells[1].id == "g0"
+        assert cells[2].id == "c0"
+
+    def test_cells_yields_addresses0_first(self) -> None:
+        """Stable iteration order: addresses0, then paths1, then paths2."""
+        from cstz.pff import (
+            Document, Rank, Patch, Addr0, Addr1, Addr2,
+            Pair, Segment,
+        )
+        d = Document(
+            documentId="order",
+            ranks=[Rank(id="r0", ordinal=0)],
+            patches=[Patch(id="p0", rank="r0", phase="ingest")],
+            addresses0=[
+                Addr0(
+                    id=f"a{i}", sort="X",
+                    segments=[Segment(
+                        rank="r0", phase="ingest", patch="p0",
+                        pairs=[Pair(
+                            chart="c0", root=f"a{i}", role="principal",
+                        )],
+                    )],
+                )
+                for i in range(2)
+            ],
+            paths1=[Addr1(
+                id="g0", rank="r0", ctor="glue", src="a0", dst="a1",
+            )],
+            paths2=[Addr2(
+                id="c0", rank="r0", ctor="coh", src="g0", dst="g0",
+            )],
+        )
+        ids = [c.id for c in d.cells()]
+        assert ids == ["a0", "a1", "g0", "c0"]
+
+
+class TestDocumentCanonicalize:
+    """Cover ``Document.canonicalize()`` post-hoc dedup pass.
+
+    canonicalize is the generic rank-agnostic dedup that handles
+    any duplicate cells, not just morphism duplicates.  It's the
+    backward-compat path for Documents constructed outside the
+    cascade (merge_bundle, JSON import, direct test fixtures).
+    """
+
+    def test_canonicalize_empty_document(self) -> None:
+        from cstz.pff import Document, Rank, Patch
+        d = Document(
+            documentId="empty",
+            ranks=[Rank(id="r0", ordinal=0)],
+            patches=[Patch(id="p0", rank="r0", phase="ingest")],
+        )
+        assert d.canonicalize() == []
+
+    def test_canonicalize_no_duplicates(self) -> None:
+        from cstz.pff import (
+            Document, Rank, Patch, Addr0, Addr1, Pair, Segment,
+        )
+        d = Document(
+            documentId="unique",
+            ranks=[Rank(id="r0", ordinal=0)],
+            patches=[Patch(id="p0", rank="r0", phase="ingest")],
+            addresses0=[
+                Addr0(
+                    id="a0", sort="X",
+                    segments=[Segment(
+                        rank="r0", phase="ingest", patch="p0",
+                        pairs=[Pair(
+                            chart="c0", root="a0", role="principal",
+                        )],
+                    )],
+                ),
+                Addr0(
+                    id="a1", sort="Y",  # different sort → different sigma_key
+                    segments=[Segment(
+                        rank="r0", phase="ingest", patch="p0",
+                        pairs=[Pair(
+                            chart="c0", root="a1", role="principal",
+                        )],
+                    )],
+                ),
+            ],
+            paths1=[
+                Addr1(id="g0", rank="r0", ctor="glue", src="a0", dst="a1"),
+            ],
+        )
+        assert d.canonicalize() == []
+        assert len(d.addresses0) == 2
+        assert len(d.paths1) == 1
+
+    def test_canonicalize_duplicate_morphisms(self) -> None:
+        """Two Addr1s with identical sigma_keys → one removed."""
+        from cstz.pff import (
+            Document, Rank, Patch, Addr0, Addr1, Pair, Segment,
+        )
+        d = Document(
+            documentId="dup-morph",
+            ranks=[Rank(id="r0", ordinal=0)],
+            patches=[Patch(id="p0", rank="r0", phase="ingest")],
+            addresses0=[
+                Addr0(
+                    id=_id, sort="X",
+                    segments=[Segment(
+                        rank="r0", phase="ingest", patch="p0",
+                        pairs=[Pair(
+                            chart="c0", root=_id, role="principal",
+                        )],
+                    )],
+                )
+                for _id in ("a0", "a1")
+            ],
+            paths1=[
+                Addr1(id="g0", rank="r0", ctor="glue", src="a0", dst="a1"),
+                Addr1(id="g1", rank="r0", ctor="glue", src="a0", dst="a1"),
+            ],
+        )
+        removed = d.canonicalize()
+        assert len(removed) == 1
+        assert removed[0].id == "g1"  # second one is dedup victim
+        assert len(d.paths1) == 1
+        assert d.paths1[0].id == "g0"
+
+    def test_canonicalize_duplicate_rank0_cells(self) -> None:
+        """Two Addr0s with identical sort + segments → one removed."""
+        from cstz.pff import (
+            Document, Rank, Patch, Addr0, Pair, Segment,
+        )
+        d = Document(
+            documentId="dup-rank0",
+            ranks=[Rank(id="r0", ordinal=0)],
+            patches=[Patch(id="p0", rank="r0", phase="ingest")],
+        )
+        for _id in ("a0", "a1"):
+            d.addresses0.append(Addr0(
+                id=_id, sort="X",
+                segments=[Segment(
+                    rank="r0", phase="ingest", patch="p0",
+                    pairs=[Pair(
+                        chart="c0", root="same-root", role="principal",
+                    )],
+                )],
+            ))
+        # Both Addr0s have identical sort and segments → same sigma_key
+        removed = d.canonicalize()
+        assert len(removed) == 1
+        assert len(d.addresses0) == 1
+
+    def test_canonicalize_rewrites_path1_references(self) -> None:
+        """When a rank-0 cell is removed, surviving paths1 references
+        to it must be rewritten to the canonical survivor."""
+        from cstz.pff import (
+            Document, Rank, Patch, Addr0, Addr1, Pair, Segment,
+        )
+        d = Document(
+            documentId="rewrite",
+            ranks=[Rank(id="r0", ordinal=0)],
+            patches=[Patch(id="p0", rank="r0", phase="ingest")],
+            addresses0=[
+                Addr0(
+                    id="a0", sort="X",
+                    segments=[Segment(
+                        rank="r0", phase="ingest", patch="p0",
+                        pairs=[Pair(
+                            chart="c0", root="same",
+                            role="principal",
+                        )],
+                    )],
+                ),
+                Addr0(  # duplicate of a0
+                    id="a1", sort="X",
+                    segments=[Segment(
+                        rank="r0", phase="ingest", patch="p0",
+                        pairs=[Pair(
+                            chart="c0", root="same",
+                            role="principal",
+                        )],
+                    )],
+                ),
+                Addr0(
+                    id="a2", sort="Y",
+                    segments=[Segment(
+                        rank="r0", phase="ingest", patch="p0",
+                        pairs=[Pair(
+                            chart="c0", root="a2", role="principal",
+                        )],
+                    )],
+                ),
+            ],
+            paths1=[
+                # References a1 (the duplicate) — should get rewritten to a0
+                Addr1(
+                    id="g0", rank="r0", ctor="transport",
+                    src="a1", dst="a2", premises=["a1"],
+                ),
+            ],
+        )
+        d.canonicalize()
+        # a1 was removed; g0's src and premises should now reference a0
+        assert len(d.addresses0) == 2
+        assert d.paths1[0].src == "a0"
+        assert d.paths1[0].premises == ["a0"]
+
+    def test_canonicalize_rewrites_path2_references(self) -> None:
+        """Path2 src/dst referring to a removed morphism get rewritten."""
+        from cstz.pff import (
+            Document, Rank, Patch, Addr0, Addr1, Addr2,
+            Pair, Segment,
+        )
+        d = Document(
+            documentId="path2",
+            ranks=[Rank(id="r0", ordinal=0)],
+            patches=[Patch(id="p0", rank="r0", phase="ingest")],
+            addresses0=[
+                Addr0(
+                    id=_id, sort="X",
+                    segments=[Segment(
+                        rank="r0", phase="ingest", patch="p0",
+                        pairs=[Pair(
+                            chart="c0", root=_id, role="principal",
+                        )],
+                    )],
+                )
+                for _id in ("a0", "a1")
+            ],
+            paths1=[
+                Addr1(
+                    id="g0", rank="r0", ctor="glue",
+                    src="a0", dst="a1",
+                ),
+                # Duplicate of g0
+                Addr1(
+                    id="g1", rank="r0", ctor="glue",
+                    src="a0", dst="a1",
+                ),
+            ],
+            paths2=[
+                Addr2(
+                    id="c0", rank="r0", ctor="vcomp",
+                    src="g1", dst="g1",
+                ),
+            ],
+        )
+        d.canonicalize()
+        # g1 removed; c0's src/dst should now reference g0
+        assert len(d.paths1) == 1
+        assert d.paths2[0].src == "g0"
+        assert d.paths2[0].dst == "g0"
+
+    def test_canonicalize_removes_duplicate_path2(self) -> None:
+        """Two Addr2s with identical sigma_keys → one removed.
+
+        Also exercises the continue-on-removed branch and the
+        path2 removal branch in canonicalize.
+        """
+        from cstz.pff import (
+            Document, Rank, Patch, Addr0, Addr1, Addr2,
+            Pair, Segment,
+        )
+        d = Document(
+            documentId="dup-path2",
+            ranks=[Rank(id="r0", ordinal=0)],
+            patches=[Patch(id="p0", rank="r0", phase="ingest")],
+            addresses0=[
+                Addr0(
+                    id=_id, sort="X",
+                    segments=[Segment(
+                        rank="r0", phase="ingest", patch="p0",
+                        pairs=[Pair(
+                            chart="c0", root=_id, role="principal",
+                        )],
+                    )],
+                )
+                for _id in ("a0", "a1")
+            ],
+            paths1=[
+                Addr1(id="g0", rank="r0", ctor="glue", src="a0", dst="a1"),
+                Addr1(id="g1", rank="r0", ctor="transport", src="a0", dst="a1"),
+            ],
+            paths2=[
+                Addr2(id="c0", rank="r0", ctor="coh", src="g0", dst="g1"),
+                Addr2(id="c1", rank="r0", ctor="coh", src="g0", dst="g1"),
+            ],
+        )
+        removed = d.canonicalize()
+        # Both Addr2s have the same sigma_key → one is removed
+        removed_ids = {c.id for c in removed}
+        assert "c1" in removed_ids
+        assert len(d.paths2) == 1
+
+    def test_canonicalize_rewrites_classview_member_addr0(self) -> None:
+        """ClassView.member.address0 references to removed rank-0
+        cells get rewritten."""
+        from cstz.pff import (
+            Document, Rank, Patch, Addr0, Pair, Segment,
+            ClassView, ClassMember,
+        )
+        d = Document(
+            documentId="classview",
+            ranks=[Rank(id="r0", ordinal=0)],
+            patches=[Patch(id="p0", rank="r0", phase="ingest")],
+            addresses0=[
+                Addr0(
+                    id="a0", sort="X",
+                    segments=[Segment(
+                        rank="r0", phase="ingest", patch="p0",
+                        pairs=[Pair(
+                            chart="c0", root="same",
+                            role="principal",
+                        )],
+                    )],
+                ),
+                Addr0(  # duplicate
+                    id="a1", sort="X",
+                    segments=[Segment(
+                        rank="r0", phase="ingest", patch="p0",
+                        pairs=[Pair(
+                            chart="c0", root="same",
+                            role="principal",
+                        )],
+                    )],
+                ),
+            ],
+            classViews=[
+                ClassView(
+                    id="cv0", rank="r0", phase="ingest",
+                    truncation="full", congruence="alpha",
+                    members=[
+                        ClassMember(classId="k0", address0="a0"),
+                        ClassMember(classId="k0", address0="a1"),
+                    ],
+                ),
+            ],
+        )
+        d.canonicalize()
+        # Both members should now point to a0
+        member_addrs = [m.address0 for m in d.classViews[0].members]
+        assert member_addrs == ["a0", "a0"]
+
+
+class TestEmissionHashConsSwapBranch:
+    """Exercise the src-canonical > dst-canonical branch of
+    ``_emit_glue``'s sigma_key normalization (pff_cascade.py:680).
+
+    Normal σ-cascade operation uses anchor-first emission, so the
+    anchor (lex-smallest id) is always the src in emission calls,
+    putting the canonical pair in (canon_src, canon_dst) order
+    where canon_src ≤ canon_dst.  The swap branch only fires when
+    a direct user-initiated glue call has src canonicalize to
+    something greater than dst's canonical.
+    """
+
+    def test_manual_glue_src_greater_than_dst_triggers_swap(self) -> None:
+        """Direct engine.glue() with src > dst's canonical triggers
+        the swap branch in _emit_glue."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau_a = e.ensure_chart("tau", "A")
+        tau_b = e.ensure_chart("tau", "B")
+        a = e.add_observation(sigma, tau_a)  # addr0-0
+        b = e.add_observation(sigma, tau_b)  # addr0-1
+        # After the streaming cascade, a and b are already unified.
+        # We force a fresh equivalence class by creating a third
+        # addr0 that's not yet glued, then issue a manual glue
+        # from it-with-greater-id to it-with-smaller-id.
+        sigma2 = e.ensure_chart("sigma", "Y")
+        tau_c = e.ensure_chart("tau", "C")
+        c = e.add_observation(sigma2, tau_c)  # addr0-2, disjoint
+        # Manual glue: src=c (addr0-2) > dst=a (addr0-0 canonical)
+        # This forces the swap: canon_src=addr0-2 > canon_dst=addr0-0
+        result = e.glue(c.id, a.id)
+        # Under normal operation this produces a new Addr1 and
+        # the swap-normalized key is ("morphism", "glue", "addr0-0",
+        # "addr0-2", ...).  We don't assert the exact key shape
+        # here — just that the glue succeeds and doesn't crash.
+        assert result.addr1 is not None
+        assert e.canonical_addr0(c.id) == e.canonical_addr0(a.id)

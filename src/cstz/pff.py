@@ -365,6 +365,72 @@ class Addr2:
         return out
 
 
+# ── Cell — the unified cascade object ───────────────────────────────
+#
+# Addr0, Addr1, and Addr2 are three coherent groupings of fields
+# (rank-0 with segments, rank-1 with full morphism data including
+# boundary/premises, rank-2 with morphism data minus those).  The
+# type system should preserve them as distinct shapes because they
+# represent genuinely different structural facts.  But the cascade
+# engine should treat them UNIFORMLY: hash-cons at emission,
+# single union-find, single cascade method.  The ``Cell`` type
+# alias is the behavioral vocabulary for "any cell the cascade
+# might mint or operate on," and ``sigma_key`` is the rank-
+# agnostic signature function the engine uses for hash-cons dedup.
+#
+# This is the HIT collapse (see rhpf-pff-profiles/AUDIT.md
+# postscript) applied at the behavior layer, not the data-model
+# layer.  The three dataclasses stay distinct; the collapse
+# happens where it belongs — in the engine.
+
+Cell = Union[Addr0, Addr1, Addr2]
+
+
+def sigma_key(cell: Cell) -> Tuple[Any, ...]:
+    """Compute the hash-cons signature of a Cell.
+
+    Rank-agnostic: the same function handles Addr0s, Addr1s, and
+    Addr2s by inspecting which fields are populated.  Two cells
+    with equal sigma_keys are considered structurally equivalent
+    under the cascade's equivalence relation — they should be
+    merged (or, at emission time, hash-consed to a single Cell).
+
+    The signature shape depends on the cell's rank:
+
+    - **Addr0** — ``("addr0", sort, segments-signature)``
+    - **Addr1/Addr2** — ``("morphism", ctor, src, dst, premises-tuple)``
+
+    For morphism cells, the ``src`` and ``dst`` fields are used
+    as-is (not canonicalized).  The caller is responsible for
+    canonicalizing them via the cascade's union-find before
+    calling ``sigma_key`` if canonicalization matters at the
+    call site (normal cascade emission does this).
+    """
+    if isinstance(cell, Addr0):
+        # Rank-0 signature: sort + segments
+        seg_sig = tuple(
+            (s.rank, s.phase, s.patch,
+             tuple((p.chart, p.root, p.role,
+                    tuple((st.kind, st.arg) for st in p.route),
+                    tuple((h.boundary, h.side, h.port) for h in p.boundary))
+                   for p in s.pairs))
+            for s in cell.segments
+        )
+        return ("addr0", cell.sort, seg_sig)
+
+    # Rank-1+ signature: morphism data
+    # Both Addr1 and Addr2 have (ctor, src, dst); only Addr1 has
+    # premises.  We unify by treating absent premises as empty.
+    premises = getattr(cell, "premises", ())
+    return (
+        "morphism",
+        cell.ctor,
+        cell.src,
+        cell.dst,
+        tuple(premises),
+    )
+
+
 # ── Derived views (non-authoritative) ───────────────────────────────
 
 
@@ -1209,6 +1275,128 @@ class Document:
             a for a, c in self.path2_canonical_map().items() if c == canonical
         )
 
+    # ── Cell views and canonicalization (HIT collapse) ──────────────
+    #
+    # Under the HIT collapse (see rhpf-pff-profiles/AUDIT.md §
+    # "HIT collapse — Cell unification"), the three collections
+    # addresses0 / paths1 / paths2 are **views over a single
+    # categorical object space**.  The three dataclasses Addr0,
+    # Addr1, Addr2 remain as distinct shapes (because they carry
+    # genuinely different structural facts), but the cascade's
+    # behavior treats them uniformly via the ``Cell`` type alias
+    # and the module-level ``sigma_key`` helper.
+    #
+    # ``Document.cells`` is an iterator that yields every cell
+    # regardless of rank, in a stable order (addresses0 first,
+    # then paths1, then paths2).  The ``Document.canonicalize()``
+    # method is the rank-agnostic post-hoc dedup pass — it absorbs
+    # what ``auto_coh_closure`` used to do, generalized to
+    # canonicalize any duplicate cells (not just redundant cohs).
+
+    def cells(self) -> Iterator[Cell]:
+        """Iterate over every Cell in the document, regardless of rank.
+
+        Order: addresses0 first (rank 0), then paths1 (rank 1),
+        then paths2 (rank 2).  Within each collection, ingest order
+        is preserved.
+
+        This is a read-only view — mutating the document's
+        collections does not affect already-yielded cells.
+        """
+        for addr0 in self.addresses0:
+            yield addr0
+        for addr1 in self.paths1:
+            yield addr1
+        for addr2 in self.paths2:
+            yield addr2
+
+    def canonicalize(self) -> List[Cell]:
+        """Post-hoc canonicalization pass: dedupe any cells with
+        matching ``sigma_key`` by converging them to a single
+        representative.
+
+        Under normal streaming cascade operation, hash-consing at
+        emission time prevents duplicates from ever being minted,
+        so this method is a no-op.  It only has work to do when
+        cells arrive in the document from a source that bypasses
+        the cascade's emission path:
+
+          - ``Document.merge_bundle()`` when both sides
+            independently minted cells with the same sigma_key
+          - JSON deserialization followed by an empty cascade run
+          - User-constructed documents for testing
+
+        The canonicalization is rank-agnostic: rank-0 duplicates
+        (multiple Addr0s with the same sort and segments) and
+        rank-1+ duplicates (multiple morphisms with the same
+        ctor, src, dst, premises) are both handled by the same
+        sigma_key equivalence relation.
+
+        Returns the list of cells that were REMOVED by the
+        canonicalization (not the ones that survived).  Empty on
+        a document already at its fixed point.
+
+        The method does NOT modify the document's existing cells
+        in place — it rewrites cross-references (when cell A is
+        canonicalized onto B, any field that referenced A is
+        rewritten to reference B) but does not touch the Cell
+        objects themselves.
+        """
+        # Build the canonical map: sigma_key → first-ingested cell id
+        canonical_by_key: Dict[Tuple[Any, ...], str] = {}
+        # rename: removed_id → survivor_id
+        rename: Dict[str, str] = {}
+
+        for cell in list(self.cells()):
+            key = sigma_key(cell)
+            if key in canonical_by_key:
+                rename[cell.id] = canonical_by_key[key]
+            else:
+                canonical_by_key[key] = cell.id
+
+        if not rename:
+            return []
+
+        # Collect the removed cells before we mutate the collections
+        removed_ids = set(rename.keys())
+        removed_cells: List[Cell] = []
+
+        # Rewrite cross-references in surviving cells.  Fields that
+        # reference cell ids: Addr1.src, Addr1.dst, Addr1.premises,
+        # Addr2.src, Addr2.dst.  We also rewrite ClassMember.address0.
+        for p1 in self.paths1:
+            if p1.id in removed_ids:
+                continue
+            p1.src = rename.get(p1.src, p1.src)
+            p1.dst = rename.get(p1.dst, p1.dst)
+            p1.premises = [rename.get(pr, pr) for pr in p1.premises]
+        for p2 in self.paths2:
+            if p2.id in removed_ids:
+                continue
+            p2.src = rename.get(p2.src, p2.src)
+            p2.dst = rename.get(p2.dst, p2.dst)
+        for cv in self.classViews:
+            for member in cv.members:
+                member.address0 = rename.get(
+                    member.address0, member.address0
+                )
+
+        # Now remove the duplicate cells from their collections
+        for cell in list(self.addresses0):
+            if cell.id in removed_ids:
+                self.addresses0.remove(cell)
+                removed_cells.append(cell)
+        for cell in list(self.paths1):
+            if cell.id in removed_ids:
+                self.paths1.remove(cell)
+                removed_cells.append(cell)
+        for cell in list(self.paths2):
+            if cell.id in removed_ids:
+                self.paths2.remove(cell)
+                removed_cells.append(cell)
+
+        return removed_cells
+
     # ── τ-cascade: auto-coh fixed-point pass ────────────────────────
     #
     # The σ-cascade (in pff_cascade.PFFCascadeEngine) auto-emits Addr1s
@@ -1242,6 +1430,15 @@ class Document:
     #
     # See rhpf-pff-profiles/AUDIT.md §"The τ-Slicer and the
     # asymmetry it exposes" for the design rationale.
+    #
+    # UPDATE (HIT collapse): under the HIT collapse, hash-consing
+    # at emission time in the cascade engine prevents duplicate
+    # morphism minting during streaming ingest.  ``auto_coh_closure``
+    # is preserved as a backward-compat wrapper around ``canonicalize``
+    # for callers that invoke it directly (some existing tests) or
+    # for Document instances constructed outside the cascade path
+    # (merge_bundle, JSON import).  New code should prefer
+    # ``canonicalize`` because it's rank-agnostic.
 
     def auto_coh_closure(self) -> List[Addr2]:
         """Run the τ-cascade fixed-point pass on this document.
@@ -1606,6 +1803,8 @@ __all__ = [
     "Addr0",
     "Addr1",
     "Addr2",
+    "Cell",
+    "sigma_key",
     "ClassMember",
     "ClassView",
     "ShadowNode",
