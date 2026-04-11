@@ -469,6 +469,151 @@ explicitly out of scope even within AMR conformance.  Effort:
 
 ---
 
+## Postscript: GF(2) double-use and the H₀ correspondence
+
+This audit's first draft framed the cstz cascade as "structural-key
+collision detection + union-find" and contrasted that with a literal
+"`Ax = f` over F₂" linear-algebra solver, treating the two as
+operationally distinct.  That framing was wrong.  The two are the
+same computation viewed through dual lenses, and a complete audit
+should make the equivalence explicit.
+
+### The mathematical equivalence
+
+For a graph `G` with vertex set `V` and edge set `E`, the connected
+components of `G` are exactly the basis of
+
+```text
+H₀(G; F₂)  =  F₂^V / im(∂)
+```
+
+where `∂ : F₂^E → F₂^V` is the boundary map sending each edge
+`(a, b)` to the formal sum `e_a + e_b` (XOR over F₂).
+
+In other words: **computing connected components = computing the
+cokernel of the boundary map = solving a homogeneous linear system
+over F₂.**
+
+Union-find is just an asymptotically faster algorithm for the same
+computation.  Given a stream of edges, union-find produces the
+connected-components partition with α(n) inverse-Ackermann
+amortization per edge; explicit Gaussian elimination on the boundary
+matrix produces the same partition in O(EV) time.  Same answer; same
+mathematical content; different data structure.
+
+The cstz cascade in `_addr0_uf` IS solving `Ax = 0` over F₂, where:
+
+- **Variables** `x ∈ F₂^N` index the addr0 set
+- **Each glue Addr1** contributes one row to A: for `glue(a, b)`,
+  the row is `e_src + e_dst`
+- **The output** is `ker(A^T) = H₀(G_glue; F₂)` = the partition of
+  addr0s into path1 equivalence classes
+
+The same picture applies to path2: `_addr1_uf` solves the analogous
+system over Addr1 ids with rows contributed by each Addr2 with
+`ctor=coh`.
+
+### What the cascade adds: a self-referential closure
+
+Plain union-find solves `Ax = 0` for a *fixed* matrix A.  The cstz
+cascade is more interesting: it solves a self-referential variant
+where the matrix itself depends on the current solution.
+
+Specifically: two addr0s are equivalent iff they have the same
+**structural key** under the equivalence relation defined by which
+addr0s are equivalent.  This is a fixed-point equation,
+`find x such that A(x)·x = 0` where `A(x)` depends on `x`.
+
+The cascade solves it by **monotone iteration**.  Each round:
+
+1. Compute structural keys under the current partition.
+2. Detect collisions → those are new rows of A → add them via the
+   union-find.
+3. Re-canonicalize parents whose children's classes have moved.
+4. Loop until no new rows are added.
+
+Each round adds rows to A monotonically.  The addr0 set is finite,
+so the fixed point is reached in finite steps.  At convergence, the
+null space of A is the unique greatest equivalence relation
+consistent with the structural-key constraint.  **This is exactly
+sheafification** in the topos-theoretic sense: the cascade lifts a
+presheaf of local observations to a globally consistent sheaf by
+gluing overlapping sections, and the final partition IS the sheaf.
+
+### F₂ shows up in cstz twice, not once
+
+When this audit's [Step 6 inference.agda PFF correspondence
+comments](../inference.agda) describe `SPPF.GF2` as "the orientation
+discipline for `Pair.role ∈ {principal, aux}`", that description is
+correct but **incomplete**.  F₂ appears in cstz in two distinct,
+mathematically consistent ways:
+
+| Role | Where | What it computes |
+| --- | --- | --- |
+| **κ-coproduct discriminator** | `SPPF.GF2` in `inference.agda`; `Pair.role`, `Chart.kind` in `pff.py` | A 2-element-choice torsor (principal/aux, sigma/tau).  The orientation bit of the σ ⊎_τ σ coproduct. |
+| **Sheafification linear algebra** | The cascade in `pff_cascade._UnionFind` + `_glue_set_and_cascade` + `_cascade_after_merge` | The boundary map `∂ : F₂^{glues} → F₂^{addr0s}` whose null space is the path1 partition (= H₀ of the glue graph).  Same construction over Addr1 ids and coh edges for path2. |
+
+Both uses are real, both live in F₂, and they're consistent: the
+cascade computes the partition, and `Pair.role` discriminates each
+member of each partition class against the principal/aux orientation.
+Reading (a) of the κ-coproduct (`Pair.role`) is the bit assigned to
+each class element; reading (b) (`Chart.kind`) is the bit assigned
+to each chart; the cascade is the machinery that decides which
+addr0 lives in which class via a linear-algebra computation over
+the *same* F₂.
+
+### Updated status (no audit findings change)
+
+This is a conceptual correction, not a new gap.  None of the
+audit's existing markers change — every ✅ stays ✅, every ⚠️ stays
+⚠️, every ⏸️ stays ⏸️.  What changes is the **interpretation** of
+the SHACL section's two ⚠️ items (MonotoneSegmentChain and
+UniqueStepIndex):
+
+- The audit said "we encode segment ordering positionally in
+  `List[Segment]` rather than via `pff:nextSegment` predicates,
+  which is stronger by construction."  That's still true, but the
+  right *reason* it's stronger by construction is that the
+  list-positional encoding IS the boundary map's domain in the H₀
+  computation: the segment order is the basis of `F₂^E`, and the
+  cascade's union-find is computing `F₂^V / im(∂)` directly on
+  that basis.  The SHACL `pff:nextSegment` predicate is one way
+  to *write down* the boundary map; our list is another.
+
+The implementation is unchanged.  The audit's findings are unchanged.
+The way we describe the implementation should mention both uses of
+F₂ rather than just the κ-coproduct discriminator.
+
+### Implications for the codebase
+
+Three follow-up actions land in the recommended-follow-ups list
+below as items 0a, 0b, 0c (prepended at top priority):
+
+- **0a.** Update the `inference.agda` Step 6 PFF correspondence
+  comments above `SPPF.GF2`, `SPPF.UnionFind`, `SPPF.Eta`, and
+  `SPPF.ClosureProofs` to mention the H₀ / cokernel-of-boundary-map
+  correspondence and the dual use of F₂.  Comment-only; no proof
+  bodies change.
+- **0b.** Add explicit accessor methods to `pff.Document` that
+  surface the linear-algebraic view: `path1_constraint_rows()`,
+  `path1_canonical_map()`, `path1_classes()`, and the analogous
+  three for path2.  These compute the H₀ partition from a
+  Document's `paths1` / `paths2` collection alone (no cascade
+  engine needed).  Refactor `agda_synth._path1_closure` /
+  `_path2_closure` to delegate to the new accessors.
+- **0c.** Add a property-based test that for any populated
+  `PFFCascadeEngine`, `engine.document.path1_classes()` agrees
+  with `engine.all_addr0_classes()` as a partition.  This makes
+  the H₀ ↔ cascade equivalence a verified runtime invariant
+  rather than a comment.
+
+These three items together would close the gap between the
+document's "Ax = f over F₂" framing in
+`Topos-Theoretic Grammar Induction and PRNG.md` and what cstz
+empirically computes.
+
+---
+
 ## Recommended follow-ups
 
 Items that the audit thinks are worth closing, in priority order:
