@@ -1299,6 +1299,217 @@ DAG and leverage analysis.
 
 ---
 
+## Postscript: HIT collapse — Cell unification as the quotient that was already there
+
+A fourth conceptual correction, same shape as the GF(2), Slicer,
+and Earley corrections.  This one collapses Steps 2-4 of the
+cstz-on-cstz plan into zero steps, because the query those steps
+were supposed to build machinery for has an answer that's
+structural rather than empirical.
+
+After Step 1 landed (commit `a8a9d6b`, classifier scope
+resolution), the user reframed the remaining plan with two
+observations:
+
+1. **Iterated fixed-point operators** — "you only need two
+   orthogonal ranks, operating on relative framings, to build
+   literally anything higher.  Focus not on 'how many levels'
+   but 'how few levels can I design where anything larger can be
+   a clean, well-formed morphism away from something smaller?'"
+
+2. **Higher inductive types (HIT) / higher category theory** —
+   "this is hash-consing of *morphisms, adjunctions and
+   projections*."  The hash-cons isn't just over points (Addr0s);
+   it's over the morphisms between them (Addr1s), and over the
+   morphisms between morphisms (Addr2s), and the same machinery
+   handles all of them.
+
+Applied to cstz, the reframe reveals that the Addr0 / Addr1 /
+Addr2 three-class distinction was never structural — it was a
+lexical partition inherited from the PFF JSON schema's three-
+bucket serialization format.  Under the HIT discipline:
+
+> The JSON schema is descriptive regularization, not prescriptive
+> mold.  It gives us syntax we can describe within, not a language
+> the implementation must speak internally.
+
+In-memory, there is ONE thing — a `Cell` — and the three apparent
+classes are regions of the Cell quotient space distinguished by
+which of their fields are populated.
+
+### The algebraic quotient
+
+- **Before the collapse**: three dataclasses (`Addr0`, `Addr1`,
+  `Addr2`) with overlapping fields and three separate collections
+  on Document (`addresses0`, `paths1`, `paths2`), two separate
+  union-finds on the cascade engine (`_addr0_uf`, `_addr1_uf`),
+  and separate cascade methods (`_glue_set_and_cascade` at rank
+  1, `auto_coh_closure` at rank 2).
+
+- **After the collapse**: one `Cell` dataclass with optional
+  `src` / `dst` fields, one `Document.cells` list, one
+  `PFFCascadeEngine._uf`, one `_cascade` method.  Rank is
+  **derived**: a Cell is rank-0 if `src is None and dst is None`,
+  rank-k otherwise.
+
+The quotient that the collapse makes explicit:
+
+```text
+Addr0 / Addr1 / Addr2  ~  Cell
+                      /  (src, dst, ctor, segments, premises, label, args, meta)
+                      /  rank ≡ derived from (src, dst) pattern
+```
+
+The three original types become **labels for different regions of
+the Cell quotient space**, not distinct types.  `Addr0` is the
+region where `src is None and dst is None`.  `Addr1` is the region
+where `src` and `dst` reference rank-0 Cells.  `Addr2` is the
+region where they reference rank-1 Cells.  There is no Addr3 class
+because rank-k for k>2 is the region where they reference
+rank-(k-1) Cells — the same Cell class all the way up.
+
+### Hash-cons of morphisms, adjunctions, and projections
+
+The existing cascade already hash-conses Addr0s via
+`_addr0_signature_index` — when `add_observation` sees two
+observations with the same full_sig, it returns the existing Addr0
+rather than minting a new one.  That's hash-cons of points.
+
+Under the HIT collapse, the same mechanism generalizes to **hash-
+cons of morphisms**: when `_emit_cell` is called to mint a rank-1
+Cell (what was an Addr1), it checks a signature index keyed by the
+Cell's sigma_key — (sort, params, canonical-src, canonical-dst) —
+before minting.  If a Cell already exists with the matching
+signature, return the existing one.
+
+This absorbs `auto_coh_closure` entirely.  The auto-coh pass
+existed because the old `_emit_glue` didn't dedupe at emission
+time, so two morphisms with the same canonical (src, dst) could
+coexist in `paths1`, and a separate post-hoc pass was needed to
+find them and emit a coh between them.  Under hash-cons at
+emission, the duplicates can't exist — the second emission call
+returns the first one.  The post-hoc pass has no work to do and
+is deleted.
+
+The same machinery, applied recursively, handles hash-cons of
+**adjunctions and projections**.  The role-coproduct projection
+`Pair.role ∈ {principal, aux}` is an adjunction between the
+σ-chart and τ-chart views of a Cell; under hash-cons, the
+adjunction itself becomes a first-class Cell whose fields record
+the two sides.  "Two projections of the same adjunction" becomes
+"two references to the same Cell at rank 2."
+
+### What becomes one thing
+
+- **`Cell`** replaces `Addr0`, `Addr1`, `Addr2`
+- **`Document.cells`** replaces `addresses0`, `paths1`, `paths2`
+- **`PFFCascadeEngine._uf`** replaces `_addr0_uf`, `_addr1_uf`
+- **`_cascade`** (rank-agnostic) replaces
+  `_glue_set_and_cascade`, `_cascade_after_merge`,
+  `auto_coh_closure`
+
+### What gets deleted
+
+- `Document.auto_coh_closure` — no longer needed (morphism
+  duplicates can't exist)
+- `PFFCascadeEngine.auto_coh_closure` — same
+- `PFFCascadeEngine._emit_glue` → replaced by `_emit_cell` with
+  hash-cons at emission
+- `PFFCascadeEngine._glue_set_and_cascade` → absorbed into
+  `_cascade`
+- `PFFCascadeEngine._cascade_after_merge` → absorbed into
+  `_cascade`
+- `TestAutoCohClosure` (20 tests) → replaced by
+  `TestHashConsedMorphisms` which verifies the same observable
+  behavior (redundant morphism emissions get merged) via the new
+  emission path
+
+### What gets preserved
+
+- **`Addr0 = Cell`, `Addr1 = Cell`, `Addr2 = Cell`** aliases, so
+  existing dataclass constructor calls in tests continue to work
+- **`Document.addresses0`, `paths1`, `paths2`** as derived
+  properties (filtered views over `cells` by derived rank)
+- **`Document.to_pff_json()`** still emits schema-conforming JSON
+  with the three-bucket structure; cells are sorted into buckets
+  by derived rank on serialization
+- **`Document.path1_classes()`, `path2_classes()`,
+  `path1_canonical_map()`** and the linear-view accessors from
+  the GF(2) postscript — derived queries over the unified
+  union-find
+- **`covering_sieves_over_addr0()`,
+  `covering_sieves_over_addr1()`** from the Slicer postscript —
+  semantic aliases for rank-filtered derived views
+- **`agda_synth.synthesize_from_document`** and the Agda H₀ /
+  cokernel-of-boundary-map view — depend only on the `paths1`
+  derived property
+- **`inference.agda`** formal spec — the collapse is an
+  implementation refinement of the fixed-point structure the spec
+  describes abstractly; no Agda changes needed
+- **All 791 passing tests** — the collapse preserves every
+  observable behavior the suite checks.  This is the collapse's
+  success criterion.
+
+### Why Steps 2-4 of the original plan are obviated
+
+The original cstz-on-cstz plan proposed building:
+
+- Step 2: provenance tracking in `add_observation` so hash-cons
+  dedup events record both callers' locations
+- Step 3: `Document.shared_across_functions(min_span)` query
+- Step 4: empirical experiment running the query on
+  `src/cstz/pff.py` + `src/cstz/pff_cascade.py`
+
+The query's answer was going to be "find AST subtrees referenced
+from multiple function contexts" — i.e., find the shared structure
+between the σ-cascade and the τ-cascade.  Under the HIT collapse,
+that answer is **already known structurally**: the σ-cascade and
+τ-cascade are two projections of a single rank-agnostic cascade.
+The shared structure IS the `Cell` / `_uf` / `_cascade` trinity
+that the collapse makes explicit.
+
+Building the empirical tool would have confirmed what we now see
+by inspection.  The tool is unnecessary because the answer is not
+empirical but structural — a category-theoretic identity rather
+than a measurement.
+
+### The meta-lesson — four conceptual corrections in one pattern
+
+This is the fourth "it's already there" finding in the audit,
+alongside:
+
+1. **GF(2) double-use** — F₂ is used both as the κ-coproduct
+   discriminator AND as the field over which the cascade computes
+   H₀ via cokernel of the boundary map.  Both uses are real; the
+   cascade IS a linear constraint solver.
+
+2. **The Slicer** — cstz's cascade fixed-point iteration is
+   exactly a Grothendieck topology generator.  Three axioms map
+   directly to cascade invariants.
+
+3. **Earley** — the cascade's self-referential chart-based
+   structure realizes Earley's parsing mechanism under different
+   vocabulary.
+
+4. **HIT collapse (this postscript)** — the Addr0/Addr1/Addr2
+   three-class partition is a lexical accident from the JSON
+   schema; in-memory there is one Cell type with derived rank.
+
+Each of these is a case where cstz implements a well-studied
+mathematical construction under non-standard vocabulary.  The
+audit process is to **recognize what's already there**, not to
+add new machinery.  Each conceptual correction reduces the
+apparent complexity of the implementation by showing that two
+things we thought were distinct are actually one thing.
+
+The HIT collapse is unique among the four in that it also **deletes
+code** — the other three were pure documentation reframes.  This
+one actually rewrites the data model to match the reframe, because
+leaving the three-class split in place once we see the quotient
+would be structurally dishonest.
+
+---
+
 ## Recommended follow-ups
 
 Items that the audit thinks are worth closing, in priority order:
