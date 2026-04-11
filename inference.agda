@@ -144,8 +144,30 @@ open import Relation.Nullary     using (¬_; Dec; yes; no)
 --   element.  For |X| = 2 this is the ±1 orbit you described.
 ------------------------------------------------------------------------
 
--- PFF: the GF(2) torsor here is the orientation discipline for
--- Pair.role ∈ {principal, aux}; reading (a) of the κ-coproduct.
+-- PFF: F₂ shows up in cstz in two distinct, mathematically
+-- consistent ways, both rooted in this module:
+--
+--   1. As the κ-coproduct discriminator (reading (a)).  Pair.role
+--      ∈ {principal, aux} is a 2-element-choice torsor whose
+--      orientation algebra is exactly the (GF2, ⊕) ring defined
+--      below.  Each Pair carries one bit of orientation; the
+--      discipline is the same as Chart.kind ∈ {sigma, tau}
+--      under reading (b).
+--
+--   2. As the field over which the cascade computes the path1
+--      closure as a kernel.  See SPPF.UnionFind and SPPF.Eta.
+--      For a glue graph G with Addr0 vertices and Addr1(glue)
+--      edges, the path1 partition is exactly the basis of
+--      H₀(G; F₂) = F₂^V / im(∂), where ∂ : F₂^E → F₂^V is the
+--      boundary map sending each glue (a, b) to e_a + e_b.
+--      Computing connected components = computing the cokernel of
+--      the boundary map = solving a homogeneous linear system
+--      over F₂.  Path2 over Addr1 ids and Addr2(coh) edges has
+--      the same shape.
+--
+-- Both uses are real and consistent: the cascade computes the
+-- partition; Pair.role discriminates each member of each class
+-- against the principal/aux orientation.
 module SPPF.GF2 where
 
   -- The ring -------------------------------------------------------
@@ -246,6 +268,19 @@ module SPPF.GF2 where
 -- used by PFFCascadeEngine for the path1 closure (Addr0 quotient
 -- emitting Addr1 ctor=glue) and the path2 closure (Addr1 quotient
 -- emitting Addr2 ctor=coh).
+--
+-- Linear-algebraic view: a UFState over a finite element set is a
+-- compressed representation of the kernel of an F₂ boundary map.
+-- For each merge(a, b) we add the row e_a + e_b ∈ F₂^V to a matrix
+-- A; the connected components of A's hypergraph are the basis of
+-- ker(A^T) = H₀(G; F₂) = F₂^V / im(∂), the cokernel of the boundary
+-- map.  Union-find with path compression computes this kernel
+-- incrementally with α(n) inverse-Ackermann amortization per merge,
+-- where explicit Gaussian elimination on the boundary matrix would
+-- take O(EV).  Same answer; same mathematical content; different
+-- data structure.  See SPPF.GF2 for the F₂ algebra and SPPF.Eta /
+-- SPPF.ClosureProofs for the self-referential extension that turns
+-- the static union-find into the cascade.
 module SPPF.UnionFind where
 
   -- Boolean equality on ℕ (used to construct union's find')
@@ -746,6 +781,14 @@ module SPPF.Kappa where
 -- ctor=glue (label / premises optional); the η-tower is doc.paths1.
 -- Naturality is the path1 closure invariant maintained by the
 -- streaming + recursive cascade.
+--
+-- Linear-algebraic view: every η-merge event in the EtaEvent record
+-- below is exactly one row of the F₂ boundary matrix from SPPF.GF2.
+-- The set of all η-merges across an ingest run is the row set of
+-- the constraint matrix A; the path1 partition is ker(A^T).  See
+-- the corresponding accessors on pff.Document
+-- (path1_constraint_rows, path1_canonical_map, path1_classes) which
+-- materialize this view from a Document's paths1 collection alone.
 module SPPF.Eta where
 
   open SPPF.Fiber
@@ -977,6 +1020,18 @@ module SPPF.Eta where
 -- _cascade_after_merge.  The corresponding test scenarios are in
 -- tests/test_pff_cascade.py::TestStreamingGlueCascade and
 -- ::TestRecursiveCascade.
+--
+-- Linear-algebraic view: plain union-find (SPPF.UnionFind) solves
+-- Ax = 0 for a fixed F₂ matrix A.  The cascade proven here solves
+-- a self-referential variant: A(x) depends on x because the
+-- structural keys depend on the current partition.  Each cascade
+-- round adds rows to A monotonically (collisions detected under
+-- the new partition become new rows), and the procedure converges
+-- to the unique greatest equivalence relation consistent with the
+-- structural-key constraint.  The closure proofs below are
+-- termination + uniqueness arguments for that monotone iteration;
+-- equivalently, they prove that the cascade computes ker(A^T) for
+-- the limiting matrix A^∞.
 module SPPF.ClosureProofs where
 
   open SPPF.Fiber
