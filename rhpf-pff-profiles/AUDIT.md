@@ -1062,10 +1062,24 @@ answer.
 
 ### Query specification (Step 0)
 
+**Note on earlier framing.**  The "Bounded experiment:
+α-normalization before factorization" section above described the
+approach as a standalone `ast_alpha.py` preprocessor pass.  That
+framing has been superseded: scope resolution belongs IN the
+classifier, not beside it.  Under the reframe (see plan file
+§"Step 1 — Classifier scope resolution"), the classifier's
+`_extract_params` emits resolved-address tuples for `Name` nodes
+at ingest time, and cstz's existing hash-consing produces SSA
+equivalence as a natural consequence of correct semantic
+addressing — without requiring a separate normalization pass.
+The query specification below is unchanged; only the prerequisite
+Step 1 is reframed from "build α-normalizer" to "teach classifier
+scope resolution."
+
 Before building the machinery that would answer the
 cstz-on-cstz question empirically, this section writes down the
 *exact query* that the eventual experiment will execute.  Pinning
-the query down first — before any α-normalization, provenance
+the query down first — before any scope resolution, provenance
 tracking, or factorization plumbing exists — gives every
 subsequent step a precise specification to implement against.
 See [replicated-popping-bentley.md](../../../.claude/plans/replicated-popping-bentley.md)
@@ -1153,18 +1167,22 @@ def tau_inner(items, eng, r, p, tag):
     return results
 ```
 
-After α-normalization (Step 1), both functions' bodies become
-byte-for-byte identical modulo their FunctionDef names: every
-parameter is `v0..v4`, every local is `v5..v7`, the `for` loops
-are lexically identical, the `if` conditions are lexically
-identical, the `append` calls are lexically identical.
+After classifier scope resolution (Step 1), both functions'
+bodies produce identical sigma keys for every Name node: every
+parameter resolves to `("addr", ("local", 0))` through
+`("addr", ("local", 4))`; every local resolves to
+`("addr", ("local", 5))` through `("addr", ("local", 7))`; the
+`for` loops resolve their body Names to those same addresses;
+the `if` conditions and `append` calls compare structurally.
+The sigma keys no longer carry the raw identifier strings `ids`,
+`engine`, `anchor`, etc. — only their resolved positions.
 
-After factorizing the normalized AST with provenance tracking
-enabled (Step 2), cstz's hash-consing merges the `For` subtree,
-the `If` subtree, the `Call` subtrees, and every intermediate
-node into single Addr0s — with `meta["backings"]` on each
-recording BOTH `sigma_inner` and `tau_inner` as the functions
-that contributed ingests.
+After factorizing with `resolve_scopes=True` and provenance
+tracking enabled (Step 2), cstz's hash-consing merges the `For`
+subtree, the `If` subtree, the `Call` subtrees, and every
+intermediate node into single Addr0s — with `meta["backings"]`
+on each recording BOTH `sigma_inner` and `tau_inner` as the
+functions that contributed ingests.
 
 Calling `doc.shared_across_functions(min_span=2)` (Step 3) then
 returns (something close to):
@@ -1242,10 +1260,21 @@ steps can proceed in order.  Each step's commit message will
 cite its role in the DAG described in
 [replicated-popping-bentley.md](../../../.claude/plans/replicated-popping-bentley.md):
 
-- **Step 1** — `src/cstz/ast_alpha.py` with the α-normalization
-  pass.  Renames locals to `v0`, `v1`, ... by first-appearance
-  order per scope.  Module scope unchanged.  Free variables
-  left as-is for this bounded experiment.
+- **Step 1 (reframed)** — scope resolution in the classifier,
+  not a standalone α-normalization pass.  Extends `_Env` in
+  `pff_python_classifier.py` with positional bindings and an
+  inherited-names set, then teaches `_extract_params` to emit
+  resolved-address tuples (`("local", i)`, `("nonlocal", depth,
+  i)`, `("global", name)`, `("free", name)`) for `Name` and
+  `ast.arg` nodes instead of the raw identifier string.  Gated
+  behind a `resolve_scopes=False` default flag.  Under the flag,
+  two functions with identical bodies and different local
+  variable names produce identical sigma keys → cstz's existing
+  hash-consing makes them collide → SSA emerges as the
+  equivalence structure without requiring an explicit SSA pass.
+  The original plan's `src/cstz/ast_alpha.py` draft (574 lines,
+  never committed) is superseded by this approach and deleted as
+  part of the Step 1 commit.
 - **Step 2** — provenance tracking in
   `PFFCascadeEngine.add_observation` via
   `Addr0.meta["backings"]`.  New optional `scope_path` parameter
