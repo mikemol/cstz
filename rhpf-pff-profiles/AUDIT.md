@@ -501,7 +501,8 @@ amortization per edge; explicit Gaussian elimination on the boundary
 matrix produces the same partition in O(EV) time.  Same answer; same
 mathematical content; different data structure.
 
-The cstz cascade in `_addr0_uf` IS solving `Ax = 0` over F₂, where:
+The cstz cascade in `_uf` (the unified union-find spanning all cell
+ranks after the HIT collapse) IS solving `Ax = 0` over F₂, where:
 
 - **Variables** `x ∈ F₂^N` index the addr0 set
 - **Each glue Addr1** contributes one row to A: for `glue(a, b)`,
@@ -509,9 +510,11 @@ The cstz cascade in `_addr0_uf` IS solving `Ax = 0` over F₂, where:
 - **The output** is `ker(A^T) = H₀(G_glue; F₂)` = the partition of
   addr0s into path1 equivalence classes
 
-The same picture applies to path2: `_addr1_uf` solves the analogous
+The same picture applies to path2: `_uf` solves the analogous
 system over Addr1 ids with rows contributed by each Addr2 with
-`ctor=coh`.
+`ctor=coh`.  (Prior to the HIT collapse, these were two separate
+union-finds `_addr0_uf` and `_addr1_uf`; the collapse unified
+them into a single `_uf` keyed by cell id.)
 
 ### What the cascade adds: a self-referential closure
 
@@ -540,6 +543,15 @@ sheafification** in the topos-theoretic sense: the cascade lifts a
 presheaf of local observations to a globally consistent sheaf by
 gluing overlapping sections, and the final partition IS the sheaf.
 
+(v2 re-grounding note: under the QIIT substrate vocabulary from
+pre-draft.md §4, sheafification IS what QIITs do by definition —
+quotienting the substrate by its equality constructors and taking
+the fixed point.  The four AUDIT corrections (GF(2), Slicer,
+Earley, HIT) are four projections of this single sheafification
+construction, not four independent findings.  See conception matrix
+v2 cell `SheafificationIsQIITQuotient` and rank-2 cell
+`FourCorrectionsAreOneSheafification`.)
+
 ### F₂ shows up in cstz twice, not once
 
 When this audit's [Step 6 inference.agda PFF correspondence
@@ -551,7 +563,7 @@ mathematically consistent ways:
 | Role | Where | What it computes |
 | --- | --- | --- |
 | **κ-coproduct discriminator** | `SPPF.GF2` in `inference.agda`; `Pair.role`, `Chart.kind` in `pff.py` | A 2-element-choice torsor (principal/aux, sigma/tau).  The orientation bit of the σ ⊎_τ σ coproduct. |
-| **Sheafification linear algebra** | The cascade in `pff_cascade._UnionFind` + `_glue_set_and_cascade` + `_cascade_after_merge` | The boundary map `∂ : F₂^{glues} → F₂^{addr0s}` whose null space is the path1 partition (= H₀ of the glue graph).  Same construction over Addr1 ids and coh edges for path2. |
+| **Sheafification linear algebra** | The cascade in `pff_cascade._UnionFind` (`_uf`) + `_glue_set_and_cascade` + `_cascade_after_merge` | The boundary map `∂ : F₂^{glues} → F₂^{addr0s}` whose null space is the path1 partition (= H₀ of the glue graph).  Same construction over Addr1 ids and coh edges for path2.  Under v2 vocabulary: the cascade's closure under the QIIT's equality constructors. |
 
 Both uses are real, both live in F₂, and they're consistent: the
 cascade computes the partition, and `Pair.role` discriminates each
@@ -594,23 +606,24 @@ below as items 0a, 0b, 0c (prepended at top priority):
   `SPPF.ClosureProofs` to mention the H₀ / cokernel-of-boundary-map
   correspondence and the dual use of F₂.  Comment-only; no proof
   bodies change.
-- **0b.** Add explicit accessor methods to `pff.Document` that
+- **0b.** ~~Add explicit accessor methods to `pff.Document` that
   surface the linear-algebraic view: `path1_constraint_rows()`,
   `path1_canonical_map()`, `path1_classes()`, and the analogous
-  three for path2.  These compute the H₀ partition from a
-  Document's `paths1` / `paths2` collection alone (no cascade
-  engine needed).  Refactor `agda_synth._path1_closure` /
-  `_path2_closure` to delegate to the new accessors.
-- **0c.** Add a property-based test that for any populated
+  three for path2.~~  **DONE** — landed in the GF(2) correction
+  commit (`767c518..c9374a1`).  The six accessors live on
+  `Document` and compute H₀ from the `paths1`/`paths2`
+  collection alone; `agda_synth` delegates to them.
+- **0c.** ~~Add a property-based test that for any populated
   `PFFCascadeEngine`, `engine.document.path1_classes()` agrees
-  with `engine.all_addr0_classes()` as a partition.  This makes
-  the H₀ ↔ cascade equivalence a verified runtime invariant
-  rather than a comment.
+  with `engine.all_addr0_classes()` as a partition.~~  **DONE** —
+  `TestLinearViewCrossCheck` in `tests/test_pff_cascade.py`
+  verifies the H₀ ↔ cascade equivalence as a runtime invariant
+  across multiple engine configurations.
 
-These three items together would close the gap between the
-document's "Ax = f over F₂" framing in
-`Topos-Theoretic Grammar Induction and PRNG.md` and what cstz
-empirically computes.
+Item 0a remains open (inference.agda comment update).  Items
+0b and 0c are closed; together with the existing test suite they
+close the gap between the "Ax = f over F₂" framing and what
+cstz empirically computes.
 
 ---
 
