@@ -474,59 +474,14 @@ projection): include the constructor name (``glue`` / ``coh``
 / ``transport`` / etc.) in the signature."""
 
 DISCRIM_ENDPOINTS = "endpoints"
-"""All cells (via the ``endpoints`` property added in Step
-1.5.1 Pass 3.1 — Addr0 returns ``(self.id, self.id)`` per the
-identity-on-objects convention; Addr1/Addr2 return
-``(self.src, self.dst)``): include both endpoint ids in the
-signature.
-
-Under ``tag_projection="legacy-three-tag"`` (default), this
-discriminator is only consulted for Addr1/Addr2 cells; Addr0
-cells skip it because the legacy reading treats Addr0 as an
-"object without endpoints."  Under
-``tag_projection="unified-morphism"``, it is consulted for
-every cell, so two distinct Addr0s with the same sort but
-different ids are distinguished by their ``(id, id)`` tuples.
-This is the resolution of gap #8 by parameterization."""
+"""Addr1/Addr2 cells: include both endpoint ids in the signature
+(via the ``endpoints`` property added in Step 1.5.1 Pass 3.1).
+Addr0 cells skip this discriminator because the legacy reading
+treats Addr0 as an object rather than a self-loop morphism."""
 
 DISCRIM_PREMISES = "premises"
-"""Cells with a ``premises`` field (Addr1 under any tag
-projection): include the premises tuple in the signature."""
-
-
-# ── Tag projections (Step 1.5.2 — arrow-category dual reading) ──────
-#
-# Two valid projections of the arrow-category lattice C → C^→.  Both
-# are simultaneously true; choosing one is a relational labeling
-# convention, not a normative claim.  See feedback memory
-# ``feedback_reframe_as_projection.md`` and the FRICTION-10 entry in
-# ``research-log-step-1.5.1.md``.
-
-TAG_PROJECTION_LEGACY_THREE_TAG = "legacy-three-tag"
-"""The C-side projection of the arrow-category functor: read the
-substrate as a category with distinct objects and morphisms.
-Addr0 sigma_keys start with ``"addr0"``; morphism sigma_keys
-start with ``"morphism"``.  Under this projection, two distinct
-Addr0s with the same sort have the same κ-key — they are
-identified as "objects of the same sort."  This is the Pass 1
-default, preserved here for byte-equivalence with the
-HIT collapse and the entire 842-test baseline."""
-
-TAG_PROJECTION_UNIFIED_MORPHISM = "unified-morphism"
-"""The C^→-side projection of the arrow-category functor: read
-the substrate as a category whose objects are morphisms, every
-cell as a morphism with endpoints.  All cell sigma_keys start
-with ``"morphism"``; Addr0s use the ``endpoints`` property
-``(self.id, self.id)`` per the identity-on-objects convention.
-Under this projection, two distinct Addr0s with the same sort
-have *different* κ-keys (their endpoints differ) — they are
-two distinct identity morphisms ``id_a`` and ``id_b`` between
-distinct objects.
-
-Both projections produce correct answers under their respective
-intensions.  The legacy projection is the C side; the unified
-projection is the C^→ side; they are related by the
-arrow-category functor and neither is canonical."""
+"""Cells with a ``premises`` field (Addr1): include the premises
+tuple in the signature."""
 
 
 PERSPECTIVE_SIGMA: FrozenSet[str] = frozenset({
@@ -584,17 +539,15 @@ def _addr0_segment_signature(cell: "Addr0") -> Tuple[Any, ...]:
 def sigma_key(
     cell: Cell,
     perspective: FrozenSet[str] = PERSPECTIVE_SIGMA,
-    *,
-    tag_projection: str = TAG_PROJECTION_LEGACY_THREE_TAG,
 ) -> Tuple[Any, ...]:
     """Compute the hash-cons signature of a Cell under a perspective.
 
     Rank-agnostic: the same function handles Addr0s, Addr1s, and
     Addr2s by inspecting which fields are populated.  Two cells
-    with equal sigma_keys (under the same ``perspective`` and
-    ``tag_projection``) are considered structurally equivalent
-    under that intension — they should be merged (or, at
-    emission time, hash-consed to a single Cell).
+    with equal sigma_keys (under the same ``perspective``) are
+    considered structurally equivalent under that intension —
+    they should be merged (or, at emission time, hash-consed to
+    a single Cell).
 
     The ``perspective`` argument selects which discriminators
     contribute to the signature.  Three named perspectives are
@@ -603,42 +556,8 @@ def sigma_key(
     internals), and ``PERSPECTIVE_KAPPA`` (most merged; keeps
     only sort and endpoints).
 
-    The ``tag_projection`` argument selects which side of the
-    arrow-category functor ``C → C^→`` the signature is read on.
-    Two values:
-
-    - **``TAG_PROJECTION_LEGACY_THREE_TAG``** (default): the
-      C-side projection.  Addr0 sigma_keys start with ``"addr0"``;
-      morphism sigma_keys start with ``"morphism"``.  Two
-      distinct Addr0s with the same sort have the same κ-key
-      ("objects of the same sort").  This is byte-compatible
-      with Step 1.5.1 Pass 1 — every existing test that asserts
-      a literal ``("addr0", ...)`` or ``("morphism", ...)``
-      shape continues to pass.
-    - **``TAG_PROJECTION_UNIFIED_MORPHISM``**: the C^→-side
-      projection.  All cells produce sigma_keys starting with
-      ``"morphism"``; Addr0 cells use the ``endpoints`` property
-      ``(self.id, self.id)`` per the identity-on-objects
-      convention.  Two distinct Addr0s with the same sort have
-      *different* κ-keys (their endpoints differ) — they are
-      two distinct identity morphisms.  This is the resolution
-      of gap #8 by parameterization (Step 1.5.2): both
-      projections are simultaneously true because they project
-      from the same arrow-category lattice.
-
-    The two parameters are **orthogonal**: ``perspective``
-    selects which discriminators are active; ``tag_projection``
-    selects how the cell projects under the arrow-category
-    functor.  The product ``(perspective, tag_projection)``
-    enumerates the full set of valid sigma_key shapes for a
-    cell.  See conception matrix cells
-    ``ArrowCategoryHasTwoSides``,
-    ``SigmaKeyTagProjectionIsArrowFunctor``, and
-    ``Gap8IsParameterized``.
-
-    Default behavior (``perspective=PERSPECTIVE_SIGMA``,
-    ``tag_projection=TAG_PROJECTION_LEGACY_THREE_TAG``) is
-    byte-compatible with Step 1.5.1 Pass 1:
+    Default behavior (``perspective=PERSPECTIVE_SIGMA``) is
+    byte-compatible with Step 1.5:
 
     - **Addr0** — ``("addr0", sort, segments-signature)``
     - **Addr1/Addr2** — ``("morphism", ctor, src, dst, premises-tuple)``
@@ -648,30 +567,6 @@ def sigma_key(
     canonicalizing them via the cascade's union-find before
     calling ``sigma_key`` if canonicalization matters at the
     call site (normal cascade emission does this).
-    """
-    if tag_projection == TAG_PROJECTION_LEGACY_THREE_TAG:
-        return _sigma_key_legacy(cell, perspective)
-    if tag_projection == TAG_PROJECTION_UNIFIED_MORPHISM:
-        return _sigma_key_unified(cell, perspective)
-    raise ValueError(
-        f"unknown tag_projection {tag_projection!r}; expected "
-        f"{TAG_PROJECTION_LEGACY_THREE_TAG!r} or "
-        f"{TAG_PROJECTION_UNIFIED_MORPHISM!r}"
-    )
-
-
-def _sigma_key_legacy(
-    cell: Cell,
-    perspective: FrozenSet[str],
-) -> Tuple[Any, ...]:
-    """The C-side projection of the arrow-category functor.
-
-    Byte-compatible with Step 1.5.1 Pass 1's ``sigma_key`` body
-    (the only change is that the body has been extracted into
-    a private helper so the public ``sigma_key`` can dispatch
-    on ``tag_projection``).  Reads Addr0s as objects (the
-    ``"addr0"`` tag prefix) and Addr1/Addr2 as morphisms (the
-    ``"morphism"`` prefix).
     """
     if isinstance(cell, Addr0):
         # Rank-0 signature.  Build incrementally so the default
@@ -708,48 +603,6 @@ def _sigma_key_legacy(
         parts.append(cell.src)
         parts.append(cell.dst)
     if DISCRIM_PREMISES in perspective:
-        premises = getattr(cell, "premises", ())
-        parts.append(tuple(premises))
-    return tuple(parts)
-
-
-def _sigma_key_unified(
-    cell: Cell,
-    perspective: FrozenSet[str],
-) -> Tuple[Any, ...]:
-    """The C^→-side projection of the arrow-category functor.
-
-    All cells project as morphisms with the ``"morphism"`` tag
-    prefix.  Addr0 cells use the ``endpoints`` property
-    ``(self.id, self.id)`` per the identity-on-objects
-    convention; Addr1/Addr2 cells use ``(self.src, self.dst)``.
-    Discriminators that don't apply to a particular cell type
-    (e.g., ``ctor`` and ``premises`` for Addr0; ``sort`` and
-    ``segments`` for Addr1/Addr2) are silently skipped.
-
-    Under this projection, two distinct Addr0s with the same
-    sort have different sigma_keys (their endpoints tuples
-    differ), which resolves gap #8 by parameterization: callers
-    that want this finer view pass
-    ``tag_projection=TAG_PROJECTION_UNIFIED_MORPHISM``.
-    """
-    parts: List[Any] = ["morphism"]
-    if DISCRIM_SORT in perspective and isinstance(cell, Addr0):
-        parts.append(cell.sort)
-    if DISCRIM_SEGMENTS in perspective and isinstance(cell, Addr0):
-        parts.append(_addr0_segment_signature(cell))
-    if DISCRIM_CTOR in perspective and not isinstance(cell, Addr0):
-        parts.append(cell.ctor)
-    if DISCRIM_ENDPOINTS in perspective:
-        # cell.endpoints is a Tuple[str, str] property that
-        # honors the identity-on-objects convention for Addr0
-        # (returns (self.id, self.id)) and reads
-        # (self.src, self.dst) for Addr1/Addr2.  Added in
-        # Step 1.5.1 Pass 3.1.
-        src, dst = cell.endpoints
-        parts.append(src)
-        parts.append(dst)
-    if DISCRIM_PREMISES in perspective and not isinstance(cell, Addr0):
         premises = getattr(cell, "premises", ())
         parts.append(tuple(premises))
     return tuple(parts)
@@ -1026,85 +879,6 @@ def _classes_from_canonical_map(
 
 
 # ── Document ────────────────────────────────────────────────────────
-
-
-class _ArrowCategoryView:
-    """View on a Document under the C^→-side projection of the
-    arrow-category functor.
-
-    Forwards ``wedge``, ``wedge_2``, and ``hom_set`` to the
-    underlying Document with
-    ``tag_projection=TAG_PROJECTION_UNIFIED_MORPHISM`` baked in
-    as the default.  Constructed via ``Document.arrow_category_view()``.
-
-    Pass-through, not a snapshot: mutations to the underlying
-    Document are visible through the view.  This honors the
-    three-identity-layers discipline — the substrate is the
-    Document; the view is a relabeling, not a copy.
-
-    See conception matrix cells ``ArrowCategoryHasTwoSides``,
-    ``SigmaKeyTagProjectionIsArrowFunctor``, and
-    ``Gap8IsParameterized``, and feedback memory
-    ``feedback_reframe_as_projection.md``.
-    """
-
-    __slots__ = ("_document",)
-
-    def __init__(self, document: "Document") -> None:
-        self._document = document
-
-    @property
-    def document(self) -> "Document":
-        """The underlying Document this view projects from."""
-        return self._document
-
-    def wedge(
-        self,
-        *perspectives: FrozenSet[str],
-    ) -> Dict[Tuple[Tuple[Any, ...], ...], List[str]]:
-        """``Document.wedge`` under the unified-morphism projection."""
-        return self._document.wedge(
-            *perspectives,
-            tag_projection=TAG_PROJECTION_UNIFIED_MORPHISM,
-        )
-
-    def wedge_2(
-        self,
-        perspective_a: FrozenSet[str],
-        perspective_b: FrozenSet[str],
-    ) -> Dict[Tuple[Tuple[Any, ...], Tuple[Any, ...]], List[str]]:
-        """``Document.wedge_2`` under the unified-morphism projection."""
-        return self._document.wedge_2(
-            perspective_a, perspective_b,
-            tag_projection=TAG_PROJECTION_UNIFIED_MORPHISM,
-        )
-
-    def hom_set(
-        self,
-        src_id: str,
-        dst_id: str,
-        *,
-        perspective: FrozenSet[str] = PERSPECTIVE_KAPPA,
-    ) -> FrozenSet[str]:
-        """``Document.hom_set`` under the unified-morphism projection.
-
-        Under this projection, ``hom_set(X, X, perspective=κ)``
-        for an Addr0 X returns just ``frozenset({X.id})`` even
-        if other morphisms (Addr1 self-loops) share the
-        endpoints, because they all collapse to the same
-        ``("morphism", X.id, X.id)`` κ-key.  This is the
-        gap #8 resolution made executable.
-        """
-        return self._document.hom_set(
-            src_id, dst_id,
-            perspective=perspective,
-            tag_projection=TAG_PROJECTION_UNIFIED_MORPHISM,
-        )
-
-    def __repr__(self) -> str:
-        return (
-            f"_ArrowCategoryView({self._document.documentId!r})"
-        )
 
 
 @dataclass
@@ -1834,32 +1608,23 @@ class Document:
     def wedge(
         self,
         *perspectives: FrozenSet[str],
-        tag_projection: str = TAG_PROJECTION_LEGACY_THREE_TAG,
     ) -> Dict[Tuple[Tuple[Any, ...], ...], List[str]]:
         """Project every cell through each given perspective and
         group cells by the resulting tuple-of-signatures.
 
         This is the Document-side analogue of ``core.py:SPPF.wedge``,
-        ported under Step 1.5.1 Pass 3 and parameterized by
-        ``tag_projection`` under Step 1.5.2.  It computes the wedge
+        ported under Step 1.5.1 Pass 3.  It computes the wedge
         product `p_1 ∧ p_2 ∧ ... ∧ p_n` over the supplied
         perspectives by:
 
           1. Iterating over every cell in the document
           2. Computing each cell's perspective-parameterized
-             ``sigma_key`` once per perspective in the order given,
-             under the chosen tag projection
+             ``sigma_key`` once per perspective in the order given
           3. Using the resulting tuple-of-signatures as a dict key,
              accumulating the cell ids that share that tuple
 
         With **no perspectives** supplied, defaults to the canonical
         three-perspective wedge `σ ∧ τ ∧ κ` (Reading A).
-
-        ``tag_projection`` selects which side of the arrow-category
-        functor ``C → C^→`` the wedge is computed on; see the
-        ``sigma_key`` docstring for the dual-reading framing.
-        Defaults to ``TAG_PROJECTION_LEGACY_THREE_TAG`` for
-        byte-equivalence with Pass 3 callers.
 
         Returns a dict mapping each occupied position in the
         product space to the list of cell ids at that position.
@@ -1877,10 +1642,7 @@ class Document:
             )
         out: Dict[Tuple[Tuple[Any, ...], ...], List[str]] = defaultdict(list)
         for cell in self.cells():
-            key = tuple(
-                sigma_key(cell, perspective=p, tag_projection=tag_projection)
-                for p in perspectives
-            )
+            key = tuple(sigma_key(cell, perspective=p) for p in perspectives)
             out[key].append(cell.id)
         return dict(out)
 
@@ -1888,8 +1650,6 @@ class Document:
         self,
         perspective_a: FrozenSet[str],
         perspective_b: FrozenSet[str],
-        *,
-        tag_projection: str = TAG_PROJECTION_LEGACY_THREE_TAG,
     ) -> Dict[Tuple[Tuple[Any, ...], Tuple[Any, ...]], List[str]]:
         """Two-perspective wedge product → ``{(key_a, key_b): [cell_ids]}``.
 
@@ -1903,24 +1663,14 @@ class Document:
         one perspective refines or coarsens under another (e.g.,
         ``wedge_2(PERSPECTIVE_KAPPA, PERSPECTIVE_SIGMA)`` shows
         which σ-classes lie inside each κ-class).
-
-        ``tag_projection`` selects the arrow-category projection;
-        see the ``sigma_key`` docstring.  Defaults to
-        ``TAG_PROJECTION_LEGACY_THREE_TAG``.
         """
         out: Dict[Tuple[Tuple[Any, ...], Tuple[Any, ...]], List[str]] = (
             defaultdict(list)
         )
         for cell in self.cells():
             key = (
-                sigma_key(
-                    cell, perspective=perspective_a,
-                    tag_projection=tag_projection,
-                ),
-                sigma_key(
-                    cell, perspective=perspective_b,
-                    tag_projection=tag_projection,
-                ),
+                sigma_key(cell, perspective=perspective_a),
+                sigma_key(cell, perspective=perspective_b),
             )
             out[key].append(cell.id)
         return dict(out)
@@ -1931,7 +1681,6 @@ class Document:
         dst_id: str,
         *,
         perspective: FrozenSet[str] = PERSPECTIVE_KAPPA,
-        tag_projection: str = TAG_PROJECTION_LEGACY_THREE_TAG,
     ) -> FrozenSet[str]:
         """Return the set of Cell ids that are morphisms from
         ``src_id`` to ``dst_id``, modulo the equivalence
@@ -1966,27 +1715,6 @@ class Document:
           - **PERSPECTIVE_KAPPA** (coarsest, default here) — drops
             ctor and premises; under most readings, any morphism
             between (src, dst) collapses regardless of constructor.
-            Note that the Addr0 identity morphism on X has a
-            distinct sigma_key from a non-identity self-loop on
-            X (an Addr1 with src=dst=X) under
-            ``tag_projection=TAG_PROJECTION_LEGACY_THREE_TAG``
-            (the default), because the legacy projection tags
-            them with different prefixes (``"addr0"`` vs
-            ``"morphism"``).  Under
-            ``tag_projection=TAG_PROJECTION_UNIFIED_MORPHISM`` they
-            collapse to the same κ-key because both project to
-            ``("morphism", id, id)``.
-
-        ``tag_projection`` selects which side of the
-        arrow-category functor ``C → C^→`` the equivalence is
-        computed on; see the ``sigma_key`` docstring for the
-        full dual-reading framing.  Defaults to
-        ``TAG_PROJECTION_LEGACY_THREE_TAG`` for byte-equivalence
-        with Pass 3 callers; pass
-        ``TAG_PROJECTION_UNIFIED_MORPHISM`` to read the
-        document under the C^→ projection (which collapses two
-        Addr0s with the same endpoints to one κ-class — gap #8
-        resolution by parameterization).
 
         The default ``perspective=PERSPECTIVE_KAPPA`` matches the
         most natural reading of "are there any distinct morphisms
@@ -2014,44 +1742,10 @@ class Document:
         for cell in self.cells():
             if cell.endpoints != target:
                 continue
-            key = sigma_key(
-                cell, perspective=perspective,
-                tag_projection=tag_projection,
-            )
+            key = sigma_key(cell, perspective=perspective)
             if key not in seen_keys:
                 seen_keys[key] = cell.id
         return frozenset(seen_keys.values())
-
-    def arrow_category_view(self) -> "_ArrowCategoryView":
-        """Return a view of this Document under the C^→-side
-        projection of the arrow-category functor.
-
-        The returned view exposes ``wedge``, ``wedge_2``, and
-        ``hom_set`` methods that delegate to the underlying
-        Document's same-named methods with
-        ``tag_projection=TAG_PROJECTION_UNIFIED_MORPHISM``
-        baked in as the default.  Use this when you want to
-        run multiple queries under the unified-morphism
-        projection without repeating the kwarg.
-
-        The view is a thin forwarding wrapper, not a frozen
-        snapshot — mutations to the underlying Document are
-        visible through the view.  This is intentional under
-        the three-identity-layers discipline: the absolute
-        address layer is the Document; the view is just a
-        relabeling of the same substrate.
-
-        Example::
-
-            view = doc.arrow_category_view()
-            view.hom_set("X", "X")  # uses unified-morphism
-            view.wedge_2(PERSPECTIVE_SIGMA, PERSPECTIVE_KAPPA)
-
-        See conception matrix cells ``ArrowCategoryHasTwoSides``,
-        ``SigmaKeyTagProjectionIsArrowFunctor``, and
-        ``Gap8IsParameterized``.
-        """
-        return _ArrowCategoryView(self)
 
     # ── τ-cascade: auto-coh fixed-point pass ────────────────────────
     #
@@ -2469,8 +2163,6 @@ __all__ = [
     "PERSPECTIVE_SIGMA",
     "PERSPECTIVE_TAU",
     "PERSPECTIVE_KAPPA",
-    "TAG_PROJECTION_LEGACY_THREE_TAG",
-    "TAG_PROJECTION_UNIFIED_MORPHISM",
     "ClassMember",
     "ClassView",
     "ShadowNode",
