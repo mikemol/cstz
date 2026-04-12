@@ -104,6 +104,7 @@ from .pff import (
     Rank,
     Segment,
     Step,
+    morphism_term,
     sigma_key,
 )
 
@@ -257,9 +258,9 @@ class _Fiber:
 
     __slots__ = ("name", "perspective", "classes", "class_of", "uf")
 
-    def __init__(self, name: str, perspective: FrozenSet[str]) -> None:
+    def __init__(self, name: str, perspective: str) -> None:
         self.name: str = name
-        self.perspective: FrozenSet[str] = perspective
+        self.perspective: str = perspective
         self.classes: Dict[Tuple[Any, ...], _FiberClass] = {}
         self.class_of: Dict[str, Tuple[Any, ...]] = {}
         self.uf: _UnionFind = _UnionFind()
@@ -1076,13 +1077,20 @@ class PFFCascadeEngine:
         sigma_key (computed over the canonical (src, dst) pair),
         return the existing one instead of minting a duplicate.
 
-        Canonicalization happens BEFORE sigma_key lookup: the
-        provisional sigma_key uses the current canonical src/dst
-        under the union-find, so two _emit_glue calls with
-        different raw endpoints but the same canonical pair
-        produce the same sigma_key and hash-cons to one Addr1.
+        The hash-cons key is the **witness term** for the morphism,
+        built via ``morphism_term()`` from the swap-normalized
+        canonical endpoints.  The term IS the key — no separate
+        encoding step.  ``morphism_term`` is the same function
+        that ``sigma_key`` calls internally, so the key format
+        is always in sync.
 
-        The union call comes AFTER the sigma_key lookup because
+        Canonicalization happens BEFORE term construction: the
+        term uses the current canonical src/dst under the
+        union-find, so two _emit_glue calls with different raw
+        endpoints but the same canonical pair produce the same
+        term and hash-cons to one Addr1.
+
+        The union call comes AFTER the term lookup because
         unioning changes the canonical map and would invalidate
         the key we just computed.
 
@@ -1093,23 +1101,21 @@ class PFFCascadeEngine:
         This matches the old _emit_glue's first-writer-wins
         discipline.
         """
-        # Compute the provisional sigma_key.  We need an Addr1
-        # instance to call sigma_key on, but we don't want to mint
-        # an id yet (that would be wasteful on hash-cons hit).
-        # Build a temporary Addr1 with a placeholder id.
+        # Canonicalize endpoints.
         canon_src = self._uf.find(src) if src in self._uf else src
         canon_dst = self._uf.find(dst) if dst in self._uf else dst
-        # Normalize (canon_src, canon_dst) so the sigma_key is
-        # invariant under swapping: a glue from A to B is the same
-        # equivalence witness as a glue from B to A at the path1
-        # level.  (This is what auto_coh_closure previously did
-        # post-hoc via sorted((p1.src, p1.dst)).)
+        # Swap-normalize so the term is invariant under swapping:
+        # a glue from A to B is the same equivalence witness as
+        # a glue from B to A at the path1 level.
         if canon_src > canon_dst:
             key_src, key_dst = canon_dst, canon_src
         else:
             key_src, key_dst = canon_src, canon_dst
-        key_premises = tuple(premises or [])
-        key = ("morphism", "glue", key_src, key_dst, key_premises)
+
+        # The witness term IS the hash-cons key.
+        key = morphism_term(
+            key_src, key_dst, "glue", tuple(premises or []),
+        )
 
         # v2 residue port: capture the raw (src, dst) pair as
         # supplied by the caller, before swap normalization and

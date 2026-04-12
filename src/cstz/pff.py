@@ -451,81 +451,55 @@ Cell = Union[Addr0, Addr1, Addr2]
 #   - Step151PerspectiveOrderIsBasisChoice
 #   - LabelingIsRelationalNotNormative
 #
-# Each perspective is a **set of discriminator names** — atomic
-# questions the perspective asks about a cell.  ``sigma_key``
-# walks the active discriminators and projects the cell onto
-# them.  The perspective constants define the canonical lattice;
-# ad-hoc perspectives can be passed at call sites as raw
-# ``frozenset`` literals.
+# The σ/τ/κ chain is a **truncation chain** — not a
+# discriminator-subset lattice.  Each cell's sigma_key is a tuple
+# of (key, value) pairs ordered by truncation priority: fields
+# that survive coarser truncations come first.  Truncation at a
+# given level is prefix-taking on this tuple.
+#
+# Three named levels:
+#   σ (sigma) — trivial truncation: full term, all fields
+#   τ (tau)   — intermediate: drop the finest-only fields
+#               (premises for morphisms, segments for Addr0)
+#   κ (kappa) — set truncation: keep only the fields that
+#               survive the coarsest partition (sort for Addr0,
+#               endpoints for morphisms)
+#
+# The field ordering is fixed per cell sort:
+#   Addr0:     (sort, segments)        — κ keeps 1, τ keeps 1, σ keeps 2
+#   Addr1:     (src, dst, ctor, premises) — κ keeps 2, τ keeps 3, σ keeps 4
+#   Addr2:     (src, dst, ctor)        — κ keeps 2, τ keeps 3, σ keeps 3
+#
+# Under v2 vocabulary (pre-draft §4): the witness term IS its own
+# hash-cons key.  There is no separate "sigma_key function" concept
+# — the term hashes to itself.  Truncation produces views.
 
-# Discriminator names — the questions a perspective can ask:
-DISCRIM_SORT = "sort"
-"""Cells with a ``sort`` field (Addr0 under any tag projection):
-include the sort field in the signature."""
+PERSPECTIVE_SIGMA = "sigma"
+"""Trivial truncation: full term, all fields retained."""
 
-DISCRIM_SEGMENTS = "segments"
-"""Cells with a ``segments`` field (Addr0 under any tag
-projection): include the full segment-pair-route-boundary
-signature."""
+PERSPECTIVE_TAU = "tau"
+"""Intermediate truncation: drop premises (morphisms) or
+segments (Addr0).  Keeps sort/endpoints/ctor."""
 
-DISCRIM_CTOR = "ctor"
-"""Cells with a ``ctor`` field (Addr1/Addr2 under any tag
-projection): include the constructor name (``glue`` / ``coh``
-/ ``transport`` / etc.) in the signature."""
+PERSPECTIVE_KAPPA = "kappa"
+"""Set truncation: keep only sort (Addr0) or endpoints
+(morphisms).  The coarsest partition."""
 
-DISCRIM_ENDPOINTS = "endpoints"
-"""Addr1/Addr2 cells: include both endpoint ids in the signature
-(via the ``endpoints`` property added in Step 1.5.1 Pass 3.1).
-Addr0 cells skip this discriminator because the legacy reading
-treats Addr0 as an object rather than a self-loop morphism."""
-
-DISCRIM_PREMISES = "premises"
-"""Cells with a ``premises`` field (Addr1): include the premises
-tuple in the signature."""
-
-
-PERSPECTIVE_SIGMA: FrozenSet[str] = frozenset({
-    DISCRIM_SORT,
-    DISCRIM_SEGMENTS,
-    DISCRIM_CTOR,
-    DISCRIM_ENDPOINTS,
-    DISCRIM_PREMISES,
-})
-"""Reading A: σ is the LABEL for the most-discriminating
-perspective — full structural fingerprint with every
-discriminator active.  This is exactly the Step 1.5 default
-behavior of ``sigma_key``, preserved as the new default so
-existing call sites are byte-compatible."""
-
-PERSPECTIVE_TAU: FrozenSet[str] = frozenset({
-    DISCRIM_SORT,
-    DISCRIM_CTOR,
-    DISCRIM_ENDPOINTS,
-})
-"""Reading A: τ is the LABEL for the middle perspective —
-structural ctor and endpoints survive, but premises are dropped
-and rank-0 segment internals are abstracted away.  The
-analogue of core.py's τ-key (which drops ``params`` and resolves
-children through the τ-fiber's union-find)."""
-
-PERSPECTIVE_KAPPA: FrozenSet[str] = frozenset({
-    DISCRIM_SORT,
-    DISCRIM_ENDPOINTS,
-})
-"""Reading A: κ is the LABEL for the most-merged perspective —
-only sort and endpoints survive.  Two cells with the same sort
-and the same (src, dst) endpoints are identified regardless of
-constructor or premises.  The analogue of core.py's κ-key
-(which is ``(kappa_tag, child_kappas)``, ast_type-agnostic)."""
+# Prefix lengths per (sort-kind, truncation-level).
+# sigma_key returns term[:n] where n comes from this table.
+# None means "full term" (no truncation).
+_TRUNCATION: Dict[Tuple[str, str], Optional[int]] = {
+    ("addr0", "sigma"): None,
+    ("addr0", "tau"): 1,      # sort only
+    ("addr0", "kappa"): 1,    # sort only
+    ("morphism", "sigma"): None,
+    ("morphism", "tau"): 3,   # src + dst + ctor
+    ("morphism", "kappa"): 2, # src + dst
+}
 
 
 def _addr0_segment_signature(cell: "Addr0") -> Tuple[Any, ...]:
-    """Build the canonical segment-pair-route-boundary tuple for an Addr0.
-
-    Factored out of ``sigma_key`` so the same projection can be
-    reused by both the legacy and unified branches without
-    duplicating the nested generator expression.
-    """
+    """Build the canonical segment-pair-route-boundary tuple for an Addr0."""
     return tuple(
         (s.rank, s.phase, s.patch,
          tuple((p.chart, p.root, p.role,
@@ -536,76 +510,59 @@ def _addr0_segment_signature(cell: "Addr0") -> Tuple[Any, ...]:
     )
 
 
+def addr0_term(sort: Any, segments_sig: Any) -> Tuple[Tuple[str, Any], ...]:
+    """Build the witness term for an Addr0 from its parts.
+
+    The field ordering is: sort first (survives all truncations),
+    segments second (survives only σ).  This is the term that
+    sigma_key returns for an Addr0 under PERSPECTIVE_SIGMA.
+    """
+    return (("sort", sort), ("segments", segments_sig))
+
+
+def morphism_term(
+    src: str, dst: str, ctor: str, premises: Tuple[Any, ...] = (),
+) -> Tuple[Tuple[str, Any], ...]:
+    """Build the witness term for a morphism (Addr1/Addr2) from parts.
+
+    The field ordering is: endpoints first (survive all
+    truncations), ctor second (survives τ and σ), premises last
+    (survives only σ).  Addr2 cells pass empty premises.
+    """
+    return (("src", src), ("dst", dst), ("ctor", ctor), ("premises", premises))
+
+
 def sigma_key(
     cell: Cell,
-    perspective: FrozenSet[str] = PERSPECTIVE_SIGMA,
-) -> Tuple[Any, ...]:
-    """Compute the hash-cons signature of a Cell under a perspective.
+    perspective: str = PERSPECTIVE_SIGMA,
+) -> Tuple[Tuple[str, Any], ...]:
+    """Compute the witness term of a Cell, optionally truncated.
 
-    Rank-agnostic: the same function handles Addr0s, Addr1s, and
-    Addr2s by inspecting which fields are populated.  Two cells
-    with equal sigma_keys (under the same ``perspective``) are
-    considered structurally equivalent under that intension —
-    they should be merged (or, at emission time, hash-consed to
-    a single Cell).
+    The return value is a tuple of ``(key, value)`` pairs ordered
+    by truncation priority.  The full term (σ) includes every
+    field; coarser truncations (τ, κ) take progressively shorter
+    prefixes.  Two cells with equal sigma_keys under the same
+    perspective are structurally equivalent at that truncation
+    level.
 
-    The ``perspective`` argument selects which discriminators
-    contribute to the signature.  Three named perspectives are
-    provided: ``PERSPECTIVE_SIGMA`` (full structural fingerprint),
-    ``PERSPECTIVE_TAU`` (middle; drops premises and segment
-    internals), and ``PERSPECTIVE_KAPPA`` (most merged; keeps
-    only sort and endpoints).
+    The term IS the hash-cons key — no separate encoding step.
 
-    Default behavior (``perspective=PERSPECTIVE_SIGMA``) is
-    byte-compatible with Step 1.5:
-
-    - **Addr0** — ``("addr0", sort, segments-signature)``
-    - **Addr1/Addr2** — ``("morphism", ctor, src, dst, premises-tuple)``
-
-    For morphism cells, the ``src`` and ``dst`` fields are used
-    as-is (not canonicalized).  The caller is responsible for
-    canonicalizing them via the cascade's union-find before
-    calling ``sigma_key`` if canonicalization matters at the
-    call site (normal cascade emission does this).
+    For morphism cells, ``src`` and ``dst`` are used as-is (not
+    canonicalized).  The caller is responsible for canonicalizing
+    via the cascade's union-find if needed.
     """
     if isinstance(cell, Addr0):
-        # Rank-0 signature.  Build incrementally so the default
-        # case (PERSPECTIVE_SIGMA, all discriminators active)
-        # produces exactly the Step 1.5 tuple shape.
-        if perspective == PERSPECTIVE_SIGMA:
-            seg_sig = _addr0_segment_signature(cell)
-            return ("addr0", cell.sort, seg_sig)
-
-        parts: List[Any] = ["addr0"]
-        if DISCRIM_SORT in perspective:
-            parts.append(cell.sort)
-        if DISCRIM_SEGMENTS in perspective:
-            parts.append(_addr0_segment_signature(cell))
-        return tuple(parts)
-
-    # Rank-1+ signature: morphism data.
-    # Both Addr1 and Addr2 have (ctor, src, dst); only Addr1 has
-    # premises.  We unify by treating absent premises as empty.
-    if perspective == PERSPECTIVE_SIGMA:
+        term = addr0_term(cell.sort, _addr0_segment_signature(cell))
+        sort_kind = "addr0"
+    else:
         premises = getattr(cell, "premises", ())
-        return (
-            "morphism",
-            cell.ctor,
-            cell.src,
-            cell.dst,
-            tuple(premises),
-        )
+        term = morphism_term(cell.src, cell.dst, cell.ctor, tuple(premises))
+        sort_kind = "morphism"
 
-    parts = ["morphism"]
-    if DISCRIM_CTOR in perspective:
-        parts.append(cell.ctor)
-    if DISCRIM_ENDPOINTS in perspective:
-        parts.append(cell.src)
-        parts.append(cell.dst)
-    if DISCRIM_PREMISES in perspective:
-        premises = getattr(cell, "premises", ())
-        parts.append(tuple(premises))
-    return tuple(parts)
+    n = _TRUNCATION.get((sort_kind, perspective))
+    if n is not None:
+        return term[:n]
+    return term
 
 
 # ── Derived views (non-authoritative) ───────────────────────────────
@@ -1607,7 +1564,7 @@ class Document:
 
     def wedge(
         self,
-        *perspectives: FrozenSet[str],
+        *perspectives: str,
     ) -> Dict[Tuple[Tuple[Any, ...], ...], List[str]]:
         """Project every cell through each given perspective and
         group cells by the resulting tuple-of-signatures.
@@ -1648,8 +1605,8 @@ class Document:
 
     def wedge_2(
         self,
-        perspective_a: FrozenSet[str],
-        perspective_b: FrozenSet[str],
+        perspective_a: str,
+        perspective_b: str,
     ) -> Dict[Tuple[Tuple[Any, ...], Tuple[Any, ...]], List[str]]:
         """Two-perspective wedge product → ``{(key_a, key_b): [cell_ids]}``.
 
@@ -1680,7 +1637,7 @@ class Document:
         src_id: str,
         dst_id: str,
         *,
-        perspective: FrozenSet[str] = PERSPECTIVE_KAPPA,
+        perspective: str = PERSPECTIVE_KAPPA,
     ) -> FrozenSet[str]:
         """Return the set of Cell ids that are morphisms from
         ``src_id`` to ``dst_id``, modulo the equivalence
@@ -2155,11 +2112,8 @@ __all__ = [
     "Addr2",
     "Cell",
     "sigma_key",
-    "DISCRIM_SORT",
-    "DISCRIM_SEGMENTS",
-    "DISCRIM_CTOR",
-    "DISCRIM_ENDPOINTS",
-    "DISCRIM_PREMISES",
+    "addr0_term",
+    "morphism_term",
     "PERSPECTIVE_SIGMA",
     "PERSPECTIVE_TAU",
     "PERSPECTIVE_KAPPA",

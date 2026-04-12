@@ -2069,6 +2069,33 @@ class TestSigmaKeyFunction:
         keys = {sigma_key(a0), sigma_key(a1), sigma_key(a2)}
         assert len(keys) == 3  # all three are distinct
 
+    def test_emit_glue_key_is_morphism_term(self) -> None:
+        """The hash-cons key used by ``_emit_glue`` is built via
+        ``morphism_term()`` — the same constructor that
+        ``sigma_key`` uses internally.  The minted Addr1 IS a
+        value stored in ``_morphism_signature_index``, and the
+        key for that value is a tuple of (key, value) pairs in
+        the truncation-priority field ordering."""
+        e = PFFCascadeEngine()
+        sigma_a = e.ensure_chart("sigma", "A")
+        sigma_b = e.ensure_chart("sigma", "B")
+        tau = e.ensure_chart("tau", "T")
+        a = e.add_observation(sigma_a, tau, sort="A")
+        b = e.add_observation(sigma_b, tau, sort="B")
+        result = e.glue(a.id, b.id)
+        addr1 = result.addr1
+        assert addr1 is not None
+        # The addr1 IS stored in the index as a value
+        assert addr1 in e._morphism_signature_index.values()
+        # The key for it is a tuple of (key, value) pairs —
+        # every element is a 2-tuple
+        for stored_key, stored_val in e._morphism_signature_index.items():
+            if stored_val is addr1:
+                for field in stored_key:
+                    assert isinstance(field, tuple)
+                    assert len(field) == 2
+                break
+
 
 class TestSigmaKeyPerspectives:
     """Cover the perspective lattice added by Step 1.5.1 Pass 1.
@@ -2143,8 +2170,10 @@ class TestSigmaKeyPerspectives:
                 pairs=[Pair(chart="c", root="r", role="principal")],
             )],
         )
-        # κ-key for an Addr0 is ("addr0", sort)
-        assert sigma_key(a, perspective=PERSPECTIVE_KAPPA) == ("addr0", "X")
+        # κ-key for an Addr0 is the shortest prefix: just sort
+        k = sigma_key(a, perspective=PERSPECTIVE_KAPPA)
+        assert len(k) == 1
+        assert k[0] == ("sort", "X")
 
     def test_addr0_kappa_distinguishes_different_sorts(self) -> None:
         """Two Addr0s with different sorts have different κ-keys."""
@@ -2186,11 +2215,12 @@ class TestSigmaKeyPerspectives:
         from cstz.pff import Addr1, Addr2, sigma_key, PERSPECTIVE_KAPPA
         a1 = Addr1(id="g", rank="r0", ctor="glue", src="x", dst="y")
         a2 = Addr2(id="c", rank="r0", ctor="coh", src="x", dst="y")
-        # Both collapse to ("morphism", "x", "y") at κ
+        # Both collapse to the same endpoints-only prefix at κ
         assert sigma_key(a1, perspective=PERSPECTIVE_KAPPA) == \
             sigma_key(a2, perspective=PERSPECTIVE_KAPPA)
-        assert sigma_key(a1, perspective=PERSPECTIVE_KAPPA) == \
-            ("morphism", "x", "y")
+        k = sigma_key(a1, perspective=PERSPECTIVE_KAPPA)
+        assert len(k) == 2
+        assert k == (("src", "x"), ("dst", "y"))
         # σ-perspective distinguishes them (different ctors)
         assert sigma_key(a1) != sigma_key(a2)
 
@@ -2202,95 +2232,89 @@ class TestSigmaKeyPerspectives:
         assert sigma_key(a, perspective=PERSPECTIVE_KAPPA) \
             != sigma_key(b, perspective=PERSPECTIVE_KAPPA)
 
-    def test_perspective_lattice_refinement_order(self) -> None:
-        """Reading A: σ ⊏ τ ⊏ κ.  σ has the most discriminators
-        and produces the strictest equivalence relation; κ has the
-        fewest and produces the loosest.
-
-        Concretely: any two cells equal under σ are also equal
-        under τ, and any two cells equal under τ are also equal
-        under κ.  The converse fails."""
+    def test_truncation_chain_refinement_order(self) -> None:
+        """σ ⊐ τ ⊐ κ: σ is the full term (finest partition), κ
+        is the shortest prefix (coarsest partition).  Any two
+        cells equal under σ are equal under τ, and any two
+        equal under τ are equal under κ.  Verified behaviorally:
+        the σ-key is a prefix of the τ-key is a prefix of the
+        κ-key (because truncation is prefix-taking)."""
         from cstz.pff import (
+            Addr1, sigma_key,
             PERSPECTIVE_SIGMA, PERSPECTIVE_TAU, PERSPECTIVE_KAPPA,
         )
-        # σ is a strict superset of τ which is a strict superset of κ
-        assert PERSPECTIVE_SIGMA > PERSPECTIVE_TAU
-        assert PERSPECTIVE_TAU > PERSPECTIVE_KAPPA
-        assert PERSPECTIVE_SIGMA > PERSPECTIVE_KAPPA
-
-    def test_ad_hoc_perspective_via_frozenset_literal(self) -> None:
-        """Callers can pass a custom perspective as a raw
-        frozenset literal — the constants are convenience names,
-        not a closed set."""
-        from cstz.pff import (
-            Addr1, sigma_key, DISCRIM_CTOR, DISCRIM_PREMISES,
-        )
-        # Custom perspective: only ctor + premises (no endpoints)
-        custom = frozenset({DISCRIM_CTOR, DISCRIM_PREMISES})
         a = Addr1(
             id="g", rank="r0", ctor="glue", src="x", dst="y",
             premises=["p"],
         )
-        key = sigma_key(a, perspective=custom)
-        assert key == ("morphism", "glue", ("p",))
+        s = sigma_key(a, PERSPECTIVE_SIGMA)
+        t = sigma_key(a, PERSPECTIVE_TAU)
+        k = sigma_key(a, PERSPECTIVE_KAPPA)
+        # σ is the longest (full term)
+        assert len(s) >= len(t) >= len(k)
+        # τ IS a prefix of σ
+        assert s[:len(t)] == t
+        # κ IS a prefix of τ
+        assert t[:len(k)] == k
 
-    def test_empty_perspective_yields_only_type_tag(self) -> None:
-        """An empty perspective drops every discriminator, leaving
-        only the rank-tag prefix.  This is the degenerate
-        bottom-of-the-lattice case."""
+    def test_kappa_collapses_addr1s_with_different_ctors(self) -> None:
+        """Under κ, two Addr1s with the same endpoints but
+        different ctors collapse to the same key — ctor is
+        dropped at the κ truncation level."""
         from cstz.pff import (
-            Addr0, Addr1, Pair, Segment, sigma_key,
+            Addr1, sigma_key, PERSPECTIVE_KAPPA,
         )
-        empty = frozenset()
-        a0 = Addr0(
-            id="a", sort="X",
-            segments=[Segment(
-                rank="r0", phase="ingest", patch="p0",
-                pairs=[Pair(chart="c", root="r", role="principal")],
-            )],
-        )
-        a1 = Addr1(id="g", rank="r0", ctor="glue", src="x", dst="y")
-        assert sigma_key(a0, perspective=empty) == ("addr0",)
-        assert sigma_key(a1, perspective=empty) == ("morphism",)
+        glue = Addr1(id="g", rank="r0", ctor="glue", src="x", dst="y")
+        named = Addr1(id="n", rank="r0", ctor="named", src="x", dst="y")
+        assert sigma_key(glue, PERSPECTIVE_KAPPA) == \
+            sigma_key(named, PERSPECTIVE_KAPPA)
+        # But under σ they're distinct (ctor survives)
+        assert sigma_key(glue) != sigma_key(named)
 
-    def test_addr0_segments_only_perspective(self) -> None:
-        """A custom perspective containing DISCRIM_SEGMENTS but
-        NOT equal to PERSPECTIVE_SIGMA exercises the segments-
-        signature branch inside the non-default rank-0 path.
-        This is the inverse of the τ/κ pattern: instead of
-        dropping segments, drop everything else and keep
-        segments alone."""
+    def test_tau_preserves_ctor_but_drops_premises(self) -> None:
+        """Under τ, ctor survives but premises are dropped.
+        Two Addr1s with the same (src, dst, ctor) but different
+        premises collapse under τ."""
         from cstz.pff import (
-            Addr0, Pair, Segment, Step, Hop, sigma_key,
-            DISCRIM_SEGMENTS,
+            Addr1, sigma_key, PERSPECTIVE_TAU,
         )
-        segments_only = frozenset({DISCRIM_SEGMENTS})
+        a = Addr1(id="g1", rank="r0", ctor="glue", src="x", dst="y",
+                  premises=["p1"])
+        b = Addr1(id="g2", rank="r0", ctor="glue", src="x", dst="y",
+                  premises=["p2"])
+        assert sigma_key(a, PERSPECTIVE_TAU) == \
+            sigma_key(b, PERSPECTIVE_TAU)
+        # Under σ they're distinct (premises survive)
+        assert sigma_key(a) != sigma_key(b)
+
+    def test_addr0_kappa_drops_segments(self) -> None:
+        """Under κ, Addr0 terms keep only sort; segments are
+        dropped.  Two Addr0s with the same sort but different
+        segments collapse under κ."""
+        from cstz.pff import (
+            Addr0, Pair, Segment, Step, sigma_key, PERSPECTIVE_KAPPA,
+        )
         a = Addr0(
             id="a", sort="X",
             segments=[Segment(
                 rank="r0", phase="ingest", patch="p0",
+                pairs=[Pair(chart="c0", root="r", role="principal")],
+            )],
+        )
+        b = Addr0(
+            id="b", sort="X",
+            segments=[Segment(
+                rank="r0", phase="ingest", patch="p0",
                 pairs=[Pair(
-                    chart="c0", root="root",
+                    chart="c0", root="r", role="principal",
                     route=[Step(kind="child", arg=0)],
-                    boundary=[Hop(
-                        boundary="b0", side="left", port="lhs",
-                    )],
-                    role="principal",
                 )],
             )],
         )
-        key = sigma_key(a, perspective=segments_only)
-        # Tuple shape: ("addr0", segments-tuple) — sort is dropped
-        assert key[0] == "addr0"
-        assert len(key) == 2
-        # Two Addr0s with the same segments but different sorts
-        # are identified under this perspective
-        b = Addr0(
-            id="b", sort="Y",
-            segments=list(a.segments),
-        )
-        assert sigma_key(a, perspective=segments_only) == \
-            sigma_key(b, perspective=segments_only)
+        assert sigma_key(a, PERSPECTIVE_KAPPA) == \
+            sigma_key(b, PERSPECTIVE_KAPPA)
+        # Under σ they're distinct (segments survive)
+        assert sigma_key(a) != sigma_key(b)
 
 
 class TestPassTwoFibers:
@@ -2589,14 +2613,14 @@ class TestPassThreeDocumentQueries:
         wedge = d.wedge(PERSPECTIVE_KAPPA)
         # Two morphisms (Addr1 glue + Addr2 coh) with same
         # (src, dst) collapse under κ → they share a bucket.
-        morphism_buckets = [
-            ids for key, ids in wedge.items()
-            if key[0][0] == "morphism"
-        ]
-        assert len(morphism_buckets) == 1
-        bucket = morphism_buckets[0]
-        assert "g1" in bucket
-        assert "c1" in bucket
+        # Find the bucket containing g1.
+        g1_bucket = None
+        for ids in wedge.values():
+            if "g1" in ids:
+                g1_bucket = ids
+                break
+        assert g1_bucket is not None
+        assert "c1" in g1_bucket
 
     # ── wedge_2() — convenience two-perspective product ──
 
@@ -2615,13 +2639,18 @@ class TestPassThreeDocumentQueries:
         # (different ctors) but the same κ key (only endpoints
         # survive), so they sit in different (σ, κ) buckets but
         # those buckets share a κ-coordinate.
-        morphism_keys = [
-            key for key in w2
-            if key[0][0] == "morphism"
-        ]
-        assert len(morphism_keys) == 2
-        kappa_coords = {key[1] for key in morphism_keys}
-        assert len(kappa_coords) == 1
+        # Find the two buckets containing g1 and c1 respectively.
+        g1_key = c1_key = None
+        for key, ids in w2.items():
+            if "g1" in ids:
+                g1_key = key
+            if "c1" in ids:
+                c1_key = key
+        assert g1_key is not None and c1_key is not None
+        # Different σ-keys (different ctors)
+        assert g1_key[0] != c1_key[0]
+        # Same κ-key (endpoints only)
+        assert g1_key[1] == c1_key[1]
 
     # ── hom_set() — perspective-aware morphism query ──
 
@@ -3193,30 +3222,21 @@ class TestDynamicCleavageFibers:
         assert snapshot == (f1,)
         assert e.cleavage_fibers() == (f1, f2)
 
-    def test_cleavage_fiber_with_custom_perspective(self) -> None:
-        """A cleavage Fiber under a custom (non-σ/τ/κ) perspective
-        partitions cells differently than the static trio."""
+    def test_cleavage_fiber_with_kappa_perspective(self) -> None:
+        """A cleavage Fiber under the κ truncation level partitions
+        cells by the coarsest prefix (sort for Addr0, endpoints
+        for morphisms)."""
         from cstz.pff_cascade import PFFCascadeEngine
-        from cstz.pff import DISCRIM_SORT
+        from cstz.pff import PERSPECTIVE_KAPPA
         e = PFFCascadeEngine()
         sigma = e.ensure_chart(kind="sigma", root="r")
         tau = e.ensure_chart(kind="tau", root="r")
-        # Custom perspective: sort only (no segments, no endpoints)
-        sort_only = frozenset({DISCRIM_SORT})
-        fiber = e.add_cleavage_fiber("sort-only", sort_only)
-        # Two Addr0s with the same sort but different segments
+        fiber = e.add_cleavage_fiber("kappa-clone", PERSPECTIVE_KAPPA)
         a = e.add_observation(sigma, tau, sort="X")
-        b = e.add_observation(sigma, tau, sort="X")
-        # Wait — they hash-cons to the same Addr0 because their
-        # full_sig matches.  Use different sorts instead and
-        # verify the partition matches the sort.
         c = e.add_observation(sigma, tau, sort="Y")
-        # Under sort-only perspective, X-sorted cells are in one
-        # class and Y-sorted cells are in another.
+        # Under κ, different sorts → different classes
         assert a.id in fiber.class_of
         assert c.id in fiber.class_of
-        # And the σ-fiber sees them differently because it
-        # includes more discriminators.
         assert fiber.class_of[a.id] != fiber.class_of[c.id]
 
 
