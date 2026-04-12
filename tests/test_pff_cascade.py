@@ -1951,87 +1951,112 @@ class TestSigmaKeyFunction:
     the HIT collapse (Step 1.5).
 
     sigma_key produces a rank-agnostic hash-cons signature for any
-    Cell type (Addr0, Addr1, Addr2).  The signature shape differs
-    by rank so the function can be called on any cell without the
-    caller knowing its rank.
+    Cell type (Addr0, Addr1, Addr2).  These tests assert
+    **behavioral invariants** (equal inputs → equal keys, different
+    inputs → different keys, namespaces disjoint) rather than
+    literal tuple shapes, so they survive internal refactors of the
+    sigma_key output format.  See the v2 test-suite walk: "the v2
+    replacement is not 'rewrite the assertions' but 'test the
+    constructor algebra equality directly.'"
     """
 
-    def test_addr0_signature_includes_sort_and_segments(self) -> None:
-        from cstz.pff import (
-            Addr0, Pair, Segment, Step, Hop, sigma_key,
-        )
-        a = Addr0(
-            id="a0",
-            sort="X",
-            segments=[
-                Segment(
-                    rank="r0", phase="ingest", patch="p0",
-                    pairs=[Pair(
-                        chart="c0", root="root",
-                        route=[Step(kind="child", arg=0)],
-                        boundary=[Hop(
-                            boundary="b0", side="left", port="lhs",
-                        )],
-                        role="principal",
-                    )],
-                ),
-            ],
-        )
-        key = sigma_key(a)
-        assert key[0] == "addr0"
-        assert key[1] == "X"
-        # The segments-signature is a tuple of (rank, phase, patch,
-        # pair-tuple) elements
-        assert len(key[2]) == 1
-        rank_phase_patch_pairs = key[2][0]
-        assert rank_phase_patch_pairs[:3] == ("r0", "ingest", "p0")
-
-    def test_addr0_signature_equal_for_equivalent_cells(self) -> None:
+    def test_addr0_sigma_key_discriminates_by_sort(self) -> None:
+        """Two Addr0s with different sorts produce different keys."""
         from cstz.pff import Addr0, Pair, Segment, sigma_key
-        mk = lambda _id: Addr0(
-            id=_id,
-            sort="X",
+        mk = lambda sort: Addr0(
+            id="a", sort=sort,
             segments=[Segment(
                 rank="r0", phase="ingest", patch="p0",
                 pairs=[Pair(chart="c0", root="r", role="principal")],
             )],
         )
-        # Different ids, same structural content → same signature
+        assert sigma_key(mk("X")) != sigma_key(mk("Y"))
+
+    def test_addr0_sigma_key_discriminates_by_segments(self) -> None:
+        """Two Addr0s with different segment structure produce
+        different keys."""
+        from cstz.pff import Addr0, Pair, Segment, Step, sigma_key
+        base = Addr0(
+            id="a", sort="X",
+            segments=[Segment(
+                rank="r0", phase="ingest", patch="p0",
+                pairs=[Pair(chart="c0", root="r", role="principal")],
+            )],
+        )
+        with_route = Addr0(
+            id="b", sort="X",
+            segments=[Segment(
+                rank="r0", phase="ingest", patch="p0",
+                pairs=[Pair(
+                    chart="c0", root="r", role="principal",
+                    route=[Step(kind="child", arg=0)],
+                )],
+            )],
+        )
+        assert sigma_key(base) != sigma_key(with_route)
+
+    def test_addr0_sigma_key_equal_for_equivalent_cells(self) -> None:
+        """Two Addr0s with different ids but identical structural
+        content produce the same sigma_key — the id is not part of
+        the signature under the default perspective."""
+        from cstz.pff import Addr0, Pair, Segment, sigma_key
+        mk = lambda _id: Addr0(
+            id=_id, sort="X",
+            segments=[Segment(
+                rank="r0", phase="ingest", patch="p0",
+                pairs=[Pair(chart="c0", root="r", role="principal")],
+            )],
+        )
         assert sigma_key(mk("a0")) == sigma_key(mk("b0"))
 
-    def test_addr1_signature_morphism_shape(self) -> None:
-        from cstz.pff import Addr1, sigma_key
-        a1 = Addr1(
-            id="g", rank="r0", ctor="glue", src="a", dst="b",
-            premises=["p1", "p2"],
-        )
-        key = sigma_key(a1)
-        assert key == ("morphism", "glue", "a", "b", ("p1", "p2"))
-
-    def test_addr2_signature_morphism_shape(self) -> None:
-        from cstz.pff import Addr2, sigma_key
-        a2 = Addr2(
-            id="c", rank="r0", ctor="coh", src="g1", dst="g2",
-        )
-        key = sigma_key(a2)
-        # Addr2 doesn't have premises; signature gets empty tuple
-        assert key == ("morphism", "coh", "g1", "g2", ())
-
-    def test_addr1_signature_differs_from_addr2_with_same_endpoints(
+    def test_addr1_sigma_key_equal_for_same_ctor_endpoints_premises(
         self,
     ) -> None:
-        """Addr1 and Addr2 with the same src/dst are different
-        morphisms because they have different ctors; sigma_key
-        must distinguish them."""
+        """Two Addr1s with the same (ctor, src, dst, premises)
+        produce the same key regardless of id, rank, or label."""
+        from cstz.pff import Addr1, sigma_key
+        a = Addr1(id="g1", rank="r0", ctor="glue", src="a", dst="b",
+                  premises=["p1"], label="first")
+        b = Addr1(id="g2", rank="r1", ctor="glue", src="a", dst="b",
+                  premises=["p1"], label="second")
+        assert sigma_key(a) == sigma_key(b)
+
+    def test_addr1_sigma_key_discriminates_by_ctor(self) -> None:
+        """Two Addr1s with different ctors produce different keys."""
+        from cstz.pff import Addr1, sigma_key
+        glue = Addr1(id="g", rank="r0", ctor="glue", src="a", dst="b")
+        named = Addr1(id="n", rank="r0", ctor="named", src="a", dst="b")
+        assert sigma_key(glue) != sigma_key(named)
+
+    def test_addr1_sigma_key_discriminates_by_premises(self) -> None:
+        """Two Addr1s with different premises produce different keys."""
+        from cstz.pff import Addr1, sigma_key
+        a = Addr1(id="g1", rank="r0", ctor="glue", src="a", dst="b",
+                  premises=["p1"])
+        b = Addr1(id="g2", rank="r0", ctor="glue", src="a", dst="b",
+                  premises=["p2"])
+        assert sigma_key(a) != sigma_key(b)
+
+    def test_addr2_sigma_key_equal_for_same_ctor_endpoints(self) -> None:
+        """Two Addr2s with the same (ctor, src, dst) produce the
+        same key."""
+        from cstz.pff import Addr2, sigma_key
+        a = Addr2(id="c1", rank="r0", ctor="coh", src="g1", dst="g2")
+        b = Addr2(id="c2", rank="r1", ctor="coh", src="g1", dst="g2")
+        assert sigma_key(a) == sigma_key(b)
+
+    def test_addr1_differs_from_addr2_with_same_endpoints(self) -> None:
+        """Addr1 and Addr2 with the same src/dst but different ctors
+        produce different keys — sigma_key distinguishes them."""
         from cstz.pff import Addr1, Addr2, sigma_key
         a1 = Addr1(id="g", rank="r0", ctor="glue", src="x", dst="y")
         a2 = Addr2(id="c", rank="r0", ctor="coh", src="x", dst="y")
         assert sigma_key(a1) != sigma_key(a2)
 
-    def test_addr0_signature_differs_from_morphism_signature(self) -> None:
-        """Addr0 signature tuple starts with 'addr0', morphism
-        signatures start with 'morphism'."""
-        from cstz.pff import Addr0, Addr1, Pair, Segment, sigma_key
+    def test_addr0_and_morphism_namespaces_disjoint(self) -> None:
+        """Addr0 and Addr1/Addr2 sigma_keys never collide — the
+        hash-cons can never confuse an object with a morphism."""
+        from cstz.pff import Addr0, Addr1, Addr2, Pair, Segment, sigma_key
         a0 = Addr0(
             id="a", sort="X",
             segments=[Segment(
@@ -2040,8 +2065,9 @@ class TestSigmaKeyFunction:
             )],
         )
         a1 = Addr1(id="g", rank="r0", ctor="glue", src="a", dst="b")
-        assert sigma_key(a0)[0] == "addr0"
-        assert sigma_key(a1)[0] == "morphism"
+        a2 = Addr2(id="c", rank="r0", ctor="coh", src="a", dst="b")
+        keys = {sigma_key(a0), sigma_key(a1), sigma_key(a2)}
+        assert len(keys) == 3  # all three are distinct
 
 
 class TestSigmaKeyPerspectives:
