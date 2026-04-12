@@ -1263,10 +1263,11 @@ class PFFCascadeEngine:
     #
     # Under the HIT collapse, _uf is a single union-find spanning
     # all ranks (addr0 and addr1 ids mix freely).  The query
-    # methods below filter by id prefix ("addr0-" for rank-0
-    # queries, "addr1-" for rank-1 queries) so callers still see
-    # the rank-specific partitions they expect.  The engine's
-    # internal state is unified; the query API is rank-segmented.
+    # methods below iterate the type-segmented Document collections
+    # (``self.document.addresses0`` / ``self.document.paths1``) to
+    # answer rank-specific class queries — cells know their type
+    # via the dataclass that holds them, so the query API stays
+    # rank-segmented without resorting to id-string inspection.
 
     def canonical_addr0(self, addr0_id: str) -> str:
         """Return the canonical Addr0 id under the path1 union-find."""
@@ -1280,32 +1281,32 @@ class PFFCascadeEngine:
         """All addr0 ids in the same path1 equivalence class."""
         canon = self.canonical_addr0(addr0_id)
         return {
-            a for a in self._uf
-            if a.startswith("addr0-") and self._uf.find(a) == canon
+            a.id for a in self.document.addresses0
+            if a.id in self._uf and self._uf.find(a.id) == canon
         }
 
     def addr1_class(self, addr1_id: str) -> Set[str]:
         """All addr1 ids in the same path2 equivalence class."""
         canon = self.canonical_addr1(addr1_id)
         return {
-            a for a in self._uf
-            if a.startswith("addr1-") and self._uf.find(a) == canon
+            a.id for a in self.document.paths1
+            if a.id in self._uf and self._uf.find(a.id) == canon
         }
 
     def all_addr0_classes(self) -> Dict[str, Set[str]]:
         """Map every canonical addr0 id to its full path1 class."""
         out: Dict[str, Set[str]] = defaultdict(set)
-        for a in self._uf:
-            if a.startswith("addr0-"):
-                out[self._uf.find(a)].add(a)
+        for a in self.document.addresses0:
+            if a.id in self._uf:
+                out[self._uf.find(a.id)].add(a.id)
         return dict(out)
 
     def all_addr1_classes(self) -> Dict[str, Set[str]]:
         """Map every canonical addr1 id to its full path2 class."""
         out: Dict[str, Set[str]] = defaultdict(set)
-        for a in self._uf:
-            if a.startswith("addr1-"):
-                out[self._uf.find(a)].add(a)
+        for a in self.document.paths1:
+            if a.id in self._uf:
+                out[self._uf.find(a.id)].add(a.id)
         return dict(out)
 
     # ── Reading-(a) projection: κ as Pair.role ──────────────────

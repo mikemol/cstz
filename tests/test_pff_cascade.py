@@ -737,6 +737,44 @@ class TestClassQueries:
         # Single observation → its own canonical
         assert e.canonical_addr0(a.id) == a.id
 
+    def test_class_queries_skip_cells_not_in_uf(self) -> None:
+        """Cells manually added to the document (bypassing the
+        engine) are not registered in ``_uf``, and the class query
+        methods correctly exclude them instead of crashing."""
+        from cstz.pff import Addr0, Addr1, Segment, Pair
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart("sigma", "X")
+        tau = e.ensure_chart("tau", "T")
+        a = e.add_observation(sigma, tau)
+        # Manually append an Addr0 that the engine doesn't know
+        foreign = Addr0(
+            id="foreign-addr0", sort="X",
+            segments=[Segment(
+                rank="rank-0", phase="ingest", patch="patch-0",
+                pairs=[Pair(chart=sigma.id, root="X",
+                            role="principal")],
+            )],
+        )
+        e.document.addresses0.append(foreign)
+        # Manually append an Addr1 that the engine doesn't know
+        foreign_a1 = Addr1(
+            id="foreign-addr1", rank="rank-0", ctor="glue",
+            src="x", dst="y",
+        )
+        e.document.paths1.append(foreign_a1)
+        # addr0_class for the engine-managed addr0 still works
+        cls = e.addr0_class(a.id)
+        assert cls == {a.id}
+        assert "foreign-addr0" not in cls
+        # all_addr0_classes excludes the foreign addr0
+        all_cls = e.all_addr0_classes()
+        for members in all_cls.values():
+            assert "foreign-addr0" not in members
+        # all_addr1_classes excludes the foreign addr1
+        all_a1_cls = e.all_addr1_classes()
+        for members in all_a1_cls.values():
+            assert "foreign-addr1" not in members
+
 
 # ── Reading-(a) projection: role coproduct view ────────────────────
 
