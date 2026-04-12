@@ -469,13 +469,61 @@ class PFFCascadeEngine:
         self.tau_fiber: _Fiber = _Fiber("tau", PERSPECTIVE_TAU)
         self.kappa_fiber: _Fiber = _Fiber("kappa", PERSPECTIVE_KAPPA)
 
+        # ── Three v2-aligned ports from core.py ──
+        # The v2 conception matrix's "core.py walk" identified three
+        # mechanisms in the legacy reference implementation that the
+        # PFF stack lacked: residue tracking, dynamic cleavage Fibers,
+        # and an eta-abstraction union-find.  These are independent of
+        # the QIIT re-grounding and can ship under v1 vocabulary.  All
+        # three are additive and passive: they create infrastructure
+        # available to future callers without changing existing
+        # emission decisions.
+
+        # ── Eta-abstraction UF: substrate-level identity for named
+        # bindings.  Mirrors core.py:_eta_uf and _eta_abstractions
+        # ([core.py:173-174](../../github/cstz/src/cstz/core.py#L173)).
+        # Initially empty; callers populate it via the eta_make /
+        # eta_abstract / eta_union public methods.  Use case: tracking
+        # that two analytical names refer to the same thing without
+        # conflating them with the cell ids they appear in.
+        self._eta_uf: _UnionFind = _UnionFind()
+        self._eta_abstractions: Dict[str, str] = {}
+
+        # ── Residue tracking: raw-endpoint witness preservation.
+        # Mirrors core.py:_residue_sets ([core.py:179](../../github/cstz/src/cstz/core.py#L179)).
+        # When _emit_glue and add_observation canonicalize endpoints
+        # via _uf.find, the raw pre-canonical endpoints are lost from
+        # the sigma_key.  These dicts preserve the raw forms keyed by
+        # the chosen Cell id (canonical at insertion time).  Public
+        # accessors addr0_residue / addr1_residue project through the
+        # current _uf canonical map at query time, so unions after
+        # insertion are reflected automatically without needing a
+        # merge step.
+        self._addr0_residue: Dict[str, Set[Tuple[str, ...]]] = defaultdict(set)
+        self._addr1_residue: Dict[str, Set[Tuple[str, str]]] = defaultdict(set)
+
+        # ── Dynamic cleavage Fibers: runtime-extensible perspective
+        # lattice.  Mirrors core.py:_cleavage_fibers ([core.py:181](../../github/cstz/src/cstz/core.py#L181)).
+        # The static σ/τ/κ trio above is augmented with a list of
+        # additional Fibers added at runtime via add_cleavage_fiber.
+        # When a new cleavage Fiber is added, every existing cell is
+        # observed into it; subsequent emissions also flow into it via
+        # _observe_into_fibers's loop.  This is the *infrastructure*
+        # for dynamic cleavage; core.py's automatic triggering policy
+        # (via κ-tag diversity in _process_cleavage) is NOT ported
+        # because PFF lacks κ-tags in core.py's sense.  Callers may
+        # use the infrastructure to add cleavage Fibers programmatically
+        # for any custom perspective.
+        self._cleavage_fibers: List[_Fiber] = []
+
     # ── Id minting ──────────────────────────────────────────────
 
     # ── Three-Fiber observation helper (Pass 2) ─────────────────
 
     def _observe_into_fibers(self, cell: Cell) -> None:
-        """Register a cell in all three Fibers under their respective
-        perspectives.
+        """Register a cell in all three static Fibers under their
+        respective perspectives, plus all dynamic cleavage Fibers
+        currently in ``self._cleavage_fibers``.
 
         Pass 2: this is the *only* mutation point for the Fiber
         registries, called from each emission site exactly once
@@ -485,10 +533,186 @@ class PFFCascadeEngine:
         Hash-cons hits in ``_emit_glue`` and ``add_observation``
         return existing cells *before* this method is called, so
         the Fibers see each cell exactly once at first emission.
+
+        v2 port: also observes the cell into every dynamic cleavage
+        Fiber added via ``add_cleavage_fiber``.  The dynamic Fibers
+        accumulate alongside the static trio.
         """
         self.sigma_fiber.observe(cell)
         self.tau_fiber.observe(cell)
         self.kappa_fiber.observe(cell)
+        for fiber in self._cleavage_fibers:
+            fiber.observe(cell)
+
+    # ── v2 port: eta-abstraction union-find ─────────────────────
+    #
+    # Mirrors core.py's _eta_uf + _eta_abstractions mechanism.  An
+    # *abstraction* is a named binding (string) that may be claimed
+    # to be the canonical form of multiple raw names.  The eta UF
+    # unifies abstraction names that turn out to refer to the same
+    # underlying binding.  Use case: tracking that two analytical
+    # names (e.g., two patch labels, two rank descriptors, two
+    # external symbol references) are identified, without
+    # conflating them with the Cell ids they appear in.
+    #
+    # All four methods are no-ops on the cascade's emission paths;
+    # they exist as a parallel substrate-level identity tracker
+    # that callers can populate as needed.
+
+    def eta_make(self, name: str) -> None:
+        """Register a name in the eta-abstraction union-find.
+
+        Idempotent: calling ``eta_make("X")`` twice is a no-op
+        the second time.  After ``eta_make("X")``, ``eta_find("X")``
+        returns ``"X"``.
+        """
+        self._eta_uf.make(name)
+
+    def eta_abstract(self, raw_name: str, abstract_name: str) -> None:
+        """Record that ``raw_name`` is an instance of the named
+        abstraction ``abstract_name``.
+
+        After this call, ``eta_find(raw_name)`` returns the canonical
+        form of ``abstract_name`` under the eta UF.  The abstraction
+        target is registered in the UF if it isn't already.
+
+        First-writer-wins: if ``raw_name`` is already mapped to a
+        different abstraction, the existing mapping is preserved
+        and the new call has no effect.  Callers that want to
+        re-bind a raw name should ``eta_union`` the old and new
+        abstraction names instead.
+        """
+        if raw_name in self._eta_abstractions:
+            return
+        self._eta_abstractions[raw_name] = abstract_name
+        self._eta_uf.make(abstract_name)
+
+    def eta_union(self, a: str, b: str) -> str:
+        """Unify two abstraction names; return the canonical id.
+
+        Both names are registered in the eta UF if they aren't
+        already.  After this call, ``eta_find(a) == eta_find(b)``.
+        """
+        self._eta_uf.make(a)
+        self._eta_uf.make(b)
+        return self._eta_uf.union(a, b)
+
+    def eta_find(self, name: str) -> str:
+        """Resolve a name through the abstraction map and the
+        eta UF.
+
+        Walks ``_eta_abstractions`` once (raw → abstraction), then
+        walks the eta UF to its canonical root.  If the name is
+        neither an abstraction nor a registered UF element,
+        returns the name unchanged.
+        """
+        target = self._eta_abstractions.get(name, name)
+        if target in self._eta_uf:
+            return self._eta_uf.find(target)
+        return target
+
+    # ── v2 port: residue tracking ───────────────────────────────
+    #
+    # Mirrors core.py's _residue_sets mechanism.  When the cascade
+    # canonicalizes endpoints (via _uf.find) before computing
+    # sigma_keys, the raw pre-canonical forms are lost.  Residue
+    # tracking preserves them in a sidecar dict keyed by the chosen
+    # Cell id.  Public accessors project through the current _uf
+    # canonical map at query time, so unions that happen after
+    # insertion are reflected automatically.
+
+    def addr0_residue(self, addr0_id: str) -> FrozenSet[Tuple[str, ...]]:
+        """Return all raw ``sigma_children`` tuples that produced
+        any Addr0 in the same path1 class as ``addr0_id``.
+
+        On a hash-cons hit (an observation that reuses an existing
+        Addr0), the new caller's raw children tuple is added to
+        the residue set so multiple distinct raw children that all
+        canonicalize to the same Addr0 are preserved as evidence.
+
+        Returns the union of residues across the entire path1
+        class containing ``addr0_id``, computed by walking the
+        residue dict and grouping by current canonical id.  This
+        is O(N) per query in the size of the residue dict; it
+        avoids needing a merge step at union time.
+
+        Returns an empty frozenset if no residue is recorded for
+        any Addr0 in the class.
+        """
+        if addr0_id not in self._uf:
+            return frozenset(self._addr0_residue.get(addr0_id, set()))
+        canonical = self._uf.find(addr0_id)
+        out: Set[Tuple[str, ...]] = set()
+        for aid, residue in self._addr0_residue.items():
+            if aid in self._uf and self._uf.find(aid) == canonical:
+                out |= residue
+        return frozenset(out)
+
+    def addr1_residue(self, addr1_id: str) -> FrozenSet[Tuple[str, str]]:
+        """Return all raw ``(src, dst)`` pairs that produced any
+        Addr1 in the same path2 class as ``addr1_id``.
+
+        Mirrors :meth:`addr0_residue` for Addr1s.  On a hash-cons
+        hit in ``_emit_glue``, the new caller's raw endpoints are
+        added to the residue set even though no new Addr1 is
+        minted.  Cross-Addr1 unions (from ``coh``) are reflected
+        at query time via the canonical id projection.
+        """
+        if addr1_id not in self._uf:
+            return frozenset(self._addr1_residue.get(addr1_id, set()))
+        canonical = self._uf.find(addr1_id)
+        out: Set[Tuple[str, str]] = set()
+        for aid, residue in self._addr1_residue.items():
+            if aid in self._uf and self._uf.find(aid) == canonical:
+                out |= residue
+        return frozenset(out)
+
+    # ── v2 port: dynamic cleavage Fibers ────────────────────────
+    #
+    # Mirrors core.py's _cleavage_fibers list.  Adds a runtime
+    # extension point to the static σ/τ/κ trio: callers can append
+    # additional Fibers under custom perspectives, and every
+    # existing and future cell is automatically observed into them.
+
+    def add_cleavage_fiber(
+        self,
+        name: str,
+        perspective: FrozenSet[str],
+    ) -> _Fiber:
+        """Append a new dynamic Fiber under ``perspective`` and
+        observe every existing cell into it.
+
+        Subsequent emissions (via ``add_observation``,
+        ``_emit_glue``, ``coh``) will also observe new cells into
+        this Fiber via ``_observe_into_fibers``.
+
+        Returns the newly created ``_Fiber`` so the caller can
+        immediately query its classes.
+
+        Use case: at runtime, the caller decides that a particular
+        sub-perspective is needed (e.g., a cleavage along a
+        substrate-specific discriminator that the static σ/τ/κ
+        constants don't capture).  ``add_cleavage_fiber`` makes
+        the new perspective first-class without restarting the
+        engine.
+        """
+        fiber = _Fiber(name, perspective)
+        # Observe all existing cells into the new Fiber so it
+        # starts in sync with the static trio.
+        for cell in self.document.cells():
+            fiber.observe(cell)
+        self._cleavage_fibers.append(fiber)
+        return fiber
+
+    def cleavage_fibers(self) -> Tuple[_Fiber, ...]:
+        """Return the current tuple of dynamic cleavage Fibers,
+        in insertion order.
+
+        The returned tuple is a snapshot — adding more Fibers via
+        ``add_cleavage_fiber`` after the call will not affect the
+        previously-returned tuple.
+        """
+        return tuple(self._cleavage_fibers)
 
     def _mint_id(self, prefix: str) -> str:
         n = self._next_id[prefix]
@@ -629,9 +853,16 @@ class PFFCascadeEngine:
             canon_tau_children,
         )
 
+        # v2 residue port: capture the raw sigma_children tuple as
+        # supplied by the caller, before any canonicalization.  Used
+        # by addr0_residue() to recover all the raw forms that fed
+        # into a single canonical Addr0.
+        raw_children_tuple = tuple(sigma_children)
+
         # Dedup: if an exact match already exists, return it.
         existing_addr0 = self._addr0_signature_index.get(full_sig)
         if existing_addr0 is not None:
+            self._addr0_residue[existing_addr0.id].add(raw_children_tuple)
             return existing_addr0
 
         # Mint the new addr0.
@@ -679,6 +910,10 @@ class PFFCascadeEngine:
         # _addr0_signature_index machinery; they are passive in
         # Pass 2 and do not influence emission decisions.
         self._observe_into_fibers(addr0)
+
+        # v2 residue port: record the raw sigma_children tuple
+        # against the freshly-minted Addr0 id.
+        self._addr0_residue[addr0_id].add(raw_children_tuple)
 
         # ── Streaming glue cascade ──
         same_shape = self._addr0s_by_sigma_key[sigma_key]
@@ -876,10 +1111,18 @@ class PFFCascadeEngine:
         key_premises = tuple(premises or [])
         key = ("morphism", "glue", key_src, key_dst, key_premises)
 
+        # v2 residue port: capture the raw (src, dst) pair as
+        # supplied by the caller, before swap normalization and
+        # canonicalization.  Used by addr1_residue() to recover
+        # all the raw endpoint forms that fed into a single
+        # canonical Addr1.
+        raw_endpoints = (src, dst)
+
         # Hash-cons lookup: if a glue with this exact signature
         # already exists, return it.
         existing = self._morphism_signature_index.get(key)
         if existing is not None:
+            self._addr1_residue[existing.id].add(raw_endpoints)
             return existing
 
         # Mint a fresh Addr1.
@@ -899,6 +1142,9 @@ class PFFCascadeEngine:
         # Pass 2: register the new Addr1 in all three Fibers.
         # See _observe_into_fibers and the Fiber section docstring.
         self._observe_into_fibers(addr1)
+        # v2 residue port: record the raw (src, dst) pair against
+        # the freshly-minted Addr1 id.
+        self._addr1_residue[addr1.id].add(raw_endpoints)
         # Apply the union AFTER registering the sigma_key in the
         # index, because unioning changes the canonical map and
         # any future _emit_glue call computing a sigma_key would

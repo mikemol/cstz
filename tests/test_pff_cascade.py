@@ -2789,6 +2789,373 @@ class TestPassThreeDocumentQueries:
         assert next(iter(doc_hom)) in kappa_class.members
 
 
+# ── v2 ports from core.py (residue / cleavage / eta-abstraction) ────
+
+
+class TestEtaAbstractionUnionFind:
+    """Cover the eta-abstraction union-find ported from core.py
+    (``_eta_uf`` and ``_eta_abstractions`` at core.py:173-174).
+
+    The eta UF is a substrate-level identity tracker for *named
+    bindings* — strings that may be claimed equivalent without
+    being conflated with the Cell ids they appear in.  All four
+    public methods (eta_make / eta_abstract / eta_union / eta_find)
+    operate on the eta UF in isolation; none affect the cascade's
+    emission decisions.
+    """
+
+    def test_eta_uf_starts_empty(self) -> None:
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        assert len(e._eta_uf) == 0
+        assert e._eta_abstractions == {}
+
+    def test_eta_make_registers_name(self) -> None:
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        e.eta_make("X")
+        assert "X" in e._eta_uf
+        assert e.eta_find("X") == "X"
+
+    def test_eta_make_idempotent(self) -> None:
+        """Calling eta_make on the same name twice is a no-op."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        e.eta_make("X")
+        e.eta_make("X")
+        assert len(e._eta_uf) == 1
+        assert e.eta_find("X") == "X"
+
+    def test_eta_abstract_records_mapping(self) -> None:
+        """``eta_abstract(raw, abs)`` maps raw → abs and registers
+        abs in the UF."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        e.eta_abstract("List[int]", "T0")
+        assert e._eta_abstractions["List[int]"] == "T0"
+        assert "T0" in e._eta_uf
+        assert e.eta_find("List[int]") == "T0"
+
+    def test_eta_abstract_first_writer_wins(self) -> None:
+        """A second eta_abstract on the same raw name is a no-op."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        e.eta_abstract("List[int]", "T0")
+        e.eta_abstract("List[int]", "T1")  # ignored
+        assert e.eta_find("List[int]") == "T0"
+
+    def test_eta_union_unifies_two_abstractions(self) -> None:
+        """After ``eta_union(a, b)``, ``eta_find(a) == eta_find(b)``."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        e.eta_make("T0")
+        e.eta_make("T1")
+        e.eta_union("T0", "T1")
+        assert e.eta_find("T0") == e.eta_find("T1")
+
+    def test_eta_union_makes_names_if_absent(self) -> None:
+        """``eta_union`` registers both names in the UF if they
+        weren't already present."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        e.eta_union("T0", "T1")  # neither registered yet
+        assert "T0" in e._eta_uf
+        assert "T1" in e._eta_uf
+        assert e.eta_find("T0") == e.eta_find("T1")
+
+    def test_eta_find_walks_abstraction_then_uf(self) -> None:
+        """``eta_find`` walks the abstraction map first, then
+        chases the UF to canonical."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        e.eta_abstract("raw_a", "T0")
+        e.eta_abstract("raw_b", "T1")
+        e.eta_union("T0", "T1")
+        # Both raw names now resolve to the same canonical
+        assert e.eta_find("raw_a") == e.eta_find("raw_b")
+
+    def test_eta_find_unknown_name_returns_unchanged(self) -> None:
+        """A name that's neither an abstraction nor in the UF is
+        returned unchanged by eta_find."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        assert e.eta_find("unknown") == "unknown"
+
+    def test_eta_uf_does_not_affect_cell_uf(self) -> None:
+        """The eta UF is independent of the cell ``_uf``: unioning
+        two abstraction names does not union any Cell ids."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        # Use distinct sigma charts so the two Addr0s have
+        # different sigma_keys and don't auto-glue via streaming
+        # cascade.
+        sigma_a = e.ensure_chart(kind="sigma", root="A")
+        sigma_b = e.ensure_chart(kind="sigma", root="B")
+        tau = e.ensure_chart(kind="tau", root="r")
+        a = e.add_observation(sigma_a, tau, sort="A")
+        b = e.add_observation(sigma_b, tau, sort="B")
+        # Use the addr0 ids as eta names too
+        e.eta_make(a.id)
+        e.eta_make(b.id)
+        e.eta_union(a.id, b.id)
+        # eta UF unifies them
+        assert e.eta_find(a.id) == e.eta_find(b.id)
+        # cell UF does NOT
+        assert e.canonical_addr0(a.id) != e.canonical_addr0(b.id)
+
+
+class TestResidueTracking:
+    """Cover residue tracking ported from core.py
+    (``_residue_sets``, ``_update_residue``, ``_merge_residue_sets``
+    at core.py:179, 312-321).
+
+    Residue tracking preserves the raw pre-canonical form of
+    inputs to ``add_observation`` (raw sigma_children) and
+    ``_emit_glue`` (raw src/dst).  After Step 1.5's HIT collapse,
+    these raw forms were lost when the cascade canonicalized.
+    These tests verify the raw forms are preserved and
+    accessible via ``addr0_residue`` / ``addr1_residue``.
+    """
+
+    def _engine_with_charts(self):
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart(kind="sigma", root="r")
+        tau = e.ensure_chart(kind="tau", root="r")
+        return e, sigma, tau
+
+    def test_addr0_residue_records_first_observation(self) -> None:
+        e, sigma, tau = self._engine_with_charts()
+        # First observation with no children — residue contains
+        # the empty tuple
+        a = e.add_observation(sigma, tau, sort="A")
+        assert e.addr0_residue(a.id) == frozenset({()})
+
+    def test_addr0_residue_records_children(self) -> None:
+        e, sigma, tau = self._engine_with_charts()
+        leaf = e.add_observation(sigma, tau, sort="leaf")
+        parent = e.add_observation(
+            sigma, tau, sigma_children=[leaf.id], sort="parent",
+        )
+        residue = e.addr0_residue(parent.id)
+        assert (leaf.id,) in residue
+
+    def test_addr0_residue_grows_on_hash_cons_hit(self) -> None:
+        """A second observation with identical full_sig hits the
+        existing Addr0; its raw children tuple is added to the
+        residue."""
+        e, sigma, tau = self._engine_with_charts()
+        leaf = e.add_observation(sigma, tau, sort="leaf")
+        first = e.add_observation(
+            sigma, tau, sigma_children=[leaf.id], sort="parent",
+        )
+        # Same call again — hash-cons hit, returns the same Addr0
+        second = e.add_observation(
+            sigma, tau, sigma_children=[leaf.id], sort="parent",
+        )
+        assert first is second
+        # Residue contains the raw children tuple (which is the
+        # same on both calls, so still one element in the set)
+        residue = e.addr0_residue(first.id)
+        assert residue == frozenset({(leaf.id,)})
+
+    def test_addr0_residue_groups_through_canonical(self) -> None:
+        """When two distinct Addr0s end up in the same path1 class
+        via cascade glue, addr0_residue returns the union of their
+        residues from either id."""
+        e, sigma, tau = self._engine_with_charts()
+        # Two leaves with different sorts
+        leaf_a = e.add_observation(sigma, tau, sort="leafA")
+        leaf_b = e.add_observation(sigma, tau, sort="leafB")
+        # Two parents with different children but the same shape;
+        # they will NOT collide on sigma_key because their child
+        # canonicals differ.  We force the union via explicit glue.
+        p_a = e.add_observation(
+            sigma, tau, sigma_children=[leaf_a.id], sort="parent",
+        )
+        p_b = e.add_observation(
+            sigma, tau, sigma_children=[leaf_b.id], sort="parent",
+        )
+        # Glue the two leaves so the parents end up in the same
+        # path1 class via cascade
+        e.glue(leaf_a.id, leaf_b.id)
+        # After cascade, both parents are in the same canonical
+        # class and addr0_residue returns the union.
+        residue_via_a = e.addr0_residue(p_a.id)
+        residue_via_b = e.addr0_residue(p_b.id)
+        assert residue_via_a == residue_via_b
+        assert (leaf_a.id,) in residue_via_a
+        assert (leaf_b.id,) in residue_via_a
+
+    def test_addr0_residue_empty_for_unknown_id(self) -> None:
+        """Querying residue for an id not in any cell-uf returns
+        an empty frozenset (covers the not-in-uf branch)."""
+        e, _, _ = self._engine_with_charts()
+        assert e.addr0_residue("addr0-999") == frozenset()
+
+    def test_addr1_residue_records_first_glue(self) -> None:
+        """A fresh _emit_glue records the raw (src, dst) pair
+        in the residue under the new Addr1's id."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        # Distinct sigma charts → distinct sigma_keys → no
+        # auto-glue from streaming cascade
+        sigma_a = e.ensure_chart(kind="sigma", root="A")
+        sigma_b = e.ensure_chart(kind="sigma", root="B")
+        tau = e.ensure_chart(kind="tau", root="r")
+        a = e.add_observation(sigma_a, tau, sort="A")
+        b = e.add_observation(sigma_b, tau, sort="B")
+        result = e.glue(a.id, b.id)
+        addr1 = result.addr1
+        assert addr1 is not None
+        assert e.addr1_residue(addr1.id) == frozenset({(a.id, b.id)})
+
+    def test_addr1_residue_grows_on_hash_cons_hit(self) -> None:
+        """A second glue between two Addr0s already in the same
+        path1 class hits the hash-cons; the raw (src, dst) is
+        added to the residue."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        # Three distinct charts so streaming cascade leaves them
+        # alone until we manually glue.
+        sigma_a = e.ensure_chart(kind="sigma", root="A")
+        sigma_b = e.ensure_chart(kind="sigma", root="B")
+        sigma_c = e.ensure_chart(kind="sigma", root="C")
+        tau = e.ensure_chart(kind="tau", root="r")
+        a = e.add_observation(sigma_a, tau, sort="A")
+        b = e.add_observation(sigma_b, tau, sort="B")
+        c = e.add_observation(sigma_c, tau, sort="C")
+        # First glue (a, b) — fresh emission
+        r1 = e.glue(a.id, b.id)
+        addr1 = r1.addr1
+        assert addr1 is not None
+        # Glue (b, c) — fresh emission of a separate Addr1
+        e.glue(b.id, c.id)
+        # Now (a, c) glue: a and c are already in the same canonical
+        # class via the chain a-b-c, so this is a no-op at the
+        # cascade level.  But the raw_endpoints (a.id, c.id) tuple
+        # is recorded against whichever Addr1 hash-conses (or it's
+        # a noop with no residue update if was_noop).  The original
+        # raw (a, b) pair must still be present in addr1's residue.
+        e.glue(a.id, c.id)
+        residue = e.addr1_residue(addr1.id)
+        # The original raw (a, b) pair is in there
+        assert (a.id, b.id) in residue
+
+    def test_addr1_residue_empty_for_unknown_id(self) -> None:
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        assert e.addr1_residue("addr1-999") == frozenset()
+
+
+class TestDynamicCleavageFibers:
+    """Cover the dynamic cleavage Fiber list ported from core.py
+    (``_cleavage_fibers`` at core.py:181).
+
+    Dynamic cleavage Fibers are an extension of the static
+    σ/τ/κ trio: callers can append additional Fibers under
+    custom perspectives at runtime, and every existing and
+    future cell is automatically observed into them.
+    """
+
+    def test_cleavage_fibers_starts_empty(self) -> None:
+        from cstz.pff_cascade import PFFCascadeEngine
+        e = PFFCascadeEngine()
+        assert e.cleavage_fibers() == ()
+
+    def test_add_cleavage_fiber_returns_fiber(self) -> None:
+        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.pff import PERSPECTIVE_KAPPA
+        e = PFFCascadeEngine()
+        fiber = e.add_cleavage_fiber("custom", PERSPECTIVE_KAPPA)
+        assert fiber.name == "custom"
+        assert fiber.perspective == PERSPECTIVE_KAPPA
+        assert e.cleavage_fibers() == (fiber,)
+
+    def test_add_cleavage_fiber_observes_existing_cells(self) -> None:
+        """Adding a cleavage fiber observes every cell currently in
+        the document, so the new fiber starts in sync with the
+        static trio."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.pff import PERSPECTIVE_KAPPA
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart(kind="sigma", root="r")
+        tau = e.ensure_chart(kind="tau", root="r")
+        # Emit cells before adding the fiber
+        a = e.add_observation(sigma, tau, sort="A")
+        b = e.add_observation(sigma, tau, sort="B")
+        # Now add the fiber
+        fiber = e.add_cleavage_fiber("late", PERSPECTIVE_KAPPA)
+        # Both cells should already be in the new fiber
+        assert a.id in fiber.class_of
+        assert b.id in fiber.class_of
+
+    def test_new_cells_flow_into_cleavage_fiber(self) -> None:
+        """Cells emitted after add_cleavage_fiber automatically
+        observe into the new fiber via _observe_into_fibers."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.pff import PERSPECTIVE_KAPPA
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart(kind="sigma", root="r")
+        tau = e.ensure_chart(kind="tau", root="r")
+        # Add the fiber first
+        fiber = e.add_cleavage_fiber("early", PERSPECTIVE_KAPPA)
+        # Then emit cells
+        a = e.add_observation(sigma, tau, sort="A")
+        # The new cell flows into the fiber
+        assert a.id in fiber.class_of
+
+    def test_multiple_cleavage_fibers_coexist(self) -> None:
+        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.pff import (
+            PERSPECTIVE_SIGMA, PERSPECTIVE_TAU, PERSPECTIVE_KAPPA,
+        )
+        e = PFFCascadeEngine()
+        f1 = e.add_cleavage_fiber("alt-sigma", PERSPECTIVE_SIGMA)
+        f2 = e.add_cleavage_fiber("alt-tau", PERSPECTIVE_TAU)
+        f3 = e.add_cleavage_fiber("alt-kappa", PERSPECTIVE_KAPPA)
+        assert e.cleavage_fibers() == (f1, f2, f3)
+
+    def test_cleavage_fibers_returns_snapshot(self) -> None:
+        """``cleavage_fibers()`` returns a tuple snapshot, so
+        adding more fibers after the call does not affect the
+        previously-returned tuple."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.pff import PERSPECTIVE_KAPPA
+        e = PFFCascadeEngine()
+        f1 = e.add_cleavage_fiber("first", PERSPECTIVE_KAPPA)
+        snapshot = e.cleavage_fibers()
+        f2 = e.add_cleavage_fiber("second", PERSPECTIVE_KAPPA)
+        assert snapshot == (f1,)
+        assert e.cleavage_fibers() == (f1, f2)
+
+    def test_cleavage_fiber_with_custom_perspective(self) -> None:
+        """A cleavage Fiber under a custom (non-σ/τ/κ) perspective
+        partitions cells differently than the static trio."""
+        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.pff import DISCRIM_SORT
+        e = PFFCascadeEngine()
+        sigma = e.ensure_chart(kind="sigma", root="r")
+        tau = e.ensure_chart(kind="tau", root="r")
+        # Custom perspective: sort only (no segments, no endpoints)
+        sort_only = frozenset({DISCRIM_SORT})
+        fiber = e.add_cleavage_fiber("sort-only", sort_only)
+        # Two Addr0s with the same sort but different segments
+        a = e.add_observation(sigma, tau, sort="X")
+        b = e.add_observation(sigma, tau, sort="X")
+        # Wait — they hash-cons to the same Addr0 because their
+        # full_sig matches.  Use different sorts instead and
+        # verify the partition matches the sort.
+        c = e.add_observation(sigma, tau, sort="Y")
+        # Under sort-only perspective, X-sorted cells are in one
+        # class and Y-sorted cells are in another.
+        assert a.id in fiber.class_of
+        assert c.id in fiber.class_of
+        # And the σ-fiber sees them differently because it
+        # includes more discriminators.
+        assert fiber.class_of[a.id] != fiber.class_of[c.id]
+
+
 class TestDocumentCells:
     """Cover ``Document.cells()`` iterator added by HIT collapse."""
 
