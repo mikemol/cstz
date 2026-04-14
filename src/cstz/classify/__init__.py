@@ -20,12 +20,12 @@ observation protocol at cstz.observe.
 
 from cstz.classify.registry import Discriminator, DiscriminatorRegistry
 from cstz.classify.base import Classified, ShapeWitness, Classifier
-from cstz.classify.walker import zpath, walk
+from cstz.classify.walker import zpath, walk, KeyFn, ChildrenFn
 from cstz.classify.adapter import emit_patch
 
 __all__ = [
     "Discriminator", "DiscriminatorRegistry",
     "Classified", "ShapeWitness", "Classifier",
-    "zpath", "walk",
+    "zpath", "walk", "KeyFn", "ChildrenFn",
     "emit_patch",
 ]

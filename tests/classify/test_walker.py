@@ -180,6 +180,45 @@ class TestWalkErrors:
             list(walk(leaf, classifier, tree_children))
 
 
+class TestWalkKeyFn:
+    """key_fn parameter lets callers replace the default traversal zpath
+    with a node-intrinsic coordinate."""
+
+    def test_default_key_fn_uses_zpath(self):
+        classifier, _ = _make_trivial_classifier()
+        leaf = TNode("leaf")
+        [(zp, _)] = list(walk(leaf, classifier, tree_children))
+        assert zp == 0b1  # default: zpath(0, 0)
+
+    def test_custom_key_fn(self):
+        classifier, _ = _make_trivial_classifier()
+        leaf = TNode("leaf", value=42)
+        results = list(
+            walk(leaf, classifier, tree_children,
+                 key_fn=lambda n: 999)
+        )
+        [(zp, _)] = results
+        assert zp == 999
+
+    def test_custom_key_fn_across_tree(self):
+        """key_fn is called once per node; result replaces traversal zpath."""
+        classifier, _ = _make_trivial_classifier()
+        tree = TNode("branch",
+                     left=TNode("leaf", value=1),
+                     right=TNode("leaf", value=2))
+        # Use node identity as key
+        keys = {}
+        def key_fn(n):
+            k = id(n) % 1000  # small hash for testing
+            keys[id(n)] = k
+            return k
+        results = list(walk(tree, classifier, tree_children, key_fn=key_fn))
+        # Each visited node gets its custom key
+        assert len(results) == 3
+        for zp, _ in results:
+            assert zp in keys.values()
+
+
 class TestWalkMonotonicity:
     """M6 pre-verification: stopping early gives a prefix of full walk."""
 
