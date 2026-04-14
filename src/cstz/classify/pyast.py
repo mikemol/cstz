@@ -32,8 +32,37 @@ produce different keys at that bit position.
 Minimum-width convention: for nonzero |value|, width = value.bit_length().
 For value=0: width=0 and bits_root is AstNil (empty magnitude).
 
-Arity: Nil, Scalar, IntWidth, IntBit → 0
-       Field, ListSeg, NodeWrap, IntRoot, IntBitSeg → 2
+Phase 4b applies the same pattern to strings.  Four more variants:
+
+    StringRoot(parent_key, ordinal, kind, value,              -- arity 2
+               length_marker, chars_root)                        (length, chars)
+    StringLength(parent_key, length)                          -- arity 0 marker
+    CharSeg(parent_key, lo, length, left, right)              -- arity 2
+    CharLeaf(parent_key, position, codepoint)                 -- arity 0 leaf
+
+StringRoot's own key bakes in `kind` (str / field_name tag) alongside
+ordinal, so two user strings and a field-name label at the same slot
+would not collide (they also live in disjoint slots in practice).
+CharLeaf's coordinate interleaves (position, codepoint), so two
+strings differing in any character produce different leaf keys.
+
+Scope: StringRoot replaces AstScalar for user-facing string payloads
+(Name.id, FunctionDef.name, Global.names, Constant value, etc.).
+Field-name labels (body, args, ...) remain AstScalar(kind='field_name');
+they are fixed AST-grammar identifiers, not user strings, and the
+field_<name> discriminator family depends on them.
+
+StringRoot carries a `.value: str` payload field for discriminator
+access (same pattern as AstScalar.value).  Identity remains
+structural — two StringRoots with equal payload but different
+(parent_key, ordinal) still differ — but discriminators that care
+about the whole string (naming conventions, keyword matches) can
+inspect .value locally without walking children.
+
+Arity: Nil, Scalar, IntWidth, IntBit,
+       StringLength, CharLeaf                                 → 0
+       Field, ListSeg, NodeWrap,
+       IntRoot, IntBitSeg, StringRoot, CharSeg                → 2
        (NodeWrap's second child is always AstNil — preserves uniform
        binary world without adding new walker mechanics.)
 
@@ -47,26 +76,35 @@ Ordinal convention within a Field:
 Key scheme — 4-bit constructor tag in low bits (Phase 4a widened
 from 3 bits), Morton-interleaved coordinates in high bits:
 
-    key_nil        = 0
-    key_scalar     = (morton2(parent_key, ordinal)    << 4) | 0b0001
-    key_field      = (morton2(parent_key, f_ordinal)  << 4) | 0b0010
-    key_list_seg   = (morton2(parent_key, morton2(lo, len)) << 4) | 0b0011
-    key_node_wrap  = (morton2(parent_key, ordinal)    << 4) | 0b0100
-    key_int_root   = (morton2(parent_key,
-                               morton2(ordinal, int(is_negative))) << 4) | 0b0101
-    key_int_width  = (morton2(parent_key, width)      << 4) | 0b0110
-    key_int_bitseg = (morton2(parent_key, morton2(lo, len)) << 4) | 0b0111
-    key_int_bit    = (morton2(parent_key,
-                               (position << 1) | bit)   << 4) | 0b1000
+    key_nil           = 0
+    key_scalar        = (morton2(parent_key, ordinal)    << 4) | 0b0001
+    key_field         = (morton2(parent_key, f_ordinal)  << 4) | 0b0010
+    key_list_seg      = (morton2(parent_key, morton2(lo, len)) << 4) | 0b0011
+    key_node_wrap     = (morton2(parent_key, ordinal)    << 4) | 0b0100
+    key_int_root      = (morton2(parent_key,
+                                  morton2(ordinal, int(is_negative))) << 4) | 0b0101
+    key_int_width     = (morton2(parent_key, width)      << 4) | 0b0110
+    key_int_bitseg    = (morton2(parent_key, morton2(lo, len)) << 4) | 0b0111
+    key_int_bit       = (morton2(parent_key,
+                                  (position << 1) | bit)   << 4) | 0b1000
+    key_string_root   = (morton2(parent_key,
+                                  morton2(ordinal, kind_tag)) << 4) | 0b1001
+    key_string_length = (morton2(parent_key, length)      << 4) | 0b1010
+    key_char_seg      = (morton2(parent_key, morton2(lo, len)) << 4) | 0b1011
+    key_char_leaf     = (morton2(parent_key,
+                                  morton2(position, codepoint)) << 4) | 0b1100
 
 Walker / classifier / registry mechanics unchanged from Phases 1-3.
-Phase 4a adds only new node variants and a new discriminator family.
+Phase 4a/4b add only new node variants and discriminator families.
 
-Payload-sensitive scope: Phase 4a decomposes **ints only**.  Floats,
-strings, bytes, and bools remain AstScalar leaves with positional
-identity (Phase 4b+ extension).  Bool is an int subclass but is
+Payload-sensitive scope: Phase 4a decomposes ints; Phase 4b decomposes
+user-facing strings.  Floats and bytes remain AstScalar leaves with
+positional identity (future 4c).  Bool is an int subclass but is
 preserved as AstScalar(kind="bool") — its two-state identity does not
-benefit from bit decomposition.
+benefit from bit decomposition.  AstField.name_scalar (kind='field_name')
+is also kept as AstScalar: field-name labels are a closed set of AST
+grammar identifiers, and the field_<name> discriminator family depends
+on the payload being inspectable as a single string value.
 """
 
 from __future__ import annotations
@@ -95,11 +133,29 @@ TAG_INT_ROOT = 0b0101
 TAG_INT_WIDTH = 0b0110
 TAG_INT_BIT_SEG = 0b0111
 TAG_INT_BIT = 0b1000
+TAG_STRING_ROOT = 0b1001
+TAG_STRING_LENGTH = 0b1010
+TAG_CHAR_SEG = 0b1011
+TAG_CHAR_LEAF = 0b1100
 
 # Reserved ordinals within a Field
 SLOT_NAME = 0          # the name_scalar
 SLOT_DIRECT_VALUE = 1  # non-list field value
 SLOT_LIST_OFFSET = 2   # i-th list element lives at SLOT_LIST_OFFSET + i
+
+# StringRoot kind tag — baked into the StringRoot key via nested Morton.
+# Disjoint: "str" and "field_name" StringRoots at the same slot do not collide.
+STRING_KIND_STR = 0
+STRING_KIND_FIELD_NAME = 1  # reserved; field-names currently stay AstScalar
+
+
+def _string_kind_tag(kind: str) -> int:
+    """Translate a StringRoot.kind tag to its integer coordinate."""
+    if kind == "str":
+        return STRING_KIND_STR
+    if kind == "field_name":  # pragma: no cover — field names stay AstScalar in Phase 4b
+        return STRING_KIND_FIELD_NAME
+    raise ValueError(f"unknown string kind {kind!r}")  # pragma: no cover
 
 
 # ---------------------------------------------------------------------------
@@ -276,8 +332,93 @@ class IntBit:
 
 
 IntTree = Union[AstNil, IntWidth, IntBitSeg, IntBit]
+
+
+# ---------------------------------------------------------------------------
+# Phase 4b: string payload decomposition
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class StringRoot:
+    """Arity 2 = (length_marker, chars_root).
+
+    Replaces AstScalar for user-facing string payloads.  Identity
+    coordinates include `kind` (STR vs FIELD_NAME) baked via nested
+    Morton, plus parent_key and ordinal.  Each character's coordinate
+    encodes (position, codepoint), so two strings differing in any
+    character produce distinct CharLeaf keys.
+
+    Attributes:
+        parent_key:    enclosing AstField's key (or other container)
+        ordinal:       position within parent (SLOT_DIRECT_VALUE, etc.)
+        kind:          "str" for user strings.  Baked into key.
+        value:         convenience payload for whole-string discriminators
+                       (naming conventions, keyword match).  Identity
+                       remains structural — .value is observational, not
+                       identity-bearing beyond what the char tree already
+                       encodes.
+        length_marker: explicit StringLength child (arity-0 marker)
+        chars_root:    AstNil (empty string), CharLeaf (length=1), or
+                       CharSeg (length>=2) over character positions
+    """
+    parent_key: int
+    ordinal: int
+    kind: str
+    value: str
+    length_marker: "StringLength"
+    chars_root: "StringTree"
+
+
+@dataclass(frozen=True)
+class StringLength:
+    """Arity 0.  Explicit length marker for a StringRoot.
+
+    Attributes:
+        parent_key: enclosing StringRoot's key
+        length:     character count (Python codepoints); 0 for empty
+                    string.  Baked into the marker's own coordinate.
+    """
+    parent_key: int
+    length: int
+
+
+@dataclass(frozen=True)
+class CharSeg:
+    """Arity 2.  Balanced segment over character positions [lo, lo+length).
+
+    Identity uses (parent_key, lo, length) — same pattern as
+    AstListSeg and IntBitSeg.  parent_key is always the enclosing
+    StringRoot's key, stable across segment-tree rebalancing.
+    """
+    parent_key: int
+    lo: int
+    length: int
+    left: "StringTree"
+    right: "StringTree"
+
+
+@dataclass(frozen=True)
+class CharLeaf:
+    """Arity 0.  A single character at a position.
+
+    Attributes:
+        parent_key: enclosing StringRoot's key
+        position:   character position, 0-based
+        codepoint:  Unicode codepoint (0..0x10FFFF).  Baked into the
+                    leaf's coordinate via nested Morton with position,
+                    so CharLeaf(p, c0) and CharLeaf(p, c1) have
+                    distinct keys when c0 != c1.
+    """
+    parent_key: int
+    position: int
+    codepoint: int
+
+
+StringTree = Union[AstNil, StringLength, CharSeg, CharLeaf]
 AstTree = Union[AstNil, AstScalar, AstField, AstListSeg, AstNodeWrap,
-                IntRoot, IntWidth, IntBitSeg, IntBit]
+                IntRoot, IntWidth, IntBitSeg, IntBit,
+                StringRoot, StringLength, CharSeg, CharLeaf]
 
 
 # ---------------------------------------------------------------------------
@@ -310,6 +451,17 @@ def ast_key(node: AstTree) -> int:
     if isinstance(node, IntBit):
         coord = (node.position << 1) | node.bit
         return (morton2(node.parent_key, coord) << TAG_BITS) | TAG_INT_BIT
+    if isinstance(node, StringRoot):
+        inner = morton2(node.ordinal, _string_kind_tag(node.kind))
+        return (morton2(node.parent_key, inner) << TAG_BITS) | TAG_STRING_ROOT
+    if isinstance(node, StringLength):
+        return (morton2(node.parent_key, node.length) << TAG_BITS) | TAG_STRING_LENGTH
+    if isinstance(node, CharSeg):
+        q = morton2(node.lo, node.length)
+        return (morton2(node.parent_key, q) << TAG_BITS) | TAG_CHAR_SEG
+    if isinstance(node, CharLeaf):
+        coord = morton2(node.position, node.codepoint)
+        return (morton2(node.parent_key, coord) << TAG_BITS) | TAG_CHAR_LEAF
     raise TypeError(f"unknown AstTree variant: {type(node)!r}")  # pragma: no cover
 
 
@@ -329,6 +481,10 @@ def ast_children(node: AstTree) -> Tuple[Tuple[str, AstTree], ...]:
     if isinstance(node, IntRoot):
         return (("width", node.width_marker), ("bits", node.bits_root))
     if isinstance(node, IntBitSeg):
+        return (("left", node.left), ("right", node.right))
+    if isinstance(node, StringRoot):
+        return (("length", node.length_marker), ("chars", node.chars_root))
+    if isinstance(node, CharSeg):
         return (("left", node.left), ("right", node.right))
     return ()
 
@@ -352,6 +508,10 @@ class AstClassifier(Classifier):
         if isinstance(node, IntRoot):
             return ShapeWitness(arity=2, roles=("width", "bits"))
         if isinstance(node, IntBitSeg):
+            return ShapeWitness(arity=2, roles=("left", "right"))
+        if isinstance(node, StringRoot):
+            return ShapeWitness(arity=2, roles=("length", "chars"))
+        if isinstance(node, CharSeg):
             return ShapeWitness(arity=2, roles=("left", "right"))
         return ShapeWitness(arity=0, roles=())
 
@@ -417,7 +577,7 @@ def _primitive_kind_subkind(value: Any) -> Tuple[str, str]:
         return ("int", "int")
     if isinstance(value, float):
         return ("float", "float")
-    if isinstance(value, str):
+    if isinstance(value, str):  # pragma: no cover — str handled before this call (Phase 4b)
         return ("str", "str")
     if isinstance(value, bytes):
         return ("bytes", "bytes")
@@ -518,6 +678,11 @@ def _build_field(
     elif isinstance(value, int):
         value_tree = _build_int_root(value, parent_key=field_key,
                                       ordinal=SLOT_DIRECT_VALUE)
+    elif isinstance(value, str):
+        value_tree = _build_string_root(
+            value, parent_key=field_key, ordinal=SLOT_DIRECT_VALUE,
+            kind="str",
+        )
     else:
         kind, subkind = _primitive_kind_subkind(value)
         value_tree = AstScalar(
@@ -567,8 +732,11 @@ def _build_list_item(item: Any, parent_key: int, ordinal: int) -> AstTree:
                          parent_key=parent_key, ordinal=ordinal)
     if isinstance(item, int):  # pragma: no cover — ints don't appear raw in AST lists
         return _build_int_root(item, parent_key=parent_key, ordinal=ordinal)
-    kind, subkind = _primitive_kind_subkind(item)
-    return AstScalar(
+    if isinstance(item, str):
+        return _build_string_root(item, parent_key=parent_key, ordinal=ordinal,
+                                   kind="str")
+    kind, subkind = _primitive_kind_subkind(item)  # pragma: no cover — no non-str non-int primitive list items
+    return AstScalar(  # pragma: no cover
         kind=kind, subkind=subkind, value=item,
         parent_key=parent_key, ordinal=ordinal,
     )
@@ -632,6 +800,65 @@ def _int_bit_seg(magnitude: int, parent_key: int,
         length=length,
         left=_int_bit_seg(magnitude, parent_key, lo, mid),
         right=_int_bit_seg(magnitude, parent_key, lo + mid, length - mid),
+    )
+
+
+# ---------------------------------------------------------------------------
+# String payload builder (Phase 4b)
+# ---------------------------------------------------------------------------
+
+
+def _build_string_root(value: str, parent_key: int, ordinal: int,
+                       kind: str) -> StringRoot:
+    """Decompose a Python str into StringRoot + StringLength + char tree.
+
+    `kind` is baked into StringRoot's key via nested Morton (ordinal, kind_tag).
+    `value` is retained on the StringRoot for whole-string discriminator
+    access, but identity is carried by the char decomposition.
+    """
+    length = len(value)
+
+    inner = morton2(ordinal, _string_kind_tag(kind))
+    string_root_key = (morton2(parent_key, inner) << TAG_BITS) | TAG_STRING_ROOT
+
+    length_marker = StringLength(parent_key=string_root_key, length=length)
+    chars_root = _build_char_tree(value, parent_key=string_root_key)
+
+    return StringRoot(
+        parent_key=parent_key,
+        ordinal=ordinal,
+        kind=kind,
+        value=value,
+        length_marker=length_marker,
+        chars_root=chars_root,
+    )
+
+
+def _build_char_tree(value: str, parent_key: int) -> "StringTree":
+    """Build the character subtree for a string of given length.
+
+    length=0 → AstNil (empty string); length=1 → single CharLeaf;
+    length>=2 → balanced CharSeg over positions [0, length).
+    """
+    n = len(value)
+    if n == 0:
+        return AstNil()
+    if n == 1:
+        return CharLeaf(parent_key=parent_key, position=0, codepoint=ord(value))
+    return _char_seg(value, parent_key, lo=0, length=n)
+
+
+def _char_seg(value: str, parent_key: int, lo: int, length: int) -> "StringTree":
+    if length == 1:
+        return CharLeaf(parent_key=parent_key, position=lo,
+                        codepoint=ord(value[lo]))
+    mid = length // 2
+    return CharSeg(
+        parent_key=parent_key,
+        lo=lo,
+        length=length,
+        left=_char_seg(value, parent_key, lo, mid),
+        right=_char_seg(value, parent_key, lo + mid, length - mid),
     )
 
 
@@ -806,15 +1033,19 @@ def make_list_registry(
 def make_naming_registry(
     reg: Optional[DiscriminatorRegistry] = None,
 ) -> DiscriminatorRegistry:
-    """Naming-convention family for str-kind scalars."""
+    """Naming-convention family for user-facing string payloads.
+
+    Fires on StringRoot(kind='str') — the Phase 4b decomposed string
+    node.  Payload is read via the StringRoot.value convenience field;
+    identity of the whole string is already carried by its char tree.
+    """
     if reg is None:
         reg = DiscriminatorRegistry()
 
     def _str_and(pred):
         return lambda n: (
-            isinstance(n, AstScalar)
+            isinstance(n, StringRoot)
             and n.kind == "str"
-            and isinstance(n.value, str)
             and pred(n.value)
         )
 
@@ -892,4 +1123,76 @@ def make_int_registry(
     reg.register("int_width_large",
                  lambda n: isinstance(n, IntWidth) and n.width > 32,
                  doc="IntWidth exceeds 32 bits (big int).")
+    return reg
+
+
+def make_string_registry(
+    reg: Optional[DiscriminatorRegistry] = None,
+) -> DiscriminatorRegistry:
+    """String-decomposition family (Phase 4b).
+
+    Structural: one discriminator per new constructor.
+    Content:    empty/length-class/char-class properties.
+
+    All predicates are pure and node-local; non-matching variants
+    never fire.
+    """
+    if reg is None:
+        reg = DiscriminatorRegistry()
+
+    reg.register("is_string_root",
+                 lambda n: isinstance(n, StringRoot),
+                 doc="Fires on StringRoot.")
+    reg.register("is_string_length",
+                 lambda n: isinstance(n, StringLength),
+                 doc="Fires on StringLength marker.")
+    reg.register("is_char_seg",
+                 lambda n: isinstance(n, CharSeg),
+                 doc="Fires on CharSeg.")
+    reg.register("is_char_leaf",
+                 lambda n: isinstance(n, CharLeaf),
+                 doc="Fires on CharLeaf.")
+
+    reg.register("string_is_empty",
+                 lambda n: (isinstance(n, StringRoot)
+                            and n.length_marker.length == 0),
+                 doc="StringRoot for empty string (length=0).")
+    reg.register("string_length_one",
+                 lambda n: (isinstance(n, StringRoot)
+                            and n.length_marker.length == 1),
+                 doc="StringRoot of length 1.")
+
+    reg.register("string_length_zero",
+                 lambda n: isinstance(n, StringLength) and n.length == 0,
+                 doc="StringLength marker with length 0.")
+    reg.register("string_length_short",
+                 lambda n: (isinstance(n, StringLength)
+                            and 1 <= n.length <= 16),
+                 doc="StringLength in 1..16.")
+    reg.register("string_length_long",
+                 lambda n: isinstance(n, StringLength) and n.length >= 64,
+                 doc="StringLength >= 64.")
+
+    def _char_and(pred):
+        return lambda n: isinstance(n, CharLeaf) and pred(n.codepoint)
+
+    reg.register("char_null",
+                 _char_and(lambda c: c == 0),
+                 doc="CharLeaf with codepoint 0.")
+    reg.register("char_ascii",
+                 _char_and(lambda c: c < 128),
+                 doc="CharLeaf in 7-bit ASCII (codepoint < 128).")
+    reg.register("char_letter",
+                 _char_and(lambda c: (0x41 <= c <= 0x5A)
+                                       or (0x61 <= c <= 0x7A)),
+                 doc="CharLeaf ASCII letter A-Z or a-z.")
+    reg.register("char_digit",
+                 _char_and(lambda c: 0x30 <= c <= 0x39),
+                 doc="CharLeaf ASCII digit 0-9.")
+    reg.register("char_underscore",
+                 _char_and(lambda c: c == 0x5F),
+                 doc="CharLeaf underscore.")
+    reg.register("char_whitespace",
+                 _char_and(lambda c: c in (0x09, 0x0A, 0x0D, 0x20)),
+                 doc="CharLeaf ASCII whitespace: tab, LF, CR, space.")
     return reg
