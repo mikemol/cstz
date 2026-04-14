@@ -1,0 +1,15 @@
+------------------------------------------------------------------------
+-- CSTZ.Topos.FiberedTopos
+-- Paper §9, Thm 9.6: ∫C is an elementary topos.  [AP]
+-- Finite limits at joins; Ω constant across fibers; power objects
+-- via monoidal closure.  K is a modular lattice (V* is a vector
+-- space; see Verification.RISC).
+------------------------------------------------------------------------
+module CSTZ.Topos.FiberedTopos where
+-- The Grothendieck construction ∫C has:
+--   Objects: (κ, A) — an equivalence class at a specific resolution
+--   Morphisms: inclusions + morphisms in the finer category
+-- Finite limits computed at finite joins κ₁ ∨ κ₂.
+-- Subobject classifier Ω = GF(2)² is constant across fibers.
+-- Power objects Ω^B = [B, Ω] exist by monoidal closure.
+-- The operationalist axiom is needed only for infinite-limit claims.

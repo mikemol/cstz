@@ -1,0 +1,11 @@
+------------------------------------------------------------------------
+-- CSTZ.Monoidal.Delooping
+-- Paper §8, Thm 8.4: Delooping equivalence.  [A]
+-- Rotating to the σ-perspective performs delooping: a 2-category
+-- with one object ≡ a monoidal 1-category.
+------------------------------------------------------------------------
+module CSTZ.Monoidal.Delooping where
+-- What were 1-morphisms (discriminators in κ) become objects.
+-- What was their wedge product becomes the monoidal product of objects.
+-- What were 2-morphisms become 1-morphisms.
+-- This is Baez-Dolan delooping as a geometric operation on the toroid.

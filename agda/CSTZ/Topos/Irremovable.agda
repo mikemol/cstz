@@ -1,0 +1,13 @@
+------------------------------------------------------------------------
+-- CSTZ.Topos.Irremovable
+-- Paper §9, Thm 9.16: Discrimination is irremovable.  [AP]
+-- Removing discrimination produces four independent failures and
+-- a homological gap whose filling IS discrimination.
+------------------------------------------------------------------------
+module CSTZ.Topos.Irremovable where
+-- This is internal necessity: it holds within the framework's own
+-- gap-filling machinery.  A reader who has not accepted the
+-- framework has no reason to accept this argument.
+-- The proof uses the framework's own residue mechanism at the
+-- meta-level: removing discrimination produces χ=0, which triggers
+-- κ-evolution, which reinstates discrimination.

@@ -1,0 +1,11 @@
+------------------------------------------------------------------------
+-- CSTZ.Higher.Perspectives
+-- Paper §7, Prop 7.11: Three perspectives.  [A]
+------------------------------------------------------------------------
+module CSTZ.Higher.Perspectives where
+-- κ-perspective: directed 1-morphisms (discriminators act on population)
+-- σ-perspective: directed 2-morphisms (discriminating discriminators)
+-- τ-perspective: third directed level
+-- All lossless (xor is involutive): rotating and rotating back = identity.
+-- Dynamics transfer (Prop 7.12): monotonicity, write/read properties
+-- transfer under S₃ because they are GF(2) algebra consequences.

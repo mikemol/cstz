@@ -83,16 +83,16 @@ open ≡-Reasoning
 
 -- Bilinearity in first argument: ⟨u + v, w⟩ = ⟨u,w⟩ + ⟨v,w⟩
 -- Paper §4: This is profile linearity instantiated at the vector level.
--- Helper: rearrange (a+b)+(c+d) = (a+c)+(b+d) over GF(2)
-private
-  +F-interchange : ∀ (a b c d : F) → (a +F b) +F (c +F d) ≡ (a +F c) +F (b +F d)
-  +F-interchange a b c d = begin
-    (a +F b) +F (c +F d)    ≡⟨ +F-assoc a b (c +F d) ⟩
-    a +F (b +F (c +F d))    ≡⟨ cong (a +F_) (sym (+F-assoc b c d)) ⟩
-    a +F ((b +F c) +F d)    ≡⟨ cong (λ x → a +F (x +F d)) (+F-comm b c) ⟩
-    a +F ((c +F b) +F d)    ≡⟨ cong (a +F_) (+F-assoc c b d) ⟩
-    a +F (c +F (b +F d))    ≡⟨ sym (+F-assoc a c (b +F d)) ⟩
-    (a +F c) +F (b +F d)    ∎
+-- Rearrange (a+b)+(c+d) = (a+c)+(b+d) over GF(2)
+-- Paper §6: used in the interchange law proof.
++F-interchange : ∀ (a b c d : F) → (a +F b) +F (c +F d) ≡ (a +F c) +F (b +F d)
++F-interchange a b c d = begin
+  (a +F b) +F (c +F d)    ≡⟨ +F-assoc a b (c +F d) ⟩
+  a +F (b +F (c +F d))    ≡⟨ cong (a +F_) (sym (+F-assoc b c d)) ⟩
+  a +F ((b +F c) +F d)    ≡⟨ cong (λ x → a +F (x +F d)) (+F-comm b c) ⟩
+  a +F ((c +F b) +F d)    ≡⟨ cong (a +F_) (+F-assoc c b d) ⟩
+  a +F (c +F (b +F d))    ≡⟨ sym (+F-assoc a c (b +F d)) ⟩
+  (a +F c) +F (b +F d)    ∎
 
 ·V-linearˡ : ∀ {n} (u v w : GF2Vec n)
   → (u +V v) ·V w ≡ (u ·V w) +F (v ·V w)
