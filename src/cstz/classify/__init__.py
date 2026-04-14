@@ -22,10 +22,12 @@ from cstz.classify.registry import Discriminator, DiscriminatorRegistry
 from cstz.classify.base import Classified, ShapeWitness, Classifier
 from cstz.classify.walker import zpath, walk, KeyFn, ChildrenFn
 from cstz.classify.adapter import emit_patch
+from cstz.classify.bytes import morton2
 
 __all__ = [
     "Discriminator", "DiscriminatorRegistry",
     "Classified", "ShapeWitness", "Classifier",
     "zpath", "walk", "KeyFn", "ChildrenFn",
     "emit_patch",
+    "morton2",
 ]
