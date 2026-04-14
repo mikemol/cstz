@@ -17,16 +17,19 @@ from cstz.classify.adapter import emit_patch
 from cstz.classify.base import Classifier, ShapeWitness
 from cstz.classify.bytes import morton2
 from cstz.classify.pyast import (
+    TAG_BITS,
     TAG_NIL, TAG_SCALAR, TAG_FIELD, TAG_LIST_SEG, TAG_NODE_WRAP,
+    TAG_INT_ROOT, TAG_INT_WIDTH, TAG_INT_BIT_SEG, TAG_INT_BIT,
     SLOT_NAME, SLOT_DIRECT_VALUE, SLOT_LIST_OFFSET,
     AstNil, AstScalar, AstField, AstListSeg, AstNodeWrap,
+    IntRoot, IntWidth, IntBitSeg, IntBit,
     AstClassifier,
     ast_key, ast_children,
     parse_to_tree, module_to_tree,
     make_structural_registry, make_category_registry,
     make_ast_class_registry, make_field_registry,
     make_scalar_kind_registry, make_list_registry,
-    make_naming_registry,
+    make_naming_registry, make_int_registry,
 )
 from cstz.classify.registry import DiscriminatorRegistry
 from cstz.classify.walker import walk
@@ -50,25 +53,25 @@ class TestG3CoordinateIdentity:
     def test_scalar_key_from_parent_ordinal(self):
         s = AstScalar(kind="int", subkind="int", value=42,
                        parent_key=0, ordinal=1)
-        assert ast_key(s) == (morton2(0, 1) << 3) | TAG_SCALAR
+        assert ast_key(s) == (morton2(0, 1) << TAG_BITS) | TAG_SCALAR
 
     def test_field_key_from_parent_and_ordinal(self):
         ns = AstScalar(kind="field_name", subkind="str", value="x",
                         parent_key=0, ordinal=SLOT_NAME)
         f = AstField(parent_key=42, field_ordinal=3,
                       name_scalar=ns, value=AstNil())
-        assert ast_key(f) == (morton2(42, 3) << 3) | TAG_FIELD
+        assert ast_key(f) == (morton2(42, 3) << TAG_BITS) | TAG_FIELD
 
     def test_listseg_key_from_nested_morton(self):
         s = AstListSeg(parent_key=100, lo=4, length=8,
                         left=AstNil(), right=AstNil())
         q = morton2(4, 8)
-        assert ast_key(s) == (morton2(100, q) << 3) | TAG_LIST_SEG
+        assert ast_key(s) == (morton2(100, q) << TAG_BITS) | TAG_LIST_SEG
 
     def test_nodewrap_key_from_parent_and_ordinal(self):
         w = AstNodeWrap(ast_class="Module", kind_bucket="statement",
                          parent_key=0, ordinal=0, fields_root=AstNil())
-        assert ast_key(w) == (morton2(0, 0) << 3) | TAG_NODE_WRAP
+        assert ast_key(w) == (morton2(0, 0) << TAG_BITS) | TAG_NODE_WRAP
 
 
 # ---------------------------------------------------------------------------
@@ -78,13 +81,17 @@ class TestG3CoordinateIdentity:
 
 class TestG2TagDisjointness:
     def test_distinct_tags(self):
-        assert len({TAG_NIL, TAG_SCALAR, TAG_FIELD, TAG_LIST_SEG,
-                     TAG_NODE_WRAP}) == 5
+        all_tags = {TAG_NIL, TAG_SCALAR, TAG_FIELD, TAG_LIST_SEG,
+                     TAG_NODE_WRAP, TAG_INT_ROOT, TAG_INT_WIDTH,
+                     TAG_INT_BIT_SEG, TAG_INT_BIT}
+        assert len(all_tags) == 9
 
-    def test_tags_fit_in_3_bits(self):
+    def test_tags_fit_in_tag_bits(self):
+        limit = 1 << TAG_BITS
         for tag in (TAG_NIL, TAG_SCALAR, TAG_FIELD, TAG_LIST_SEG,
-                     TAG_NODE_WRAP):
-            assert 0 <= tag < 8
+                     TAG_NODE_WRAP, TAG_INT_ROOT, TAG_INT_WIDTH,
+                     TAG_INT_BIT_SEG, TAG_INT_BIT):
+            assert 0 <= tag < limit
 
     def test_keys_separable_by_tag(self):
         """Different constructors at the same coordinate give distinct keys."""
@@ -94,9 +101,10 @@ class TestG2TagDisjointness:
         w = AstNodeWrap(ast_class="X", kind_bucket="other",
                          parent_key=pk, ordinal=o, fields_root=AstNil())
         assert ast_key(s) != ast_key(w)
-        # Low 3 bits differ by tag
-        assert ast_key(s) & 0b111 == TAG_SCALAR
-        assert ast_key(w) & 0b111 == TAG_NODE_WRAP
+        # Low TAG_BITS bits encode the constructor tag
+        mask = (1 << TAG_BITS) - 1
+        assert ast_key(s) & mask == TAG_SCALAR
+        assert ast_key(w) & mask == TAG_NODE_WRAP
 
 
 # ---------------------------------------------------------------------------
@@ -464,11 +472,13 @@ class TestCoverageGaps:
         Note: the Python literal `None` becomes `ast.Constant(value=None)`;
         internally we treat the None payload as "absent" (AstNil) rather
         than a scalar, so kind='None' is not observed through source parse.
-        Bool/int/float/str/bytes are observed normally.
+        Bool/float/str/bytes are observed as AstScalar.
+        Int payloads are decomposed into IntRoot (Phase 4a), not AstScalar;
+        see TestG9PayloadSensitiveInt for integer coverage.
         """
-        tree = parse_to_tree("True; 1; 1.5; 'x'; b'y'")
+        tree = parse_to_tree("True; 1.5; 'x'; b'y'")
         kinds = _collect_scalar_kinds(tree)
-        for k in ("int", "float", "str", "bool", "bytes"):
+        for k in ("float", "str", "bool", "bytes"):
             assert k in kinds, f"missing scalar kind {k!r}"
 
     def test_global_names_are_string_list_items(self):
@@ -629,3 +639,254 @@ class TestExpressivePower:
         fired = {o.discriminator for o in patch.observations}
         # __init__ fires name_dunder
         assert reg.get_by_name("name_dunder").id in fired
+
+
+# ---------------------------------------------------------------------------
+# Gate G9 (Phase 4a): payload-sensitive identity for integers
+# ---------------------------------------------------------------------------
+
+
+def _collect_int_nodes(tree):
+    """Gather all Int* nodes by walking the structural tree."""
+    out = []
+    _walk_int(tree, out)
+    return out
+
+
+def _walk_int(node, out):
+    if isinstance(node, (IntRoot, IntWidth, IntBitSeg, IntBit)):
+        out.append(node)
+    if isinstance(node, AstField):
+        _walk_int(node.name_scalar, out)
+        _walk_int(node.value, out)
+    elif isinstance(node, AstListSeg):
+        _walk_int(node.left, out)
+        _walk_int(node.right, out)
+    elif isinstance(node, AstNodeWrap):
+        _walk_int(node.fields_root, out)
+    elif isinstance(node, IntRoot):
+        _walk_int(node.width_marker, out)
+        _walk_int(node.bits_root, out)
+    elif isinstance(node, IntBitSeg):
+        _walk_int(node.left, out)
+        _walk_int(node.right, out)
+
+
+def _find_int_root(tree):
+    """First IntRoot found in tree, or None."""
+    nodes = _collect_int_nodes(tree)
+    for n in nodes:
+        if isinstance(n, IntRoot):
+            return n
+    return None
+
+
+class TestG9PayloadSensitiveInt:
+    """Phase 4a gates: integer payload is represented as structure,
+    not as an opaque scalar value.  Identity of each component is
+    coordinate-derived; walker/classifier/registry mechanics unchanged."""
+
+    def test_int_key_derivation(self):
+        r = IntRoot(parent_key=7, ordinal=1, is_negative=False,
+                     width_marker=IntWidth(parent_key=0, width=3),
+                     bits_root=AstNil())
+        inner = morton2(1, 0)
+        assert ast_key(r) == (morton2(7, inner) << TAG_BITS) | TAG_INT_ROOT
+
+    def test_int_width_key_encodes_width(self):
+        a = IntWidth(parent_key=0, width=3)
+        b = IntWidth(parent_key=0, width=8)
+        assert ast_key(a) != ast_key(b)
+        assert ast_key(a) & ((1 << TAG_BITS) - 1) == TAG_INT_WIDTH
+
+    def test_int_bit_key_encodes_value(self):
+        b0 = IntBit(parent_key=0, position=2, bit=0)
+        b1 = IntBit(parent_key=0, position=2, bit=1)
+        assert ast_key(b0) != ast_key(b1)
+        assert ast_key(b0) & ((1 << TAG_BITS) - 1) == TAG_INT_BIT
+
+    def test_int_bit_seg_subsegs_distinct(self):
+        outer = IntBitSeg(parent_key=5, lo=0, length=4,
+                           left=AstNil(), right=AstNil())
+        inner = IntBitSeg(parent_key=5, lo=0, length=2,
+                           left=AstNil(), right=AstNil())
+        assert ast_key(outer) != ast_key(inner)
+
+    def test_signs_give_different_int_roots(self):
+        pos = _find_int_root(parse_to_tree("x = 1"))
+        neg = _find_int_root(parse_to_tree("x = -1"))
+        assert pos is not None and neg is not None
+        # Unary-minus wraps as ast.UnaryOp, so the literal inside is still
+        # positive 1.  Construct a negative IntRoot directly to verify
+        # sign is baked into the key.
+        pos_direct = IntRoot(parent_key=7, ordinal=1, is_negative=False,
+                              width_marker=IntWidth(parent_key=0, width=1),
+                              bits_root=AstNil())
+        neg_direct = IntRoot(parent_key=7, ordinal=1, is_negative=True,
+                              width_marker=IntWidth(parent_key=0, width=1),
+                              bits_root=AstNil())
+        assert ast_key(pos_direct) != ast_key(neg_direct)
+
+    def test_zero_has_width_zero_and_nil_bits(self):
+        r = _build_int_root_zero()
+        assert r.width_marker.width == 0
+        assert isinstance(r.bits_root, AstNil)
+
+    def test_width_one_has_single_bit(self):
+        tree = parse_to_tree("x = 1")
+        r = _find_int_root(tree)
+        assert r is not None
+        assert r.width_marker.width == 1
+        assert isinstance(r.bits_root, IntBit)
+        assert r.bits_root.bit == 1
+        assert r.bits_root.position == 0
+
+    def test_width_ge_two_builds_balanced_seg(self):
+        tree = parse_to_tree("x = 5")  # 0b101, width=3
+        r = _find_int_root(tree)
+        assert r is not None
+        assert r.width_marker.width == 3
+        assert isinstance(r.bits_root, IntBitSeg)
+        # Gather all IntBit leaves to verify the bit pattern
+        bits = [n for n in _collect_int_nodes(tree) if isinstance(n, IntBit)]
+        at = {b.position: b.bit for b in bits}
+        assert at == {0: 1, 1: 0, 2: 1}
+
+    def test_different_values_differ_at_bits(self):
+        """x=1 and x=2 produce distinct keys at some IntBit leaf."""
+        t1 = parse_to_tree("x = 1")
+        t2 = parse_to_tree("x = 2")
+        keys1 = {ast_key(n) for n in _collect_int_nodes(t1)
+                 if isinstance(n, IntBit)}
+        keys2 = {ast_key(n) for n in _collect_int_nodes(t2)
+                 if isinstance(n, IntBit)}
+        assert keys1 != keys2
+
+    def test_same_value_same_tree(self):
+        assert parse_to_tree("x = 42") == parse_to_tree("x = 42")
+
+    def test_uniform_binary_int_shapes(self):
+        c = AstClassifier(DiscriminatorRegistry(), ())
+        # Arity 2 for IntRoot and IntBitSeg
+        r = IntRoot(parent_key=0, ordinal=0, is_negative=False,
+                     width_marker=IntWidth(parent_key=0, width=0),
+                     bits_root=AstNil())
+        assert c.shape_of(r).arity == 2
+        assert c.shape_of(r).roles == ("width", "bits")
+        seg = IntBitSeg(parent_key=0, lo=0, length=2,
+                         left=AstNil(), right=AstNil())
+        assert c.shape_of(seg).arity == 2
+        assert c.shape_of(seg).roles == ("left", "right")
+        # Arity 0 for markers and leaf bits
+        assert c.shape_of(IntWidth(parent_key=0, width=0)).arity == 0
+        assert c.shape_of(IntBit(parent_key=0, position=0, bit=1)).arity == 0
+
+    def test_int_children(self):
+        w = IntWidth(parent_key=0, width=3)
+        bits = IntBit(parent_key=0, position=0, bit=1)
+        r = IntRoot(parent_key=0, ordinal=1, is_negative=False,
+                     width_marker=w, bits_root=bits)
+        kids = ast_children(r)
+        assert kids == (("width", w), ("bits", bits))
+        seg = IntBitSeg(parent_key=0, lo=0, length=2,
+                         left=AstNil(), right=bits)
+        assert ast_children(seg) == (("left", AstNil()), ("right", bits))
+        assert ast_children(IntWidth(parent_key=0, width=0)) == ()
+        assert ast_children(IntBit(parent_key=0, position=0, bit=0)) == ()
+
+    def test_int_registry_structural_coverage(self):
+        reg = make_int_registry()
+        for name in ("is_int_root", "is_int_width", "is_int_bit_seg",
+                      "is_int_bit"):
+            assert reg.get_by_name(name) is not None
+
+    def test_int_registry_fires_and_silents(self):
+        reg = make_int_registry()
+        r = IntRoot(parent_key=0, ordinal=0, is_negative=True,
+                     width_marker=IntWidth(parent_key=0, width=3),
+                     bits_root=AstNil())
+        w = IntWidth(parent_key=0, width=0)
+        b0 = IntBit(parent_key=0, position=0, bit=0)
+        b1 = IntBit(parent_key=0, position=5, bit=1)
+        seg = IntBitSeg(parent_key=0, lo=0, length=2,
+                         left=AstNil(), right=AstNil())
+
+        assert reg.get_by_name("is_int_root").fires(r) is True
+        assert reg.get_by_name("is_int_root").fires(AstNil()) is False
+        assert reg.get_by_name("is_int_width").fires(w) is True
+        assert reg.get_by_name("is_int_width").fires(r) is False
+        assert reg.get_by_name("is_int_bit_seg").fires(seg) is True
+        assert reg.get_by_name("is_int_bit_seg").fires(AstNil()) is False
+        assert reg.get_by_name("is_int_bit").fires(b1) is True
+        assert reg.get_by_name("is_int_bit").fires(AstNil()) is False
+
+        assert reg.get_by_name("int_is_negative").fires(r) is True
+        assert reg.get_by_name("int_is_negative").fires(AstNil()) is False
+        # width=3 > 0 so not zero
+        assert reg.get_by_name("int_is_zero").fires(r) is False
+        assert reg.get_by_name("int_is_zero").fires(AstNil()) is False
+        zero = IntRoot(parent_key=0, ordinal=0, is_negative=False,
+                        width_marker=IntWidth(parent_key=0, width=0),
+                        bits_root=AstNil())
+        assert reg.get_by_name("int_is_zero").fires(zero) is True
+
+        assert reg.get_by_name("int_bit_zero").fires(b0) is True
+        assert reg.get_by_name("int_bit_zero").fires(b1) is False
+        assert reg.get_by_name("int_bit_zero").fires(AstNil()) is False
+        assert reg.get_by_name("int_bit_one").fires(b1) is True
+        assert reg.get_by_name("int_bit_one").fires(b0) is False
+        assert reg.get_by_name("int_bit_one").fires(AstNil()) is False
+        assert reg.get_by_name("int_bit_lsb").fires(b0) is True
+        assert reg.get_by_name("int_bit_lsb").fires(b1) is False
+        assert reg.get_by_name("int_bit_lsb").fires(AstNil()) is False
+
+        assert reg.get_by_name("int_width_zero").fires(w) is True
+        assert reg.get_by_name("int_width_zero").fires(AstNil()) is False
+        byte_w = IntWidth(parent_key=0, width=5)
+        big_w = IntWidth(parent_key=0, width=64)
+        assert reg.get_by_name("int_width_byte").fires(byte_w) is True
+        assert reg.get_by_name("int_width_byte").fires(w) is False
+        assert reg.get_by_name("int_width_byte").fires(AstNil()) is False
+        assert reg.get_by_name("int_width_large").fires(big_w) is True
+        assert reg.get_by_name("int_width_large").fires(byte_w) is False
+        assert reg.get_by_name("int_width_large").fires(AstNil()) is False
+
+    def test_int_registry_extends_existing(self):
+        base = DiscriminatorRegistry()
+        before = len(base)
+        make_int_registry(base)
+        assert len(base) > before
+
+    def test_end_to_end_int_observations_differ(self):
+        """Gate G1 under Phase 4a: walker + adapter unchanged, yet
+        integer-sensitive observations split x=1 from x=2."""
+        reg = make_structural_registry()
+        make_int_registry(reg)
+        classifier = AstClassifier(reg, tuple(d.id for d in reg.all()))
+
+        obs1 = _observe(parse_to_tree("x = 1"), classifier)
+        obs2 = _observe(parse_to_tree("x = 2"), classifier)
+
+        # Different programs → different observation sets (the specific
+        # IntBit zpaths differ because bit-value is in the coordinate).
+        assert obs1 != obs2
+
+    def test_end_to_end_int_observations_idempotent(self):
+        """Parsing the same program twice yields identical observations."""
+        reg = make_structural_registry()
+        make_int_registry(reg)
+        classifier = AstClassifier(reg, tuple(d.id for d in reg.all()))
+        assert (_observe(parse_to_tree("x = 42"), classifier)
+                == _observe(parse_to_tree("x = 42"), classifier))
+
+
+def _build_int_root_zero():
+    """Parse `x = 0` and extract its IntRoot for inspection."""
+    return _find_int_root(parse_to_tree("x = 0"))
+
+
+def _observe(tree, classifier):
+    """Collect (zpath, discriminator) observations from walking `tree`."""
+    patch = Patch()
+    emit_patch(walk(tree, classifier, ast_children, key_fn=ast_key), patch)
+    return {(o.element, o.discriminator, o.result) for o in patch.observations}
