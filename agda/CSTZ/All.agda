@@ -53,3 +53,6 @@ open import CSTZ.Verification.LimitsExhaustive
 
 -- Phase 10: Examples (App E)
 open import CSTZ.Examples
+
+-- Phase 11: Meta (App D)
+open import CSTZ.Meta.TechniqueProfile
