@@ -220,3 +220,105 @@ runs `tests/test_*.py` under a 100 % branch-coverage gate
 9. §4 `cstz.projections.pff_json` + `rhpf-pff-profiles/pff.schema.json`.
 10. Optional deep dives: §5 `inference.agda`, `CoreProof.agda`, and
     `cstz.legacy/` for historical context.
+
+## 8. Cofibration of Agda ↔ Python
+
+The Agda specification and the Python runtime implement the same theory
+but make different definitional choices. Treating each side as a set of
+named objects and asking, concept by concept, *"what is its status on
+the other side?"* exposes a **cofibration**: the two implementations
+share a common subtheory, but each carries a *cofiber* of concepts the
+other side treats only implicitly or not at all.
+
+Every concept is placed in one of nine status cells. **E** = explicitly
+named; **I** = implied (derivable from other named code but not itself
+named); **M** = missing.
+
+| status | Agda **E** | Agda **I** | Agda **M** |
+|--------|------------|------------|------------|
+| **Python E** | aligned (may still differ in *proof strength*) | Python names a derived fact | Python-only |
+| **Python I** | Agda names it; Python derives it | both implicit (outside this study) | — |
+| **Python M** | Agda-only | — | — |
+
+The table below and the three subsections distill the mechanical
+enumeration in each phase to the mismatched cells only; trivial
+name-casing differences (e.g. Agda `cd-mul` ↔ Python `cd_mul`) are
+aligned and omitted. Verified by spot-checking `topos.py:19–22`,
+`higher.py:14–24`, `category.py:19`, `agda/CSTZ/Category/Directed.agda:27`,
+and `agda/CSTZ/Topos/Fano.agda:47–73`.
+
+### 8.1 Proof-strength mismatches (both sides explicit, different strength)
+
+These are **E/E** cells where the concept is named on both sides, but
+the Agda form is a structural axiom or theorem and the Python form is an
+empirical check. These are the most subtle asymmetries because a casual
+reader may believe the two sides are "the same."
+
+| Concept | Agda form | Python form | Mismatch |
+|---------|-----------|-------------|----------|
+| profile linearity (P1) | `postulate profile-linearity` (`Axiom/ProfileLinearity.agda:26`) | `axioms.check_profile_linearity` + `verification.check_profile_linearity_exhaustive` | unprovable axiom ↔ bounded empirical check |
+| eval linearity (P2) | `postulate eval-linearity` (`Axiom/EvalLinearity.agda:27`) | `axioms.check_eval_linearity` + exhaustive variant | same |
+| operationalist (P3) | `postulate operationalist` (`Axiom/Operationalist.agda:26`) | `axioms.check_operationalist` (checks antecedent only) | Python cannot derive the conclusion; the axiom supplies it |
+| ∂∘∂ ≡ 0 (P4) | `postulate ∂∘∂≡0` (`Exterior/Boundary.agda:88`) | `verification.check_boundary_squared` (all basis) + `_all` (exhaustive at n=3) | finite exhaustion ≠ proof, but covers 2^(2^n) elements |
+| Fano lines | 7 theorems `fano-line-1..7` (`Topos/Fano.agda:47–73`) | `FANO_LINES` list + `verify_fano_line` | Agda enumerates and proves each; Python verifies a generic predicate |
+| DNE / EM-fail | `dne`, `em-fails-at-gap` (`Topos/ProofTheory.agda:27–31`) | `topos.dne`, `check_truth_tables` | semantically aligned; Python bundles EM failure into `check_truth_tables` |
+
+### 8.2 The Agda cofiber (explicit in Agda, missing or implied in Python)
+
+**Structural types and records Python inlines.**
+- `DiscSystem`, `DiscPair` records (`Framework/Discriminator.agda:30,62`) — Python encodes discriminators as integer bitmasks without a wrapping type; a `DiscriminatorRegistry` exists in `classify/registry.py` but is a runtime catalogue, not an algebraic object.
+- `Adjunction` record + `Axis` data (`Category/Adjunction.agda:33,52`) — **no Python counterpart**; adjunctions are implicit in `compose_witnesses` / `compose_coeff` usage.
+- `LinearFunc` (`Vec.agda:66`), `Exterior` (`Exterior/Basis.agda:81`) — Python uses bare `int` and `list[int]` respectively.
+
+**Postulate spine without Python witnesses** (see §3 for the full catalog).
+- P5 `leibniz`, P6 `exhaustive-filling` (`Homotopy/Exhaustivity.agda`)
+- P7 `chain-depth-bound` (`Sets/Foundation.agda`)
+- P8 `a≡b` local to `yoneda-faithful` (`Category/Yoneda.agda:58`)
+- P9 `chain-bound` (`Verification/ChainBound.agda`)
+
+**Enumerated constructions Python condenses to a single verifier.**
+- Fano lines: seven separate theorems in Agda ↔ one `verify_fano_line` predicate in Python (see also §8.1).
+- Segal coherence: `top-3-cell` plus six face definitions in `Verification/Segal.agda` ↔ no Python counterpart (Segal structure is implicit).
+- Truth-table coverage: `neg-gap`, `neg-overlap`, `dne-gap`, `dne-overlap`, `conj-gap-any`, `disj-gap-gap`, `em-gap`, `em-overlap`, `expl-overlap` (nine named cases in `Examples/TruthTables.agda`) ↔ one `check_truth_tables` function that bundles the cases.
+
+**Agda-only metadata.**
+- `Meta/TechniqueProfile.agda` — proof-technique annotations (Appendix D); Python has no analogue and does not need one (the metadata describes the Agda development itself).
+
+### 8.3 The Python cofiber (explicit in Python, missing or implied in Agda)
+
+**Runtime subsystems with no Agda counterpart at all.**
+- `cstz.observe` — `Observation`, `Patch`, `ObservationState` (a runtime sheaf of discriminations). Agda's sheaf axioms are in `Topos/Sheaves.agda`; the *state carrier* that accumulates observations at runtime is Python-only.
+- `cstz.classify/` — `DiscriminatorRegistry`, `Classified`, `Walker`, `Adapter`, plus three concrete classifiers (`pyast`, `bytes`, `toy`). Classification maps concrete syntax to discriminator bitmasks; the Agda formalization fixes the algebra of discriminators but does not prescribe how to obtain them.
+- `cstz.projections.pff_json` — serializer to `rhpf-pff-profiles/pff.schema.json`; no mathematical counterpart.
+- `cstz.legacy/` — superseded SPPF/PFF stack; mirrors `inference.agda` (the older standalone Agda spec), not `agda/CSTZ/`.
+
+**Algebra Python names that Agda treats structurally.**
+- Ω constants `TRUE_OMEGA`, `FALSE_OMEGA`, `UNKNOWN_OMEGA`, `OVERDET_OMEGA` (`topos.py:19–22`) — Agda reasons about these values through `Topos/ProofTheory.agda` without giving them individual names (they appear as pattern-match cases).
+- Ω operators `omega_neg`, `omega_conj`, `omega_disj` (`topos.py:25–…`) — Agda has the *properties* (`em-fails-at-gap`, etc.) but not the operators as first-class functions; they are implicit in the sub-object classifier's algebra.
+- `Perspective` IntEnum (`higher.py:14`, members `KAPPA`, `SIGMA`, `TAU`) and toroid-point constants `TAU_POINT`, `SIGMA_POINT`, `KAPPA_POINT` (`higher.py:22–24`) — Agda uses structural role tracking without an enum type.
+
+**Bundled convenience checks.**
+- `axioms.check_bilinearity` (`axioms.py:28`) — Agda derives bilinearity from P1 ∧ P2 by composition; Python names the conjunction.
+- `verification.check_truth_tables` (`verification.py:93`) — collapses Agda's nine truth-table theorems into a single sweep (also noted in §8.2).
+
+### 8.4 Summary table
+
+| Direction | Cardinality (indicative) | Notable examples |
+|-----------|--------------------------|------------------|
+| E/E aligned | ~45 | `cd_mul`, `rotate`, `dot`, `basis`, `classify`, `evolve`, `russell_exclusion`, `DirectedMorphism`, `LimitKind` |
+| E/E proof-strength mismatch (§8.1) | 6 | linearity axioms, `∂∘∂≡0`, Fano lines, DNE/EM |
+| Agda E, Python M/I (§8.2) | ~15 | `DiscSystem`, `Adjunction`, P5–P9 postulates, Segal cells, truth-table cases |
+| Agda M/I, Python E (§8.3) | ~20 (plus all of `classify/`, `observe`, `projections`) | Ω constants, Ω operators, `Perspective`, `check_bilinearity`, classification engine |
+
+### 8.5 Regenerating this section
+
+The postulate spine (§3) is mechanical:
+```
+python3 scripts/count_postulates.py
+```
+The full named-object enumeration used here was produced by scanning
+each phase's modules for `data`/`record`/`postulate`/typed-name openings
+in Agda and for `class`/`def`/upper-snake constants in Python. A
+generalized `scripts/collect_decls.py` would automate re-running the
+cofibration; until then, the hand enumeration is auditable by
+re-grepping each cited file and comparing against this section.
