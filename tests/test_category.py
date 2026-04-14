@@ -1,7 +1,7 @@
-"""Tests for cstz.disc.category."""
+"""Tests for cstz.category."""
 
 import pytest
-from cstz.disc.category import (
+from cstz.category import (
     compose_witnesses, compose_coeff, interchange, equalizer_witness, LimitKind,
 )
 

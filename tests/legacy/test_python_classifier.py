@@ -7,11 +7,11 @@ from pathlib import Path
 from typing import Optional
 
 import pytest
-from cstz.python_classifier import (
+from cstz.legacy.python_classifier import (
     _Env, _infer, _classify_kappa, _extract_params, _receiver_domain,
     _build_sppf, factorize, _KNOWN_TYPES, _PARAM_TYPES,
 )
-from cstz.core import SPPF
+from cstz.legacy.core import SPPF
 
 
 # ── _Env ─────────────────────────────────────────────────────────────

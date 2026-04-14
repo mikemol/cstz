@@ -7,14 +7,14 @@ Mirrors: agda/CSTZ/Verification/*.agda
 
 from __future__ import annotations
 
-from cstz.disc.gf2 import dot, popcount
-from cstz.disc.exterior import (
+from cstz.gf2 import dot, popcount
+from cstz.exterior import (
     ext_basis, ext_boundary, ext_is_zero, ext_wedge,
 )
-from cstz.disc.framework import chi
-from cstz.disc.axioms import check_profile_linearity, check_eval_linearity
-from cstz.disc.topos import FANO_LINES, verify_fano_line, unique_top_form
-from cstz.disc.monoidal import cd_mul, swap_conjugation
+from cstz.framework import chi
+from cstz.axioms import check_profile_linearity, check_eval_linearity
+from cstz.topos import FANO_LINES, verify_fano_line, unique_top_form
+from cstz.monoidal import cd_mul, swap_conjugation
 
 
 def check_boundary_squared(n: int) -> None:
@@ -92,7 +92,7 @@ def check_eval_linearity_exhaustive(n: int) -> None:
 
 def check_truth_tables() -> None:
     """B.10: Belnap FDE truth tables on Ω."""
-    from cstz.disc.topos import omega_neg, omega_conj, omega_disj
+    from cstz.topos import omega_neg, omega_conj, omega_disj
 
     # Double negation elimination
     for p in range(4):

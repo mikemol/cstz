@@ -1,8 +1,8 @@
-"""Tests for cstz.disc.homotopy."""
+"""Tests for cstz.homotopy."""
 
 import pytest
-from cstz.disc.exterior import ext_basis, ext_add
-from cstz.disc.homotopy import chain_complex_check, exhaustive_filling, self_inverse_check
+from cstz.exterior import ext_basis, ext_add
+from cstz.homotopy import chain_complex_check, exhaustive_filling, self_inverse_check
 
 N = 3
 

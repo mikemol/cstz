@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import List, Tuple
 
-from cstz.disc.monoidal import swap_conjugation
+from cstz.monoidal import swap_conjugation
 
 # ---------------------------------------------------------------------------
 # Subobject classifier Ω = GF(2)² (Paper §9, Thm 9.4)

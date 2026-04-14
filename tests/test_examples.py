@@ -7,17 +7,17 @@ Mirrors: agda/CSTZ/Examples/GF2Cubed/*.agda
 """
 
 import pytest
-from cstz.disc.gf2 import dot, vec_add, popcount
-from cstz.disc.exterior import (
+from cstz.gf2 import dot, vec_add, popcount
+from cstz.exterior import (
     ext_basis, ext_add, ext_boundary, ext_is_zero, ext_wedge, ext_grade,
 )
-from cstz.disc.framework import (
+from cstz.framework import (
     GAP, ORDERED_SIGMA, ORDERED_TAU, OVER,
     classify, chi, profile, membership,
 )
-from cstz.disc.sets import kappa_equiv, is_paired, link_vector
-from cstz.disc.topos import omega_neg, omega_conj, omega_disj, FANO_LINES
-from cstz.disc.examples import *
+from cstz.sets import kappa_equiv, is_paired, link_vector
+from cstz.topos import omega_neg, omega_conj, omega_disj, FANO_LINES
+from cstz.examples import *
 
 
 class TestSetup:

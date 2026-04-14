@@ -13,7 +13,7 @@ import json
 
 import pytest
 
-from cstz.pff import (
+from cstz.legacy.pff import (
     ADDR1_CTORS,
     ADDR2_CTORS,
     HOP_SIDES,
@@ -1031,17 +1031,17 @@ class TestKernelHelpers:
     """Direct tests for the module-level helper functions."""
 
     def test_kernel_projection_empty(self):
-        from cstz.pff import _kernel_projection
+        from cstz.legacy.pff import _kernel_projection
         assert _kernel_projection([], []) == {}
 
     def test_kernel_projection_singletons(self):
-        from cstz.pff import _kernel_projection
+        from cstz.legacy.pff import _kernel_projection
         result = _kernel_projection(["a", "b", "c"], [])
         assert result == {"a": "a", "b": "b", "c": "c"}
 
     def test_kernel_projection_idempotent_union(self):
         """Calling union on already-merged elements is a no-op."""
-        from cstz.pff import _kernel_projection
+        from cstz.legacy.pff import _kernel_projection
         result = _kernel_projection(
             ["a", "b"],
             [("a", "b"), ("a", "b"), ("b", "a")],
@@ -1050,13 +1050,13 @@ class TestKernelHelpers:
 
     def test_kernel_projection_lex_decreasing_union(self):
         """Edge with lex-larger src first triggers the swap branch."""
-        from cstz.pff import _kernel_projection
+        from cstz.legacy.pff import _kernel_projection
         result = _kernel_projection(["a", "b"], [("b", "a")])
         assert result == {"a": "a", "b": "a"}
 
     def test_kernel_projection_path_compression(self):
         """A 3-deep chain triggers the path-compression inner loop."""
-        from cstz.pff import _kernel_projection
+        from cstz.legacy.pff import _kernel_projection
         # Build edges so that parent[c]=b, parent[b]=a after the
         # naive union order.
         result = _kernel_projection(
@@ -1066,11 +1066,11 @@ class TestKernelHelpers:
         assert result == {"a": "a", "b": "a", "c": "a"}
 
     def test_classes_from_canonical_map_empty(self):
-        from cstz.pff import _classes_from_canonical_map
+        from cstz.legacy.pff import _classes_from_canonical_map
         assert _classes_from_canonical_map({}) == []
 
     def test_classes_from_canonical_map_groups_by_canonical(self):
-        from cstz.pff import _classes_from_canonical_map
+        from cstz.legacy.pff import _classes_from_canonical_map
         canon = {"a": "a", "b": "a", "x": "x", "y": "x"}
         classes = _classes_from_canonical_map(canon)
         assert classes == [

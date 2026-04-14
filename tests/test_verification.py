@@ -1,7 +1,7 @@
-"""Tests for cstz.disc.verification — exhaustive runtime checks."""
+"""Tests for cstz.verification — exhaustive runtime checks."""
 
 import pytest
-from cstz.disc.verification import (
+from cstz.verification import (
     check_boundary_squared,
     check_boundary_squared_all,
     check_fano_lines,

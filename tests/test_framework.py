@@ -1,13 +1,13 @@
-"""Tests for cstz.disc.framework and cstz.disc.axioms."""
+"""Tests for cstz.framework and cstz.axioms."""
 
 import pytest
-from cstz.disc.gf2 import dot, basis
-from cstz.disc.framework import (
+from cstz.gf2 import dot, basis
+from cstz.framework import (
     GAP, ORDERED_SIGMA, ORDERED_TAU, OVER, CellKind,
     classify, chi, is_residue, is_boolean,
     profile, evolve, dim_kappa, membership,
 )
-from cstz.disc.axioms import (
+from cstz.axioms import (
     check_profile_linearity, check_eval_linearity,
     check_bilinearity, check_operationalist,
 )

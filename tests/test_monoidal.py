@@ -1,7 +1,7 @@
-"""Tests for cstz.disc.monoidal."""
+"""Tests for cstz.monoidal."""
 
 import pytest
-from cstz.disc.monoidal import tensor_witness, swap_conjugation, cd_mul
+from cstz.monoidal import tensor_witness, swap_conjugation, cd_mul
 
 e1, e2, e3 = 0b100, 0b010, 0b001
 

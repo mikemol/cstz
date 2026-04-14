@@ -18,7 +18,7 @@ Mirrors: agda/CSTZ/Exterior/{Basis,Wedge,Graded,Boundary}.agda
 
 from __future__ import annotations
 
-from cstz.disc.gf2 import popcount
+from cstz.gf2 import popcount
 
 
 # ---------------------------------------------------------------------------

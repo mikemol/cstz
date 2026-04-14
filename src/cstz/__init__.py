@@ -1,13 +1,7 @@
-"""cstz -- Three-fiber SPPF factorization engine.
+"""CSTZ — Discrimination as Foundation.
 
-Re-exports the public API:
-    SPPF            — core shared packed parse forest
-    factorize       — Python AST front-end
-    factorize_bytes — bitstream front-end
+Set theory from exterior algebra over GF(2).
+Bitmask-tensor native algebraic kernel.
+
+Legacy SPPF/PFF implementations available via cstz.legacy.
 """
-
-from .core import SPPF
-from .python_classifier import factorize
-from .byte_classifier import factorize_bytes
-
-__all__ = ["SPPF", "factorize", "factorize_bytes"]

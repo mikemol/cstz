@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import pytest
-from cstz.core import UnionFind, FiberClass, Fiber, SPPF
+from cstz.legacy.core import UnionFind, FiberClass, Fiber, SPPF
 
 
 # ── UnionFind ────────────────────────────────────────────────────────
@@ -1391,7 +1391,7 @@ class TestIntegrationCascade:
 
     def test_factorize_complex(self) -> None:
         """Use factorize on source with many repeated patterns."""
-        from cstz import factorize
+        from cstz.legacy import factorize
         code = """
 def add(x, y):
     return x + y
@@ -1418,7 +1418,7 @@ e = sub(b, c)
         rich Python with deep recursion patterns and repeated
         arithmetic/control structures to exercise η-cascades."""
         import ast
-        from cstz import factorize
+        from cstz.legacy import factorize
         code = """
 def ackermann(m, n):
     if m == 0:

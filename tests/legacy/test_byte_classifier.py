@@ -4,7 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from cstz.byte_classifier import factorize_bytes, _classify_byte, _classify_span
+from cstz.legacy.byte_classifier import factorize_bytes, _classify_byte, _classify_span
 
 
 # ── _classify_byte ───────────────────────────────────────────────────

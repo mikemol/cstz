@@ -15,8 +15,8 @@ calls.  Tests therefore only exercise valid usage patterns.
 
 from __future__ import annotations
 
-from cstz.pff import Rank
-from cstz.pff_cascade import PFFCascadeEngine, _UnionFind
+from cstz.legacy.pff import Rank
+from cstz.legacy.pff_cascade import PFFCascadeEngine, _UnionFind
 
 
 # ── _UnionFind helper ───────────────────────────────────────────────
@@ -741,7 +741,7 @@ class TestClassQueries:
         """Cells manually added to the document (bypassing the
         engine) are not registered in ``_uf``, and the class query
         methods correctly exclude them instead of crashing."""
-        from cstz.pff import Addr0, Addr1, Segment, Pair
+        from cstz.legacy.pff import Addr0, Addr1, Segment, Pair
         e = PFFCascadeEngine()
         sigma = e.ensure_chart("sigma", "X")
         tau = e.ensure_chart("tau", "T")
@@ -1055,7 +1055,7 @@ class TestLinearViewCrossCheck:
         self._assert_path2_agreement(e)
 
     def test_path2_after_explicit_coh(self) -> None:
-        from cstz.pff import Addr1
+        from cstz.legacy.pff import Addr1
         e = PFFCascadeEngine()
         sigma = e.ensure_chart("sigma", "X")
         tau_a = e.ensure_chart("tau", "A")
@@ -1236,7 +1236,7 @@ class TestGrothendieckTopology:
     def test_tau_stability_under_pullback_monotonicity(self) -> None:
         """Axiom 2 (τ): adding observations never removes an Addr1
         from its τ-sieve."""
-        from cstz.pff import Addr1, Addr2
+        from cstz.legacy.pff import Addr1, Addr2
         e = PFFCascadeEngine()
         sigma = e.ensure_chart("sigma", "X")
         tau_a = e.ensure_chart("tau", "A")
@@ -1263,7 +1263,7 @@ class TestGrothendieckTopology:
 
     def test_tau_transitivity_of_sieve_membership(self) -> None:
         """Axiom 3 (τ): path2 cohs are transitively closed."""
-        from cstz.pff import Addr1
+        from cstz.legacy.pff import Addr1
         e = PFFCascadeEngine()
         sigma = e.ensure_chart("sigma", "X")
         tau_a = e.ensure_chart("tau", "A")
@@ -1421,7 +1421,7 @@ def _seeded_document():
     id is ``rank-0`` and the patch id is ``patch-0``, matching the
     engine's default ids.
     """
-    from cstz.pff import Chart, Document, Patch, Rank
+    from cstz.legacy.pff import Chart, Document, Patch, Rank
     return Document(
         documentId="test-seeded",
         ranks=[Rank(id="rank-0", ordinal=0, label="ingest")],
@@ -1575,7 +1575,7 @@ class TestAutoCohClosure:
     def test_document_auto_coh_closure_idempotent(self) -> None:
         """Running auto_coh_closure twice on a Document produces no
         new records the second time."""
-        from cstz.pff import Addr0, Addr1, Pair, Patch, Rank, Segment
+        from cstz.legacy.pff import Addr0, Addr1, Pair, Patch, Rank, Segment
         d = _seeded_document()
         d.addresses0 = [
             Addr0(id=f"a{i}", segments=[Segment(
@@ -1597,7 +1597,7 @@ class TestAutoCohClosure:
     def test_document_auto_coh_closure_returns_new_records(self) -> None:
         """The return value of auto_coh_closure is the list of
         newly-minted Addr2 records, in emission order."""
-        from cstz.pff import Addr0, Addr1, Pair, Segment
+        from cstz.legacy.pff import Addr0, Addr1, Pair, Segment
         d = _seeded_document()
         d.addresses0 = [
             Addr0(id=f"a{i}", segments=[Segment(
@@ -1621,7 +1621,7 @@ class TestAutoCohClosure:
     def test_document_auto_coh_skips_non_glue_ctors(self) -> None:
         """Addr1 records with ctors other than glue/refl are ignored
         by the τ-cascade."""
-        from cstz.pff import Addr0, Addr1, Pair, Segment
+        from cstz.legacy.pff import Addr0, Addr1, Pair, Segment
         d = _seeded_document()
         d.addresses0 = [
             Addr0(id=f"a{i}", segments=[Segment(
@@ -1644,7 +1644,7 @@ class TestAutoCohClosure:
     def test_document_auto_coh_handles_refl_ctor(self) -> None:
         """refl Addr1s DO participate in τ-coherence (they assert
         path1 equivalence, same as glue)."""
-        from cstz.pff import Addr0, Addr1, Pair, Segment
+        from cstz.legacy.pff import Addr0, Addr1, Pair, Segment
         d = _seeded_document()
         d.addresses0 = [
             Addr0(id="a0", segments=[Segment(
@@ -1665,7 +1665,7 @@ class TestAutoCohClosure:
     def test_document_auto_coh_skips_singleton_groups(self) -> None:
         """A canonical-pair group with only one Addr1 doesn't need
         coherence — no coh is emitted."""
-        from cstz.pff import Addr0, Addr1, Pair, Segment
+        from cstz.legacy.pff import Addr0, Addr1, Pair, Segment
         d = _seeded_document()
         d.addresses0 = [
             Addr0(id=f"a{i}", segments=[Segment(
@@ -1690,7 +1690,7 @@ class TestAutoCohClosure:
         both canonicalize to the same path1 class and land in the
         same group — the sorted raw-pair label picks the
         lex-smaller endpoint first regardless of raw direction."""
-        from cstz.pff import Addr0, Addr1, Pair, Segment
+        from cstz.legacy.pff import Addr0, Addr1, Pair, Segment
         d = _seeded_document()
         d.addresses0 = [
             Addr0(id=f"a{i}", segments=[Segment(
@@ -1713,7 +1713,7 @@ class TestAutoCohClosure:
         sorted.  When the first Addr1 has raw src > dst, the sort
         normalization kicks in and the label still picks lex-smaller
         first."""
-        from cstz.pff import Addr0, Addr1, Pair, Segment
+        from cstz.legacy.pff import Addr0, Addr1, Pair, Segment
         d = _seeded_document()
         d.addresses0 = [
             Addr0(id=f"a{i}", segments=[Segment(
@@ -1737,7 +1737,7 @@ class TestAutoCohClosure:
     def test_document_auto_coh_three_member_group(self) -> None:
         """A group with three glues emits two cohs in an anchor-first
         chain.  All three Addr1s end up in the same path2 class."""
-        from cstz.pff import Addr0, Addr1, Pair, Segment
+        from cstz.legacy.pff import Addr0, Addr1, Pair, Segment
         d = _seeded_document()
         d.addresses0 = [
             Addr0(id=f"a{i}", segments=[Segment(
@@ -1761,7 +1761,7 @@ class TestAutoCohClosure:
     def test_document_auto_coh_uses_lex_smallest_rank(self) -> None:
         """Rank selection: the emitted coh uses the lex-smallest rank
         id among the grouped Addr1s."""
-        from cstz.pff import Addr0, Addr1, Pair, Segment
+        from cstz.legacy.pff import Addr0, Addr1, Pair, Segment
         d = _seeded_document()
         d.ranks.append(Rank(id="rank-extra", ordinal=1))
         d.addresses0 = [
@@ -1785,7 +1785,7 @@ class TestAutoCohClosure:
     def test_document_auto_coh_uses_first_patch_with_none_handling(self) -> None:
         """Patch selection: the emitted coh uses the first non-None
         patch found among the grouped Addr1s."""
-        from cstz.pff import Addr0, Addr1, Pair, Segment
+        from cstz.legacy.pff import Addr0, Addr1, Pair, Segment
         d = _seeded_document()
         d.addresses0 = [
             Addr0(id=f"a{i}", segments=[Segment(
@@ -1806,7 +1806,7 @@ class TestAutoCohClosure:
 
     def test_document_auto_coh_handles_no_patches_available(self) -> None:
         """If no grouped Addr1 has a patch, the coh's patch is None."""
-        from cstz.pff import Addr0, Addr1, Pair, Segment
+        from cstz.legacy.pff import Addr0, Addr1, Pair, Segment
         d = _seeded_document()
         d.addresses0 = [
             Addr0(id=f"a{i}", segments=[Segment(
@@ -1840,7 +1840,7 @@ class TestAutoCohClosure:
         """Calling engine.auto_coh_closure() directly (e.g., after
         a manual Document edit) returns the new records and syncs
         the engine's _addr1_uf."""
-        from cstz.pff import Addr1
+        from cstz.legacy.pff import Addr1
         e = PFFCascadeEngine()
         sigma = e.ensure_chart("sigma", "X")
         tau_a = e.ensure_chart("tau", "A")
@@ -1867,7 +1867,7 @@ class TestAutoCohClosure:
 
     def test_engine_auto_coh_closure_idempotent_manual(self) -> None:
         """Manual auto_coh_closure invocation is also idempotent."""
-        from cstz.pff import Addr1
+        from cstz.legacy.pff import Addr1
         e = PFFCascadeEngine()
         sigma = e.ensure_chart("sigma", "X")
         tau_a = e.ensure_chart("tau", "A")
@@ -1962,7 +1962,7 @@ class TestSigmaKeyFunction:
 
     def test_addr0_sigma_key_discriminates_by_sort(self) -> None:
         """Two Addr0s with different sorts produce different keys."""
-        from cstz.pff import Addr0, Pair, Segment, sigma_key
+        from cstz.legacy.pff import Addr0, Pair, Segment, sigma_key
         mk = lambda sort: Addr0(
             id="a", sort=sort,
             segments=[Segment(
@@ -1975,7 +1975,7 @@ class TestSigmaKeyFunction:
     def test_addr0_sigma_key_discriminates_by_segments(self) -> None:
         """Two Addr0s with different segment structure produce
         different keys."""
-        from cstz.pff import Addr0, Pair, Segment, Step, sigma_key
+        from cstz.legacy.pff import Addr0, Pair, Segment, Step, sigma_key
         base = Addr0(
             id="a", sort="X",
             segments=[Segment(
@@ -1999,7 +1999,7 @@ class TestSigmaKeyFunction:
         """Two Addr0s with different ids but identical structural
         content produce the same sigma_key — the id is not part of
         the signature under the default perspective."""
-        from cstz.pff import Addr0, Pair, Segment, sigma_key
+        from cstz.legacy.pff import Addr0, Pair, Segment, sigma_key
         mk = lambda _id: Addr0(
             id=_id, sort="X",
             segments=[Segment(
@@ -2014,7 +2014,7 @@ class TestSigmaKeyFunction:
     ) -> None:
         """Two Addr1s with the same (ctor, src, dst, premises)
         produce the same key regardless of id, rank, or label."""
-        from cstz.pff import Addr1, sigma_key
+        from cstz.legacy.pff import Addr1, sigma_key
         a = Addr1(id="g1", rank="r0", ctor="glue", src="a", dst="b",
                   premises=["p1"], label="first")
         b = Addr1(id="g2", rank="r1", ctor="glue", src="a", dst="b",
@@ -2023,14 +2023,14 @@ class TestSigmaKeyFunction:
 
     def test_addr1_sigma_key_discriminates_by_ctor(self) -> None:
         """Two Addr1s with different ctors produce different keys."""
-        from cstz.pff import Addr1, sigma_key
+        from cstz.legacy.pff import Addr1, sigma_key
         glue = Addr1(id="g", rank="r0", ctor="glue", src="a", dst="b")
         named = Addr1(id="n", rank="r0", ctor="named", src="a", dst="b")
         assert sigma_key(glue) != sigma_key(named)
 
     def test_addr1_sigma_key_discriminates_by_premises(self) -> None:
         """Two Addr1s with different premises produce different keys."""
-        from cstz.pff import Addr1, sigma_key
+        from cstz.legacy.pff import Addr1, sigma_key
         a = Addr1(id="g1", rank="r0", ctor="glue", src="a", dst="b",
                   premises=["p1"])
         b = Addr1(id="g2", rank="r0", ctor="glue", src="a", dst="b",
@@ -2040,7 +2040,7 @@ class TestSigmaKeyFunction:
     def test_addr2_sigma_key_equal_for_same_ctor_endpoints(self) -> None:
         """Two Addr2s with the same (ctor, src, dst) produce the
         same key."""
-        from cstz.pff import Addr2, sigma_key
+        from cstz.legacy.pff import Addr2, sigma_key
         a = Addr2(id="c1", rank="r0", ctor="coh", src="g1", dst="g2")
         b = Addr2(id="c2", rank="r1", ctor="coh", src="g1", dst="g2")
         assert sigma_key(a) == sigma_key(b)
@@ -2048,7 +2048,7 @@ class TestSigmaKeyFunction:
     def test_addr1_differs_from_addr2_with_same_endpoints(self) -> None:
         """Addr1 and Addr2 with the same src/dst but different ctors
         produce different keys — sigma_key distinguishes them."""
-        from cstz.pff import Addr1, Addr2, sigma_key
+        from cstz.legacy.pff import Addr1, Addr2, sigma_key
         a1 = Addr1(id="g", rank="r0", ctor="glue", src="x", dst="y")
         a2 = Addr2(id="c", rank="r0", ctor="coh", src="x", dst="y")
         assert sigma_key(a1) != sigma_key(a2)
@@ -2056,7 +2056,7 @@ class TestSigmaKeyFunction:
     def test_addr0_and_morphism_namespaces_disjoint(self) -> None:
         """Addr0 and Addr1/Addr2 sigma_keys never collide — the
         hash-cons can never confuse an object with a morphism."""
-        from cstz.pff import Addr0, Addr1, Addr2, Pair, Segment, sigma_key
+        from cstz.legacy.pff import Addr0, Addr1, Addr2, Pair, Segment, sigma_key
         a0 = Addr0(
             id="a", sort="X",
             segments=[Segment(
@@ -2115,7 +2115,7 @@ class TestSigmaKeyPerspectives:
     def test_default_perspective_is_sigma(self) -> None:
         """``sigma_key(cell)`` (no perspective arg) is byte-identical
         to ``sigma_key(cell, perspective=PERSPECTIVE_SIGMA)``."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Addr0, Addr1, Pair, Segment, sigma_key, PERSPECTIVE_SIGMA,
         )
         a0 = Addr0(
@@ -2136,7 +2136,7 @@ class TestSigmaKeyPerspectives:
         """Under PERSPECTIVE_TAU, an Addr0's segments are NOT in the key.
         Two Addr0s with the same sort but different segments are
         identified at τ."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Addr0, Pair, Segment, sigma_key, PERSPECTIVE_TAU,
         )
         a = Addr0(
@@ -2160,7 +2160,7 @@ class TestSigmaKeyPerspectives:
 
     def test_addr0_perspective_kappa_keeps_only_sort(self) -> None:
         """Under PERSPECTIVE_KAPPA, only sort survives for an Addr0."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Addr0, Pair, Segment, sigma_key, PERSPECTIVE_KAPPA,
         )
         a = Addr0(
@@ -2177,7 +2177,7 @@ class TestSigmaKeyPerspectives:
 
     def test_addr0_kappa_distinguishes_different_sorts(self) -> None:
         """Two Addr0s with different sorts have different κ-keys."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Addr0, Pair, Segment, sigma_key, PERSPECTIVE_KAPPA,
         )
         mk = lambda sort: Addr0(
@@ -2194,7 +2194,7 @@ class TestSigmaKeyPerspectives:
         """Under PERSPECTIVE_TAU, premises are NOT in the morphism key.
         Two Addr1s with the same (ctor, src, dst) but different
         premises are identified at τ."""
-        from cstz.pff import Addr1, sigma_key, PERSPECTIVE_TAU
+        from cstz.legacy.pff import Addr1, sigma_key, PERSPECTIVE_TAU
         a = Addr1(
             id="g1", rank="r0", ctor="glue", src="x", dst="y",
             premises=["p1", "p2"],
@@ -2212,7 +2212,7 @@ class TestSigmaKeyPerspectives:
         """Under PERSPECTIVE_KAPPA, only endpoints survive for a
         morphism.  Any morphism between the same (src, dst) pair is
         identified at κ regardless of constructor."""
-        from cstz.pff import Addr1, Addr2, sigma_key, PERSPECTIVE_KAPPA
+        from cstz.legacy.pff import Addr1, Addr2, sigma_key, PERSPECTIVE_KAPPA
         a1 = Addr1(id="g", rank="r0", ctor="glue", src="x", dst="y")
         a2 = Addr2(id="c", rank="r0", ctor="coh", src="x", dst="y")
         # Both collapse to the same endpoints-only prefix at κ
@@ -2226,7 +2226,7 @@ class TestSigmaKeyPerspectives:
 
     def test_addr1_kappa_distinguishes_different_endpoints(self) -> None:
         """Two morphisms with different endpoints have different κ-keys."""
-        from cstz.pff import Addr1, sigma_key, PERSPECTIVE_KAPPA
+        from cstz.legacy.pff import Addr1, sigma_key, PERSPECTIVE_KAPPA
         a = Addr1(id="g1", rank="r0", ctor="glue", src="x", dst="y")
         b = Addr1(id="g2", rank="r0", ctor="glue", src="x", dst="z")
         assert sigma_key(a, perspective=PERSPECTIVE_KAPPA) \
@@ -2239,7 +2239,7 @@ class TestSigmaKeyPerspectives:
         equal under τ are equal under κ.  Verified behaviorally:
         the σ-key is a prefix of the τ-key is a prefix of the
         κ-key (because truncation is prefix-taking)."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Addr1, sigma_key,
             PERSPECTIVE_SIGMA, PERSPECTIVE_TAU, PERSPECTIVE_KAPPA,
         )
@@ -2261,7 +2261,7 @@ class TestSigmaKeyPerspectives:
         """Under κ, two Addr1s with the same endpoints but
         different ctors collapse to the same key — ctor is
         dropped at the κ truncation level."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Addr1, sigma_key, PERSPECTIVE_KAPPA,
         )
         glue = Addr1(id="g", rank="r0", ctor="glue", src="x", dst="y")
@@ -2275,7 +2275,7 @@ class TestSigmaKeyPerspectives:
         """Under τ, ctor survives but premises are dropped.
         Two Addr1s with the same (src, dst, ctor) but different
         premises collapse under τ."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Addr1, sigma_key, PERSPECTIVE_TAU,
         )
         a = Addr1(id="g1", rank="r0", ctor="glue", src="x", dst="y",
@@ -2291,7 +2291,7 @@ class TestSigmaKeyPerspectives:
         """Under κ, Addr0 terms keep only sort; segments are
         dropped.  Two Addr0s with the same sort but different
         segments collapse under κ."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Addr0, Pair, Segment, Step, sigma_key, PERSPECTIVE_KAPPA,
         )
         a = Addr0(
@@ -2335,8 +2335,8 @@ class TestPassTwoFibers:
     """
 
     def _engine_with_one_addr0(self):
-        from cstz.pff import Chart
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff import Chart
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         sigma_chart = e.ensure_chart(
             patch=e.ensure_patch(),
@@ -2357,8 +2357,8 @@ class TestPassTwoFibers:
 
     def test_engine_has_three_fibers(self) -> None:
         """The engine instantiates three named Fibers in __init__."""
-        from cstz.pff_cascade import PFFCascadeEngine
-        from cstz.pff import (
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff import (
             PERSPECTIVE_SIGMA, PERSPECTIVE_TAU, PERSPECTIVE_KAPPA,
         )
         e = PFFCascadeEngine()
@@ -2371,7 +2371,7 @@ class TestPassTwoFibers:
 
     def test_fresh_engine_fibers_are_empty(self) -> None:
         """A freshly-constructed engine has zero Fiber classes."""
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         assert len(e.sigma_fiber) == 0
         assert len(e.tau_fiber) == 0
@@ -2393,7 +2393,7 @@ class TestPassTwoFibers:
 
     def test_class_for_unknown_id_returns_none(self) -> None:
         """``_Fiber.class_for`` on an unregistered cell id is None."""
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         assert e.sigma_fiber.class_for("nonexistent-id") is None
         assert e.tau_fiber.class_for("nonexistent-id") is None
@@ -2405,8 +2405,8 @@ class TestPassTwoFibers:
         Two Addr0s with the same sigma_chart but different tau_charts
         produce two distinct addr0s plus one auto-emitted glue Addr1.
         That Addr1 should appear in every Fiber."""
-        from cstz.pff_cascade import PFFCascadeEngine
-        from cstz.pff import Addr1
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff import Addr1
         e = PFFCascadeEngine()
         patch = e.ensure_patch()
         sigma_chart = e.ensure_chart(patch=patch, root="r0", kind="sigma")
@@ -2434,8 +2434,8 @@ class TestPassTwoFibers:
         the κ-perspective semantics ("any morphism between these
         endpoints").  Under σ they remain distinct because they
         have different ctors."""
-        from cstz.pff_cascade import PFFCascadeEngine
-        from cstz.pff import Addr1, Addr2
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff import Addr1, Addr2
         e = PFFCascadeEngine()
         # Construct an Addr1 and an Addr2 with matching endpoints.
         a1 = Addr1(
@@ -2463,8 +2463,8 @@ class TestPassTwoFibers:
     def test_observe_is_idempotent(self) -> None:
         """Observing the same cell twice in the same Fiber is a
         no-op (set membership)."""
-        from cstz.pff_cascade import PFFCascadeEngine
-        from cstz.pff import Addr1
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff import Addr1
         e = PFFCascadeEngine()
         a1 = Addr1(
             id="g1", rank="r0", ctor="glue", src="x", dst="y",
@@ -2481,7 +2481,7 @@ class TestPassTwoFibers:
         self,
     ) -> None:
         """``_FiberClass.__repr__`` shows representative + size."""
-        from cstz.pff_cascade import _FiberClass
+        from cstz.legacy.pff_cascade import _FiberClass
         fc = _FiberClass(
             signature=("addr0", "X", ()),
             representative="addr0-0",
@@ -2492,7 +2492,7 @@ class TestPassTwoFibers:
 
     def test_fiber_repr_includes_name_and_counts(self) -> None:
         """``_Fiber.__repr__`` shows name + class count + cell count."""
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e, addr0 = self._engine_with_one_addr0()
         s = repr(e.sigma_fiber)
         assert "sigma" in s
@@ -2521,7 +2521,7 @@ class TestPassThreeDocumentQueries:
         between the same (src, dst) endpoints — one Addr1 with
         ctor=glue, one Addr2 with ctor=coh.  Used by several
         tests below to exercise the κ-collapse semantics."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Document, Rank, Patch, Addr0, Addr1, Addr2,
             Pair, Segment,
         )
@@ -2576,7 +2576,7 @@ class TestPassThreeDocumentQueries:
         Each cell in the document gets projected through three
         perspectives, and the result groups by the resulting
         triple-of-signatures."""
-        from cstz.pff import sigma_key, PERSPECTIVE_SIGMA
+        from cstz.legacy.pff import sigma_key, PERSPECTIVE_SIGMA
         d = self._doc_with_two_morphisms_same_endpoints()
         wedge = d.wedge()
         # Each cell occupies one wedge cell (no two cells happen
@@ -2595,7 +2595,7 @@ class TestPassThreeDocumentQueries:
     def test_wedge_two_explicit_perspectives_yields_two_tuples(self) -> None:
         """``wedge(σ, κ)`` with explicit perspectives produces
         2-tuple keys."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             PERSPECTIVE_SIGMA, PERSPECTIVE_KAPPA,
         )
         d = self._doc_with_two_morphisms_same_endpoints()
@@ -2608,7 +2608,7 @@ class TestPassThreeDocumentQueries:
         partition: each cell appears in exactly one bucket, and
         cells with equal sigma_keys under p are in the same
         bucket."""
-        from cstz.pff import sigma_key, PERSPECTIVE_KAPPA
+        from cstz.legacy.pff import sigma_key, PERSPECTIVE_KAPPA
         d = self._doc_with_two_morphisms_same_endpoints()
         wedge = d.wedge(PERSPECTIVE_KAPPA)
         # Two morphisms (Addr1 glue + Addr2 coh) with same
@@ -2627,7 +2627,7 @@ class TestPassThreeDocumentQueries:
     def test_wedge_2_returns_two_tuple_keys(self) -> None:
         """``wedge_2(σ, κ)`` returns dict with 2-tuple keys
         and cells grouped by their (σ_key, κ_key) pair."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             PERSPECTIVE_SIGMA, PERSPECTIVE_KAPPA, sigma_key,
         )
         d = self._doc_with_two_morphisms_same_endpoints()
@@ -2673,7 +2673,7 @@ class TestPassThreeDocumentQueries:
         """``hom_set(src, dst, perspective=σ)`` returns one
         representative per σ-equivalence class — for two morphisms
         with different ctors, that's two distinct elements."""
-        from cstz.pff import PERSPECTIVE_SIGMA
+        from cstz.legacy.pff import PERSPECTIVE_SIGMA
         d = self._doc_with_two_morphisms_same_endpoints()
         hom = d.hom_set("src", "dst", perspective=PERSPECTIVE_SIGMA)
         # Under σ, the Addr1 and Addr2 are distinct → both
@@ -2685,7 +2685,7 @@ class TestPassThreeDocumentQueries:
         """Under τ, two morphisms with the same (ctor, src, dst)
         but different premises collapse; two with different
         ctors stay distinct."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Document, Rank, Patch, Addr0, Addr1,
             Pair, Segment, PERSPECTIVE_TAU,
         )
@@ -2804,7 +2804,7 @@ class TestPassThreeDocumentQueries:
         Until that question is resolved, this test asserts only
         the membership invariant, not any specific tuple shape.
         """
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             PERSPECTIVE_SIGMA, PERSPECTIVE_TAU, PERSPECTIVE_KAPPA,
         )
         d = self._doc_with_two_morphisms_same_endpoints()
@@ -2820,7 +2820,7 @@ class TestPassThreeDocumentQueries:
         """The lattice refinement law: |hom_set under κ| ≤
         |hom_set under σ| for the same (src, dst).  More
         discriminators ⇒ finer equivalence ⇒ more classes."""
-        from cstz.pff import PERSPECTIVE_SIGMA, PERSPECTIVE_KAPPA
+        from cstz.legacy.pff import PERSPECTIVE_SIGMA, PERSPECTIVE_KAPPA
         d = self._doc_with_two_morphisms_same_endpoints()
         sigma_hom = d.hom_set(
             "src", "dst", perspective=PERSPECTIVE_SIGMA,
@@ -2839,8 +2839,8 @@ class TestPassThreeDocumentQueries:
         topological-completeness query to the engine-side
         cached materialization (Pass 2's Fibers).  At cascade
         convergence under correct usage they must agree."""
-        from cstz.pff_cascade import PFFCascadeEngine
-        from cstz.pff import Addr1, PERSPECTIVE_KAPPA
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff import Addr1, PERSPECTIVE_KAPPA
         e = PFFCascadeEngine()
         patch = e.ensure_patch()
         sigma_chart = e.ensure_chart(
@@ -2898,13 +2898,13 @@ class TestEtaAbstractionUnionFind:
     """
 
     def test_eta_uf_starts_empty(self) -> None:
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         assert len(e._eta_uf) == 0
         assert e._eta_abstractions == {}
 
     def test_eta_make_registers_name(self) -> None:
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         e.eta_make("X")
         assert "X" in e._eta_uf
@@ -2912,7 +2912,7 @@ class TestEtaAbstractionUnionFind:
 
     def test_eta_make_idempotent(self) -> None:
         """Calling eta_make on the same name twice is a no-op."""
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         e.eta_make("X")
         e.eta_make("X")
@@ -2922,7 +2922,7 @@ class TestEtaAbstractionUnionFind:
     def test_eta_abstract_records_mapping(self) -> None:
         """``eta_abstract(raw, abs)`` maps raw → abs and registers
         abs in the UF."""
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         e.eta_abstract("List[int]", "T0")
         assert e._eta_abstractions["List[int]"] == "T0"
@@ -2931,7 +2931,7 @@ class TestEtaAbstractionUnionFind:
 
     def test_eta_abstract_first_writer_wins(self) -> None:
         """A second eta_abstract on the same raw name is a no-op."""
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         e.eta_abstract("List[int]", "T0")
         e.eta_abstract("List[int]", "T1")  # ignored
@@ -2939,7 +2939,7 @@ class TestEtaAbstractionUnionFind:
 
     def test_eta_union_unifies_two_abstractions(self) -> None:
         """After ``eta_union(a, b)``, ``eta_find(a) == eta_find(b)``."""
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         e.eta_make("T0")
         e.eta_make("T1")
@@ -2949,7 +2949,7 @@ class TestEtaAbstractionUnionFind:
     def test_eta_union_makes_names_if_absent(self) -> None:
         """``eta_union`` registers both names in the UF if they
         weren't already present."""
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         e.eta_union("T0", "T1")  # neither registered yet
         assert "T0" in e._eta_uf
@@ -2959,7 +2959,7 @@ class TestEtaAbstractionUnionFind:
     def test_eta_find_walks_abstraction_then_uf(self) -> None:
         """``eta_find`` walks the abstraction map first, then
         chases the UF to canonical."""
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         e.eta_abstract("raw_a", "T0")
         e.eta_abstract("raw_b", "T1")
@@ -2970,14 +2970,14 @@ class TestEtaAbstractionUnionFind:
     def test_eta_find_unknown_name_returns_unchanged(self) -> None:
         """A name that's neither an abstraction nor in the UF is
         returned unchanged by eta_find."""
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         assert e.eta_find("unknown") == "unknown"
 
     def test_eta_uf_does_not_affect_cell_uf(self) -> None:
         """The eta UF is independent of the cell ``_uf``: unioning
         two abstraction names does not union any Cell ids."""
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         # Use distinct sigma charts so the two Addr0s have
         # different sigma_keys and don't auto-glue via streaming
@@ -3011,7 +3011,7 @@ class TestResidueTracking:
     """
 
     def _engine_with_charts(self):
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         sigma = e.ensure_chart(kind="sigma", root="r")
         tau = e.ensure_chart(kind="tau", root="r")
@@ -3089,7 +3089,7 @@ class TestResidueTracking:
     def test_addr1_residue_records_first_glue(self) -> None:
         """A fresh _emit_glue records the raw (src, dst) pair
         in the residue under the new Addr1's id."""
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         # Distinct sigma charts → distinct sigma_keys → no
         # auto-glue from streaming cascade
@@ -3107,7 +3107,7 @@ class TestResidueTracking:
         """A second glue between two Addr0s already in the same
         path1 class hits the hash-cons; the raw (src, dst) is
         added to the residue."""
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         # Three distinct charts so streaming cascade leaves them
         # alone until we manually glue.
@@ -3136,7 +3136,7 @@ class TestResidueTracking:
         assert (a.id, b.id) in residue
 
     def test_addr1_residue_empty_for_unknown_id(self) -> None:
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         assert e.addr1_residue("addr1-999") == frozenset()
 
@@ -3152,13 +3152,13 @@ class TestDynamicCleavageFibers:
     """
 
     def test_cleavage_fibers_starts_empty(self) -> None:
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         assert e.cleavage_fibers() == ()
 
     def test_add_cleavage_fiber_returns_fiber(self) -> None:
-        from cstz.pff_cascade import PFFCascadeEngine
-        from cstz.pff import PERSPECTIVE_KAPPA
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff import PERSPECTIVE_KAPPA
         e = PFFCascadeEngine()
         fiber = e.add_cleavage_fiber("custom", PERSPECTIVE_KAPPA)
         assert fiber.name == "custom"
@@ -3169,8 +3169,8 @@ class TestDynamicCleavageFibers:
         """Adding a cleavage fiber observes every cell currently in
         the document, so the new fiber starts in sync with the
         static trio."""
-        from cstz.pff_cascade import PFFCascadeEngine
-        from cstz.pff import PERSPECTIVE_KAPPA
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff import PERSPECTIVE_KAPPA
         e = PFFCascadeEngine()
         sigma = e.ensure_chart(kind="sigma", root="r")
         tau = e.ensure_chart(kind="tau", root="r")
@@ -3186,8 +3186,8 @@ class TestDynamicCleavageFibers:
     def test_new_cells_flow_into_cleavage_fiber(self) -> None:
         """Cells emitted after add_cleavage_fiber automatically
         observe into the new fiber via _observe_into_fibers."""
-        from cstz.pff_cascade import PFFCascadeEngine
-        from cstz.pff import PERSPECTIVE_KAPPA
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff import PERSPECTIVE_KAPPA
         e = PFFCascadeEngine()
         sigma = e.ensure_chart(kind="sigma", root="r")
         tau = e.ensure_chart(kind="tau", root="r")
@@ -3199,8 +3199,8 @@ class TestDynamicCleavageFibers:
         assert a.id in fiber.class_of
 
     def test_multiple_cleavage_fibers_coexist(self) -> None:
-        from cstz.pff_cascade import PFFCascadeEngine
-        from cstz.pff import (
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff import (
             PERSPECTIVE_SIGMA, PERSPECTIVE_TAU, PERSPECTIVE_KAPPA,
         )
         e = PFFCascadeEngine()
@@ -3213,8 +3213,8 @@ class TestDynamicCleavageFibers:
         """``cleavage_fibers()`` returns a tuple snapshot, so
         adding more fibers after the call does not affect the
         previously-returned tuple."""
-        from cstz.pff_cascade import PFFCascadeEngine
-        from cstz.pff import PERSPECTIVE_KAPPA
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff import PERSPECTIVE_KAPPA
         e = PFFCascadeEngine()
         f1 = e.add_cleavage_fiber("first", PERSPECTIVE_KAPPA)
         snapshot = e.cleavage_fibers()
@@ -3226,8 +3226,8 @@ class TestDynamicCleavageFibers:
         """A cleavage Fiber under the κ truncation level partitions
         cells by the coarsest prefix (sort for Addr0, endpoints
         for morphisms)."""
-        from cstz.pff_cascade import PFFCascadeEngine
-        from cstz.pff import PERSPECTIVE_KAPPA
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff import PERSPECTIVE_KAPPA
         e = PFFCascadeEngine()
         sigma = e.ensure_chart(kind="sigma", root="r")
         tau = e.ensure_chart(kind="tau", root="r")
@@ -3244,7 +3244,7 @@ class TestDocumentCells:
     """Cover ``Document.cells()`` iterator added by HIT collapse."""
 
     def test_cells_empty_document(self) -> None:
-        from cstz.pff import Document, Rank, Patch
+        from cstz.legacy.pff import Document, Rank, Patch
         d = Document(
             documentId="empty",
             ranks=[Rank(id="r0", ordinal=0)],
@@ -3253,7 +3253,7 @@ class TestDocumentCells:
         assert list(d.cells()) == []
 
     def test_cells_iterates_all_ranks(self) -> None:
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Document, Rank, Patch, Addr0, Addr1, Addr2,
             Pair, Segment,
         )
@@ -3285,7 +3285,7 @@ class TestDocumentCells:
 
     def test_cells_yields_addresses0_first(self) -> None:
         """Stable iteration order: addresses0, then paths1, then paths2."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Document, Rank, Patch, Addr0, Addr1, Addr2,
             Pair, Segment,
         )
@@ -3326,7 +3326,7 @@ class TestDocumentCanonicalize:
     """
 
     def test_canonicalize_empty_document(self) -> None:
-        from cstz.pff import Document, Rank, Patch
+        from cstz.legacy.pff import Document, Rank, Patch
         d = Document(
             documentId="empty",
             ranks=[Rank(id="r0", ordinal=0)],
@@ -3335,7 +3335,7 @@ class TestDocumentCanonicalize:
         assert d.canonicalize() == []
 
     def test_canonicalize_no_duplicates(self) -> None:
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Document, Rank, Patch, Addr0, Addr1, Pair, Segment,
         )
         d = Document(
@@ -3372,7 +3372,7 @@ class TestDocumentCanonicalize:
 
     def test_canonicalize_duplicate_morphisms(self) -> None:
         """Two Addr1s with identical sigma_keys → one removed."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Document, Rank, Patch, Addr0, Addr1, Pair, Segment,
         )
         d = Document(
@@ -3404,7 +3404,7 @@ class TestDocumentCanonicalize:
 
     def test_canonicalize_duplicate_rank0_cells(self) -> None:
         """Two Addr0s with identical sort + segments → one removed."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Document, Rank, Patch, Addr0, Pair, Segment,
         )
         d = Document(
@@ -3430,7 +3430,7 @@ class TestDocumentCanonicalize:
     def test_canonicalize_rewrites_path1_references(self) -> None:
         """When a rank-0 cell is removed, surviving paths1 references
         to it must be rewritten to the canonical survivor."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Document, Rank, Patch, Addr0, Addr1, Pair, Segment,
         )
         d = Document(
@@ -3484,7 +3484,7 @@ class TestDocumentCanonicalize:
 
     def test_canonicalize_rewrites_path2_references(self) -> None:
         """Path2 src/dst referring to a removed morphism get rewritten."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Document, Rank, Patch, Addr0, Addr1, Addr2,
             Pair, Segment,
         )
@@ -3534,7 +3534,7 @@ class TestDocumentCanonicalize:
         Also exercises the continue-on-removed branch and the
         path2 removal branch in canonicalize.
         """
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Document, Rank, Patch, Addr0, Addr1, Addr2,
             Pair, Segment,
         )
@@ -3572,7 +3572,7 @@ class TestDocumentCanonicalize:
     def test_canonicalize_rewrites_classview_member_addr0(self) -> None:
         """ClassView.member.address0 references to removed rank-0
         cells get rewritten."""
-        from cstz.pff import (
+        from cstz.legacy.pff import (
             Document, Rank, Patch, Addr0, Pair, Segment,
             ClassView, ClassMember,
         )
@@ -3634,7 +3634,7 @@ class TestEmissionHashConsSwapBranch:
     def test_manual_glue_src_greater_than_dst_triggers_swap(self) -> None:
         """Direct engine.glue() with src > dst's canonical triggers
         the swap branch in _emit_glue."""
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine()
         sigma = e.ensure_chart("sigma", "X")
         tau_a = e.ensure_chart("tau", "A")

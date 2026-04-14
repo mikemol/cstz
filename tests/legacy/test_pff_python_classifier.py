@@ -19,7 +19,7 @@ import ast
 import textwrap
 from pathlib import Path
 
-from cstz.pff_python_classifier import (
+from cstz.legacy.pff_python_classifier import (
     _annotation_to_str,
     _bind_declarations,
     _classify_kappa,
@@ -729,7 +729,7 @@ class TestFactorizeFromFile:
 class TestFactorizeOnRealFile:
     def test_pff_module_self(self) -> None:
         """Run the classifier on cstz/pff.py and check basic invariants."""
-        engine = factorize("src/cstz/pff.py")
+        engine = factorize("src/cstz/legacy/pff.py")
         assert engine.receipt().wfStatus == "clean"
         # pff.py is large; expect lots of observations and at least
         # some η-glue from repeated AST patterns.
@@ -1023,7 +1023,7 @@ class TestScopeResolution:
 
     def test_env_resolve_local_and_nonlocal_directly(self) -> None:
         """Unit test on _Env.resolve to exercise each branch."""
-        from cstz.pff_python_classifier import _Env
+        from cstz.legacy.pff_python_classifier import _Env
         module = _Env()
         outer = module.open_scope()
         outer.bind_position("a")
@@ -1051,7 +1051,7 @@ class TestScopeResolution:
         """A non-boundary child env (opened via child() rather than
         open_scope()) inherits its parent's positions and doesn't
         count as a scope boundary for depth."""
-        from cstz.pff_python_classifier import _Env
+        from cstz.legacy.pff_python_classifier import _Env
         module = _Env()
         outer = module.open_scope()
         outer.bind_position("a")

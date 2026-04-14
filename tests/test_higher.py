@@ -1,7 +1,7 @@
-"""Tests for cstz.disc.higher."""
+"""Tests for cstz.higher."""
 
 import pytest
-from cstz.disc.higher import (
+from cstz.higher import (
     Perspective, TAU_POINT, SIGMA_POINT, KAPPA_POINT,
     triangle_identity, rotate,
 )

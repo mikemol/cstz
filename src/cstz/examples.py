@@ -12,7 +12,7 @@ Mirrors: agda/CSTZ/Examples/GF2Cubed/*.agda
 
 from __future__ import annotations
 
-from cstz.disc.gf2 import dot, basis
+from cstz.gf2 import dot, basis
 
 # ---------------------------------------------------------------------------
 # Population: GF(2)³ = {0,...,7}

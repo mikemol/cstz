@@ -7,7 +7,7 @@ Mirrors: agda/CSTZ/Homotopy/*.agda
 
 from __future__ import annotations
 
-from cstz.disc.exterior import (
+from cstz.exterior import (
     ExteriorElement, ext_zero, ext_basis, ext_add, ext_is_zero,
     ext_wedge, ext_boundary, ext_grade, ext_restrict_grade,
 )

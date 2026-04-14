@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from enum import IntEnum
 from typing import Callable, List
 
-from cstz.disc.gf2 import dot, vec_add
+from cstz.gf2 import dot, vec_add
 
 
 @dataclass(frozen=True)

@@ -1,11 +1,11 @@
-"""Tests for cstz.disc.gf2 — GF(2) field and packed bitvector ops.
+"""Tests for cstz.gf2 — GF(2) field and packed bitvector ops.
 
 Every Agda `refl` from Examples/GF2Cubed/Setup becomes an assert here.
 Algebraic laws verified by exhaustive enumeration over GF(2) and GF(2)^3.
 """
 
 import pytest
-from cstz.disc.gf2 import (
+from cstz.gf2 import (
     ZERO, ONE, gf2_add, gf2_mul, double_cancel,
     popcount, vec_zero, basis, vec_add, dot,
     check_double_cancel, check_vec_self_inverse,

@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 
-from cstz.agda_synth import (
+from cstz.legacy.agda_synth import (
     _addr0_index_map,
     _addr1_index_map,
     _build_chart_names,
@@ -26,8 +26,8 @@ from cstz.agda_synth import (
     _sanitize,
     synthesize_from_document,
 )
-from cstz.pff_cascade import PFFCascadeEngine
-from cstz.pff_python_classifier import factorize
+from cstz.legacy.pff_cascade import PFFCascadeEngine
+from cstz.legacy.pff_python_classifier import factorize
 
 
 # ── Helpers ─────────────────────────────────────────────────────────
@@ -155,7 +155,7 @@ class TestPath1Closure:
         # for the same pair would still be a no-op in the closure.
         closure_before = _path1_closure(e.document)
         # Manually add a redundant Addr1 with the same endpoints
-        from cstz.pff import Addr1
+        from cstz.legacy.pff import Addr1
         ids = [a.id for a in e.document.addresses0]
         e.document.paths1.append(Addr1(
             id="redundant", rank=e.document.ranks[0].id,
@@ -165,7 +165,7 @@ class TestPath1Closure:
         assert closure_before == closure_after
 
     def test_non_glue_ctors_ignored(self) -> None:
-        from cstz.pff import Addr1
+        from cstz.legacy.pff import Addr1
         e = _empty_engine()
         sigma_a = e.ensure_chart("sigma", "A")
         sigma_b = e.ensure_chart("sigma", "B")
@@ -181,7 +181,7 @@ class TestPath1Closure:
         assert closure[a.id] != closure[b.id]
 
     def test_refl_ctor_treated_as_self_union(self) -> None:
-        from cstz.pff import Addr1
+        from cstz.legacy.pff import Addr1
         e = _empty_engine()
         sigma = e.ensure_chart("sigma", "X")
         tau = e.ensure_chart("tau", "T")
@@ -194,7 +194,7 @@ class TestPath1Closure:
         assert closure[a.id] == a.id
 
     def test_chained_glues(self) -> None:
-        from cstz.pff import Addr1
+        from cstz.legacy.pff import Addr1
         e = _empty_engine()
         sigma_a = e.ensure_chart("sigma", "A")
         sigma_b = e.ensure_chart("sigma", "B")
@@ -220,8 +220,8 @@ class TestPath1Closure:
         """Build a parent chain of depth ≥ 2 so the inner compression
         loop body fires.  Order the glues so the parent links chain
         through an intermediate, not directly to the root."""
-        from cstz.pff import Addr0, Addr1, Pair, Segment, Step
-        from cstz.pff_cascade import PFFCascadeEngine
+        from cstz.legacy.pff import Addr0, Addr1, Pair, Segment, Step
+        from cstz.legacy.pff_cascade import PFFCascadeEngine
         e = PFFCascadeEngine(document_id="chain")
         rank = e.ensure_rank(0)
         patch = e.ensure_patch(rank=rank)
@@ -254,7 +254,7 @@ class TestPath1Closure:
 
     def test_lex_decreasing_union(self) -> None:
         """When src lex-orders AFTER dst, the union swap branch fires."""
-        from cstz.pff import Addr1
+        from cstz.legacy.pff import Addr1
         e = _empty_engine()
         sigma_a = e.ensure_chart("sigma", "A")
         sigma_b = e.ensure_chart("sigma", "B")
@@ -282,7 +282,7 @@ class TestPath2Closure:
         assert closure[addr1_ids[0]] == addr1_ids[0]
 
     def test_coh_unions_addr1s(self) -> None:
-        from cstz.pff import Addr1, Addr2
+        from cstz.legacy.pff import Addr1, Addr2
         e = _empty_engine()
         sigma = e.ensure_chart("sigma", "X")
         tau_a = e.ensure_chart("tau", "A")
@@ -305,7 +305,7 @@ class TestPath2Closure:
         assert closure[first_id] == closure["alt"]
 
     def test_non_coh_ctors_ignored(self) -> None:
-        from cstz.pff import Addr1, Addr2
+        from cstz.legacy.pff import Addr1, Addr2
         e = _empty_engine()
         sigma = e.ensure_chart("sigma", "X")
         tau_a = e.ensure_chart("tau", "A")
@@ -329,7 +329,7 @@ class TestPath2Closure:
     def test_path2_no_op_when_already_in_class(self) -> None:
         """Two coh records targeting the same canonical pair: the
         second is a no-op (early return in union)."""
-        from cstz.pff import Addr1, Addr2
+        from cstz.legacy.pff import Addr1, Addr2
         e = _empty_engine()
         sigma = e.ensure_chart("sigma", "X")
         tau_a = e.ensure_chart("tau", "A")
@@ -358,7 +358,7 @@ class TestPath2Closure:
     def test_path2_chain_compression(self) -> None:
         """Build a 3-addr1 path2 chain so the inner compression loop
         body fires."""
-        from cstz.pff import Addr1, Addr2
+        from cstz.legacy.pff import Addr1, Addr2
         e = _empty_engine()
         sigma = e.ensure_chart("sigma", "X")
         tau_a = e.ensure_chart("tau", "A")
@@ -426,7 +426,7 @@ class TestPath2Closure:
         dst='addr1-0') has ra='z-glue' > rb='addr1-0' and hits the
         else branch.
         """
-        from cstz.pff import Addr1, Addr2
+        from cstz.legacy.pff import Addr1, Addr2
         e = _empty_engine()
         sigma = e.ensure_chart("sigma", "X")
         tau_a = e.ensure_chart("tau", "A")
@@ -539,7 +539,7 @@ class TestSynthesizeStructure:
         assert "π : ℕ → ℕ" in agda
 
     def test_coh_witnesses_emitted(self) -> None:
-        from cstz.pff import Addr1, Addr2
+        from cstz.legacy.pff import Addr1, Addr2
         e = _two_obs_engine(glue=True)
         first_id = e.document.paths1[0].id
         ids = [a.id for a in e.document.addresses0]
@@ -597,7 +597,7 @@ class TestSynthesizeStructure:
     def test_addr0_with_no_matching_pair_skipped(self) -> None:
         """An addr0 whose first segment has no role-matching pair should
         be silently skipped (the chart partition loop falls through)."""
-        from cstz.pff import Addr0, Pair, Segment, Step
+        from cstz.legacy.pff import Addr0, Pair, Segment, Step
         e = _empty_engine()
         sigma = e.ensure_chart("sigma", "X")
         tau = e.ensure_chart("tau", "T")
@@ -687,7 +687,7 @@ class TestAgdaTypeCheck:
         _agda_check(agda, "Cascade", tmp_path)
 
     def test_with_explicit_coh(self, tmp_path: Path) -> None:
-        from cstz.pff import Addr1, Addr2
+        from cstz.legacy.pff import Addr1, Addr2
         e = _two_obs_engine(glue=True)
         first_id = e.document.paths1[0].id
         ids = [a.id for a in e.document.addresses0]

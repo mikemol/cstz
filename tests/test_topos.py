@@ -1,7 +1,7 @@
-"""Tests for cstz.disc.topos."""
+"""Tests for cstz.topos."""
 
 import pytest
-from cstz.disc.topos import (
+from cstz.topos import (
     TRUE_OMEGA, FALSE_OMEGA, UNKNOWN_OMEGA, OVERDET_OMEGA,
     omega_neg, omega_conj, omega_disj, dne,
     FANO_POINTS, FANO_LINES, CONVERGENCE_RATE,

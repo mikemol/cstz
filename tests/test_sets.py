@@ -1,8 +1,8 @@
-"""Tests for cstz.disc.sets — set-theoretic consequences."""
+"""Tests for cstz.sets — set-theoretic consequences."""
 
 import pytest
-from cstz.disc.gf2 import dot
-from cstz.disc.sets import (
+from cstz.gf2 import dot
+from cstz.sets import (
     kappa_equiv, russell_exclusion, chain_depth_bound, link_vector,
     in_annihilator, is_paired, sym_diff_discriminator,
     power_set_bound, choice_measure,

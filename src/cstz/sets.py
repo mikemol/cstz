@@ -10,8 +10,8 @@ from __future__ import annotations
 
 from typing import List
 
-from cstz.disc.gf2 import dot, vec_add, popcount
-from cstz.disc.framework import EvalFn, Regime
+from cstz.gf2 import dot, vec_add, popcount
+from cstz.framework import EvalFn, Regime
 
 
 # ---------------------------------------------------------------------------

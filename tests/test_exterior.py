@@ -1,11 +1,11 @@
-"""Tests for cstz.disc.exterior — bitmask-indexed exterior algebra.
+"""Tests for cstz.exterior — bitmask-indexed exterior algebra.
 
 Exhaustive verification at n=3: all 8 basis elements, all pairs for
 wedge commutativity, all elements for ∂∘∂=0.
 """
 
 import pytest
-from cstz.disc.exterior import (
+from cstz.exterior import (
     ext_zero, ext_basis, ext_scalar, ext_add, ext_is_zero,
     ext_wedge, ext_grade, ext_restrict_grade,
     ext_boundary,
