@@ -50,3 +50,6 @@ open import CSTZ.Verification.OmegaChain
 open import CSTZ.Verification.Annihilator
 open import CSTZ.Verification.MonoidalCoherence
 open import CSTZ.Verification.LimitsExhaustive
+
+-- Phase 10: Examples (App E)
+open import CSTZ.Examples
