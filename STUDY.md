@@ -276,7 +276,7 @@ caller chooses, but not a single statement quantified over `n`.
 |---------|-----------|-------------|------------------|
 | profile linearity (P1) | `postulate profile-linearity` (`Axiom/ProfileLinearity.agda:26`) — uniform in n | `axioms.check_profile_linearity` + `verification.check_profile_linearity_exhaustive(n)` | uniform proof ↔ proof-schema parameterized by n |
 | eval linearity (P2) | `postulate eval-linearity` (`Axiom/EvalLinearity.agda:27`) — uniform in n | `axioms.check_eval_linearity` + exhaustive variant | same |
-| operationalist (P3) | `postulate operationalist` (`Axiom/Operationalist.agda:26`) — foundational | `axioms.check_operationalist` (checks antecedent only) | different in kind: P3 *defines* identity, so Python can verify the hypothesis on finite populations but the conclusion is the axiom's semantics, not something Python derives |
+| operationalist (P3) | `postulate operationalist` (`Axiom/Operationalist.agda:26`) — propositional equality `a ≡ b` coincides with operational indistinguishability | `sets.kappa_equiv` (`sets.py:22`) **and** `sets.is_paired` (`sets.py:67`) — *constructively realize* the equivalence relation: `kappa_equiv` sweeps every `d ∈ regime` and checks `eval(d,a) == eval(d,b)`; `is_paired` computes the residue `a ⊕ b` and transposes it to the surface of each discriminator via the annihilator check `dot(d, a ⊕ b) == 0` (equivalent formulation: the residue is annihilated by every k-regime's measurement) | aligned — Python defines ≡ operationally at each (regime, a, b); the only residual difference is substitutability, which Agda inherits automatically from propositional `≡` while Python requires the caller to invoke `kappa_equiv` at each comparison site |
 | ∂∘∂ ≡ 0 (P4) | `postulate ∂∘∂≡0` (`Exterior/Boundary.agda:88`) — uniform in n | `verification.check_boundary_squared` (all basis) + `_all` (exhaustive at n=3: all 2^(2ⁿ) elements) | uniform proof ↔ proof-schema; `_all` at n=3 is a proof at n=3, not weaker evidence |
 | Fano lines | 7 theorems `fano-line-1..7` (`Topos/Fano.agda:47–73`) | `FANO_LINES` list + `verify_fano_line` | **no proof-strength mismatch** — the Fano plane has exactly 7 lines over GF(2); enumerating and checking them is the same proof, expressed differently |
 | DNE / EM-fail | `dne`, `em-fails-at-gap` (`Topos/ProofTheory.agda:27–31`) | `topos.dne`, `check_truth_tables` | **no mismatch** — the four-valued Ω has a finite truth table; exhaustion is universal |
@@ -285,10 +285,14 @@ The Agda-only gap is therefore narrower than it first appears: for
 P1, P2, P4, Fano, and DNE the Python side can produce a proof at any
 specific `n` the user asks for, with the same confidence as a uniform
 proof — it just does not produce one statement quantified over `n`.
-P3 is a different kind of gap: operationalism is about the meaning of
-identity itself, and Python cannot express the conclusion `a ≡ b` (its
-built-in `==` is bitwise structural equality), so `check_operationalist`
-stops at the antecedent.
+P3 is *not* the separate "foundational" gap my earlier draft claimed.
+It is constructively realized by `sets.kappa_equiv` (regime sweep) and
+`sets.is_paired` (residue-plus-annihilator), both of which *compute*
+the equivalence relation `≡` rather than merely checking the axiom's
+hypothesis. The only residual asymmetry is *substitutability*: in Agda
+a proof of `a ≡ b` propagates through every context automatically; in
+Python the equivalence must be invoked at each comparison site (a
+caller who writes `a == b` gets structural equality, not `≡`).
 
 ### 8.2 The Agda cofiber (explicit in Agda, missing or implied in Python)
 
@@ -332,9 +336,9 @@ stops at the antecedent.
 
 | Direction | Cardinality (indicative) | Notable examples |
 |-----------|--------------------------|------------------|
-| E/E aligned (same statement, same strength) | ~48 | `cd_mul`, `rotate`, `dot`, `basis`, `classify`, `evolve`, `russell_exclusion`, `DirectedMorphism`, `LimitKind`, Fano lines, DNE |
+| E/E aligned (same statement, same strength) | ~49 | `cd_mul`, `rotate`, `dot`, `basis`, `classify`, `evolve`, `russell_exclusion`, `DirectedMorphism`, `LimitKind`, Fano lines, DNE, **P3 operationalist via `kappa_equiv`/`is_paired`** |
 | E/E uniform vs. parameterized schema (§8.1) | 3 | P1, P2, P4 — Agda uniform in n; Python proof per caller-chosen n |
-| E/E foundational asymmetry (§8.1) | 1 | P3 — operationalism defines identity; Python verifies only the hypothesis |
+| E/E substitutability caveat | 1 | P3 — `≡` propagates automatically in Agda's propositional equality; Python callers must invoke `kappa_equiv` at each comparison site |
 | Agda E, Python M/I (§8.2) | ~15 | `DiscSystem`, `Adjunction`, P5–P9 postulates, Segal cells, truth-table cases |
 | Agda M/I, Python E (§8.3) | ~20 (plus all of `classify/`, `observe`, `projections`) | Ω constants, Ω operators, `Perspective`, `check_bilinearity`, classification engine |
 
