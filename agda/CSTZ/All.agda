@@ -37,3 +37,16 @@ open import CSTZ.Monoidal
 
 -- Phase 8: Topos (§9)
 open import CSTZ.Topos
+
+-- Phase 9: Verification (App B gap-closers)
+open import CSTZ.Verification.Segal
+open import CSTZ.Verification.RISC
+open import CSTZ.Verification.CDHexagon
+open import CSTZ.Verification.ChoiceBound
+open import CSTZ.Verification.PairingBilinear
+open import CSTZ.Verification.FixedPointStab
+open import CSTZ.Verification.ChainBound
+open import CSTZ.Verification.OmegaChain
+open import CSTZ.Verification.Annihilator
+open import CSTZ.Verification.MonoidalCoherence
+open import CSTZ.Verification.LimitsExhaustive
