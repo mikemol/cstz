@@ -15,6 +15,15 @@ from cstz.monoidal import swap_conjugation
 # ---------------------------------------------------------------------------
 # Subobject classifier Ω = GF(2)² (Paper §9, Thm 9.4)
 # ---------------------------------------------------------------------------
+#
+# Cofibration (STUDY.md §8.3, Python cofiber): the four Ω values and the
+# three Belnap operators below are *named* in Python but treated
+# structurally in Agda. ``agda/CSTZ/Topos/ProofTheory.agda`` reasons
+# about the same values via pattern-match cases rather than as a
+# first-class constant family; the properties ``em-fails-at-gap`` and
+# friends stand in for the operator semantics. The Python naming makes
+# runtime composition direct at the cost of requiring callers to bind
+# the meaning of each bit pattern.
 
 TRUE_OMEGA = 0b10     # (1,0) = ordered-τ
 FALSE_OMEGA = 0b01    # (0,1) = ordered-σ
@@ -45,6 +54,13 @@ def dne(p: int) -> int:
 # ---------------------------------------------------------------------------
 # Fano plane PG(2, GF(2)) (Paper §9, Thm 9.20)
 # ---------------------------------------------------------------------------
+#
+# Cofibration (STUDY.md §8.1, aligned): ``agda/CSTZ/Topos/Fano.agda``
+# enumerates seven theorems ``fano-line-1 .. fano-line-7`` for the
+# same seven lines; Python's ``FANO_LINES`` list and ``verify_fano_line``
+# predicate are the operational form of that enumeration. Because the
+# Fano plane over GF(2) has exactly seven lines, the two presentations
+# carry the same proof strength.
 
 # 7 nonzero points of GF(2)³ = integers 1..7
 FANO_POINTS: List[int] = list(range(1, 8))

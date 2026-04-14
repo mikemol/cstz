@@ -15,6 +15,18 @@
 -- (Thm 4.33ii), and univalence (Prop 5.12).
 --
 -- Axiom class: AO.  8 formal objects depend on this.
+--
+-- Python cofibration (STUDY.md §8.1, P3):
+--   * Antecedent witness: src/cstz/axioms.py :: check_operationalist
+--   * Conclusion *constructively realized*:
+--       src/cstz/sets.py :: kappa_equiv   (regime sweep)
+--       src/cstz/sets.py :: is_paired     (residue + annihilator)
+--   These compute the equivalence relation a ≡ b directly; Python is
+--   not merely checking the axiom's hypothesis. The only residual
+--   asymmetry with Agda is substitutability — in Agda a proof of ≡
+--   propagates automatically through every context, while Python
+--   callers must invoke `kappa_equiv` at each comparison site rather
+--   than rely on structural `==`.
 ------------------------------------------------------------------------
 
 module CSTZ.Axiom.Operationalist where

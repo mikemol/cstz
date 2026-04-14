@@ -17,6 +17,15 @@ The observation protocol enforces:
 
 Mirrors: agda/CSTZ/ (the full algebraic kernel)
 Replaces: legacy/pff.py + legacy/pff_cascade.py cascade semantics
+
+Cofibration (STUDY.md §8.3, Python cofiber): this module has no direct
+Agda counterpart. The sheaf-of-discriminations semantics is fixed in
+``agda/CSTZ/Topos/Sheaves.agda``, but the *state carrier* that
+accumulates observations at runtime — ``Observation``, ``Patch``,
+``ObservationState`` — is runtime-only by design. The four invariants
+enforced here (S₃ symmetry, operationalist equivalence via
+:func:`cstz.sets.kappa_equiv`, regime monotonicity, OR-accumulation of
+profiles) are the operational expression of the sheaf axioms.
 """
 
 from __future__ import annotations

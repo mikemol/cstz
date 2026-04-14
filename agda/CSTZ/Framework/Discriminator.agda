@@ -7,6 +7,13 @@
 -- In our representation, a discriminator over population S with
 -- vector space V = GF(2)^n is simply a vector in GF(2)^n together
 -- with an evaluation function that maps it to a predicate on S.
+--
+-- Python cofibration (STUDY.md §8.2): Python inlines `DiscSystem` and
+-- `DiscPair` as integer bitmasks plus an `EvalFn` callable (see
+-- `src/cstz/framework.py` and `src/cstz/axioms.py :: EvalFn`). The
+-- runtime vocabulary `src/cstz/classify/registry.py ::
+-- DiscriminatorRegistry` is a *catalogue* of discriminators for
+-- concrete-syntax classification, not this algebraic record.
 ------------------------------------------------------------------------
 
 module CSTZ.Framework.Discriminator where

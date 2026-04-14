@@ -20,7 +20,16 @@ from cstz.framework import EvalFn, Regime
 
 
 def kappa_equiv(eval_fn: EvalFn, regime: Regime, a: int, b: int) -> bool:
-    """Two elements are κ-equivalent iff every discriminator agrees."""
+    """Two elements are κ-equivalent iff every discriminator agrees.
+
+    Cofibration (STUDY.md §8.1, P3): this *constructively realizes*
+    the operationalist equivalence relation ``a ≡ b`` postulated at
+    ``agda/CSTZ/Axiom/Operationalist.agda:26``. The regime sweep is
+    the definition of ``≡`` in Python — callers should prefer this
+    over Python's structural ``==`` whenever operationalist identity
+    is the intended semantics. See :func:`is_paired` for the
+    residue-plus-annihilator formulation of the same relation.
+    """
     return all(eval_fn(d, a) == eval_fn(d, b) for d in regime)
 
 
@@ -68,6 +77,13 @@ def is_paired(eval_fn: EvalFn, regime: Regime, a: int, b: int) -> bool:
     """a and b are paired under κ iff all discriminators agree on them.
 
     Equivalently: a⊕b ∈ κ⊥ (annihilator of every d in κ).
+
+    Cofibration (STUDY.md §8.1, P3): residue-plus-annihilator
+    formulation of operationalist ``≡``. Compute the residue
+    ``a ⊕ b`` and transpose it to the measurement surface of every
+    discriminator in the regime; the pair is identified iff every
+    surface annihilates the residue. Equivalent to
+    :func:`kappa_equiv` by linearity of ``eval``.
     """
     diff = vec_add(a, b)
     return all(in_annihilator(d, diff) for d in regime)

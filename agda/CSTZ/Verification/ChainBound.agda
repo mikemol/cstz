@@ -45,6 +45,10 @@ linkVector a b = a +V b
 -- We state the bound as a postulate consistent with the chain-depth
 -- bound in Sets.Foundation.
 
+-- Python cofibration (STUDY.md §8.2): P9 has no Python witness — this
+-- is a verification postulate consistent with P7 (Sets.Foundation).
+-- `src/cstz/sets.py :: chain_depth_bound(n)` reports the same numeric
+-- bound operationally but does not witness the inequality.
 postulate
   chain-bound : ∀ {n : ℕ} (k : ℕ) → k ≤ n
   -- Any chain of depth k in GF(2)^n has k ≤ n.

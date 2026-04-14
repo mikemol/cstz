@@ -84,6 +84,13 @@ private
 -- The formal proof proceeds by showing the double sum is equal to
 -- 0 via the pairing argument.  This is the hardest proof in Phase 1.
 
+-- Python cofibration (STUDY.md §8.1, P4):
+--   * Basis sweep:  src/cstz/verification.py :: check_boundary_squared
+--   * Full exhaustion at n=3 (all 2^(2^n) elements):
+--                   src/cstz/verification.py :: check_boundary_squared_all
+--   Under operationalism, exhaustion at fixed n is a proof at that n
+--   — Python covers n ≤ 3 concretely; the uniform-in-n proof below is
+--   the Agda side's contribution.
 postulate
   ∂∘∂≡0 : ∀ {n} (f : Exterior n) (t : Subset n) → ∂ (∂ f) t ≡ 𝟘
 -- Proof obligation: combinatorial pairing argument.

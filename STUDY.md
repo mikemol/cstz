@@ -82,15 +82,15 @@ postulate is purely structural).
 
 | ID | File:line | Name | Informal statement | Runtime check |
 |----|-----------|------|--------------------|---------------|
-| P1 | `agda/CSTZ/Axiom/ProfileLinearity.agda:26` | `profile-linearity` | `eval (d₁ +V d₂) a ≡ eval d₁ a +F eval d₂ a` | `cstz.axioms.check_profile_linearity`; exhaustive at n via `cstz.verification.check_profile_linearity_exhaustive` |
-| P2 | `agda/CSTZ/Axiom/EvalLinearity.agda:27` | `eval-linearity` | `eval d (y₁ +V y₂) ≡ eval d y₁ +F eval d y₂` | `cstz.axioms.check_eval_linearity`; exhaustive via `cstz.verification.check_eval_linearity_exhaustive` |
-| P3 | `agda/CSTZ/Axiom/Operationalist.agda:26` | `operationalist` | no discriminator separates `a`, `b` ⇒ `a ≡ b` | `cstz.axioms.check_operationalist` (checks the antecedent; conclusion is the axiom) |
-| P4 | `agda/CSTZ/Exterior/Boundary.agda:88` | `∂∘∂≡0` | `∂ (∂ f) t ≡ 𝟘` for every exterior element | `cstz.verification.check_boundary_squared` (all basis elements); `check_boundary_squared_all` (all 2^(2^n) elements, exhaustive at n=3) |
-| P5 | `agda/CSTZ/Homotopy/Exhaustivity.agda:41` | `leibniz` | graded Leibniz for `∂` on a `·F`-product (placeholder type) | — |
-| P6 | `agda/CSTZ/Homotopy/Exhaustivity.agda:48` | `exhaustive-filling` | every cycle `R` admits a filling `C` in the extended space | — |
-| P7 | `agda/CSTZ/Sets/Foundation.agda:73` | `chain-depth-bound` | `depth ≤ n` for any ∈-chain in `GF(2)^n` | — (mathematically tied to `check_risc`, `check_fixed_point_stability`) |
-| P8 | `agda/CSTZ/Category/Yoneda.agda:58` | `a≡b` (local) | closes `yoneda-faithful` pending operationalist/finiteness | — |
-| P9 | `agda/CSTZ/Verification/ChainBound.agda:49` | `chain-bound` | any chain of depth `k` in `GF(2)^n` satisfies `k ≤ n` | — (consistent with P7) |
+| P1 | `agda/CSTZ/Axiom/ProfileLinearity.agda:34` | `profile-linearity` | `eval (d₁ +V d₂) a ≡ eval d₁ a +F eval d₂ a` | `cstz.axioms.check_profile_linearity`; exhaustive at n via `cstz.verification.check_profile_linearity_exhaustive` |
+| P2 | `agda/CSTZ/Axiom/EvalLinearity.agda:36` | `eval-linearity` | `eval d (y₁ +V y₂) ≡ eval d y₁ +F eval d y₂` | `cstz.axioms.check_eval_linearity`; exhaustive via `cstz.verification.check_eval_linearity_exhaustive` |
+| P3 | `agda/CSTZ/Axiom/Operationalist.agda:38` | `operationalist` | no discriminator separates `a`, `b` ⇒ `a ≡ b` | antecedent: `cstz.axioms.check_operationalist`; conclusion constructively realized by `cstz.sets.kappa_equiv` (regime sweep) and `cstz.sets.is_paired` (residue + annihilator) |
+| P4 | `agda/CSTZ/Exterior/Boundary.agda:95` | `∂∘∂≡0` | `∂ (∂ f) t ≡ 𝟘` for every exterior element | `cstz.verification.check_boundary_squared` (all basis elements); `check_boundary_squared_all` (all 2^(2^n) elements, exhaustive at n=3) |
+| P5 | `agda/CSTZ/Homotopy/Exhaustivity.agda:46` | `leibniz` | graded Leibniz for `∂` on a `·F`-product (placeholder type) | — |
+| P6 | `agda/CSTZ/Homotopy/Exhaustivity.agda:53` | `exhaustive-filling` | every cycle `R` admits a filling `C` in the extended space | — |
+| P7 | `agda/CSTZ/Sets/Foundation.agda:77` | `chain-depth-bound` | `depth ≤ n` for any ∈-chain in `GF(2)^n` | — (mathematically tied to `check_risc`, `check_fixed_point_stability`) |
+| P8 | `agda/CSTZ/Category/Yoneda.agda:65` | `a≡b` (local) | closes `yoneda-faithful` pending operationalist/finiteness | — |
+| P9 | `agda/CSTZ/Verification/ChainBound.agda:53` | `chain-bound` | any chain of depth `k` in `GF(2)^n` satisfies `k ≤ n` | — (consistent with P7) |
 
 Line numbers above point to the declaration line (not the surrounding
 `postulate` keyword). They are produced mechanically by
@@ -102,15 +102,15 @@ is the canonical way to verify this table:
 
 ```
 $ python3 scripts/count_postulates.py
-agda/CSTZ/Axiom/EvalLinearity.agda:27    eval-linearity
-agda/CSTZ/Axiom/Operationalist.agda:26   operationalist
-agda/CSTZ/Axiom/ProfileLinearity.agda:26 profile-linearity
-agda/CSTZ/Category/Yoneda.agda:58        a≡b
-agda/CSTZ/Exterior/Boundary.agda:88      ∂∘∂≡0
-agda/CSTZ/Homotopy/Exhaustivity.agda:41  leibniz
-agda/CSTZ/Homotopy/Exhaustivity.agda:48  exhaustive-filling
-agda/CSTZ/Sets/Foundation.agda:73        chain-depth-bound
-agda/CSTZ/Verification/ChainBound.agda:49 chain-bound
+agda/CSTZ/Axiom/EvalLinearity.agda:36    eval-linearity
+agda/CSTZ/Axiom/Operationalist.agda:38   operationalist
+agda/CSTZ/Axiom/ProfileLinearity.agda:34 profile-linearity
+agda/CSTZ/Category/Yoneda.agda:65        a≡b
+agda/CSTZ/Exterior/Boundary.agda:95      ∂∘∂≡0
+agda/CSTZ/Homotopy/Exhaustivity.agda:46  leibniz
+agda/CSTZ/Homotopy/Exhaustivity.agda:53  exhaustive-filling
+agda/CSTZ/Sets/Foundation.agda:77        chain-depth-bound
+agda/CSTZ/Verification/ChainBound.agda:53 chain-bound
 ---
 Total postulate declarations: 9
 Files scanned: 97
@@ -245,7 +245,7 @@ enumeration in each phase to the mismatched cells only; trivial
 name-casing differences (e.g. Agda `cd-mul` ↔ Python `cd_mul`) are
 aligned and omitted. Verified by spot-checking `topos.py:19–22`,
 `higher.py:14–24`, `category.py:19`, `agda/CSTZ/Category/Directed.agda:27`,
-and `agda/CSTZ/Topos/Fano.agda:47–73`.
+and `agda/CSTZ/Topos/Fano.agda:54–80`.
 
 ### 8.1 Uniform proofs vs. parameterized proof-schemas
 
@@ -274,11 +274,11 @@ caller chooses, but not a single statement quantified over `n`.
 
 | Concept | Agda form | Python form | Refined mismatch |
 |---------|-----------|-------------|------------------|
-| profile linearity (P1) | `postulate profile-linearity` (`Axiom/ProfileLinearity.agda:26`) — uniform in n | `axioms.check_profile_linearity` + `verification.check_profile_linearity_exhaustive(n)` | uniform proof ↔ proof-schema parameterized by n |
-| eval linearity (P2) | `postulate eval-linearity` (`Axiom/EvalLinearity.agda:27`) — uniform in n | `axioms.check_eval_linearity` + exhaustive variant | same |
-| operationalist (P3) | `postulate operationalist` (`Axiom/Operationalist.agda:26`) — propositional equality `a ≡ b` coincides with operational indistinguishability | `sets.kappa_equiv` (`sets.py:22`) **and** `sets.is_paired` (`sets.py:67`) — *constructively realize* the equivalence relation: `kappa_equiv` sweeps every `d ∈ regime` and checks `eval(d,a) == eval(d,b)`; `is_paired` computes the residue `a ⊕ b` and transposes it to the surface of each discriminator via the annihilator check `dot(d, a ⊕ b) == 0` (equivalent formulation: the residue is annihilated by every k-regime's measurement) | aligned — Python defines ≡ operationally at each (regime, a, b); the only residual difference is substitutability, which Agda inherits automatically from propositional `≡` while Python requires the caller to invoke `kappa_equiv` at each comparison site |
-| ∂∘∂ ≡ 0 (P4) | `postulate ∂∘∂≡0` (`Exterior/Boundary.agda:88`) — uniform in n | `verification.check_boundary_squared` (all basis) + `_all` (exhaustive at n=3: all 2^(2ⁿ) elements) | uniform proof ↔ proof-schema; `_all` at n=3 is a proof at n=3, not weaker evidence |
-| Fano lines | 7 theorems `fano-line-1..7` (`Topos/Fano.agda:47–73`) | `FANO_LINES` list + `verify_fano_line` | **no proof-strength mismatch** — the Fano plane has exactly 7 lines over GF(2); enumerating and checking them is the same proof, expressed differently |
+| profile linearity (P1) | `postulate profile-linearity` (`Axiom/ProfileLinearity.agda:34`) — uniform in n | `axioms.check_profile_linearity` + `verification.check_profile_linearity_exhaustive(n)` | uniform proof ↔ proof-schema parameterized by n |
+| eval linearity (P2) | `postulate eval-linearity` (`Axiom/EvalLinearity.agda:36`) — uniform in n | `axioms.check_eval_linearity` + exhaustive variant | same |
+| operationalist (P3) | `postulate operationalist` (`Axiom/Operationalist.agda:38`) — propositional equality `a ≡ b` coincides with operational indistinguishability | `sets.kappa_equiv` (`sets.py:22`) **and** `sets.is_paired` (`sets.py:67`) — *constructively realize* the equivalence relation: `kappa_equiv` sweeps every `d ∈ regime` and checks `eval(d,a) == eval(d,b)`; `is_paired` computes the residue `a ⊕ b` and transposes it to the surface of each discriminator via the annihilator check `dot(d, a ⊕ b) == 0` (equivalent formulation: the residue is annihilated by every k-regime's measurement) | aligned — Python defines ≡ operationally at each (regime, a, b); the only residual difference is substitutability, which Agda inherits automatically from propositional `≡` while Python requires the caller to invoke `kappa_equiv` at each comparison site |
+| ∂∘∂ ≡ 0 (P4) | `postulate ∂∘∂≡0` (`Exterior/Boundary.agda:95`) — uniform in n | `verification.check_boundary_squared` (all basis) + `_all` (exhaustive at n=3: all 2^(2ⁿ) elements) | uniform proof ↔ proof-schema; `_all` at n=3 is a proof at n=3, not weaker evidence |
+| Fano lines | 7 theorems `fano-line-1..7` (`Topos/Fano.agda:54–80`) | `FANO_LINES` list + `verify_fano_line` | **no proof-strength mismatch** — the Fano plane has exactly 7 lines over GF(2); enumerating and checking them is the same proof, expressed differently |
 | DNE / EM-fail | `dne`, `em-fails-at-gap` (`Topos/ProofTheory.agda:27–31`) | `topos.dne`, `check_truth_tables` | **no mismatch** — the four-valued Ω has a finite truth table; exhaustion is universal |
 
 The Agda-only gap is therefore narrower than it first appears: for
@@ -297,14 +297,14 @@ caller who writes `a == b` gets structural equality, not `≡`).
 ### 8.2 The Agda cofiber (explicit in Agda, missing or implied in Python)
 
 **Structural types and records Python inlines.**
-- `DiscSystem`, `DiscPair` records (`Framework/Discriminator.agda:30,62`) — Python encodes discriminators as integer bitmasks without a wrapping type; a `DiscriminatorRegistry` exists in `classify/registry.py` but is a runtime catalogue, not an algebraic object.
-- `Adjunction` record + `Axis` data (`Category/Adjunction.agda:33,52`) — **no Python counterpart**; adjunctions are implicit in `compose_witnesses` / `compose_coeff` usage.
+- `DiscSystem`, `DiscPair` records (`Framework/Discriminator.agda:37,69`) — Python encodes discriminators as integer bitmasks without a wrapping type; a `DiscriminatorRegistry` exists in `classify/registry.py` but is a runtime catalogue, not an algebraic object.
+- `Adjunction` record + `Axis` data (`Category/Adjunction.agda:40,59`) — **no Python counterpart**; adjunctions are implicit in `compose_witnesses` / `compose_coeff` usage.
 - `LinearFunc` (`Vec.agda:66`), `Exterior` (`Exterior/Basis.agda:81`) — Python uses bare `int` and `list[int]` respectively.
 
 **Postulate spine without Python witnesses** (see §3 for the full catalog).
 - P5 `leibniz`, P6 `exhaustive-filling` (`Homotopy/Exhaustivity.agda`)
 - P7 `chain-depth-bound` (`Sets/Foundation.agda`)
-- P8 `a≡b` local to `yoneda-faithful` (`Category/Yoneda.agda:58`)
+- P8 `a≡b` local to `yoneda-faithful` (`Category/Yoneda.agda:65`)
 - P9 `chain-bound` (`Verification/ChainBound.agda`)
 
 **Enumerated constructions Python condenses to a single verifier.**
