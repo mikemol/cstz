@@ -60,6 +60,12 @@ class TestPatch:
         p.observe(a5, e1, ORDERED_TAU)
         assert p.elements() == {a0, a5}
 
+    def test_discriminators(self):
+        p = Patch()
+        p.observe(a0, e1, GAP)
+        p.observe(a0, e2, ORDERED_TAU)
+        assert p.discriminators() == {e1, e2}
+
 
 class TestObservationState:
     def _make_simple_state(self):
@@ -91,6 +97,15 @@ class TestObservationState:
         p2 = state.new_patch()
         p2.observe(a0, e2, GAP)
         assert set(state.regime) == {e1, e2}
+
+    def test_regime_dedup(self):
+        """Shared discriminators appear only once in combined regime."""
+        state = ObservationState(dim=3)
+        p1 = state.new_patch()
+        p1.observe(a0, e1, GAP)
+        p2 = state.new_patch()
+        p2.observe(a1, e1, GAP)  # same discriminator
+        assert state.regime == [e1]  # not [e1, e1]
 
     def test_profile_accumulation_or(self):
         """Two patches observing the same element: results OR together."""
@@ -139,6 +154,14 @@ class TestObservationState:
         p.observe(a5, e1, ORDERED_TAU)
         assert state.classify_element(a5) == CellKind.ORDERED_TAU
 
+    def test_regime_dim(self):
+        state = ObservationState(dim=3)
+        p1 = state.new_patch()
+        p1.observe(a0, e1, GAP)
+        p2 = state.new_patch()
+        p2.observe(a0, e2, GAP)
+        assert state.regime_dim == 2
+
     def test_residue_elements(self):
         state = ObservationState(dim=3)
         p = state.new_patch()
@@ -146,6 +169,16 @@ class TestObservationState:
         p.observe(a5, e1, ORDERED_TAU)
         assert a0 in state.residue_elements()
         assert a5 not in state.residue_elements()
+
+    def test_boolean_elements(self):
+        state = ObservationState(dim=3)
+        p = state.new_patch()
+        p.observe(a0, e1, GAP)
+        p.observe(a5, e1, ORDERED_TAU)
+        p.observe(a2, e1, ORDERED_SIGMA)
+        assert a5 in state.boolean_elements()
+        assert a2 in state.boolean_elements()
+        assert a0 not in state.boolean_elements()
 
     def test_equivalence_classes(self):
         """Under e₁ alone: {a₀,a₁,a₂,a₃} and {a₄,a₅,a₆,a₇}."""

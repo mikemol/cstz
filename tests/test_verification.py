@@ -10,6 +10,8 @@ from cstz.verification import (
     check_fixed_point_stability,
     check_swap_involutive,
     check_truth_tables,
+    check_profile_linearity_exhaustive,
+    check_eval_linearity_exhaustive,
 )
 
 
@@ -47,3 +49,11 @@ class TestVerification:
 
     def test_truth_tables(self):
         check_truth_tables()
+
+    def test_profile_linearity_exhaustive_n2(self):
+        """(P) exhaustive at n=2 (64 triples)."""
+        check_profile_linearity_exhaustive(2)
+
+    def test_eval_linearity_exhaustive_n2(self):
+        """(E) exhaustive at n=2 (64 triples)."""
+        check_eval_linearity_exhaustive(2)

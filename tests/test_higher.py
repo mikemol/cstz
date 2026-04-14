@@ -21,11 +21,12 @@ class TestRotate:
         for p in range(4):
             assert rotate(Perspective.KAPPA, p) == p
 
-    def test_roundtrip_sigma(self):
-        """Rotating to σ and back should be identity (involutive)."""
+    def test_sigma_rotation(self):
         for p in range(4):
             r = rotate(Perspective.SIGMA, p)
-            rr = rotate(Perspective.SIGMA, r)
-            # S₃ rotation is order 2 for transpositions, order 3 for cycles.
-            # σ-rotation may not be self-inverse; check it doesn't crash.
-            assert 0 <= rr <= 3
+            assert 0 <= r <= 3
+
+    def test_tau_rotation(self):
+        for p in range(4):
+            r = rotate(Perspective.TAU, p)
+            assert 0 <= r <= 3

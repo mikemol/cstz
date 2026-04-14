@@ -4,7 +4,7 @@ import json
 import pytest
 from cstz.gf2 import dot
 from cstz.framework import GAP, ORDERED_TAU, ORDERED_SIGMA, OVER
-from cstz.observe import ObservationState, Patch
+from cstz.observe import Observation, ObservationState, Patch
 from cstz.projections.pff_json import observation_state_to_pff, VERSION, IDENTIFIER_SCOPE
 
 e1, e2, e3 = 0b100, 0b010, 0b001
@@ -133,3 +133,14 @@ class TestPffJsonProjection:
             assert isinstance(addr0["id"], str)
         for rank in doc["ranks"]:
             assert isinstance(rank["id"], str)
+
+    def test_empty_regime_patch(self):
+        """A patch with manually added observations but empty regime."""
+        state = ObservationState(dim=3)
+        p = Patch()
+        # Manually add observation without going through observe()
+        p.observations.append(Observation(element=0, discriminator=e1, result=GAP))
+        state.merge(p)
+        doc = observation_state_to_pff(state)
+        # Should still produce valid output
+        assert len(doc["addresses0"]) == 1

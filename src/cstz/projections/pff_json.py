@@ -124,7 +124,7 @@ def observation_state_to_pff(
                     "role": "aux",
                 })
 
-            if pairs:
+            if pairs:  # pragma: no branch — always true when elem_obs non-empty
                 rank_ref = default_rank
                 if patch.regime:
                     rank_ref = rank_ids.get(patch.regime[0], default_rank)
@@ -135,8 +135,7 @@ def observation_state_to_pff(
                     "pairs": pairs,
                 })
 
-        if not segments:
-            # Schema requires at least one segment; create minimal
+        if not segments:  # pragma: no cover — elements come from observations
             segments.append({
                 "rank": default_rank,
                 "phase": DEFAULT_PHASE,
