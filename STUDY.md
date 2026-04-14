@@ -82,15 +82,39 @@ postulate is purely structural).
 
 | ID | File:line | Name | Informal statement | Runtime check |
 |----|-----------|------|--------------------|---------------|
-| P1 | `agda/CSTZ/Axiom/ProfileLinearity.agda:25` | `profile-linearity` | `eval (d₁ +V d₂) a ≡ eval d₁ a +F eval d₂ a` | `cstz.axioms.check_profile_linearity`; exhaustive at n via `cstz.verification.check_profile_linearity_exhaustive` |
-| P2 | `agda/CSTZ/Axiom/EvalLinearity.agda:26` | `eval-linearity` | `eval d (y₁ +V y₂) ≡ eval d y₁ +F eval d y₂` | `cstz.axioms.check_eval_linearity`; exhaustive via `cstz.verification.check_eval_linearity_exhaustive` |
-| P3 | `agda/CSTZ/Axiom/Operationalist.agda:25` | `operationalist` | no discriminator separates `a`, `b` ⇒ `a ≡ b` | `cstz.axioms.check_operationalist` (checks the antecedent; conclusion is the axiom) |
-| P4 | `agda/CSTZ/Exterior/Boundary.agda:87` | `∂∘∂≡0` | `∂ (∂ f) t ≡ 𝟘` for every exterior element | `cstz.verification.check_boundary_squared` (all basis elements); `check_boundary_squared_all` (all 2^(2^n) elements, exhaustive at n=3) |
-| P5 | `agda/CSTZ/Homotopy/Exhaustivity.agda:39` | `leibniz` | graded Leibniz for `∂` on a `·F`-product (placeholder type) | — |
+| P1 | `agda/CSTZ/Axiom/ProfileLinearity.agda:26` | `profile-linearity` | `eval (d₁ +V d₂) a ≡ eval d₁ a +F eval d₂ a` | `cstz.axioms.check_profile_linearity`; exhaustive at n via `cstz.verification.check_profile_linearity_exhaustive` |
+| P2 | `agda/CSTZ/Axiom/EvalLinearity.agda:27` | `eval-linearity` | `eval d (y₁ +V y₂) ≡ eval d y₁ +F eval d y₂` | `cstz.axioms.check_eval_linearity`; exhaustive via `cstz.verification.check_eval_linearity_exhaustive` |
+| P3 | `agda/CSTZ/Axiom/Operationalist.agda:26` | `operationalist` | no discriminator separates `a`, `b` ⇒ `a ≡ b` | `cstz.axioms.check_operationalist` (checks the antecedent; conclusion is the axiom) |
+| P4 | `agda/CSTZ/Exterior/Boundary.agda:88` | `∂∘∂≡0` | `∂ (∂ f) t ≡ 𝟘` for every exterior element | `cstz.verification.check_boundary_squared` (all basis elements); `check_boundary_squared_all` (all 2^(2^n) elements, exhaustive at n=3) |
+| P5 | `agda/CSTZ/Homotopy/Exhaustivity.agda:41` | `leibniz` | graded Leibniz for `∂` on a `·F`-product (placeholder type) | — |
 | P6 | `agda/CSTZ/Homotopy/Exhaustivity.agda:48` | `exhaustive-filling` | every cycle `R` admits a filling `C` in the extended space | — |
-| P7 | `agda/CSTZ/Sets/Foundation.agda:72` | `chain-depth-bound` | `depth ≤ n` for any ∈-chain in `GF(2)^n` | — (mathematically tied to `check_risc`, `check_fixed_point_stability`) |
+| P7 | `agda/CSTZ/Sets/Foundation.agda:73` | `chain-depth-bound` | `depth ≤ n` for any ∈-chain in `GF(2)^n` | — (mathematically tied to `check_risc`, `check_fixed_point_stability`) |
 | P8 | `agda/CSTZ/Category/Yoneda.agda:58` | `a≡b` (local) | closes `yoneda-faithful` pending operationalist/finiteness | — |
-| P9 | `agda/CSTZ/Verification/ChainBound.agda:48` | `chain-bound` | any chain of depth `k` in `GF(2)^n` satisfies `k ≤ n` | — (consistent with P7) |
+| P9 | `agda/CSTZ/Verification/ChainBound.agda:49` | `chain-bound` | any chain of depth `k` in `GF(2)^n` satisfies `k ≤ n` | — (consistent with P7) |
+
+Line numbers above point to the declaration line (not the surrounding
+`postulate` keyword). They are produced mechanically by
+`scripts/count_postulates.py`, which strips Agda's nestable block
+comments and line comments, then walks each file tracking indent levels
+to distinguish block-style `postulate` headers from inline
+`postulate <decl>` forms and continuation lines. Re-running the script
+is the canonical way to verify this table:
+
+```
+$ python3 scripts/count_postulates.py
+agda/CSTZ/Axiom/EvalLinearity.agda:27    eval-linearity
+agda/CSTZ/Axiom/Operationalist.agda:26   operationalist
+agda/CSTZ/Axiom/ProfileLinearity.agda:26 profile-linearity
+agda/CSTZ/Category/Yoneda.agda:58        a≡b
+agda/CSTZ/Exterior/Boundary.agda:88      ∂∘∂≡0
+agda/CSTZ/Homotopy/Exhaustivity.agda:41  leibniz
+agda/CSTZ/Homotopy/Exhaustivity.agda:48  exhaustive-filling
+agda/CSTZ/Sets/Foundation.agda:73        chain-depth-bound
+agda/CSTZ/Verification/ChainBound.agda:49 chain-bound
+---
+Total postulate declarations: 9
+Files scanned: 97
+```
 
 Only P1–P4 have first-class computational witnesses in Python. P5–P9
 remain structural assumptions in Agda, justified in the paper's
