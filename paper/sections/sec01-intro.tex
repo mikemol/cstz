@@ -1,0 +1,376 @@
+%----------------------------------------------------------------------
+\section{Introduction}
+%----------------------------------------------------------------------
+
+Zermelo--Fraenkel set theory with Choice (ZFC) takes membership
+($\in$) as an undefined primitive and regulates it by axioms.
+The axiom of separation, for instance, exists primarily to prevent
+the formation of Russell's set. The law of excluded middle is
+inherited from the ambient classical logic. Boolean complementation
+--- $x \notin A$ if and only if $x \in A^c$ --- is available by default.
+
+We propose an alternative starting point: \emph{discrimination}.
+Rather than asking whether $x \in A$ as a pre-given fact, we ask
+whether a discriminator $d$ can separate $x$ from the rest of a
+collection $S$ under a discrimination regime $\kappa$. The key
+departure from the classical account is:
+
+\begin{enumerate}[label=(\roman*)]
+  \item Membership is a three-place relation: element, collection,
+    discriminator.
+  \item The algebra of discriminators is the exterior algebra
+    $\bigwedge(\GF(2)^n)$, not Boolean algebra.
+  \item Boolean complementation is not given; it is an achievement,
+    local to a dimension of $\kappa$ where exhaustiveness and
+    exclusivity have been established.
+  \item The discrimination structure $\kappa$ grows monotonically:
+    articulating a new predicate \emph{is} a $\kappa$-evolution.
+    The observer is not independent of the system.
+\end{enumerate}
+
+The framework is guided by the following principle, which
+we adopt as an explicit foundational axiom --- comparable
+in status to ZFC's axiom of infinity or the law of excluded
+middle in classical logic:
+
+\begin{definition}[Operationalist axiom]\label{def:operationalist}
+If a distinction cannot be witnessed by any discriminator
+in any $\kappa$-state, it is not a valid distinction within
+the framework. Equivalently: if no $\kappa$-evolution
+produces a discriminator that separates two claims, the
+claims are $\kappa$-equivalent and hence identical by
+extensionality (Theorem \ref{thm:ext}).
+\end{definition}
+
+In informal terms: \emph{if a distinction is real, it must
+be constructible; if constructible, it must be behaviorally
+reachable; if reachable, it must be observable; if
+observable, it must be coverable; if not, it is not a valid
+runtime distinction.} This is a \emph{choice} about what
+the framework admits as meaningful, with strong engineering
+motivation (a framework that admits unobservable distinctions
+cannot be implemented, tested, or falsified), but it is not
+a forced mathematical conclusion.
+
+\subsection{Reading guide: how to verify this paper's claims}
+\label{sec:reading-guide}
+
+The paper contains 125 formal objects across 10 sections.
+Before encountering them, the reader should know three
+things: where each claim is verified, what is not claimed,
+and how much of the paper depends on which axioms.
+
+\medskip
+\noindent\textbf{Axiom-class distribution.}
+The paper rests on three commitments beyond the algebra:
+profile linearity (\textsf{P}), evaluation linearity
+(\textsf{E}), and the operationalist axiom (\textsf{O}).
+Of the 125 formal objects: 101 (81\%) depend only on
+the algebra. 9 additionally require profile linearity.
+6 require both linearities. 8 require the operationalist
+axiom. 1 requires all three. The operationalist axiom
+--- the most philosophically contentious commitment ---
+touches 6\% of the paper's formal content.
+
+\medskip
+\noindent\textbf{Verification map.}
+Each theorem's proof lives in the spine (\S\S3--9); each
+theorem's component-by-component check lives in Appendix
+B. Toulmin footnotes at each theorem state: axiom class,
+dependency depth, verification pointer, warrant, qualifier,
+finite-$\kappa$ validity, and novelty status.
+
+\begin{center}
+\scriptsize
+\begin{tabular}{l|c|c|l}
+\textbf{Claim} & \textbf{Class} & \textbf{Status} &
+  \textbf{Verification} \\
+\hline
+Extensionality (4.2) & \textsf{A} & \cmark &
+  Tautological by construction \\
+Russell exclusion (4.5) & \textsf{AEP} & \cmark &
+  B.2; affine offset explicit \\
+Foundation (4.13) & \textsf{AP} & \cmark &
+  B.16, B.34; depth $\leq \dim(V)$ \\
+Choice, finite (4.33i) & \textsf{A} & \cmark &
+  B.17, B.31; measure $= \dim(V/\kappa)$ \\
+Choice, infinite (4.33ii) & \textsf{AO} & \omark &
+  Axiom-dependent [O3] \\
+Indistinguishability (4.26) & \textsf{AO} & \cmark &
+  B.35; stabilization + linearity \\
+Exhaustivity (5.7) & \textsf{A} & \cmark &
+  B.18; filling = $\kappa$-evolution (Leibniz) \\
+Chain complex (5.5) & \textsf{A} & \cmark &
+  Double-sum cancellation explicit \\
+Groupoid (5.10) & \textsf{A} & \cmark &
+  B.19; each axiom checked \\
+Univalence (5.12) & \textsf{AO} & \cmark &
+  B.36; $\bigcap \kappa^\perp = \{0\}$ \\
+2-cat axioms (6.8) & \textsf{A} & \cmark &
+  B.20; interchange via GF(2)$^2$ profiles \\
+Adjunction (6.11) & \textsf{A} & \cmark &
+  B.1; all components verified \\
+Yoneda (6.17) & \textsf{A} & \cmark &
+  B.21; G7 resolved (presheaf boundary) \\
+Limits (6.20) & \textsf{A} & \cmark &
+  B.26; all five types enumerated \\
+$(n,1)$-structure (7.1) & \textsf{A} & \cmark &
+  B.29; commutativity of $\wedge$ $\Rightarrow$ self-inverse \\
+Dynamics transfer (7.12) & \textsf{A} & \cmark &
+  B.30; linearities swap under $S_3$ \\
+Free $(n,k)$ (7.15) & \textsf{A} & \cmark &
+  B.37; groupoid + Grassmannian \\
+Sym.\ monoidal (8.2) & \textsf{A} & \cmark &
+  Strict: $\wedge$ literally assoc., all coherences id \\
+Delooping (8.4) & \textsf{A} & \cmark &
+  B.22; rotation explicit \\
+Periodic table (8.8) & \textsf{A} & \cmark &
+  B.7, B.39; recognizer rotation \\
+Mon.\ closure (8.13) & \textsf{A} & \cmark &
+  B.22; naturality via strict unit \\
+Self-enrichment (9.2) & \textsf{A} & \cmark &
+  B.8; all components checked \\
+$\Omega$ classifier (9.4) & \textsf{A} & \cmark &
+  B.9, B.27; composites via linearity \\
+Fibered topos (9.6) & \textsf{AP} & \cmark &
+  B.4, B.14, B.27, B.38; O4 resolved \\
+Proof theory (9.11) & \textsf{A} & \cmark &
+  B.10; truth tables explicit \\
+FOL internal (9.12) & \textsf{AP} & \cmark &
+  B.15; all rules constructed \\
+Self-hosting (9.14) & \textsf{AP} & \cmark &
+  B.11; tables explicit \\
+Fixed point (9.15) & \textsf{A} & \cmark &
+  B.12, B.33; unique (1-dim), $S_3$-inv \\
+Irremovable (9.16) & \textsf{AP} & \cmark &
+  B.13; O5 resolved (dim = 1) \\
+Sheaf topos (9.18) & \textsf{AP} & \cmark &
+  B.14, B.28; topology enumerated \\
+Fano closure (9.20) & \textsf{A} & \cmark &
+  B.5; all 7 lines explicit \\
+Convergence (9.22) & \textsf{A} & \cmark &
+  B.23; standard finite geometry \\
+Pairing (4.18) & \textsf{A} & \cmark &
+  B.32; equiv.\ class, not char.\ function
+\end{tabular}
+\end{center}
+
+\noindent Legend: \cmark\ = verified,
+\gmark\ = gap (specific issue identified),
+\omark\ = open-acknowledged.
+
+\medskip
+\noindent\textbf{What is not claimed (open questions).}
+
+\emph{Open questions} (acknowledged, not claimed):
+\begin{description}[nosep,leftmargin=0.8cm]
+  \item[O1--O6] All resolved except O3 (by design):
+    $\in$-induction, infinite choice, join-semilattice,
+    fixed-point uniqueness [\textbf{resolved}: $\dim = 1$],
+    join-semilattice [\textbf{resolved}: $V^*$ is a
+    vector space $\Rightarrow$ subspace lattice], CD hexagon axioms.
+\end{description}
+
+\medskip
+\noindent\textbf{Gap priorities} (from SPPF downstream
+impact analysis).
+
+\emph{Tier 1 --- load-bearing} (closing these unblocks the
+most downstream results):
+\begin{description}[nosep,leftmargin=0.8cm]
+  \item[G6] Interchange law (10 downstream).
+    \textbf{Closed.} Cross terms cancel via $1+1=0$;
+    grade-4 collapses to grade 2 in $\GF(2)^2$.
+    Unblocks G8, G16.
+  \item[G4] Exhaustivity filling (8 downstream).
+    \textbf{Closed.} Leibniz rule: $\partial(R \wedge
+    e_{n+1}) = R$. Unblocks G2, G8, G16.
+  \item[G12] Symmetric monoidal (8 downstream).
+    \textbf{Closed.} Strict monoidal: all coherences
+    are identities. Unblocks G13, G16.
+\end{description}
+
+\emph{Tier 2 --- structural} (unblocks \S9 claims):
+\begin{description}[nosep,leftmargin=0.8cm]
+  \item[G13] Monoidal closure naturality (6 downstream).
+    \textbf{Closed.} Strict unit: $d_h \wedge 1 = d_h$.
+    Unblocks self-enrichment, topos, FOL.
+  \item[G8] Limits (5 downstream). \textbf{Closed.}
+    All five limit types enumerated; universality from
+    $\GF(2)$-linearity. Unblocks topos.
+  \item[G14] Power objects (5 downstream).
+    \textbf{Closed.} Six cases; composites by linearity;
+    Galois-equivariant transitions. Unblocks topos
+    (O4 resolved).
+\end{description}
+
+\emph{Tier 3 --- localized} (1--2 downstream results):
+G3 (indistinguishability $\omega$-chain), G17 (pairing
+linearity), G1 (foundation chain bound), G2 (choice
+termination), G9/G10 (higher structure), G15 (fixed-point
+stability).
+
+\emph{Tier 4 --- terminal or downgradable} (0 downstream):
+G5 (univalence: lift from analogy to native
+univalence), G11 (free $(n,k)$ coherence),
+G16 (sheaf topology non-triviality).
+
+\emph{All 17 gaps closed. All 33 audited claims verified
+(see Appendix D for the technique matrix and rotation principle).}
+
+\emph{Identified gaps} (claimed but incompletely verified):
+\begin{description}[nosep,leftmargin=0.8cm]
+  \item[G1] Foundation chain bound: \textbf{closed}.
+    Each link $a_i \ni a_{i+1}$ produces a link vector
+    $v_i = a_i + a_{i+1} \in \GF(2)^n$. A dependent
+    link vector is a derived relation, not a new
+    membership step. Chain depth $=
+    \dim(\mathrm{span}\{v_i\}) \leq n = \dim(V)$.
+    Sharp: achieved by basis chain. Galois: each
+    independent link reduces $\dim(V/\kappa)$ by 1.
+    (\S4, Thm 4.13; Appendix B.34.)
+  \item[G2] Finite choice termination: \textbf{closed}.
+    Decreasing measure $m(\kappa) = \dim(V/\kappa)$.
+    Each evolution adds one discriminator:
+    $m(\kappa') = m(\kappa) - 1$. Terminates in at most
+    $n = \dim(V)$ steps. Evolutions are global (shared
+    across sub-families). At $m = 0$, Galois group is
+    trivial, all classes are singletons, selection trivial.
+    (\S4, Thm 4.33; Appendix B.31.)
+  \item[G3] Indistinguishability $\omega$-chain:
+    \textbf{closed}. Three steps: (1) ascending chain
+    stabilizes ($V$ finite-dim), (2) limit regime is
+    finite span of individual $d_i$'s, (3) profile
+    linearity: linear combination of non-separating
+    discriminators is non-separating. Galois: residual
+    symmetry group contains the unbreakable symmetries.
+    (\S4, Prop 4.26; Appendix B.35.)
+  \item[G4] Exhaustivity: \textbf{closed}. The filling
+    is $C = R \wedge e_{n+1}$ for any independent $e_{n+1}$.
+    Leibniz: $\partial(R \wedge e_{n+1}) = \partial R
+    \wedge e_{n+1} + R \cdot 1 = R$. $\kappa$-evolution
+    itself is the constructive filling procedure.
+    (\S5, Thm 5.7; Appendix B.18.)
+  \item[G5] Native univalence: \textbf{closed}. The
+    path space is $\kappa^\perp$ (the annihilator). The
+    operationalist axiom says $\bigcup \kappa = V$,
+    so $\bigcap \kappa^\perp = V^\perp = \{0\}$.
+    Persistent equivalence ($a + b \in \bigcap
+    \kappa^\perp$) implies $a + b = 0$, i.e.\ $a = b$.
+    The ua map and idtoeqv are inverses. Path space is
+    contractible (single point). Univalence is
+    Galois-group exhaustion.
+    (\S5, Prop 5.12; Appendix B.36.)
+  \item[G6] Interchange law: \textbf{closed}.
+    Both paths through the interchange square yield
+    $p(g \circ f) + p(g' \circ f') \in \GF(2)^2$;
+    cross terms cancel because $1+1=0$. The grade-4
+    expression collapses to grade 2 via the Klein
+    four-group's characteristic 2. (\S6, Thm 6.8;
+    Appendix B.20.)
+  \item[G7] Yoneda, infinite case: \textbf{resolved}
+    via Galois structure. At each finite $\kappa$, Yoneda
+    holds (verified). The pro-system of finite Yoneda
+    lemmas has transition maps (restriction functors
+    between fibers) that are equivariant under the Galois
+    group inclusion $\mathrm{Gal}(V/\kappa) \hookrightarrow
+    \mathrm{Gal}(V/\kappa')$ for $\kappa' \subseteq \kappa$.
+    Unparsed data is the Galois group's orbit: data whose
+    categorical structure is undetermined by the current
+    $\kappa$. The orbit shrinks as $\kappa$ grows (Galois
+    group reduction). ``Infinite Yoneda'' is the inverse
+    limit of this Galois-equivariant pro-system, not a
+    single lemma applied to an infinite category.
+    (\S6, Thm 6.17; \S\ref{sec:galois}.)
+  \item[G8] Limits: \textbf{closed}. Exhaustive
+    construction of terminal object, product, equalizer,
+    pullback, and general finite limit. Universality
+    from linearity over $\GF(2)$: factoring morphisms
+    are unique because linear maps are determined by
+    basis values. Filling via $\kappa$-evolution when
+    constraints require new discriminators.
+    (\S6, Prop 6.20; Appendix B.26.)
+  \item[G9] $(n,1)$-structure: \textbf{closed}. Over
+    $\GF(2)$, $\wedge$ is commutative, so every grade-$k$
+    element ($k \geq 2$) equals its own reversal:
+    $d_k \wedge \cdots \wedge d_1 = d_1 \wedge \cdots
+    \wedge d_k$. Every $k$-morphism is self-inverse.
+    Direction requires asymmetry, which only the
+    $\tau/\sigma$ population interface provides, and
+    that interface exists only at grade 1.
+    (\S7, Thm 7.1; Appendix B.29.)
+  \item[G10] Dynamics transfer: \textbf{closed}. The
+    evaluation map $\mathrm{ev}(d,a) = d(a)$ is bilinear.
+    $S_3$ rotation swaps arguments:
+    $\mathrm{ev}'(a,d) = \mathrm{ev}(d,a)$. Profile
+    linearity and evaluation linearity \emph{swap} under
+    rotation; since both hold, both are preserved.
+    The bilinear pairing is $GL$-invariant; $S_3 \subset GL$.
+    (\S7, Prop 7.12; Appendix B.30.)
+  \item[G11] Free $(n,k)$ Segal conditions:
+    \textbf{closed}. Groupoids automatically satisfy
+    Segal conditions (unique fillers). The $k$-cells
+    are the Grassmannian $\mathrm{Gr}(k, V)$ over
+    $\GF(2)$: decomposable $k$-forms, each determined
+    by $k$ independent 1-forms. The Segal map is a
+    bijection. Non-decomposable elements are chain-group
+    elements, not $k$-morphisms.
+    (\S7, Thm 7.15; Appendix B.37.)
+  \item[G12] Symmetric monoidal: \textbf{closed}.
+    $\wedge$ is strictly associative with strict unit;
+    all coherence morphisms (associator, unitors,
+    braiding) are identities. Pentagon, triangle, hexagon
+    trivially satisfied. Galois mirror: joins of
+    $\kappa$-states are strict; Galois group reduction
+    under joins = intersection of subgroups.
+    (\S8, Prop 8.2; Appendix B.22.)
+  \item[G13] Monoidal closure naturality: \textbf{closed}.
+    Precomposition with $h \otimes \mathrm{id}_B =
+    d_h \wedge 1 = d_h$ (strict unit). Naturality square
+    commutes because restricting $d_h \wedge 1$ to the
+    $A$-component yields $d_h$. Galois: functoriality of
+    restriction along fiber inclusions.
+    (\S8, Thm 8.13; Appendix B.22.)
+  \item[G14] Power objects: \textbf{closed}. Six cases
+    enumerated: single-discriminator, linear combination,
+    wedge product, general at stage $\kappa$, at joins,
+    and the Galois perspective (equivariant transition
+    functors under Galois reduction). Subobjects form a
+    linear subspace of $\operatorname{Hom}(B, \Omega)$;
+    uniqueness from $\GF(2)$-linearity. The fibered
+    colimit classifies every subobject classifiable at
+    any stage.
+    (\S9, Thms 9.4, 9.6; Appendix B.27.)
+  \item[G15] Fixed-point stability: \textbf{closed}.
+    $\bigwedge^2(\GF(2)^2)$ is 1-dimensional: exactly
+    one non-zero 2-cell exists ($e_1 \wedge e_2$).
+    No alternative to perturb to. Perturbation to zero
+    triggers irremovability (reinstatement). The 2-cell
+    is $GL(2,\GF(2))$-invariant ($\det = 1$ over
+    $\GF(2)$). Also resolves [O5]: uniqueness from
+    dimensionality, not $H_2 = 0$.
+    (\S9, Thm 9.15; Appendix B.33.)
+  \item[G16] Sheaf topology: \textbf{closed}. Exhaustive
+    enumeration: single-axis families (3, each 1-dim)
+    do not cover. Two-axis families (12, each spanning
+    $\GF(2)^2$) cover. Not trivial (proper subfamilies
+    cover), not discrete (single-axis sieves fail).
+    The topology is the unique $S_3$-invariant topology
+    determined by the triangle identity.
+    (\S9, Thm 9.18; Appendix B.28.)
+  \item[G17] Pairing: \textbf{closed}. The pair
+    $\{a,b\}$ is a $\kappa$-equivalence class, not a
+    characteristic function. Condition: $a + b \in
+    \kappa^\perp$ (annihilator). No linear ``is $a$
+    or is $b$'' predicate needed. The pair is defined
+    by what $\kappa$ \emph{cannot} distinguish.
+    Verified in concrete model.
+    (\S4, Prop 4.18; Appendix B.32.)
+\end{description}
+
+\medskip
+\noindent\textbf{Gap priorities} (from SPPF downstream
+impact analysis).
+
+
+

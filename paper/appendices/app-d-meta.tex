@@ -1,0 +1,739 @@
+%----------------------------------------------------------------------
+\section{Meta-analysis: the technique matrix}\label{app:meta}
+%----------------------------------------------------------------------
+
+This appendix records the structure discovered by
+profiling the paper's 47 audited claims against the
+six closure techniques. The analysis was conducted
+after all 17 gaps were closed and revealed higher-order
+structure in the proof methodology.
+
+\subsection{The six techniques}
+
+Every closure in the paper uses one or more of:
+\begin{description}[nosep,leftmargin=1.5cm]
+  \item[T1: $1{+}1{=}0$] Characteristic 2 of $\GF(2)$:
+    signs collapse, cross terms cancel, self-inverse.
+  \item[T2: Leibniz] The graded Leibniz rule
+    $\partial(a \wedge b) = \partial a \wedge b +
+    a \wedge \partial b$ over $\GF(2)$.
+  \item[T3: Linearity] $\GF(2)$-linearity of evaluation,
+    profiles, constraints. Kernels, solution spaces,
+    unique factorization.
+  \item[T4: Strict $\wedge$] Strict associativity,
+    strict unit, strict commutativity of $\wedge$.
+    All coherence morphisms are identities.
+  \item[T5: SES] The short exact sequence
+    $0 \to \kappa \to V \to V/\kappa \to 0$ and the
+    tensor decomposition
+    $\bigwedge(V) \cong \bigwedge(\kappa) \otimes
+    \bigwedge(V/\kappa)$.
+  \item[T6: Galois] The Galois group
+    $GL(V/\kappa, \GF(2))$ and its reduction under
+    $\kappa$-evolution. Equivariance, invariance,
+    orbit exhaustion.
+\end{description}
+
+\subsection{The closure--technique matrix}
+
+Each of the 47 audited claims is assigned a binary
+profile in $\GF(2)^6$ recording which techniques its
+proof uses. The matrix has 18 distinct profiles spanning
+all of $\GF(2)^6$ (rank 6).
+
+\begin{center}
+\scriptsize
+\begin{tabular}{l|cccccc|c}
+ & T1 & T2 & T3 & T4 & T5 & T6 & Cat \\
+\hline
+\multicolumn{8}{l}{\emph{Equivalence class}
+  $[1{+}1{=}0]$: 10 items} \\
+Non-default Bool 4.11 &
+  $\bullet$ & & & & & & V \\
+Sym difference 4.19 &
+  $\bullet$ & & & & & & V \\
+Chain complex 5.5 &
+  $\bullet$ & & & & & & V \\
+Three perspectives 7.11 &
+  $\bullet$ & & & & & & V \\
+Deloop collapse 8.5 &
+  $\bullet$ & & & & & & V \\
+Proof theory 9.11 &
+  $\bullet$ & & & & & & V \\
+Self-modeling 9.21 &
+  $\bullet$ & & & & & & V \\
+Banach--Tarski 4.37 &
+  $\bullet$ & & & & & & V \\
+Commutativity B.2 &
+  $\bullet$ & & & & & & V \\
+Periodic table 8.8 &
+  $\bullet$ & & & & & & O \\[4pt]
+\multicolumn{8}{l}{\emph{Equivalence class}
+  $[\mathrm{SES} + \mathrm{Galois}]$: 6 items} \\
+FOL internal 9.12 &
+  & & & & $\bullet$ & $\bullet$ & V \\
+Choice finite (G2) &
+  & & & & $\bullet$ & $\bullet$ & C \\
+Univalence (G5) &
+  & & & & $\bullet$ & $\bullet$ & C \\
+Yoneda (G7) &
+  & & & & $\bullet$ & $\bullet$ & C \\
+Pairing (G17) &
+  & & & & $\bullet$ & $\bullet$ & C \\
+Choice infinite 4.33ii &
+  & & & & $\bullet$ & $\bullet$ & O \\[4pt]
+\multicolumn{8}{l}{\emph{Equivalence class}
+  $[\mathrm{Linear}]$: 4 items} \\
+Order-indep 3.15 &
+  & & $\bullet$ & & & & V \\
+Empty set 4.17 &
+  & & $\bullet$ & & & & V \\
+Forgetful/free 6.10 &
+  & & $\bullet$ & & & & V \\
+Bool dep type 9.13 &
+  & & $\bullet$ & & & & V \\[4pt]
+\multicolumn{8}{l}{\emph{12 further classes with
+  1--3 members (see text)}}
+\end{tabular}
+\end{center}
+
+\noindent Cat: V = verified from start, C = gap-closed,
+O = open/acknowledged.
+
+\subsection{The technique co-occurrence tree}
+\label{sec:technique-tree}
+
+The co-occurrence matrix $C_{jk}$ counts how many items
+use both technique $j$ and technique $k$. Reducing
+modulo 2 yields a symmetric matrix over $\GF(2)$ whose
+off-diagonal entries define an adjacency graph.
+
+This graph is a \emph{tree} on six vertices with five
+edges:
+\begin{center}
+$\underset{\text{(7)}}{\text{T1}}
+\;{-}\;
+\underset{\text{(1)}}{\text{T2}}
+\;{-}\;
+\underset{\text{(9)}}{\text{T5}}
+\;{-}\;
+\underset{\text{(13)}}{\text{T6}}
+\;{\begin{array}{c} | \\ | \end{array}}$
+\\[2pt]
+$\underset{\text{(4)}}{\text{T4}} \quad\quad
+\underset{\text{(5)}}{\text{T3}}$
+\end{center}
+(Usage counts in parentheses.)
+
+The tree has three arms meeting at the Galois hub (T6):
+\begin{description}[nosep,leftmargin=1.5cm]
+  \item[Algebraic arm]
+    $\text{T1} - \text{T2} - \text{T5} - \text{T6}$.
+    How the exterior algebra computes: characteristic 2,
+    Leibniz rule, tensor decomposition.
+  \item[Coherence arm] $\text{T6} - \text{T4}$. How
+    composition works: strictness of $\wedge$.
+  \item[Constraint arm] $\text{T6} - \text{T3}$. How
+    populations behave: linearity of evaluation.
+\end{description}
+
+Strict (T4) and Linearity (T3) never co-occur in
+gap closures (and co-occur only once in the full 47
+items: self-enrichment 9.2). They operate on different
+grades of $\bigwedge(V)$: Strict on morphism structure,
+Linearity on population structure.
+
+\subsection{The Galois gap}
+
+The 27 pre-verified items use Galois (T6) in 19\% of
+proofs. The 18 gap-closed items use it in 78\%. The
+gaps were precisely the claims requiring the Galois
+structure that the paper had not yet recognized.
+
+The pre-verified profiles span a rank-5 subspace of
+$\GF(2)^6$; the gap-closed profiles span rank 6. The
+missing dimension was Leibniz (T2), used zero times in
+pre-existing proofs and once in the gap closure of
+exhaustivity (G4). The full technique space is occupied
+only after both the Galois structure and the Leibniz
+filling were brought in.
+
+Verified-only profiles are single-technique: $[1{+}1{=}0]$
+(10 items), $[\text{Linear}]$ (4), $[\text{SES}]$ (3).
+Gap-only profiles are compound:
+$[\text{Linear}{+}\text{SES}{+}\text{Galois}]$,
+$[1{+}1{=}0{+}\text{Strict}{+}\text{Galois}]$,
+$[1{+}1{=}0{+}\text{Leibniz}{+}\text{SES}]$.
+The gaps existed at the intersections of the technique
+space, where multiple arms needed to combine.
+
+\subsection{The rotation principle}
+\label{sec:rotation}
+
+Every proof can be \emph{rotated} through the Galois
+hub to produce an alternate proof using techniques from
+a different arm:
+\[
+  \text{Algebraic} \xrightarrow{\text{lift}}
+  \text{Galois} \xrightarrow{\text{project}}
+  \text{Coherence or Constraint}
+\]
+The three arms correspond to the three perspectives
+$\{\kappa, \sigma, \tau\}$. Rotating a proof is rotating
+the perspective from which the same mathematical content
+is viewed.
+
+\emph{Examples of rotation.}
+
+$\partial \circ \partial = 0$ (chain complex, 5.5):
+the algebraic proof cancels double-sums over $\GF(2)$.
+The coherence alternate: $\partial \circ \partial = 0$
+follows from strict graded-commutativity of $\wedge$.
+
+Interchange law (G6): the algebraic proof computes in
+the $\GF(2)^2$ profile space and shows cross terms
+cancel via $1{+}1{=}0$. The coherence alternate: the
+2-category is strict (G12), so interchange is
+$\mathrm{id} \circ \mathrm{id} = \mathrm{id}$.
+
+$(n,1)$-structure (G9): the coherence proof uses
+commutativity of $\wedge$ (factor permutations trivial
+over $\GF(2)$). The constraint alternate: grade-$k$
+evaluation on $S$ is a $k$-linear form, and $k$-linear
+forms for $k \geq 2$ are symmetric over $\GF(2)$.
+
+Russell exclusion (4.5): the algebraic proof shows the
+affine offset $\tau(0) = 1 \neq 0$. The Galois
+alternate: the Russell predicate is in the wrong
+$GL$-orbit (affine, not linear).
+
+\emph{The exception}: exhaustivity filling (G4). The
+Leibniz rule $\partial(R \wedge e_{n+1}) = R$ is the
+unique constructive filling procedure. A Galois
+alternate exists (any element not in the stabilizer of
+$R$ fills) but is existential, not constructive.
+Leibniz is the one dimension of the technique space
+with no constructive substitute.
+
+\emph{Consequence}: the 47 claims are not 47 independent
+facts. Modulo rotation, approximately 15--18 independent
+facts exist, each provable from 2--3 arms. The paper's
+claims are overdetermined by its axioms: each truth is
+visible from multiple perspectives, connected by the
+same $S_3$ that acts on the framework's objects.
+
+
+
+\subsection{The Leibniz exception: why one technique
+  doesn't rotate}
+\label{sec:leibniz-exception}
+
+The rotation principle (\S\ref{sec:rotation}) has one
+exception: the Leibniz rule (T2) cannot be replaced by
+a constructive alternate. This subsection explains why,
+drawing on the geometric origin of the rule.
+
+\emph{The graded Leibniz rule} for the boundary operator
+is:
+\[
+  \partial(a \wedge b) = \partial a \wedge b
+  + (-1)^{|a|}\, a \wedge \partial b.
+\]
+Over $\GF(2)$, $(-1)^{|a|} = 1$, so this simplifies to
+$\partial(a \wedge b) = \partial a \wedge b + a \wedge
+\partial b$.
+
+\emph{Geometric origin.}
+The rule is derived from the boundary of a product space.
+If $A$ is a $k$-cell and $B$ is an $l$-cell, then
+$A \times B$ is a $(k{+}l)$-cell whose boundary
+decomposes as:
+\[
+  \partial(A \times B) = (\partial A \times B)
+  \cup (A \times \partial B).
+\]
+The first term sweeps the boundary of $A$ over $B$
+(holding $B$ fixed). The second holds $A$ fixed and
+takes the boundary of $B$. In the exterior algebra,
+$\times$ becomes $\wedge$ and $\cup$ becomes $+$,
+yielding the Leibniz rule.
+
+\emph{Why it matters for the filling.}
+In the filling procedure (\S\ref{app:exhaustivity-full}),
+$A = R$ (the inner system's residue, a $k$-cycle in
+$\bigwedge(\kappa)$) and $B = e_{n+1}$ (the outer
+system's fresh discriminator, in $V/\kappa$). The product
+$R \wedge e_{n+1}$ lives in $\bigwedge(\kappa) \otimes
+\bigwedge(V/\kappa)$ --- it crosses the inner/outer
+tensor boundary. The Leibniz rule decomposes its
+boundary:
+\begin{align*}
+  \partial(R \wedge e_{n+1})
+  &= \underbrace{\partial R}_{\text{sweep: inner boundary
+       over outer}} \wedge\; e_{n+1}
+  + R \wedge \underbrace{\partial(e_{n+1})}_{\text{hold
+       inner, take outer boundary}} \\
+  &= 0 \cdot e_{n+1} + R \cdot 1 = R.
+\end{align*}
+The ``sweep'' term vanishes because $R$ is a cycle
+($\partial R = 0$: the inner system's hole has no
+boundary of its own). The ``hold'' term gives $R$
+because the outer discriminator's boundary is the
+augmentation ($\partial(e_{n+1}) = 1$: a single
+discriminator bounds to the grade-0 unit).
+
+\emph{The geometric content}: the inner system's hole
+$R$ IS the face that appears when the product
+(hole $\times$ fresh discriminator) is bounded. The
+outer system's contribution is the factor that, when
+multiplied and then bounded, reproduces the hole.
+
+\emph{The three derivation paths} of the Leibniz rule
+all have framework interpretations:
+
+\begin{enumerate}[nosep]
+  \item \emph{Geometric decomposition} (boundary of a
+    product). In the framework: the product
+    $\bigwedge(\kappa) \otimes \bigwedge(V/\kappa)$ is
+    the inner/outer tensor space. Its boundary
+    decomposes into ``inner boundary swept over outer''
+    and ``inner held while outer is bounded.'' This is
+    the filling computation.
+
+  \item \emph{Orientation consistency} (sign $(-1)^k$).
+    Over $\GF(2)$, the sign is trivially 1. The
+    orientation problem that makes the Leibniz rule
+    subtle in other settings --- the careful tracking of
+    which face is ``positive'' and which is ``negative''
+    --- collapses entirely. Characteristic 2 eliminates
+    the sign bookkeeping. This is why the filling works
+    cleanly: no orientation issues can obstruct it.
+
+  \item \emph{$\partial^2 = 0$ verification}. The sign
+    $s = (-1)^k$ is required for $\partial^2 = 0$.
+    Over $\GF(2)$, $s = 1$ always, and the requirement
+    is automatically satisfied. The chain complex
+    property (Proposition \ref{prop:chain}) is the
+    algebraic verification that the Leibniz rule is
+    self-consistent.
+\end{enumerate}
+
+\emph{Why Leibniz doesn't rotate.}
+The other five techniques describe \emph{properties}:
+$1{+}1{=}0$ is a property of the field, Linearity of
+the evaluation, Strict of the product, SES of the
+decomposition, Galois of the symmetry group. Properties
+can be viewed from different perspectives; rotating
+through $S_3$ yields the same property seen from a
+different vertex.
+
+Leibniz describes an \emph{operation}: the specific
+computation of $\partial$ across the tensor boundary
+$\bigwedge(\kappa) \otimes \bigwedge(V/\kappa)$. It is
+the mechanism of crossing, not a property of either
+side. The Galois alternate says ``a filling exists''
+(because the stabilizer is a proper subgroup). But it
+does not \emph{produce} the filling --- it identifies
+the space where it lives. Leibniz produces it: take $R$,
+wedge with $e_{n+1}$, apply $\partial$, get $R$ back.
+
+The constructive content is the crossing itself: the
+moment where the outer system's model of the inner
+system's hole becomes the inner system's new
+discriminator. This is the transfer from outer-interior
+to inner-exterior --- the one step in the framework that
+cannot be described as a symmetry, a linearity, or a
+structural identity, because it is the act of making an
+outer-exterior assertion from inner-exterior observation.
+
+The framework can model itself (self-hosting). It can
+describe what it cannot distinguish (the operationalist
+axiom). It can rotate between perspectives ($S_3$). But
+when it needs to \emph{fill a hole} --- to go from
+``this residue exists'' to ``here is the discriminator
+that resolves it'' --- it must compute $\partial$ across
+the tensor boundary. That computation is Leibniz, and
+Leibniz alone.
+
+
+\subsection{Unified claims and alternate constructions}
+\label{sec:unified}
+
+The rotation principle reveals that many seemingly
+distinct claims are aspects of a smaller number of
+general claims, viewed from different arms of the
+technique tree. This subsection identifies the general
+claims and provides alternate constructions.
+
+\subsubsection*{Claim A: Characteristic 2 collapses sign,
+  orientation, and self-reference}
+
+\emph{General statement.} Over $\GF(2)$, every element
+is its own additive inverse. Negation, sign, and
+orientation are trivial. Self-referential operations
+annihilate ($v \wedge v = 0$).
+
+\emph{Instances} (10 items in $[1{+}1{=}0]$):
+non-default Booleanness, symmetric difference,
+chain complex ($\partial^2 = 0$), three perspectives,
+delooping collapse ($\beta^2 = \mathrm{id}$), proof
+theory (four-valued truth tables), self-modeling,
+Banach--Tarski (type error), commutativity of $\wedge$,
+periodic table conjecture.
+
+\emph{Alternate via Strict}: each instance follows
+from the strict graded-commutativity of $\wedge$.
+For example, $\partial^2 = 0$ (chain complex) is
+the strict identity
+$\partial \circ \partial = \mathrm{id} + \mathrm{id}
+= 0$ in the endomorphism ring of the chain group.
+
+\emph{Alternate via Galois}: each instance is a
+$GL(V)$-invariant property. For example, commutativity
+of $\wedge$ is invariant under basis change; the
+four-valued truth tables are $S_3$-invariant.
+
+\subsubsection*{Claim B: The $\kappa$-split determines
+  all epistemic structure}
+
+\emph{General statement.}
+The short exact sequence $0 \to \kappa \to V \to
+V/\kappa \to 0$ and the Galois group
+$GL(V/\kappa, \GF(2))$ jointly determine what can be
+known, what can be selected, what can be identified,
+what can be represented, and what can be paired.
+
+\emph{Instances} (6 items in $[\mathrm{SES}{+}
+\mathrm{Galois}]$): FOL internal, finite choice,
+univalence, Yoneda, pairing, infinite choice.
+
+\emph{Alternate via Linearity}: each instance can be
+restated as a linear-algebraic fact about the
+annihilator $\kappa^\perp$.
+\begin{itemize}[nosep]
+  \item \emph{Univalence}: persistent equivalence means
+    $a + b \in \bigcap \kappa^\perp = \{0\}$,
+    hence $a = b$. The linear alternate: the kernel
+    of the evaluation map, intersected over all $\kappa$,
+    is $\{0\}$.
+  \item \emph{Pairing}: $\{a, b\}$ is a
+    $\kappa$-equivalence class iff
+    $a + b \in \kappa^\perp$. The linear alternate:
+    the pair is the kernel of all $d$ with
+    $d(a + b) = 0$.
+  \item \emph{Finite choice}: selection terminates in
+    $\dim(V)$ steps. The linear alternate: each step
+    reduces the dimension of the solution space by 1.
+  \item \emph{Yoneda}: the pro-system of finite Yonedas
+    is Galois-equivariant. The linear alternate: the
+    restriction functors are linear maps between
+    finite-dimensional hom-spaces.
+  \item \emph{FOL}: $\forall$ and $\exists$ are
+    adjunctions to pullback. The linear alternate: they
+    are $\GF(2)$-linear operations on the profile space
+    (universal quantification = intersection of kernels;
+    existential = span of images).
+\end{itemize}
+
+\subsubsection*{Claim C: $S_3$-invariance determines the
+  Fano/toroid structure}
+
+\emph{General statement.}
+Over $\GF(2)^2$, the Galois group $GL(2, \GF(2))
+\cong S_3$ has a unique invariant structure at each
+grade: the triangle identity at grade 1, the unique
+2-cell $e_1 \wedge e_2$ at grade 2, and the trivial
+determinant $\det = 1$. All claims about the toroid's
+structure are consequences of this unique invariance.
+
+\emph{Instances} (4 items in $[1{+}1{=}0{+}
+\mathrm{Galois}]$): self-hosting, Fano closure,
+fixed-point stability, sheaf topology.
+
+\emph{Alternate via SES}: each instance can be derived
+from the fiber structure.
+\begin{itemize}[nosep]
+  \item \emph{Self-hosting}: the internal $\GF(2)$ is
+    the fiber at the terminal $\kappa$-stage (the Boolean
+    restriction of $\Omega$).
+  \item \emph{Fano closure}: the seven Fano lines are the
+    seven non-zero elements of $\GF(2)^3$; three
+    independent fibers generate all seven via the
+    triangle identity.
+  \item \emph{Fixed-point stability}:
+    $\dim \bigwedge^2(\GF(2)^2) = 1$; the unique
+    top form is the section of the SES at grade 2.
+  \item \emph{Sheaf topology}: two 1-dimensional
+    sub-regimes (fibers from different axes) span
+    the 2-dimensional regime.
+\end{itemize}
+
+\subsubsection*{Claim D: Strict composition with
+  equivariant decomposition determines higher structure}
+
+\emph{General statement.}
+In a strict monoidal category where $\wedge$ is strictly
+associative, commutative, and unital, all coherence
+morphisms are identities and all higher cells are
+determined by their composable edges.
+
+\emph{Instances}: delooping (Strict${+}$Galois),
+Segal conditions (Strict${+}$Galois), symmetric monoidal
+coherence (1+1=0${+}$Strict${+}$Galois), closure
+naturality (Strict alone).
+
+\emph{Unification}: delooping and Segal share the
+profile $[\mathrm{Strict}{+}\mathrm{Galois}]$.
+Delooping says a strict monoidal category is a
+one-object 2-category; Segal says $k$-cells are
+determined by composable edges. These are the same
+claim: \emph{strict composition is fully determined
+by its 1-cells}, viewed at grade 2 (delooping) and
+grade $k$ (Segal).
+
+\emph{Alternate via 1+1=0}: strictness follows from
+$(-1)^k = 1$ over $\GF(2)$. Every sign that could
+make a coherence morphism non-trivial collapses.
+
+\emph{Alternate via Linearity}: the Grassmannian
+$\mathrm{Gr}(k, V)$ parametrizes decomposable
+$k$-forms. The Segal map is a linear isomorphism
+between the space of decomposable $k$-forms and
+the space of $k$-tuples of independent 1-forms.
+
+\subsubsection*{Claim E: Linearity of evaluation makes
+  constraints solvable}
+
+\emph{General statement.}
+Profile linearity and evaluation linearity make all
+constraint satisfaction problems over $\GF(2)$
+reducible to linear algebra: kernels exist, solution
+spaces are subspaces, factoring morphisms are unique.
+
+\emph{Instances}: limits ($1{+}1{=}0{+}\mathrm{Linear}
+{+}\mathrm{SES}$), power objects ($\mathrm{Linear}
+{+}\mathrm{SES}{+}\mathrm{Galois}$), foundation chain
+bound ($\mathrm{Linear}{+}\mathrm{SES}{+}\mathrm{Galois}$),
+$\omega$-chain stabilization ($\mathrm{Linear}{+}
+\mathrm{SES}{+}\mathrm{Galois}$).
+
+\emph{Unification}: foundation (G1), indistinguishability
+(G3), and power objects (G14) share the profile
+$[\mathrm{Linear}{+}\mathrm{SES}{+}\mathrm{Galois}]$.
+Foundation bounds chain depth by dimension. Power objects
+classify subobjects by dimension. Indistinguishability
+stabilizes by dimension. All three are:
+\emph{dimension counting in the annihilator lattice}.
+
+\emph{Alternate via 1+1=0}: each instance uses the
+fact that $\GF(2)$-linear constraints have well-defined
+kernels. This is a consequence of characteristic 2:
+the kernel of a $\GF(2)$-linear map is a subspace
+(because $\ker(f) = \{x : f(x) = 0\}$ is closed
+under $+$, and $+ = -$ over $\GF(2)$).
+
+\subsubsection*{Claim F: Russell exclusion and
+  interchange are the same claim}
+
+\emph{General statement.} Evaluation linearity excludes
+non-linear predicates. This exclusion manifests as
+paradox prevention (Russell) and coherence (interchange).
+
+Russell exclusion (4.5) and the interchange law (G6)
+share the profile $[1{+}1{=}0 + \mathrm{Linear}]$.
+
+\begin{itemize}[nosep]
+  \item \emph{Russell}: the self-referential predicate
+    $d_P$ has an affine offset $\tau(0) = 1 \neq 0$.
+    Evaluation linearity excludes it because affine
+    maps are not linear.
+  \item \emph{Interchange}: the cross terms
+    $g \cdot f'$ in the interchange square have
+    coefficient 2 in the profile-space computation.
+    Linearity over $\GF(2)$ kills them ($2 = 0$).
+\end{itemize}
+
+Both are: \emph{linearity over $\GF(2)$ rejects the
+affine/quadratic component}. Russell's paradox is an
+affine predicate; the interchange failure would be a
+quadratic cross term. The same linearity excludes both.
+
+\emph{Alternate via Galois}: Russell's predicate is in
+the wrong $GL$-orbit (affine, not linear). The
+interchange cross terms are in the wrong $GL$-orbit
+(quadratic, not bilinear).
+
+\emph{Alternate via Strict}: in a strict 2-category,
+interchange is the identity (no cross terms arise).
+Russell exclusion from strictness: a strict evaluation
+has no room for an affine offset.
+
+\subsubsection*{Claim G: The bilinear pairing is the
+  one structure}
+
+\emph{General statement.}
+The evaluation map $\mathrm{ev}(d, a) = \langle d, a
+\rangle$ is a bilinear pairing over $\GF(2)$. Profile
+linearity and evaluation linearity are its two
+components. All six techniques are properties of this
+pairing or operations on the spaces it connects:
+\begin{itemize}[nosep]
+  \item $1{+}1{=}0$: the field over which the pairing
+    is defined.
+  \item Leibniz: the boundary operator derived from the
+    pairing's compatibility with the product.
+  \item Linearity: the pairing is linear in the second
+    argument.
+  \item Strict: the pairing's product ($\wedge$) is
+    strictly associative.
+  \item SES: the pairing decomposes along the
+    $\kappa$-split.
+  \item Galois: the pairing is $GL$-invariant.
+\end{itemize}
+
+The six techniques are not six independent tools. They
+are six facets of one bilinear pairing over $\GF(2)$,
+and the 47 claims are 47 projections of this pairing
+onto different parts of the mathematical landscape.
+
+
+\subsection{Infinity is non-rotatability from inside}
+\label{sec:infinity-nonrotatable}
+
+The technique matrix upgrades the treatment of infinity
+from axiomatic dissolution to structural necessity.
+
+\emph{The five rotatable techniques are properties.}
+$1{+}1{=}0$ is true on both sides of the $\kappa$-split.
+Linearity holds inside and outside. Strict associativity,
+the SES decomposition, the Galois group structure --- all
+are symmetric across the inner/outer boundary. They can
+be rotated through $S_3$ because they describe the
+algebra, and the algebra is the same from every
+perspective.
+
+\emph{Leibniz is an operation, not a property.}
+$\partial(R \wedge e_{n+1}) = R$ takes a cycle in
+$\bigwedge(\kappa)$ and fills it with material from
+$\bigwedge(V/\kappa)$. It is inherently directional:
+from outer to inner, from complement to regime, from
+unknown to known. It cannot be rotated because it IS
+the asymmetry between perspectives. The other techniques
+describe what is true on either side of the boundary.
+Leibniz describes what happens when you cross it.
+
+\emph{The experience of infinity from inside.}
+From inside $\kappa$, each Leibniz crossing produces new
+wedge products (the new $e_{n+1}$ wedges with everything
+already in $\kappa$), which produce new residues, which
+demand new crossings. The process is self-feeding. Each
+filling creates the conditions for the next filling.
+From inside, the supply of crossings looks inexhaustible.
+
+From outside, each crossing reduces $\dim(V/\kappa)$ by
+exactly 1. The Galois group shrinks. The process
+terminates in $n$ steps.
+
+The inner system cannot rotate Leibniz to see it as an
+internal property, because Leibniz is the operation of
+acquiring external resources. From inside, ``there is
+always more to acquire'' is indistinguishable from ``the
+supply is infinite,'' because the operation that would
+resolve the distinction is the same operation that extends
+the regime. Looking and extending are the same act.
+
+\emph{Structural upgrade of Proposition
+\ref{prop:indistinguish}.}
+The original proof dissolves the actual/potential
+distinction via the operationalist axiom: no discriminator
+separates them, so they are identified. The technique
+matrix provides a sharper statement:
+
+\begin{quote}
+The actual/potential distinction is unresolvable because
+resolving it would require rotating the Leibniz technique
+into a property of the regime. The Leibniz technique is
+the unique element of the technique space that does not
+admit rotation (\S\ref{sec:leibniz-exception}). The
+non-rotatability is structural (proved from the technique
+co-occurrence tree), not axiomatic (assumed by fiat).
+\end{quote}
+
+The connection: Leibniz is the filling operation. Filling
+is $\kappa$-evolution. $\kappa$-evolution is what generates
+the inner system's experience of inexhaustibility. You
+cannot use Leibniz to determine whether the crossings
+terminate, because using Leibniz IS crossing. The tool
+and the question are the same act.
+
+\emph{The halting tower.}
+The reason the level-invariance holds at every level of
+the halting tower (Remark \ref{rem:hyper-recursive}) is
+not merely that each level faces the same structural
+situation. It is that the operation connecting levels
+(Leibniz filling at the meta-level) is the same
+non-rotatable operation as at the object level. The tower
+is self-similar because the technique that builds each
+level is the one technique that cannot be recharacterized
+as a property of the levels it builds.
+
+\emph{The 3.1\% figure.}
+At $n = 3$, only $8/256 = 3.1\%$ of Boolean functions are
+admissible as primitive discriminators (linear functionals
+over $\GF(2)$). This ratio $2^n / 2^{2^n}$ shrinks
+exponentially: $0.024\%$ at $n = 4$, roughly $10^{-300}$
+at $n = 10$. The primitive set becomes vanishingly small
+while remaining fully expressive through composition.
+
+This ratio is a \emph{figure of merit}, not a cost. The
+smaller the primitive set, the more work the composition
+mechanism ($\kappa$-evolution via Leibniz filling) does.
+The more work the composition mechanism does, the more
+algebraic invariants are maintained across every
+operation. The more invariants maintained, the more
+theorems follow structurally --- Russell exclusion,
+foundation bounds, the bilinear form, the chain complex,
+the Galois structure, all 47 claims.
+
+A framework admitting 50\% of functions as primitives
+would be expressively convenient and algebraically inert.
+Nothing would be excluded structurally; every pathology
+would need its own axiom. The theorems-per-axiom yield
+would be low.
+
+What the discrimination framework achieves is a
+\emph{compression ratio for mathematical foundations}:
+the primitive set is maximally small subject to the
+constraint that composition recovers full expressiveness.
+This is the same design principle as choosing
+characteristic 2: pay in primitive expressiveness,
+collect in structural yield. The 3.1\% and the $1+1=0$
+are the same choice, made at different levels.
+\subsection{Self-application}
+
+The framework discriminates its own proofs by the same
+structure it uses to discriminate data:
+\begin{itemize}[nosep]
+  \item Each claim has a technique profile in $\GF(2)^6$
+    (a ``discriminator'' on the proof space).
+  \item Claims with the same profile are
+    ``$\kappa$-equivalent'' (proved by the same methods).
+  \item The equivalence classes partition the paper by
+    epistemological type: epistemic, constructive,
+    coherent, geometric, operational, algebraic,
+    universal, symmetric, higher, minimal.
+  \item The rotation principle is the $S_3$ action on
+    the proof space: the same symmetry that permutes
+    $\{\kappa, \sigma, \tau\}$ permutes the three arms
+    of the technique tree.
+  \item The Galois group of the technique space acts on
+    the ``unseen proofs'': alternate constructions are
+    the Galois orbit of the original proof.
+\end{itemize}
+
+The $S_3$ acts on discriminators. It acts on data. It
+acts on perspectives. And it acts on proofs about all
+of the above. The technique matrix is the paper's own
+exterior algebra, graded by proof complexity, with the
+same Galois structure at the meta-level that the paper
+describes at the object level.

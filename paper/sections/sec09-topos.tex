@@ -1,0 +1,271 @@
+%----------------------------------------------------------------------
+\section{Self-Enrichment and Topos Structure}\label{sec:topos}
+%----------------------------------------------------------------------
+
+The monoidal closed structure of Section \ref{sec:monoidal}\footnote{Section-level Toulmin. \emph{Move}: self-enrichment, topos structure, self-hosting. \emph{ZFC comparison}: ZFC cannot model itself without G\"{o}del coding; the framework's self-enrichment is structural (three toroid vertices). Self-hosting (the framework reconstructing its own substrate) is a fixed-point property, not a G\"{o}del trick. \emph{Residue instance}: the irremovability theorem is the residue mechanism applied at the meta-level --- removing discrimination produces a homological gap whose specified filling is discrimination.}
+equips $\mathcal{C}(S,\kappa)$ with internal hom-objects.
+This section shows the category is canonically self-enriched,
+forms a topos with a four-valued internal logic, and
+exhibits self-hosting and fixed-point properties. Detailed
+verifications are in Appendix \ref{app:verifications}; here
+we give each result's structural reason.
+
+\subsection{Self-enrichment from triadic closure}
+
+\begin{definition}[Enrichment data]\label{def:enrichment-data}
+An enrichment of $\mathcal{C}$ over $(\mathcal{V}, \otimes, I)$
+requires: hom-objects $[A,B] \in \mathcal{V}$, composition
+morphisms $[B,C] \otimes [A,B] \to [A,C]$, and identity
+morphisms $I \to [A,A]$, satisfying associativity and
+unitality.
+\end{definition}
+
+\begin{theorem}[Canonical self-enrichment]\label{thm:self-enrich}\footnote{Axiom class \textsf{A} $\cdot$ depth 5 $\cdot$ \S\ref{app:self-enrichment-full}.  \emph{Warrant}: three enrichment ingredients = three vertices of the toroid. No choices required (canonical). Finite-$\kappa$: yes. Novel (three enrichment ingredients = three toroid vertices).}
+$\mathcal{C}(S,\kappa)$ is canonically enriched over itself,
+with hom-objects from the $\sigma$-perspective, composition
+from $\tau$, and objects from $\kappa$. The three enrichment
+ingredients are the three vertices of the $\GF(2)$ toroid.
+\end{theorem}
+
+\begin{proof}
+Hom-objects: $[A,B] = \{d \in \kappa : \tau_d(A) = 1,\,
+\sigma_d(B) = 1\}$ (Definition \ref{def:internal-hom}),
+a legitimate object via the $\sigma$-perspective.
+Composition: sequential filtration $(d_2, d_1) \mapsto
+d_2 \circ d_1$, associative by $\wedge$. Identity: the
+degenerate grade-0 element. All coherences follow from
+the exterior algebra. (Full verification:
+\S\ref{app:self-enrichment-full}.)
+\end{proof}
+
+\subsection{The subobject classifier}\label{sec:subobject}
+
+\begin{definition}[Subobject classifier]\label{def:subobj-class}
+$\Omega = \GF(2) \times \GF(2) = \{(0,0), (1,0), (0,1),
+(1,1)\}$, the four-cell structure.
+\end{definition}
+
+\begin{theorem}[$\Omega$ is a subobject classifier]\footnote{Axiom class \textsf{A} $\cdot$ depth 2 $\cdot$ \S\ref{app:subobj-full}.  \emph{Warrant}: $\Omega = \GF(2)^2$ classifies all single-discriminator subobjects. Four-valued internal logic is Belnap FDE. Finite-$\kappa$: yes. Novel ($\Omega = \GF(2)^2$ gives four-valued logic).}
+\label{thm:subobj}
+For every monomorphism $m: S' \hookrightarrow A$, there
+exists a unique $\chi_m: A \to \Omega$ such that $S'$ is
+the pullback of $\top: 1 \to \Omega$ along $\chi_m$.
+The classifying morphism sends each $a \in A$ to
+$(\tau_d(a), \sigma_d(a))$.
+\end{theorem}
+
+\begin{proof}
+Existence: $\chi_m$ is defined by the discriminator $d$
+determining $S'$. Uniqueness: the pullback condition
+determines each component. (Full verification:
+\S\ref{app:subobj-full}.)
+\end{proof}
+
+The internal logic is four-valued (Belnap's FDE):
+$(1,0)$ = true, $(0,1)$ = false, $(0,0)$ = unknown (gap),
+$(1,1)$ = overdetermined (overlap). Boolean two-valued
+logic is recovered on Boolean dimensions where every
+element receives exactly one of $\tau$ or $\sigma$.
+
+\subsection{Topos structure}
+
+A fixed $\kappa$ may lack some finite limits. We construct
+the topos as a fibered category over the poset of
+$\kappa$-states.
+
+\begin{definition}[The fibered category]\label{def:fibered}
+$\mathbf{K}$ = poset of $\kappa$-states under sub-regime
+inclusion. The Grothendieck construction $\int \mathcal{C}$
+has objects $(\kappa, A)$ (an equivalence class at a
+specific resolution) and morphisms carrying inclusions
+plus morphisms in the finer category.
+\end{definition}
+
+\begin{theorem}[Fibered topos]\label{thm:topos}\footnote{Axiom class \textsf{AP} $\cdot$ depth 7 $\cdot$ \S\ref{app:power-object}, \S\ref{app:limits-exhaustive}, \S\ref{app:power-composite}, \S\ref{app:risc}.  \emph{Warrant}: finite limits at joins; $\Omega = \GF(2)^2$; power objects via monoidal closure. $\mathbf{K}$ is a modular lattice ($V^*$ is a vector space; Appendix \ref{app:risc}). [O4 resolved.] Power objects verified for all subobjects (Appendix \ref{app:power-composite}). Finite-$\kappa$: yes.}
+$\int \mathcal{C}$ is an elementary topos.
+\end{theorem}
+
+\begin{proof}
+\emph{Finite limits}: computed at the finite join
+$\kappa_\vee$ of the stages involved. No completed infinity
+needed. \emph{Subobject classifier}: $\Omega = \GF(2)^2$,
+constant across fibers. \emph{Power objects}: $\Omega^B =
+[B, \Omega]$ exists by monoidal closure (Theorem
+\ref{thm:closure}); universal property verified in
+\S\ref{app:power-object} (for single-discriminator
+subobjects; composite subobjects require computing
+at the join of relevant stages). The operationalist axiom
+(Definition \ref{def:operationalist}) is needed only for
+infinite-limit claims.
+\end{proof}
+
+\begin{corollary}[Pro-system interpretation]
+\label{cor:pro-topos}
+$\int \mathcal{C}$ is equivalently a pro-system of topoi
+connected by geometric morphisms. The filtered colimit is
+$\kappa$-indistinguishable from the pro-system
+(Proposition \ref{prop:infinity}).
+\end{corollary}
+
+\subsection{Proof theory}\label{sec:proof-theory}
+
+\begin{definition}[Evidence semantics]\label{def:evidence}
+$\tau_d(a) = 1$ is a positive assertion that $\tau$ fires.
+$\tau_d(a) = 0$ is silence, not falsehood. The value $0$
+reports ``no match,'' not ``false.''
+\end{definition}
+
+\begin{definition}[Information ordering]\label{def:info-order}
+The Belnap lattice: $(0,0) \sqsubseteq \{(1,0), (0,1)\}
+\sqsubseteq (1,1)$. Gap = minimal information. Overlap =
+maximal (conflicting) information. Boolean states = stable
+middle.
+\end{definition}
+
+\begin{proposition}[Residues are extremal]\label{prop:extremal}
+Gap $(0,0)$ and overlap $(1,1)$ are the extremes of the
+information ordering. Both have $\chi = 0$ and trigger
+$\kappa$-evolution. The Boolean states $(1,0)$, $(0,1)$
+have $\chi = 1$ and are stable.
+\end{proposition}
+
+\begin{theorem}[Dynamic proof theory]\label{thm:proof-theory}\footnote{Axiom class \textsf{A} $\cdot$ depth 3 $\cdot$ \S\ref{app:proof-theory-full}.  \emph{Warrant}: connectives from $\GF(2)^2$ arithmetic. Excluded middle fails at the gap; explosion fails at the overlap. Finite-$\kappa$: yes. Novel (dynamic FDE with $\kappa$-evolution).}
+\emph{Static}: within fixed $\kappa$, the logic is Belnap
+FDE. Conjunction = componentwise multiplication. Disjunction
+= componentwise maximum. Negation $\neg(\tau, \sigma) =
+(\sigma, \tau)$ (swap). Excluded middle fails at the gap.
+Explosion ($p \wedge \neg p \vdash q$) fails at the
+overlap. Modus ponens requires Boolean premises.
+
+\emph{Dynamic}: $\kappa$-evolution resolves residues,
+monotonically increasing information. Each evolution step
+moves elements from $\{(0,0), (1,1)\}$ toward
+$\{(1,0), (0,1)\}$: from extremes toward the Boolean
+middle.
+
+(Full specification of inference rules and relationship
+to classical, intuitionistic, and paraconsistent logic:
+\S\ref{app:proof-theory-full}.)
+\end{theorem}
+
+\begin{proposition}[First-order logic is internal]\footnote{Axiom class \textsf{AP} $\cdot$ depth 8 $\cdot$ \S\ref{app:fol}.  \emph{Warrant}: quantifiers as adjunctions to pullback; requires the topos structure (class \textsf{AP}). Finite-$\kappa$: yes (via finite topos). Standard (internal logic of a topos).}
+\label{prop:fol}
+FOL is a fragment of the topos's internal logic:
+$\forall_f$ = right adjoint to pullback $f^*$,
+$\exists_f$ = left adjoint, modus ponens = evaluation
+morphism, universal instantiation = $\forall$-counit,
+existential generalization = $\exists$-unit. Terms are
+morphisms, variables are elements, substitution is
+composition. The metatheory needed to validate the
+framework is available internally.
+(Full construction: \S\ref{app:fol}.)
+\end{proposition}
+
+\subsection{Boolean structure and self-hosting}
+
+\begin{proposition}[Boolean logic as a dependent type]
+\label{prop:bool-dependent}
+Booleanness on dimension $d$ over $S$ is the type
+$\chi_d: S \to \{1\}$ (all elements discriminated). This
+is a dependent type: its validity depends on $d$ and $S$,
+and must be verified constructively for each dimension.
+Classical logic is not a restriction on the framework but a
+theorem about specific dimensions.
+(Full construction: \S\ref{app:bool-convergence}.)
+\end{proposition}
+
+\begin{theorem}[Self-hosting]\label{thm:self-hosting}\footnote{Axiom class \textsf{AP} $\cdot$ depth 6 $\cdot$ \S\ref{app:self-hosting-full}.  \emph{Warrant}: Boolean restriction of $\Omega$ reconstructs $\GF(2)$ internally. \emph{Qualifier}: the self-reference is non-pathological ($\GF(2)_{\mathrm{int}}$ is algebraically identical Finite-$\kappa$: yes. Novel (Boolean restriction reconstructs $\GF(2)$ internally). to $\GF(2)_{\mathrm{ext}}$).}
+The Boolean dependent type, restricted to
+$\{(1,0), (0,1)\}$, reconstructs $\GF(2)$ internally:
+the field with two elements, addition modulo 2,
+multiplication as conjunction. The framework can serve as
+its own substrate: $\GF(2)_{\mathrm{ext}} \to$
+four-valued logic $\to$ Boolean type $\to
+\GF(2)_{\mathrm{int}} \to \cdots$. The internal
+$\GF(2)$ is algebraically identical Finite-$\kappa$: yes. Novel (Boolean restriction reconstructs $\GF(2)$ internally). to the external one.
+(Proof: \S\ref{app:self-hosting-full}.)
+\end{theorem}
+
+\subsection{The fixed-point structure}
+
+\begin{theorem}[Discrimination is a fixed point]\footnote{Axiom class \textsf{A} $\cdot$ depth 4 $\cdot$ \S\ref{app:fixed-point-full}, \S\ref{app:fixed-point-stability}.  \emph{Warrant}: three structures on the toroid; 2-cell is their binding. \emph{Qualifier}: uniqueness proved ($\dim \bigwedge^2(\GF(2)^2) = 1$). [O5 resolved.] Finite-$\kappa$: yes. Novel (toroid geometry determines the unique 2-cell).}
+\label{thm:entailed}
+Discrimination is a stable fixed point of the $\GF(2)$
+toroid's closure operation. Three structures --- the
+free-forgetful adjunction, $\GF(2)$, and Belnap logic ---
+sit on the toroid as vertices. Their binding 2-cell is
+discrimination. Uniqueness (that no other operation fills
+the 2-cell) follows from $\dim \bigwedge^2(\GF(2)^2) = 1$: there is exactly one non-zero grade-2 element
+(Appendix \ref{app:fixed-point-stability}).
+(Proof: \S\ref{app:fixed-point-full}.)
+\end{theorem}
+
+\begin{theorem}[Discrimination is irremovable]\footnote{Axiom class \textsf{AP} $\cdot$ depth 8+ $\cdot$ \S\ref{app:irremovable-full}.  \emph{Warrant}: removal produces four independent failures. \emph{Qualifier}: internal necessity only --- uses the framework's own gap-filling machinery. A reader who has not accepted the framework has no reason to accept this argument. Finite-$\kappa$: yes. Novel but circular (uses framework\'s own machinery).}
+\label{thm:irremovable}
+Removing discrimination produces four independent failures
+(sheaf, manifold, bimodule, and self-resolution) and a
+homological gap whose specified filling is discrimination.
+The removal reinstates what it removed. This is internal
+necessity, not ontological necessity: it holds within the
+framework's own machinery.
+(Proof: \S\ref{app:irremovable-full}.)
+\end{theorem}
+
+\subsection{Sheaf-theoretic interpretation}\label{sec:sheaf}
+
+\begin{definition}[The site of regimes]\label{def:site}
+The site $\mathfrak{S}$ has $\kappa$-states as objects,
+sub-regime inclusions as morphisms, and the Grothendieck
+topology generated by the six triadic adjunctions as
+covering families.
+\end{definition}
+
+\begin{theorem}[Sheaf topos]\label{thm:sheaf}\footnote{Axiom class \textsf{AP} $\cdot$ depth 6 $\cdot$ \S\ref{app:sheaf-full}.  \emph{Warrant}: six adjunctions as covering families; sheaf condition = order-independence. \emph{Qualifier}: individual adjunctions are retract adjunctions; the topology's non-triviality comes from their collective action. Finite-$\kappa$: yes. Novel (six retract adjunctions generate non-trivial topology).}
+$\mathcal{C}(S,\kappa)$ at each fiber is a sheaf topos
+over $\mathfrak{S}$: the triadic adjunctions provide
+covering data, the sheaf condition is order-independence
+(Proposition \ref{prop:monoidal}), and finite limits at
+finite joins ensure compatibility.
+(Proof: \S\ref{app:sheaf-full}.)
+\end{theorem}
+
+\subsection{The expanded classifier: $\GF(2)^3$}
+\label{sec:expanded}
+
+The base $\GF(2)^2$ classifier conflates
+``not interrogated'' with ``interrogated, both silent.''
+Adding a coverage bit $\gamma$ produces
+$\GF(2)^3 = \{(\gamma, \tau, \sigma)\}$: $\gamma = 0$
+means the discriminator has not been applied; $\gamma = 1$
+means it has, and $(\tau, \sigma)$ records the result.
+
+\begin{definition}[Coverage profile]\label{def:coverage}
+The \emph{coverage profile} of element $a$ under
+discriminator $d$ is
+$(\gamma_d(a), \tau_d(a), \sigma_d(a)) \in \GF(2)^3$,
+where $\gamma_d(a) = 1$ iff $d$ has been applied to $a$.
+\end{definition}
+
+\begin{theorem}[Fano closure]\label{thm:fano}\footnote{Axiom class \textsf{A} $\cdot$ depth 2 $\cdot$ \S\ref{app:fano-gluing}.  \emph{Warrant}: $PG(2, \GF(2))$ has 7 lines; triangle identity provides inference on each. Finite-$\kappa$: yes. Novel ($PG(2, \GF(2))$ from coverage bit).}
+The seven non-zero points of $\GF(2)^3$ form the Fano
+plane $PG(2, \GF(2))$. Each line is an instance of the
+triangle identity $p_3 = p_1 + p_2$. If two points on a
+Fano line have been interrogated ($\gamma = 1$), the
+third is determined by inference.
+(Fano line table and gluing mechanics:
+\S\ref{app:fano-gluing}.)
+\end{theorem}
+
+\begin{corollary}[Self-modeling]\label{cor:self-model}
+The sole true presheaf state (no inference possible) is
+$(0,0,0)$: the zero element, the only point not on the
+Fano plane. Every other state is either directly
+interrogated or inferrable.
+\end{corollary}
+
+\begin{theorem}[Convergence rate]\label{thm:convergence}\footnote{Axiom class \textsf{A} $\cdot$ depth 3 $\cdot$ \S\ref{app:bool-convergence}.  \emph{Warrant}: 3 non-collinear points determine all 7 via Fano inference. Finite-$\kappa$: yes. Novel (three interrogations suffice).}
+Three linearly independent interrogations per dimension
+suffice to determine all seven Fano points: the
+convergence rate is $3$.
+(Proof: \S\ref{app:bool-convergence}.)
+\end{theorem}

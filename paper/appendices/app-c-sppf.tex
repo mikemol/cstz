@@ -1,0 +1,377 @@
+%----------------------------------------------------------------------
+\section{SPPF: the paper as a discrimination regime}
+\label{app:sppf}
+%----------------------------------------------------------------------
+
+This appendix presents the paper's dependency structure as
+a Shared Packed Parse Forest (SPPF), treating every formal
+object --- definition, theorem, proposition, corollary,
+conjecture, example, and remark --- as a node in a
+discrimination regime. The SPPF is the framework pointed
+at itself.
+
+\subsection{The meta-discrimination}
+
+The paper is a population of 125 formal objects. Four
+discriminators interrogate this population:
+
+\begin{center}
+\small
+\begin{tabular}{c|l|l}
+\textbf{Tag} & \textbf{Discriminator} & \textbf{Fires when} \\
+\hline
+\textsf{A} & Algebraic & Always (every node uses
+  $\GF(2)$, $\bigwedge V$) \\
+\textsf{P} & Profile linearity &
+  Node depends on Def \ref{def:profile-linear} \\
+\textsf{E} & Evaluation linearity &
+  Node depends on Def \ref{def:eval-linear} \\
+\textsf{O} & Operationalist axiom &
+  Node depends on Def \ref{def:operationalist}
+\end{tabular}
+\end{center}
+
+The \emph{meta-membership-profile} of each node is its
+axiom class: the subset $\{\textsf{A}, \textsf{P},
+\textsf{E}, \textsf{O}\}$ of discriminators that fire.
+A node with class \textsf{A} depends only on the algebra.
+A node with class \textsf{APE} depends on both regulatory
+axioms. The profile is a composed discriminator
+(Definition \ref{def:profile}): the pair of meta-$\tau$
+(less-refined axiom set) and meta-$\sigma$ (more-refined
+axiom set) is the Grothendieck construction applied to
+the paper's own morphisms.
+
+The meta-$\kappa$-regime evolves as the paper proceeds:
+\S2 has zero nodes, \S3 introduces the algebraic
+vocabulary (all \textsf{A}), \S4 introduces the
+regulatory axioms (\textsf{P}, \textsf{E}) and the
+epistemic axiom (\textsf{O}), and subsequent sections
+inherit their dependencies transitively. The SPPF is the
+$\kappa$-evolution trace of the paper's own construction.
+
+\subsection{Axiom class summary}
+
+\begin{center}
+\begin{tabular}{l|r|l}
+\textbf{Class} & \textbf{Count} & \textbf{Interpretation} \\
+\hline
+\textsf{A} & 101 & Algebra alone (81\%) \\
+\textsf{AP} & 9 & Algebra + profile linearity \\
+\textsf{AEP} & 6 & Algebra + both linearities \\
+\textsf{AO} & 8 & Algebra + operationalist axiom \\
+\textsf{AOP} & 1 & All three axiom types \\
+\hline
+Total & 125 &
+\end{tabular}
+\end{center}
+
+81\% of the paper's formal objects depend only on the
+algebra (as stated in the reading guide,
+\S\ref{sec:reading-guide}). Profile linearity adds 9, evaluation linearity
+adds 6 (always paired with profile linearity), and the
+operationalist axiom adds 8. Only one node
+(Remark 4.10, general pathology protection) depends on
+all three regulatory/epistemic commitments simultaneously.
+
+\subsection{Complete node inventory}
+
+Each row gives the node's section, line, kind
+(\textsf{D}ef, \textsf{T}hm, \textsf{P}rop,
+\textsf{C}or, \textsf{J}conj, \textsf{E}x,
+\textsf{R}em), title, and axiom class.
+
+
+\medskip
+\noindent\textbf{\S01 Introduction} (1 nodes).
+
+\begin{center}
+\scriptsize
+\begin{tabular}{r|c|l|c}
+\textbf{Line} & \textbf{Kind} & \textbf{Title} & \textbf{Class} \\
+\hline
+36 & \textsf{D} & Operationalist axiom & \textbf{AO} \\
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent\textbf{\S03 Framework} (17 nodes).
+
+\begin{center}
+\scriptsize
+\begin{tabular}{r|c|l|c}
+\textbf{Line} & \textbf{Kind} & \textbf{Title} & \textbf{Class} \\
+\hline
+7 & \textsf{D} & Discriminator & A \\
+17 & \textsf{D} & $\tau$ and $\sigma$ as datum properties & A \\
+32 & \textsf{D} & Membership profile & A \\
+60 & \textsf{R} & The four-cell structure & A \\
+114 & \textsf{D} & Profile linearity & \textbf{AP} \\
+146 & \textsf{D} & XOR signature & A \\
+158 & \textsf{D} & Residue & A \\
+169 & \textsf{R} & Two origins of residue & A \\
+182 & \textsf{D} & Discrimination regime & A \\
+192 & \textsf{D} & $\kappa$-evolution & A \\
+199 & \textsf{P} & Monotonicity of $\kappa$ & A \\
+212 & \textsf{D} & Write path & A \\
+218 & \textsf{D} & Read path & A \\
+227 & \textsf{P} & Order-independence of filtration & A \\
+244 & \textsf{C} & Well-definedness of type erasure & A \\
+251 & \textsf{D} & Membership & A \\
+261 & \textsf{R} & Yoneda content & A \\
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent\textbf{\S04 Set theory} (25 nodes).
+
+\begin{center}
+\scriptsize
+\begin{tabular}{r|c|l|c}
+\textbf{Line} & \textbf{Kind} & \textbf{Title} & \textbf{Class} \\
+\hline
+13 & \textsf{D} & $\kappa$-equivalence & A \\
+21 & \textsf{T} & Extensionality & A \\
+46 & \textsf{D} & Discriminative comprehension & \textbf{AP} \\
+59 & \textsf{T} & Exclusion of Russell's predicate & \textbf{AEP} \\
+100 & \textsf{D} & Evaluation linearity & \textbf{AEP} \\
+179 & \textsf{R} & Profile linearity as the load-bearing axiom & \textbf{AEP} \\
+191 & \textsf{R} & The restriction is relocated & \textbf{AEP} \\
+217 & \textsf{R} & General pathology protection & \textbf{AOP} \\
+246 & \textsf{D} & Boolean dimension & A \\
+257 & \textsf{P} & Non-default Booleanness & A \\
+283 & \textsf{T} & Partial foundation & \textbf{AEP} \\
+308 & \textsf{R} & Cycles of length $\geq 2$ are permitted & \textbf{AP} \\
+374 & \textsf{P} & Empty set & A \\
+383 & \textsf{P} & Pairing & \textbf{AP} \\
+395 & \textsf{P} & Symmetric difference as primitive & A \\
+421 & \textsf{D} & Discriminative power set & A \\
+436 & \textsf{J} & Constructive continuum & A \\
+462 & \textsf{D} & Discriminative infinity & A \\
+530 & \textsf{R} & Foundational status of indistinguishability & \textbf{AO} \\
+555 & \textsf{R} & Epistemic asymmetry and the halting problem & \textbf{AO} \\
+578 & \textsf{R} & The hyper-recursive tower & \textbf{AO} \\
+621 & \textsf{R} & The proof assistant concession & \textbf{AO} \\
+681 & \textsf{T} & Choice from residue consumption & \textbf{AO} \\
+807 & \textsf{R} & Choice as a dependent type via Diaconescu & A \\
+840 & \textsf{E} & Banach--Tarski is non-paradoxical & A \\
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent\textbf{\S05 Homotopy} (11 nodes).
+
+\begin{center}
+\scriptsize
+\begin{tabular}{r|c|l|c}
+\textbf{Line} & \textbf{Kind} & \textbf{Title} & \textbf{Class} \\
+\hline
+15 & \textsf{D} & Degeneracy as identity & A \\
+40 & \textsf{D} & Discrimination complex & A \\
+64 & \textsf{D} & Boundary operator & A \\
+82 & \textsf{P} & Chain complex & A \\
+138 & \textsf{T} & Exhaustivity is operational & A \\
+184 & \textsf{C} & Non-uniqueness under truncation & A \\
+240 & \textsf{T} & Intrinsic groupoid structure & A \\
+308 & \textsf{P} & Univalence as extensionality & A \\
+338 & \textsf{R} & Transport as reclassification & A \\
+357 & \textsf{D} & Emergent $n$-groupoid & A \\
+375 & \textsf{P} & Growth of homotopical complexity & A \\
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent\textbf{\S06 Categories} (19 nodes).
+
+\begin{center}
+\scriptsize
+\begin{tabular}{r|c|l|c}
+\textbf{Line} & \textbf{Kind} & \textbf{Title} & \textbf{Class} \\
+\hline
+16 & \textsf{R} & The source of asymmetry & A \\
+27 & \textsf{D} & Directed morphism & A \\
+40 & \textsf{P} & Non-invertibility & A \\
+60 & \textsf{C} & Cost of isomorphism & A \\
+70 & \textsf{D} & Emergent category & A \\
+91 & \textsf{D} & Composition via filtration & A \\
+107 & \textsf{R} & The framework is 2-categorical from the start & A \\
+129 & \textsf{T} & 2-category axioms & A \\
+162 & \textsf{D} & Functor & A \\
+178 & \textsf{P} & Forgetful and free functors & A \\
+241 & \textsf{T} & Triadic adjunction system & A \\
+346 & \textsf{C} & The free-forgetful adjunction is one of six & A \\
+381 & \textsf{D} & Natural transformation & A \\
+399 & \textsf{P} & Naturality from coherence of discrimination & A \\
+439 & \textsf{D} & Representable presheaf & A \\
+447 & \textsf{T} & Yoneda & A \\
+510 & \textsf{D} & Limit as universal cone & A \\
+523 & \textsf{P} & Limits from exhaustive filtration & A \\
+560 & \textsf{R} & Completeness is not a fixed property & A \\
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent\textbf{\S07 Higher structure} (16 nodes).
+
+\begin{center}
+\scriptsize
+\begin{tabular}{r|c|l|c}
+\textbf{Line} & \textbf{Kind} & \textbf{Title} & \textbf{Class} \\
+\hline
+14 & \textsf{T} & Natural $(n,1)$-structure & A \\
+70 & \textsf{D} & Directed homotopy & A \\
+117 & \textsf{E} & Directed 2-morphism: two classification schemes & A \\
+158 & \textsf{P} & Structure of $k$-morphisms & A \\
+173 & \textsf{R} & Truncation level as complexity measure & A \\
+196 & \textsf{D} & Triangle identity & A \\
+216 & \textsf{R} & Grounding the identification & A \\
+254 & \textsf{P} & Three perspectives & A \\
+289 & \textsf{P} & Dynamics transfer under permutation & A \\
+334 & \textsf{R} & Semantic asymmetry across perspectives & \textbf{AEP} \\
+350 & \textsf{D} & $\GF(2)$ toroid & A \\
+376 & \textsf{T} & Free $(n,k)$-structure & A \\
+424 & \textsf{C} & Direction requires no additional axiom & A \\
+433 & \textsf{R} & Geometric content of the toroid & A \\
+451 & \textsf{R} & Why $(\infty,1)$-categories appear natural & A \\
+475 & \textsf{R} & The $(\infty,\infty)$-category & \textbf{AO} \\
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent\textbf{\S08 Monoidal and closure} (13 nodes).
+
+\begin{center}
+\scriptsize
+\begin{tabular}{r|c|l|c}
+\textbf{Line} & \textbf{Kind} & \textbf{Title} & \textbf{Class} \\
+\hline
+4 & \textsf{D} & Monoidal product & A \\
+19 & \textsf{P} & Symmetric monoidal structure & A \\
+59 & \textsf{T} & Delooping equivalence & A \\
+112 & \textsf{C} & Delooping collapse over $\GF(2)$ & A \\
+159 & \textsf{D} & Swap conjugation & A \\
+169 & \textsf{D} & Cayley--Dickson tower over $\GF(2)^2$ & A \\
+199 & \textsf{J} & The periodic table is two-dimensional & A \\
+249 & \textsf{R} & The swap conjugation is already present & A \\
+281 & \textsf{R} & Open verification: hexagon axioms at CD step 2 & A \\
+306 & \textsf{D} & Internal hom & A \\
+316 & \textsf{T} & Monoidal closure & A \\
+362 & \textsf{R} & Closure is the triangle identity & A \\
+374 & \textsf{D} & Evaluation morphism & A \\
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent\textbf{\S09 Topos and self-reference} (22 nodes).
+
+\begin{center}
+\scriptsize
+\begin{tabular}{r|c|l|c}
+\textbf{Line} & \textbf{Kind} & \textbf{Title} & \textbf{Class} \\
+\hline
+15 & \textsf{D} & Enrichment data & A \\
+23 & \textsf{T} & Canonical self-enrichment & A \\
+43 & \textsf{D} & Subobject classifier & A \\
+48 & \textsf{T} & $\Omega$ is a subobject classifier & A \\
+76 & \textsf{D} & The fibered category & A \\
+84 & \textsf{T} & Fibered topos & \textbf{AP} \\
+102 & \textsf{C} & Pro-system interpretation & \textbf{AO} \\
+112 & \textsf{D} & Evidence semantics & A \\
+118 & \textsf{D} & Information ordering & A \\
+125 & \textsf{P} & Residues are extremal & A \\
+132 & \textsf{T} & Dynamic proof theory & A \\
+151 & \textsf{P} & First-order logic is internal & \textbf{AP} \\
+166 & \textsf{P} & Boolean logic as a dependent type & A \\
+177 & \textsf{T} & Self-hosting & \textbf{AP} \\
+191 & \textsf{T} & Discrimination is a fixed point & A \\
+203 & \textsf{T} & Discrimination is irremovable & \textbf{AP} \\
+216 & \textsf{D} & The site of regimes & A \\
+223 & \textsf{T} & Sheaf topos & \textbf{AP} \\
+242 & \textsf{D} & Coverage profile & A \\
+249 & \textsf{T} & Fano closure & A \\
+259 & \textsf{C} & Self-modeling & A \\
+266 & \textsf{T} & Convergence rate & A \\
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent\textbf{\S10 Discussion} (1 nodes).
+
+\begin{center}
+\scriptsize
+\begin{tabular}{r|c|l|c}
+\textbf{Line} & \textbf{Kind} & \textbf{Title} & \textbf{Class} \\
+\hline
+270 & \textsf{R} & Epistemic limitation of self-audit & A \\
+\end{tabular}
+\end{center}
+
+\subsection{Critical dependency chains}
+
+The longest chains, with axiom class of each link:
+
+\emph{Russell exclusion} (length 3, class \textsf{AEP}):
+Def 3.1 [\textsf{A}] $\to$ Def 3.5 [\textsf{AP}]
+$\to$ Def 4.6 [\textsf{AEP}] $\to$ Thm 4.5 [\textsf{AEP}].
+
+\emph{Fibered topos} (length 7, class \textsf{AP}):
+Def 3.1 [\textsf{A}] $\to$ Def 5.2 [\textsf{A}]
+$\to$ Prop 5.4 [\textsf{A}] $\to$ Thm 5.7 [\textsf{A}]
+$\to$ Thm 8.13 [\textsf{A}] $\to$ Def 9.4 [\textsf{A}]
+$\to$ Thm 9.6 [\textsf{AP}].
+
+\emph{Infinite choice} (length 7, class \textsf{AO}):
+Def 3.1 [\textsf{A}] $\to$ Def 3.7 [\textsf{A}]
+$\to$ Def 3.9 [\textsf{A}] $\to$ Thm 5.7 [\textsf{A}]
+$\to$ Prop 4.26 [\textsf{A}] $\to$ Def 1.1 [\textsf{AO}]
+$\to$ Thm 4.31 [\textsf{AO}].
+
+\emph{Irremovability} (length 8+, class \textsf{AP}):
+$\cdots \to$ Thm 5.7 [\textsf{A}] $\to$ Thm 6.11
+[\textsf{A}] $\to$ Thm 9.6 [\textsf{AP}] $\to$
+Thm 9.14 [\textsf{AP}]. Uses the framework's own
+machinery; circularity acknowledged (Remark 10.1).
+
+\subsection{The SPPF as successive refinement}
+
+The SPPF is a magma under predicate accumulation: the
+product of two nodes is their composition (the wedge
+product of their dependency sets). The axiom class of a
+composed result is the union of the constituent classes.
+
+Reading the paper sequentially, each section refines the
+previous sections' results by adding new predicates
+(discriminators at the meta-level):
+
+\begin{itemize}[nosep]
+  \item \S3: introduces the algebraic vocabulary. All
+    nodes are class \textsf{A}. Meta-$\kappa$ has one
+    dimension.
+  \item \S4: introduces \textsf{P}, \textsf{E},
+    \textsf{O}. Meta-$\kappa$ evolves to four dimensions.
+    The Russell exclusion is the first node requiring all
+    three regulatory/epistemic dimensions.
+  \item \S\S5--8: no new axioms. These sections refine
+    the \textsf{A}-class nodes by accumulating algebraic
+    structure. The meta-$\kappa$ does not evolve (no new
+    axioms), but the population grows.
+  \item \S9: inherits \textsf{P} from the topos
+    construction. The meta-profile of \S9's theorems
+    records which axioms the topos transitively requires.
+\end{itemize}
+
+At the meta-level, $\tau$ is the less-refined set of
+predicates (the axiom class inherited from dependencies)
+and $\sigma$ is the more-refined set (the specific
+combination of axioms the node directly invokes). A node
+that inherits \textsf{AP} from its dependencies but does
+not directly invoke profile linearity has meta-$\tau$
+active and meta-$\sigma$ silent on the \textsf{P}
+dimension: the dependency is transitive, not direct. This
+distinction is the meta-level residue that the SPPF tracks.
+
+The SPPF is the Grothendieck construction applied to the
+paper's own morphisms: it fibers the population of formal
+objects over the poset of axiom classes, with the
+transition functors being the dependency edges. The
+resulting structure is the paper viewed as its own topos.

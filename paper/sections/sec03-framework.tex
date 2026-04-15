@@ -1,0 +1,349 @@
+%----------------------------------------------------------------------
+\section{The Discrimination Framework}\label{sec:framework}\footnote{Section-level Toulmin. \emph{Move}: establish the algebraic vocabulary. \emph{ZFC comparison}: ZFC takes membership as primitive and undefined; the framework takes discrimination (a binary predicate over $\GF(2)$) as primitive, giving membership algebraic content from the start. \emph{Residue instance}: the four-cell structure is the first appearance of gap/overlap --- the residue mechanism that recurs at every subsequent level.}
+%----------------------------------------------------------------------
+
+\subsection{Discriminators}
+
+\begin{definition}[Discriminator]\label{def:discriminator}
+A \emph{discriminator} is a grade-1 element $d \in \bigwedge^1 V$
+together with a single predicate $d: S \to \GF(2)$. The
+predicate \emph{fires} ($d(a) = 1$) or is \emph{silent}
+($d(a) = 0$) on each element $a \in S$. A discriminator
+is \emph{keyed to} a property of the data and tests whether
+that property is active for a given datum. It provides one
+bit of information per element.
+\end{definition}
+
+\begin{definition}[$\tau$ and $\sigma$ as datum properties]
+\label{def:tau-sigma}
+$\tau$ and $\sigma$ are two properties that a datum may
+possess. They are attributes of the \emph{data}, not of
+the discriminators. A discriminator keyed to $\tau$ tests
+whether $\tau$ is active for a datum; a discriminator
+keyed to $\sigma$ tests whether $\sigma$ is active.
+
+For a datum $a$: if a $\tau$-keyed discriminator fires,
+$a$ carries the $\tau$ label ($\tau(a) = 1$). If a
+$\sigma$-keyed discriminator fires, $a$ carries the
+$\sigma$ label ($\sigma(a) = 1$). The two labels are
+independent --- a datum may carry both, one, or neither.
+\end{definition}
+
+\begin{definition}[Membership profile]\label{def:profile}
+The \emph{membership profile} of a datum $a$ is the pair
+\begin{equation}
+  (\tau(a),\; \sigma(a)) \in \GF(2) \times \GF(2),
+\end{equation}
+recording which properties have been recognized as active
+by the discriminators applied so far. Determining the
+full profile requires (at least) two discriminators: one
+keyed to $\tau$, one keyed to $\sigma$.
+
+The profile is not merely a recorded tuple: it is itself
+a \emph{composed discriminator}. The pair $(d_\tau, d_\sigma)$
+--- a $\tau$-keyed discriminator and a $\sigma$-keyed
+discriminator applied to the same datum --- corresponds
+to the wedge product $d_\tau \wedge d_\sigma \in
+\bigwedge^2 V$. The pair compares the results of two
+base discriminators, and the comparison is the grade-2
+element that the exterior algebra provides.
+
+The $S_3$ symmetry of the triangle identity
+(Definition \ref{def:triangle}) acts on these
+compositions: rotating $\kappa \to \sigma \to \tau$
+changes which discriminators are being compared
+and in what role. The six adjunctions of Theorem
+\ref{thm:adjunction} are six ways of composing
+discriminator pairs.
+\end{definition}
+
+\begin{remark}[The four-cell structure]
+The membership profile takes values in $\GF(2) \times \GF(2)$,
+giving four possible states per datum:
+\begin{center}
+\begin{tabular}{c|c|l}
+$\tau(a)$ & $\sigma(a)$ & Interpretation \\
+\hline
+$1$ & $0$ & $\tau$ active, $\sigma$ inactive: \emph{ordered} \\
+$0$ & $1$ & $\sigma$ active, $\tau$ inactive: \emph{ordered} \\
+$0$ & $0$ & both inactive: the \emph{gap} \\
+$1$ & $1$ & both active: the \emph{overlap}
+\end{tabular}
+\end{center}
+The four cells are the product of two independent
+properties of the data. An element is \emph{discriminated}
+(ordered) when exactly one property is active. It is
+\emph{non-discriminated} when both are active (overlap)
+or neither is (gap).
+
+The overlap $(1,1)$ arises in two situations:
+\begin{itemize}[nosep]
+  \item \textbf{Genuine over-determination}: both
+    properties legitimately hold for the datum, signaling
+    that $\kappa$ needs to evolve (a finer discriminator
+    is needed to separate what the current regime conflates).
+  \item \textbf{Truncated projection}: an artifact of
+    viewing a finer discrimination at coarser resolution.
+\end{itemize}
+Both produce the same algebraic signature ($\chi = 0$)
+and both are residues.
+
+A \emph{higher-level discriminator} can test composite
+properties --- for instance, the XOR signature
+$\chi(a) = \tau(a) + \sigma(a)$ tests whether exactly
+one property is active. Such discriminators depend on
+the results of base discriminators and are therefore
+\emph{dependent type constructions}: the type of the
+higher-level predicate depends on the values produced
+by the base predicates. The Boolean dimension
+(Definition \ref{def:boolean-dim}) is the principal
+example: $\chi(a) = 1$ for all $a$ is a dependent type
+that requires both base discriminators to have been
+applied.
+
+All four cells are \emph{post-interrogation} states: writing
+$(\tau(a), \sigma(a)) = (0,0)$ means the relevant
+discriminators have been applied and both properties were
+found inactive. The value $0$ is a positivist assertion:
+``I checked and found no match.'' Representing the
+pre-interrogation state (no discriminator applied)
+requires the $\GF(2)^3$ expansion with coverage bit
+$\gamma$ (Section \ref{sec:expanded}).
+\end{remark}
+
+\begin{definition}[Profile linearity]\label{def:profile-linear}
+The map from discriminators to their predicates is
+\emph{linear}: for discriminators $d_1, d_2 \in
+\bigwedge^1 V$ and any element $a \in S$,
+\begin{equation}
+  (d_1 + d_2)(a) = d_1(a) + d_2(a),
+\end{equation}
+where addition on the left is in $V$ and on the right is
+in $\GF(2)$. This is a structural axiom: the predicate of
+a sum of discriminators is the sum of the individual
+predicates. It ensures that the evaluation map
+$d \mapsto d(\cdot)$ respects the vector space structure
+of $V$.
+\end{definition}
+
+\begin{remark}
+Profile linearity (Definition \ref{def:profile-linear}) is not a free consequence of the
+definitions --- it is an explicit requirement that ties
+the algebraic structure of $V$ to the operational behavior
+of discriminators. Without it, discriminators would be
+elements of $V$ algebraically but their predicates could
+behave non-linearly, severing the connection between the
+exterior algebra and the discrimination process. Profile
+linearity is what makes the algebra \emph{faithful} to
+the operations it encodes.
+\end{remark}
+
+The semantic distinctions underlying these definitions
+--- single predicate, datum properties, composed pairs,
+dependent types --- are verified in
+\S\ref{app:discriminator-semantics}.
+
+\begin{definition}[XOR signature]
+The \emph{XOR signature} of an element $a$ under a
+discriminator pair $(d_\tau, d_\sigma)$ is
+\begin{equation}
+  \chi(a) = d_\tau(a) + d_\sigma(a) \in \GF(2).
+\end{equation}
+When $\chi(a) = 1$, exactly one predicate fires:
+the element is \emph{discriminated} (ordered).
+When $\chi(a) = 0$, both fire or neither fires:
+the element is \emph{non-discriminated}.
+\end{definition}
+
+\begin{definition}[Residue]\label{def:residue}
+The \emph{residue} of a discriminator pair
+$(d_\tau, d_\sigma)$ applied to a collection $S$ is
+\begin{equation}
+  R(S) = \{ a \in S \mid \chi(a) = 0 \}.
+\end{equation}
+These are the elements for which discrimination was
+non-trivial in $\GF(2)$: $1 + 1 = 0$ (overlap) or
+$0 + 0 = 0$ (gap).
+\end{definition}
+
+\begin{remark}[Two origins of residue]\label{rem:residue-origins}
+Gap residues ($\tau = \sigma = 0$) arise from \emph{novelty}: the
+element has no membership under either predicate. Overlap residues
+($\tau = \sigma = 1$) arise from \emph{abstraction}: the element
+is above the discriminator's resolution, as when presenting ``mammal''
+to a cat/dog discriminator. Both are zeros in $\GF(2)$, but they
+demand $\kappa$-evolution in opposite directions: gaps extend the
+tree laterally (new specificity); overlaps extend the tree upward
+(new generality).
+\end{remark}
+
+\subsection{The discrimination regime $\kappa$}
+
+\begin{definition}[Discrimination regime]\label{def:kappa}
+A \emph{discrimination regime} $\kappa$ is a finite, ordered
+sequence of discriminators $(d_1, d_2, \ldots, d_n)$, each
+providing a single predicate $d_i: S \to \GF(2)$. The
+\emph{dimensionality} of $\kappa$ is $n$. The $\tau/\sigma$
+pairing structure (Definition \ref{def:profile}) is imposed
+on pairs of discriminators within $\kappa$; it is not
+intrinsic to individual discriminators.
+\end{definition}
+
+\begin{definition}[$\kappa$-evolution]\label{def:evolution}
+A \emph{$\kappa$-evolution} is the extension of $\kappa$ by a new
+discriminator $d_{n+1}$, producing $\kappa' = (d_1, \ldots, d_n, d_{n+1})$.
+Evolution is triggered by the articulation of a predicate, which is
+simultaneously the construction of a residue via the wedge product.
+\end{definition}
+
+\begin{proposition}[Monotonicity of $\kappa$]\label{prop:monotone}
+$\kappa$-evolution is strictly monotonic: if $\kappa \to \kappa'$,
+then $\dim(\kappa') = \dim(\kappa) + 1$. Dimensions are never removed.
+\end{proposition}
+
+\begin{proof}
+By construction. Each evolution appends a new discriminator. The write
+path is linear in the resource-consumption sense: the residue that
+triggered the evolution is consumed and cannot trigger a second evolution.
+\end{proof}
+
+\subsection{Write and read regimes}\label{sec:write-read}
+
+\begin{definition}[Write path]
+The \emph{write path} is the $\kappa$-evolution process: each
+residue is consumed exactly once to produce exactly one new
+dimension.
+\end{definition}
+
+\begin{definition}[Read path]
+The \emph{read path} is the process of evaluating discriminator
+predicates over a collection $S$ given a fixed $\kappa$. Each
+discriminator $d_i$ produces one bit $d_i(a) \in \GF(2)$ per
+element. For a $\tau/\sigma$ pair $(d_\tau, d_\sigma)$ within
+$\kappa$, the read path produces the membership profile
+$(d_\tau(a), d_\sigma(a))$.
+\end{definition}
+
+\begin{proposition}[Order-independence of filtration]\label{prop:monoidal}
+Let $\kappa = (d_1, \ldots, d_n)$ and let $\pi$ be any permutation
+of $\{1, \ldots, n\}$. The predicate value $d_i(a)$ for any
+element $a \in S$ depends only on $d_i$ and $a$, not on which
+other discriminators have been evaluated or in what order.
+The total profile of $a$ under $\kappa$ is the vector
+$(d_1(a), \ldots, d_n(a)) \in \GF(2)^n$, independent of
+evaluation order.
+\end{proposition}
+
+\begin{proof}
+Each $d_i(a)$ is a function of $d_i$ and $a$ alone (by the
+definition of a discriminator as a predicate $S \to \GF(2)$).
+The profile vector is determined by $a$ and $\kappa$, not by
+the sequence of evaluations.
+\end{proof}
+
+\begin{corollary}[Well-definedness of type erasure]
+Projecting $\kappa$ to a sub-regime $\kappa' = (d_{i_1}, \ldots, d_{i_k})$
+for $k < n$ yields a coarser but well-defined filtration.
+\end{corollary}
+
+\subsection{Membership as a relational property}
+
+\begin{definition}[Membership]\label{def:membership}
+An element $a$ is a \emph{member} of a collection $S$ under
+a $\tau/\sigma$ pair $(d_\tau, d_\sigma)$ in regime $\kappa$,
+written $a \in_{(d_\tau, d_\sigma),\kappa} S$,
+if $d_\tau(a) = 1$ (the $\tau$-discriminator fires on $a$).
+The element is in the \emph{complement} if $d_\sigma(a) = 1$.
+Membership is a relation depending on the element, the
+collection, and the discriminator pair.
+\end{definition}
+
+\begin{remark}[Yoneda content]
+That membership depends on the collection --- not just the element
+and the discriminator --- reflects the Yoneda perspective: the
+identity of an element is constituted by its predicate profile
+against the entire population under $\kappa$-filtration.
+\end{remark}
+
+
+\subsection{A concrete model}\label{sec:concrete-model}
+
+We construct an explicit finite model to ground the
+definitions. Let $V = \GF(2)^3$ and let the population
+$S = \{a, b, c, d\}$ consist of four data.
+
+\emph{Discriminators.}
+Three basis discriminators $e_1, e_2, e_3 \in V$
+(the standard basis of $\GF(2)^3$), with predicates:
+
+\begin{center}
+\small
+\begin{tabular}{c|cccc|l}
+& $a$ & $b$ & $c$ & $d$ & Keyed to \\
+\hline
+$e_1$ & 1 & 1 & 0 & 0 & $\tau$: ``has feature X'' \\
+$e_2$ & 1 & 0 & 1 & 0 & $\sigma$: ``has feature Y'' \\
+$e_3$ & 0 & 1 & 1 & 0 & $\tau$: ``has feature Z''
+\end{tabular}
+\end{center}
+
+\emph{Profile linearity (Definition \ref{def:profile-linear}).} $e_1 + e_2$ is a new
+discriminator in $V$. Its predicate:
+$(e_1 + e_2)(a) = 1 + 1 = 0$,
+$(e_1 + e_2)(b) = 1 + 0 = 1$,
+$(e_1 + e_2)(c) = 0 + 1 = 1$,
+$(e_1 + e_2)(d) = 0 + 0 = 0$.
+This is the sum of the individual predicates, as required
+by Definition \ref{def:profile-linear}. $\checkmark$
+
+\emph{Membership profiles.}
+Pairing $e_1$ ($\tau$-keyed) with $e_2$ ($\sigma$-keyed):
+\begin{center}
+\begin{tabular}{c|cc|l}
+& $\tau = e_1$ & $\sigma = e_2$ & Profile \\
+\hline
+$a$ & 1 & 1 & $(1,1)$ overlap \\
+$b$ & 1 & 0 & $(1,0)$ discriminated \\
+$c$ & 0 & 1 & $(0,1)$ discriminated \\
+$d$ & 0 & 0 & $(0,0)$ gap
+\end{tabular}
+\end{center}
+
+All four cells are realized. Elements $b$ and $c$ are
+discriminated (ordered). Element $a$ is in the overlap
+(both features active); element $d$ is in the gap
+(neither feature detected). The residue is
+$R = \{a, d\}$: $\chi(a) = 1 + 1 = 0$,
+$\chi(d) = 0 + 0 = 0$.
+
+\emph{$\kappa$-evolution.}
+The residue $\{a, d\}$ triggers evolution. Introducing
+$e_3$ ($\tau$-keyed) and pairing with $e_2$ ($\sigma$-keyed)
+on the residue: $e_3(a) = 0$, $e_2(a) = 1$, so $a$ gets
+profile $(0,1)$ under the new pair --- discriminated.
+$e_3(d) = 0$, $e_2(d) = 0$, so $d$ remains $(0,0)$ ---
+still in the gap under this pair. A further evolution
+would be needed for $d$.
+
+\emph{The wedge product.}
+$e_1 \wedge e_2 \neq 0$ (independent): the composition
+of the $\tau$- and $\sigma$-keyed discriminators is
+non-degenerate. $e_1 \wedge e_1 = 0$: self-composition
+is degenerate. No discriminator can be paired with itself
+to produce a non-trivial profile.
+
+\emph{Russell exclusion.}
+If $S \cap V \neq \varnothing$ (discriminators are also
+data), the self-membership question is: does $e_1$,
+viewed as a datum, carry the $\tau$ property that $e_1$
+itself tests for? The Russell predicate would require
+$\tau_{d_P}(e_i) = 1 + e_i(e_i)$ for each
+discriminator-datum $e_i$. Since $\tau_{d_P}(0) = 1
+\neq 0$ (the zero discriminator maps to $1$), this
+profile is affine, violating profile linearity (Definition \ref{def:profile-linear}). $\checkmark$
+
+This four-element model instantiates the full framework:
+profile linearity, the four-cell structure, residue
+detection, $\kappa$-evolution, the wedge product, and the
+Russell exclusion. Every definition in \S\ref{sec:framework}
+has a concrete realization.

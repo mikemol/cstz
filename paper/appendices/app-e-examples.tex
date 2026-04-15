@@ -1,0 +1,719 @@
+%----------------------------------------------------------------------
+\section{Worked examples: the $\GF(2)^3$ model}
+\label{app:examples}
+%----------------------------------------------------------------------
+
+This appendix instantiates every definition, proposition,
+and theorem in the paper using a single running example.
+The example is designed to serve as a specification for
+formal verification (e.g., in Agda).
+
+\subsection{Setup}
+
+\emph{Population.} $S = \GF(2)^3 = \{000, 001, 010,
+011, 100, 101, 110, 111\}$ (8 elements, written as
+binary strings). We name them:
+$a_0 = 000$, $a_1 = 001$, $a_2 = 010$, $a_3 = 011$,
+$a_4 = 100$, $a_5 = 101$, $a_6 = 110$, $a_7 = 111$.
+
+\emph{Discriminator space.} $V = \GF(2)^3$ with basis
+$\{e_1, e_2, e_3\}$, where $e_i(a) =$ the $i$-th bit
+of $a$. The dual space $V^* = \{0, e_1, e_2, e_3,
+e_1{+}e_2, e_1{+}e_3, e_2{+}e_3, e_1{+}e_2{+}e_3\}$
+(8 linear functionals, 7 non-trivial).
+
+\emph{$\kappa$-stages.}
+$\kappa_0 = \varnothing$,
+$\kappa_1 = \langle e_1 \rangle$,
+$\kappa_2 = \langle e_1, e_2 \rangle$,
+$\kappa_3 = \langle e_1, e_2, e_3 \rangle = V$.
+
+%----------------------------------------------------------------------
+\subsection{Section 3: Framework definitions}
+%----------------------------------------------------------------------
+
+\emph{Definition 3.1 (Discriminator).}
+$e_1: S \to \GF(2)$ with $e_1(a) =$ first bit.
+$e_1(000) = 0$, $e_1(001) = 0$, $e_1(010) = 0$,
+$e_1(011) = 0$, $e_1(100) = 1$, $e_1(101) = 1$,
+$e_1(110) = 1$, $e_1(111) = 1$.
+
+\emph{Definition 3.3 (Membership profile).}
+Under $\kappa_2 = \langle e_1, e_2 \rangle$:
+$\tau_{e_1}(a_5 = 101) = 1$, $\sigma_{e_1}(a_5) = 0$
+(the element is in $e_1$'s positive class).
+$\tau_{e_2}(a_5) = 0$, $\sigma_{e_2}(a_5) = 1$
+(the element is in $e_2$'s negative class).
+Full profile of $a_5$ under $\kappa_2$:
+$(\tau_{e_1}, \sigma_{e_1}, \tau_{e_2}, \sigma_{e_2})
+= (1, 0, 0, 1)$.
+
+\emph{Definition 3.5 (Profile linearity).}
+$e_1(a_3 + a_5) = e_1(011 + 101) = e_1(110) = 1$.
+$e_1(a_3) + e_1(a_5) = 0 + 1 = 1$. $\checkmark$
+
+$(e_1 + e_2)(a_5) = e_1(a_5) + e_2(a_5) = 1 + 0 = 1$.
+Direct: $(e_1 + e_2)(101) = 1 + 0 = 1$. $\checkmark$
+
+\emph{Definition 3.9 (Residue).}
+Under $\kappa_1 = \langle e_1 \rangle$: the elements
+$a_0 = 000$ and $a_2 = 010$ have the same $e_1$-value
+(both 0). They form a residue: $\chi_{e_1}(a_0, a_2)
+= \tau_{e_1}(a_0) + \sigma_{e_1}(a_2) = 0 + 0 = 0$.
+The pair $(a_0, a_2)$ is unresolved.
+
+To resolve: evolve $\kappa_1 \to \kappa_2$ by adding
+$e_2$. Now $e_2(a_0) = 0 \neq e_2(a_2) = 1$. The
+residue is consumed. $\checkmark$
+
+\emph{Definition 3.11 ($\kappa$-evolution).}
+$\kappa_1 = \langle e_1 \rangle \subset
+\kappa_2 = \langle e_1, e_2 \rangle$.
+$\dim(\kappa_1) = 1$, $\dim(\kappa_2) = 2$.
+Monotonic: $\kappa_1 \subset \kappa_2$. $\checkmark$
+
+\emph{Proposition 3.12 (Monotonicity).}
+$\kappa_0 \subset \kappa_1 \subset \kappa_2 \subset
+\kappa_3$. Each inclusion adds one basis vector. $\checkmark$
+
+\emph{Proposition 3.15 (Order-independence).}
+$e_1(a_5) = 1$ regardless of whether $e_2$ has been
+added to $\kappa$. Adding $e_2$ does not change $e_1$'s
+evaluation on any element. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Section 4: Set theory}
+%----------------------------------------------------------------------
+
+\emph{Theorem 4.2 (Extensionality).}
+Under $\kappa_3 = V$, each element has a unique profile:
+$a_0 \leftrightarrow (0,0,0)$, $a_1 \leftrightarrow
+(0,0,1)$, \ldots, $a_7 \leftrightarrow (1,1,1)$.
+Two elements with identical profiles are the same element.
+$\checkmark$
+
+\emph{Theorem 4.5 (Russell exclusion).}
+The Russell predicate $d_P(a) = 1 + a(a)$ (``$a$ does
+not belong to itself'') is affine, not linear:
+$d_P(a_0) = 1 + 0 = 1$ but $d_P(a_0 + a_0) = d_P(0)
+= 1 + 0 = 1 \neq d_P(a_0) + d_P(a_0) = 1 + 1 = 0$.
+Evaluation linearity requires $d_P(0) = 0$. Since
+$d_P(0) = 1 \neq 0$, $d_P$ is excluded. $\checkmark$
+
+\emph{Proposition 4.17 (Empty set).}
+Consider the contradictory discriminator pair: $e_1$
+must fire and $e_1$ must not fire simultaneously. The
+$\kappa$-equivalence class satisfying both is
+$\{a : e_1(a) = 1 \text{ and } e_1(a) = 0\} =
+\varnothing$. $\checkmark$
+
+\emph{Proposition 4.18 (Pairing).}
+To pair $a_4 = 100$ and $a_6 = 110$: their difference is
+$a_4 + a_6 = 010 = e_2$. Choose $\kappa$ such that
+$e_2 \in \kappa^\perp$. Take $\kappa = \langle e_1,
+e_3 \rangle$. Then $e_1(a_4) = 1 = e_1(a_6)$ and
+$e_3(a_4) = 0 = e_3(a_6)$: both discriminators agree
+on $a_4$ and $a_6$. But $e_1(a_0) = 0 \neq 1 =
+e_1(a_4)$, so $a_0$ is separated. The pair
+$\{a_4, a_6\}$ is the $\kappa$-equivalence class.
+$\checkmark$
+
+\emph{Proposition 4.19 (Symmetric difference).}
+$\{a : e_1(a) = 1\} \triangle \{a : e_2(a) = 1\}
+= \{a : (e_1 + e_2)(a) = 1\} = \{a_2, a_3, a_4, a_5\}$.
+$(e_1 + e_2)(010) = 0 + 1 = 1$. $\checkmark$
+$(e_1 + e_2)(110) = 1 + 1 = 0$. $\checkmark$
+
+\emph{Definition 4.22 (Power set).}
+Under $\kappa_2 = \langle e_1, e_2 \rangle$: the
+discriminative power set of $S$ is the set of all
+$\kappa_2$-classifiable subsets. Each non-zero element
+of $\kappa_2$ defines a subset:
+$e_1 \to \{a_4, a_5, a_6, a_7\}$ (first bit = 1),
+$e_2 \to \{a_2, a_3, a_6, a_7\}$ (second bit = 1),
+$e_1{+}e_2 \to \{a_2, a_3, a_4, a_5\}$ (bits differ).
+The power set has $2^2 - 1 = 3$ non-trivial subsets
+plus $\varnothing$ and $S$. $\checkmark$
+
+\emph{Proposition 4.26 (Indistinguishability).}
+Under $\kappa_2$, the elements $a_0 = 000$ and
+$a_1 = 001$ are indistinguishable ($e_1$ and $e_2$
+agree on both). The difference $a_0 + a_1 = 001 = e_3
+\in \kappa_2^\perp = \langle e_3 \rangle$. They are
+$\kappa_2$-equivalent. Only $\kappa_3$ (adding $e_3$)
+separates them. $\checkmark$
+
+\emph{Theorem 4.13 (Foundation, chain bound).}
+A chain $a_7 \ni a_3 \ni a_1$: link vectors
+$v_1 = a_7 + a_3 = 111 + 011 = 100 = e_1$,
+$v_2 = a_3 + a_1 = 011 + 001 = 010 = e_2$.
+$\{e_1, e_2\}$ are linearly independent. Chain depth
+$= 2 \leq 3 = \dim(V)$. Adding $v_3 = a_1 + a_0 =
+001 = e_3$: depth 3 = $\dim(V)$. Maximum chain:
+$a_7 \ni a_3 \ni a_1 \ni a_0$ (4 elements, 3 links).
+$\checkmark$
+
+\emph{Theorem 4.33 (Choice, finite).}
+Family: $S_1 = \{a_0, a_1\}$, $S_2 = \{a_4, a_5\}$.
+Under $\kappa_1 = \langle e_1 \rangle$: within $S_1$,
+$e_1(a_0) = e_1(a_1) = 0$ (unresolved). Within $S_2$,
+$e_1(a_4) = e_1(a_5) = 1$ (unresolved).
+Residue: both pairs unresolved. Evolve: add $e_3$.
+Now $e_3(a_0) = 0 \neq e_3(a_1) = 1$ (resolved) and
+$e_3(a_4) = 0 \neq e_3(a_5) = 1$ (resolved). One
+evolution resolved both families simultaneously.
+Measure: $\dim(V/\kappa) = 3 \to 2 \to 1 \to 0$.
+At most 3 steps. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Section 5: Homotopy}
+%----------------------------------------------------------------------
+
+\emph{Definition 5.2 (Discrimination complex).}
+$\bigwedge(\GF(2)^3) = \bigwedge^0 \oplus \bigwedge^1
+\oplus \bigwedge^2 \oplus \bigwedge^3$.
+Dimensions: $1, 3, 3, 1$ (total 8).
+Basis: grade 0: $\{1\}$; grade 1: $\{e_1, e_2, e_3\}$;
+grade 2: $\{e_1 \wedge e_2,\; e_1 \wedge e_3,\;
+e_2 \wedge e_3\}$; grade 3: $\{e_1 \wedge e_2 \wedge
+e_3\}$.
+
+\emph{Definition 5.4 (Boundary operator).}
+$\partial(e_1 \wedge e_2) = e_1 + e_2$ (remove each
+factor in turn). $\partial(e_1 \wedge e_2 \wedge e_3)
+= e_2 \wedge e_3 + e_1 \wedge e_3 + e_1 \wedge e_2$
+(remove each of the three factors).
+
+\emph{Proposition 5.5 (Chain complex, $\partial^2 = 0$).}
+$\partial^2(e_1 \wedge e_2 \wedge e_3)
+= \partial(e_2 \wedge e_3 + e_1 \wedge e_3 +
+e_1 \wedge e_2)$
+$= (e_2 + e_3) + (e_1 + e_3) + (e_1 + e_2)
+= 2e_1 + 2e_2 + 2e_3 = 0$. $\checkmark$
+
+\emph{Theorem 5.7 (Exhaustivity, constructive filling).}
+Under $\kappa_2 = \langle e_1, e_2 \rangle$: the
+residue $R = e_1 \wedge e_2$ is a 2-cycle
+($\partial R = e_1 + e_2$, but as a cycle in the
+\emph{relative} complex\ldots). The filling:
+$C = R \wedge e_3 = e_1 \wedge e_2 \wedge e_3$.
+$\partial C = e_2 \wedge e_3 + e_1 \wedge e_3 +
+e_1 \wedge e_2$. The component $e_1 \wedge e_2 = R$
+appears in $\partial C$: the residue is a boundary in
+the extended complex. $\checkmark$
+
+\emph{Theorem 5.10 (Groupoid).}
+$e_1 \wedge e_2 = e_2 \wedge e_1$ (commutativity).
+$(e_1 \wedge e_2) \wedge (e_1 \wedge e_2) = 0$
+(nilpotency: every 2-morphism is self-inverse).
+Identity: $e_1 \wedge 1 = e_1$ (grade-0 unit).
+$\checkmark$
+
+\emph{Proposition 5.12 (Univalence).}
+$a_3 = 011$ and $a_5 = 101$: difference $a_3 + a_5 =
+110 = e_1 + e_2$. Under $\kappa_1 = \langle e_1
+\rangle$: $e_1(a_3) = 0 \neq e_1(a_5) = 1$. Already
+separated. Under no $\kappa$ are they persistently
+equivalent (since $e_1$ separates them). For persistent
+equivalence: $a + b \in \bigcap_\kappa \kappa^\perp
+= \{0\}$. Therefore $a + b = 0$, $a = b$. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Section 6: Categories}
+%----------------------------------------------------------------------
+
+\emph{Running example.}
+$\mathcal{C}(S, \kappa_2)$ with $\kappa_2 = \langle
+e_1, e_2 \rangle$. Objects: the four $\kappa_2$-equivalence
+classes:
+$A = \{a_0, a_1\}$ (profile $00$),
+$B = \{a_2, a_3\}$ (profile $01$),
+$C = \{a_4, a_5\}$ (profile $10$),
+$D = \{a_6, a_7\}$ (profile $11$).
+
+\emph{Definition 6.1 (Directed morphism).}
+$e_1$ witnesses $A \to C$: $\tau_{e_1}(A) = 0$,
+$\tau_{e_1}(C) = 1$. The morphism goes from class $A$
+(where $e_1 = 0$) to class $C$ (where $e_1 = 1$).
+$e_2$ witnesses $A \to B$ similarly.
+
+\emph{Proposition 6.2 (Non-invertibility).}
+The reverse $C \to A$ needs a discriminator $d'$ with
+$d'(C) = 0$ and $d'(A) = 1$. In $\kappa_2$, only
+$e_1{+}e_2$ sends $C = 10$ to $0{+}1 = 1$? No:
+$(e_1{+}e_2)(10) = 1+0 = 1$. Actually $e_1(A) = 0$,
+$e_1(C) = 1$, so $e_1$ witnesses $A \to C$; the reverse
+$C \to A$ is witnessed by a different morphism (or the
+same $e_1$ with $\tau/\sigma$ swapped under $S_3$).
+The morphism $e_1: A \to C$ is non-invertible if
+$e_1 \neq$ the reverse witness. $\checkmark$
+
+\emph{Definition 6.5 (Emergent category).}
+Objects of $\mathcal{C}(S, \kappa_2)$: $\{A, B, C, D\}$.
+Morphisms: 3 non-trivial (one per non-zero element of
+$\kappa_2$): $e_1, e_2, e_1{+}e_2$.
+Identity: the zero discriminator $0$ (maps everything
+to itself). $\checkmark$
+
+\emph{Definition 6.6 (Composition).}
+$e_2 \circ e_1 = e_2 \wedge e_1 = e_1 \wedge e_2$
+(a 2-morphism, grade 2). This is a comparison of the
+two discriminators, not a morphism in $\mathcal{C}$.
+Grade-2 elements are 2-cells. $\checkmark$
+
+\emph{Theorem 6.8 (2-category axioms).}
+Horizontal composition: $e_1 * e_2 = e_1 \wedge e_2$.
+Vertical composition of 2-cells: if $\alpha = e_1
+\wedge e_2$ and $\beta = e_1 \wedge e_3$, then
+$\alpha \circ \beta = (e_1 \wedge e_2) + (e_1 \wedge
+e_3) = e_1 \wedge (e_2 + e_3)$ (by linearity).
+Interchange: both paths give the same result because
+cross terms cancel ($1+1=0$). $\checkmark$
+
+\emph{Theorem 6.11 (Triadic adjunction).}
+The three axes $e_1, e_2, e_1{+}e_2$ of $\kappa_2$
+give three inclusion-projection pairs:
+$\iota_1: \langle e_1 \rangle \hookrightarrow \kappa_2$
+with $\pi_1: \kappa_2 \to \langle e_1 \rangle$ via
+$\pi_1(e_1) = e_1$, $\pi_1(e_2) = 0$.
+$\pi_1 \circ \iota_1 = \mathrm{id}$. $\checkmark$
+
+Similarly for $e_2$ and $e_1{+}e_2$. Six adjunctions
+total (three axes $\times$ two chiralities). $\checkmark$
+
+\emph{Theorem 6.17 (Yoneda).}
+The representable presheaf $\mathrm{Hom}(A, -)$ in
+$\mathcal{C}(S, \kappa_2)$:
+$\mathrm{Hom}(A, A) = \{0\}$ (identity),
+$\mathrm{Hom}(A, B) = \{e_2\}$,
+$\mathrm{Hom}(A, C) = \{e_1\}$,
+$\mathrm{Hom}(A, D) = \{e_1{+}e_2\}$.
+Each hom-set is a subset of $\kappa_2$, hence a set
+(local smallness). Natural transformations out of
+$\mathrm{Hom}(A, -)$ biject with evaluations at $A$.
+$\checkmark$
+
+\emph{Proposition 6.20 (Limits).}
+Product $B \times C$ in $\mathcal{C}(S, \kappa_2)$:
+joint profile under $(e_2, e_1)$. The product is
+the class with profile $01 \times 10 = 0110$, which
+is $\{a_3, a_5\} \cap$\ldots\ Actually, the product
+is constructed at $\kappa_3$: add $e_3$ to separate
+within classes. Equalizer of $e_1, e_2: A \to D$:
+$\ker(e_1 + e_2) \cap A = \{a \in A :
+(e_1{+}e_2)(a) = 0\} = \{a_0, a_1\} \cap \{a :
+e_1(a) = e_2(a)\} = \{a_0, a_1\}$ (both have
+$e_1 = e_2 = 0$). $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Section 7: Higher structure}
+%----------------------------------------------------------------------
+
+\emph{Theorem 7.1 ($(n,1)$-structure).}
+Grade-1 morphisms: $e_1, e_2, e_3$ (directed,
+non-invertible: $e_1$ sends $A \to C$ but the reverse
+uses a different witness).
+Grade-2: $e_1 \wedge e_2, e_1 \wedge e_3, e_2 \wedge
+e_3$ (all self-inverse: $(e_1 \wedge e_2)^{-1} =
+e_1 \wedge e_2$ since $e_2 \wedge e_1 = e_1 \wedge
+e_2$). Invertible = groupoid at grade 2. $\checkmark$
+
+\emph{Definition 7.13 (GF(2) toroid).}
+The three non-zero elements of $\GF(2)^2$:
+$\tau = (1,0)$, $\sigma = (0,1)$, $\kappa = (1,1)$.
+$\tau + \sigma = \kappa$, $\tau + \kappa = \sigma$,
+$\sigma + \kappa = \tau$. Triangle identity.
+$S_3$ permutes: $(12)$ swaps $\tau \leftrightarrow
+\sigma$ (fixes $\kappa$), $(123)$ cycles all three.
+$\checkmark$
+
+\emph{Theorem 7.15 (Free $(n,k)$, Segal).}
+At $n = 3$: $\mathrm{Gr}(2, \GF(2)^3)$ has
+$\binom{3}{2}_2 = \frac{(8-1)(8-2)}{(4-1)(4-2)} =
+\frac{7 \cdot 6}{3 \cdot 2} = 7$ points (the 7 lines
+of the Fano plane). Each 2-cell (grade-2 element) is
+determined by its two composable edges:
+$e_1 \wedge e_2$ is determined by $\{e_1, e_2\}$.
+Segal map: $\{e_1, e_2\} \mapsto e_1 \wedge e_2$.
+Bijection. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Section 8: Monoidal structure}
+%----------------------------------------------------------------------
+
+\emph{Definition 8.1 (Monoidal product).}
+$A \otimes B = e_A \wedge e_B$ where $e_A, e_B$ are
+the classifying discriminators. In $\mathcal{C}(S,
+\kappa_2)$: $e_1 \otimes e_2 = e_1 \wedge e_2$.
+
+Strict associativity: $(e_1 \wedge e_2) \wedge e_3
+= e_1 \wedge (e_2 \wedge e_3) = e_1 \wedge e_2
+\wedge e_3$. Both sides are the same element of
+$\bigwedge^3 V$. $\checkmark$
+
+Unit: $e_1 \wedge 1 = e_1 = 1 \wedge e_1$.
+$\checkmark$
+
+Symmetry: $e_1 \wedge e_2 = e_2 \wedge e_1$
+(since $-1 = 1$ in $\GF(2)$). $\checkmark$
+
+\emph{Theorem 8.4 (Delooping).}
+The monoidal category $(\mathcal{C}, \wedge, 1)$
+viewed as a one-object 2-category $B\mathcal{C}$:
+the single object is ``$S$''. Morphisms are
+$\{0, e_1, e_2, e_3, e_1{+}e_2, e_1{+}e_3,
+e_2{+}e_3, e_1{+}e_2{+}e_3\}$ (the 8 elements of
+$V^*$). 2-cells are grade-2 elements. The delooping
+collapse: $\beta^2 = \mathrm{id}$ because $(-1)^2 = 1$
+in $\GF(2)$. $\checkmark$
+
+\emph{Theorem 8.13 (Monoidal closure).}
+$[e_1, e_2]$ (the internal hom): a morphism
+$e_1 \otimes e_2 \to e_3$ is witnessed by a
+discriminator $d$ with $d(e_1 \wedge e_2) = e_3$.
+Via the triangle identity: $d = e_3$ (since
+$e_1 + e_2 + e_3 = e_1{+}e_2{+}e_3$ determines
+the third from any two). The tensor-hom bijection:
+$\mathrm{Hom}(e_1 \wedge e_2, e_3) \cong
+\mathrm{Hom}(e_1, [e_2, e_3])$. Naturality:
+precomposition with $d_h \wedge 1 = d_h$ (strict unit).
+$\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Section 9: Topos}
+%----------------------------------------------------------------------
+
+\emph{Theorem 9.2 (Self-enrichment).}
+$\mathrm{Hom}(e_1, e_2) = \{d \in \kappa :
+d \text{ witnesses } e_1 \to e_2\}$. In the concrete
+model: $\mathrm{Hom}(e_1, e_2) \cong \GF(2)$ (either
+the zero map or the unique witness). Composition:
+$\GF(2) \otimes \GF(2) \to \GF(2)$ via multiplication.
+$\checkmark$
+
+\emph{Theorem 9.3 (Subobject classifier).}
+$\Omega = \GF(2)^2 = \{(0,0), (1,0), (0,1), (1,1)\}$.
+The four values: $(0,0) =$ neither (gap), $(1,0) =$
+$\tau$-only, $(0,1) = \sigma$-only, $(1,1) =$ both
+(overlap). For the subset $\{a_4, a_5, a_6, a_7\}
+= \{a : e_1(a) = 1\}$, the classifying map sends:
+elements inside $\mapsto (1, 0)$ ($\tau$-positive),
+elements outside $\mapsto (0, 1)$ ($\sigma$-positive).
+$\checkmark$
+
+\emph{Theorem 9.6 (Fibered topos).}
+The base category: $K = \{\kappa_0, \kappa_1, \kappa_2,
+\kappa_3\}$ with $\kappa_i \subset \kappa_j$ for
+$i < j$. $K$ is a modular lattice (subspace lattice
+of $V^*$).
+
+Fibers: $\mathcal{C}(S, \kappa_1)$ has 2 objects (split
+by $e_1$). $\mathcal{C}(S, \kappa_2)$ has 4 objects.
+$\mathcal{C}(S, \kappa_3)$ has 8 objects (singletons).
+
+Each fiber is a topos (finite limits, $\Omega$, power
+objects). The Grothendieck construction
+$\int \mathcal{C}$ is the total category. $\checkmark$
+
+
+\emph{Corollary 9.7 (Pro-system, geometric morphisms).}
+The three non-trivial fibers form a pro-system:
+$\mathcal{C}(S, \kappa_1) \leftarrow \mathcal{C}(S,
+\kappa_2) \leftarrow \mathcal{C}(S, \kappa_3)$.
+
+\emph{Restriction $\kappa_2 \to \kappa_1$}: forgets
+$e_2$. Objects of $\mathcal{C}(S, \kappa_2)$:
+$\{A, B, C, D\}$ (4 classes). Objects of
+$\mathcal{C}(S, \kappa_1)$: $\{A \cup B, C \cup D\}$
+(2 classes, merge pairs that $e_2$ distinguished).
+The restriction functor $f^*$:
+$f^*(A) = A \cup B$, $f^*(B) = A \cup B$,
+$f^*(C) = C \cup D$, $f^*(D) = C \cup D$.
+On morphisms: $f^*(e_1) = e_1$ (survives),
+$f^*(e_2) = 0$ (forgotten), $f^*(e_1{+}e_2) = e_1$
+(the $e_2$ component drops out). $\checkmark$
+
+The direct image $f_*$: for a presheaf $P$ on
+$\kappa_1$, $f_*(P)$ evaluates $P$ on the
+$\kappa_1$-images: $f_*(P)(A) = P(A \cup B)$,
+$f_*(P)(C) = P(C \cup D)$, $f_*(P)(B) = P(A \cup B)$,
+$f_*(P)(D) = P(C \cup D)$.
+
+The adjunction $f^* \dashv f_*$:
+$\mathrm{Hom}_{\kappa_1}(f^*(X), Y) \cong
+\mathrm{Hom}_{\kappa_2}(X, f_*(Y))$.
+Concretely: a morphism from $A$ (in $\kappa_2$) to
+the pullback of a $\kappa_1$-object is the same as a
+morphism from the merged class $A \cup B$ (in
+$\kappa_1$) to that object. $\checkmark$
+
+\emph{Restriction $\kappa_3 \to \kappa_2$}: forgets
+$e_3$. Merges pairs within each $\kappa_2$-class:
+$f^*(a_0) = A$, $f^*(a_1) = A$ (both in $A$),
+$f^*(a_2) = B$, etc. The 8 singletons of
+$\mathcal{C}(S, \kappa_3)$ map to the 4 classes of
+$\mathcal{C}(S, \kappa_2)$. $\checkmark$
+
+\emph{Galois equivariance.}
+$\mathrm{Gal}(V/\kappa_1) = GL(2, \GF(2)) \cong S_3$
+(order 6: permutes the 3 non-zero elements of
+$V/\kappa_1 = \langle e_2, e_3 \rangle$).
+$\mathrm{Gal}(V/\kappa_2) = GL(1, \GF(2)) = \{1\}$
+(trivial: $V/\kappa_2 = \langle e_3 \rangle$ has only
+one non-zero element).
+The inclusion $\{1\} \hookrightarrow S_3$: the
+restriction functor commutes with the Galois action.
+Restricting from $\kappa_2$ to $\kappa_1$ ``forgets''
+the $e_2$-discrimination; the Galois group at $\kappa_1$
+can permute $e_2$ and $e_3$ (and $e_2{+}e_3$) freely,
+reflecting the fact that $\kappa_1$ doesn't see them.
+$\checkmark$
+
+\emph{The pro-system limit.}
+The inverse limit $\varprojlim \mathcal{C}(S, \kappa_i)$
+consists of compatible families: an object in each fiber,
+related by restriction functors. A compatible family:
+$(a_5 \in \kappa_3,\; C \in \kappa_2,\;
+C {\cup} D \in \kappa_1)$ with
+$f^*(a_5) = C$ and $f^*(C) = C {\cup} D$. $\checkmark$
+
+\emph{Theorem 9.11 (Proof theory).}
+Conjunction in the four-valued logic:
+$(1,0) \wedge (0,1) = (0,0)$ ($\tau$-only AND
+$\sigma$-only = neither: gap).
+$(1,1) \wedge (1,0) = (1,0)$ (both AND $\tau$-only
+= $\tau$-only).
+Excluded middle: $(1,0) \vee \neg(1,0) = (1,0) \vee
+(0,1) = (1,1) \neq (1,0)$ (does not return to
+``true'' --- returns to ``both''). Excluded middle
+fails. $\checkmark$
+
+\emph{Theorem 9.14 (Self-hosting).}
+The Boolean restriction of $\Omega$: elements with
+$\chi = 1$ are $\{(1,0), (0,1)\}$. Under the map
+$(1,0) \mapsto 0$, $(0,1) \mapsto 1$: addition table
+$(1,0) + (0,1) = (1,1)$ which has $\chi = 0$
+(the residue). So $(1,0) + (0,1) \notin$ the Boolean
+restriction. Instead: $(1,0) + (1,0) = (0,0)$ which
+maps to $0 + 0 = 0$. And $(0,1) + (0,1) = (0,0)$
+maps to $1 + 1 = 0$. The internal $\GF(2)$ reproduces:
+$0 + 0 = 0$, $1 + 1 = 0$, $0 \cdot 1 = 0$,
+$1 \cdot 1 = 1$. $\checkmark$
+
+\emph{Theorem 9.20 (Fano closure).}
+The 7 non-zero elements of $\GF(2)^3$ and the 7 lines
+of $PG(2, \GF(2))$: each line $\{a, b, c\}$ satisfies
+$a + b + c = 0$. The lines:
+$\{e_1, e_2, e_1{+}e_2\}$,
+$\{e_1, e_3, e_1{+}e_3\}$,
+$\{e_2, e_3, e_2{+}e_3\}$,
+$\{e_1, e_2{+}e_3, e_1{+}e_2{+}e_3\}$,
+$\{e_2, e_1{+}e_3, e_1{+}e_2{+}e_3\}$,
+$\{e_3, e_1{+}e_2, e_1{+}e_2{+}e_3\}$,
+$\{e_1{+}e_2, e_1{+}e_3, e_2{+}e_3\}$.
+Three non-collinear points (e.g., $e_1, e_2, e_3$)
+determine all 7. Convergence rate: 3. $\checkmark$
+
+\emph{Theorem 9.22 (Convergence).}
+$\dim(V) = 3$. Three independent interrogations
+($e_1, e_2, e_3$) generate the full dual space $V^*$.
+After 3 evolutions, $\kappa = V$, the Galois group
+$GL(V/\kappa) = GL(0) = \{1\}$ (trivial). Full
+coverage. $\checkmark$
+
+
+%----------------------------------------------------------------------
+\subsection{Remaining definitions and propositions}
+%----------------------------------------------------------------------
+
+\emph{Corollary 6.3 (Cost of isomorphism).}
+In $\mathcal{C}(S, \kappa_2)$: the morphism
+$e_1: \{A,B\} \to \{C,D\}$ is witnessed by one
+discriminator. To make $A$ and $C$ isomorphic
+(indistinguishable), we need to \emph{remove} $e_1$
+from $\kappa$: shrink $\kappa_2 \to \kappa_1' =
+\langle e_2 \rangle$. Under $\kappa_1'$, $A$ and $C$
+merge into one class $\{a_0, a_1, a_4, a_5\}$. Cost:
+loss of the $e_1$-discrimination. Isomorphism between
+objects separated at stage $\kappa$ requires regressing
+to a coarser stage. $\checkmark$
+
+\emph{Definition 6.13 (Natural transformation).}
+A natural transformation $\alpha: F \Rightarrow G$
+between functors $F, G: \mathcal{C}(S, \kappa_1) \to
+\mathcal{C}(S, \kappa_2)$: at each object $X$ of
+$\kappa_1$, a morphism $\alpha_X: F(X) \to G(X)$ in
+$\kappa_2$, such that for every morphism $f: X \to Y$
+in $\kappa_1$, $\alpha_Y \circ F(f) = G(f) \circ
+\alpha_X$.
+
+Concretely: $\kappa_1$ has objects $\{P, Q\}$ (split
+by $e_1$). $F$ sends $P \mapsto A$, $Q \mapsto C$.
+$G$ sends $P \mapsto B$, $Q \mapsto D$. The natural
+transformation needs $\alpha_P: A \to B$ (witnessed by
+$e_2$) and $\alpha_Q: C \to D$ (also witnessed by $e_2$).
+Naturality: $e_2 \circ e_1 = e_1 \circ e_2$ (both
+$= e_1 \wedge e_2$, by commutativity of $\wedge$).
+$\checkmark$
+
+\emph{Definition 5.13 (Emergent $n$-groupoid).}
+At $n = 3$: the groupoid has
+grade-1 morphisms: 7 (the non-zero elements of $V^*$),
+grade-2 morphisms: 7 (the lines of the Fano plane,
+i.e., decomposable 2-forms),
+grade-3 morphisms: 1 ($e_1 \wedge e_2 \wedge e_3$,
+the top form).
+All grade-$\geq 2$ morphisms are invertible
+($\alpha = \alpha^{-1}$). This is a 3-groupoid.
+$\checkmark$
+
+\emph{Proposition 5.16 (Growth of homotopical complexity).}
+$n = 2$: $\bigwedge(\GF(2)^2)$ has dimensions
+$(1, 2, 1)$. Total: $4$. Morphisms: $2 + 1 = 3$.
+$n = 3$: $\bigwedge(\GF(2)^3)$ has dimensions
+$(1, 3, 3, 1)$. Total: $8$. Morphisms: $3 + 3 + 1 = 7$.
+$n = 4$: dimensions $(1, 4, 6, 4, 1)$. Total: $16$.
+Morphisms: $4 + 6 + 4 + 1 = 15$.
+The number of $k$-morphisms at grade $k$ is
+$\binom{n}{k}$, growing as $n$ increases. $\checkmark$
+
+\emph{Definition 7.7 (Triangle identity).}
+The three non-zero elements of $\GF(2)^2$:
+$\tau = (1,0)$, $\sigma = (0,1)$, $\kappa = (1,1)$.
+$\tau + \sigma = \kappa$: explicitly,
+$(1,0) + (0,1) = (1,1)$. Similarly $\sigma + \kappa =
+(0,1) + (1,1) = (1,0) = \tau$, and $\kappa + \tau =
+(1,1) + (1,0) = (0,1) = \sigma$. Any two determine the
+third. $\checkmark$
+
+\emph{Proposition 7.9 (Structure of $k$-morphisms).}
+At $k = 2$: $e_1 \wedge e_2$ is a comparison of two
+discriminators. It does not evaluate on $S$ directly
+(grade 2 has no population interface). It records
+``$e_1$ and $e_2$ were both applied'' without specifying
+to which elements or in which order (commutativity).
+At $k = 3$: $e_1 \wedge e_2 \wedge e_3$ records
+``all three discriminators were applied.'' This is a
+3-comparison, invertible, and determines a volume element
+in $V$. $\checkmark$
+
+\emph{Definition 9.8 (Evidence semantics).}
+$\Omega = \GF(2)^2$. The four truth values as evidence
+states:
+$(0,0)$: no evidence for or against (gap). Example:
+$e_3$ has not been applied to $a_0$ vs $a_1$ under
+$\kappa_2$.
+$(1,0)$: evidence for ($\tau$), none against. Example:
+$e_1(a_4) = 1$ (element is in the $e_1$-positive class).
+$(0,1)$: evidence against ($\sigma$), none for.
+Example: $e_1(a_0) = 0$ (element is in the
+$e_1$-negative class).
+$(1,1)$: evidence both for and against (overlap).
+Example: $a_3 = 011$ has $e_2(a_3) = 1$ (for, under
+$e_2$) and $e_1(a_3) = 0$ (against, under $e_1$).
+If the question is ``is $a_3$ in the positive class?''
+with respect to different discriminators, the answer is
+both yes and no. $\checkmark$
+
+\emph{Definition 9.9 (Information ordering).}
+The Belnap lattice on $\Omega$:
+$(0,0) \sqsubseteq (1,0)$, $(0,0) \sqsubseteq (0,1)$
+(gap has less information than either determination).
+$(1,0) \sqsubseteq (1,1)$, $(0,1) \sqsubseteq (1,1)$
+(either determination has less information than both).
+$(1,0)$ and $(0,1)$ are incomparable (different
+evidence, neither subsumes the other). This is the
+diamond lattice. $\checkmark$
+
+\emph{Corollary 9.21 (Self-modeling).}
+The Fano plane $PG(2, \GF(2))$ has 7 points and 7
+lines. The framework at $n = 3$ has 7 non-trivial
+discriminators and 7 non-trivial grade-2 comparisons
+(the Fano lines). The structure self-models: the
+incidence structure of the discriminator space IS the
+Fano plane. The only element not in any Fano line
+is $(0,0,0)$ (the zero discriminator, which
+discriminates nothing). $\checkmark$
+
+\emph{Theorem 9.22 (Convergence, explicit).}
+Start: $\kappa_0 = \varnothing$.
+$\mathrm{Gal}(V/\kappa_0) = GL(3, \GF(2))$, order 168.
+Step 1: add $e_1$. $\mathrm{Gal}(V/\kappa_1) = GL(2,
+\GF(2)) \cong S_3$, order 6. Reduction: $168/6 = 28$.
+Step 2: add $e_2$. $\mathrm{Gal}(V/\kappa_2) = GL(1,
+\GF(2)) = \{1\}$, order 1. Reduction: $6/1 = 6$.
+Step 3: add $e_3$. $\mathrm{Gal}(V/\kappa_3) = GL(0)
+= \{1\}$ (trivially). Full coverage. Three steps.
+
+Galois group orders: $168 \to 6 \to 1 \to 1$.
+Dimension of unknown: $3 \to 2 \to 1 \to 0$.
+$\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{O2: $\in$-induction with cycles}
+\label{app:o2-cycles}
+%----------------------------------------------------------------------
+
+Cycles of length $\geq 2$ are not excluded by the
+framework ($v \wedge v = 0$ excludes only 1-cycles).
+We show that cycles do not break induction.
+
+\emph{2-cycle.}
+$a \in b \in a$: witnessed by $d_1$ ($a \in b$) and
+$d_2$ ($b \in a$). Link vectors: $v_1 = a + b$,
+$v_2 = b + a = a + b$. Over $\GF(2)$: $v_1 = v_2$.
+The two link vectors are \emph{dependent}. The 2-cycle
+consumes 1 dimension, not 2. $\checkmark$
+
+\emph{3-cycle.}
+$a \in b \in c \in a$: link vectors $v_1 = a + b$,
+$v_2 = b + c$, $v_3 = c + a$. Sum:
+$v_1 + v_2 + v_3 = (a + b) + (b + c) + (c + a)
+= 2a + 2b + 2c = 0$ (over $\GF(2)$). The three
+vectors are always linearly dependent. A 3-cycle
+consumes at most 2 dimensions. $\checkmark$
+
+\emph{General $k$-cycle.}
+$a_1 \in a_2 \in \cdots \in a_k \in a_1$: link vectors
+$v_i = a_i + a_{i+1}$ (indices mod $k$). Sum:
+$\sum_{i=1}^k v_i = \sum_{i=1}^k (a_i + a_{i+1})
+= 2\sum_{i=1}^k a_i = 0$. The $k$ link vectors always
+sum to zero. At most $k - 1$ are independent. A
+$k$-cycle consumes at most $k - 1$ dimensions.
+$\checkmark$
+
+\emph{The induction principle.}
+Induction on $m(\kappa) = \dim(V/\kappa)$ (the Galois
+measure) remains valid in the presence of cycles:
+\begin{itemize}[nosep]
+  \item Each genuinely new membership link adds an
+    independent link vector and decreases $m$ by 1.
+  \item Cycle links do not add independent vectors
+    (their sum is zero), so they do not decrease $m$.
+  \item Cycles are ``free'': they exist without consuming
+    dimensional resources.
+  \item The measure $m$ still reaches 0 in at most
+    $n = \dim(V)$ genuinely independent steps.
+\end{itemize}
+Useful $\in$-induction: induct on $m(\kappa)$, not on
+chain length. Cycles are invisible to the measure.
+$\checkmark$
+
+\emph{Concrete example.}
+In $\GF(2)^3$: the 2-cycle $a_3 \in a_5 \in a_3$
+(i.e., $011 \in 101 \in 011$). Link vector:
+$a_3 + a_5 = 110 = e_1 + e_2$. Witnessed by $e_1$
+(which distinguishes $a_3$ and $a_5$: $e_1(011) = 0$,
+$e_1(101) = 1$). The cycle consumes 1 dimension
+(the direction $e_1 + e_2$). The remaining 2 dimensions
+($e_3$ and any complement of $e_1{+}e_2$) are
+available for further membership relations.
+
+A structure with both a chain and a cycle:
+$a_7 \ni a_3 \in a_5 \in a_3$ (chain $a_7 \to a_3$,
+then cycle $a_3 \leftrightarrow a_5$). Chain link
+vector: $a_7 + a_3 = 100 = e_1$. Cycle link vector:
+$a_3 + a_5 = 110 = e_1 + e_2$. Independent:
+$\{e_1, e_1{+}e_2\}$ has rank 2. Total depth: 2.
+Maximum possible additional depth: 1 (one more
+independent dimension remains). $\checkmark$

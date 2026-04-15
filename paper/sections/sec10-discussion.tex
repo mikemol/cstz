@@ -1,0 +1,541 @@
+%----------------------------------------------------------------------
+\section{Discussion}\label{sec:discussion}
+%----------------------------------------------------------------------
+
+\subsection{Summary of results}
+
+The following table summarizes the status of ZFC axioms within
+the discrimination framework.
+
+\medskip
+\begin{center}
+\begin{tabular}{l|l|l}
+\textbf{ZFC Axiom} & \textbf{Status} & \textbf{Mechanism} \\
+\hline
+Extensionality & Theorem & Definition of $\kappa$-equivalence \\
+Empty set & Theorem & Trivial filtration \\
+Pairing & Theorem & Predicate articulation \\
+Union & Derived & Requires intersection; $\GF(2)$ gives $\triangle$ \\
+Power set & Constructive & Bounded by $\kappa$-state \\
+Separation & Unnecessary & Comprehension bounded by algebra \\
+Foundation & Partial & Self-membership excluded; cycles $\geq 2$ permitted \\
+Infinity & Operationalist axiom (Definition \ref{def:operationalist}) & Indistinguishability (Prop.\ \ref{prop:infinity}) \\
+Choice & Constructive (finite); operationalist (infinite) & Boolean dims.\ (Thm.\ \ref{thm:choice}) \\
+\end{tabular}
+\end{center}
+
+\subsection{Relationship to existing work}
+
+The framework draws on established mathematics:
+\begin{itemize}[nosep]
+  \item The exterior algebra over $\GF(2)$ and its nilpotency
+    properties are standard.
+  \item The Yoneda lemma and the view that identity is
+    constituted by morphism profiles are classical category theory.
+  \item Linear logic's resource sensitivity governs the write
+    path; the exponential modality governs the read path.
+  \item Homotopy type theory provides the interpretive framework
+    for the graded groupoid structure.
+\end{itemize}
+Additional structural analogies --- to Surreal numbers,
+the Grothendieck construction, and CW-complex cell
+attachment --- are developed in Appendix \ref{app:analogies}.
+These provide interpretive context but are not
+load-bearing for any theorem in the paper.
+
+The novelty lies not in any individual component but in the
+specific synthesis: discrimination as primitive, valued in
+$\GF(2)$ exterior algebra, with Boolean structure as a derived
+local property rather than a global assumption, and with an
+observer-dependent, monotonically growing regime $\kappa$
+that records all discriminations performed.
+
+
+\subsection{Galois structure of discrimination}
+\label{sec:galois}
+
+Every $\kappa$-state splits $V$ into seen and unseen:
+\begin{equation}
+  0 \to \kappa \to V \to V/\kappa \to 0.
+\end{equation}
+$\kappa$ is the inner system's regime (what it can
+discriminate). $V/\kappa$ is the complement (what it
+can't --- the inner-exterior). The exterior algebra
+decomposes along this split:
+$\bigwedge(V) \cong \bigwedge(\kappa) \otimes
+\bigwedge(V/\kappa)$.
+
+The residue filling (Theorem \ref{thm:exhaustive},
+Appendix B.18) crosses this tensor boundary:
+$R \in \bigwedge(\kappa)$ is a cycle the inner system
+can detect but not fill. The filling $R \wedge e_{n+1}$
+lives in $\bigwedge(\kappa) \otimes \bigwedge(V/\kappa)$
+--- a tensor product straddling the inner/outer boundary.
+
+\emph{The Galois connection.}
+Two lattices stand in order-reversing correspondence:
+\begin{center}
+\begin{tabular}{rcl}
+Sub-regimes: & $\kappa_1 \subseteq \kappa_2 \subseteq
+  \cdots \subseteq V$ & (more seen) \\
+Complements: & $V/\kappa_1 \supseteq V/\kappa_2
+  \supseteq \cdots$ & (less unseen)
+\end{tabular}
+\end{center}
+More discriminators $=$ smaller complement $=$ less
+freedom in how the unseen could be arranged.
+$\kappa$-evolution moves right in the first lattice and
+left in the second.
+
+\emph{The Galois group.}
+The automorphisms of the complement that preserve the
+sub-regime form the Galois group of the extension:
+$\mathrm{Gal}(V/\kappa) = GL(V/\kappa,\; \GF(2))$.
+This is the symmetry group of what the inner system
+\emph{does not know}, holding fixed what it does know.
+It acts on the $\gamma = 0$ region (the unseen
+discriminators, Section \ref{sec:expanded}).
+
+Each $\kappa$-evolution (adding one discriminator)
+\emph{reduces the Galois group}: the stabilizer of the
+new discriminator is a proper subgroup. Knowledge
+acquisition is Galois-group reduction.
+
+\emph{The Fano automorphism group.}
+For the expanded classifier $\GF(2)^3$:
+$GL(3, \GF(2)) \cong PSL(2,7)$, the simple group of
+order 168, which is the full automorphism group of the
+Fano plane $PG(2, \GF(2))$.
+
+The convergence rate of 3 (Theorem \ref{thm:convergence})
+is the minimum size of a generating set for $GL(3, \GF(2))$
+acting on the Fano plane: three independent interrogations
+generate all 168 symmetries of the epistemic structure.
+After 3 interrogations, the Galois group is trivial ---
+no symmetry of the unknown remains, and the full
+structure is determined.
+
+\emph{The Galois correspondence for $\kappa$-states.}
+Intermediate sub-regimes $\kappa \subset \kappa' \subset V$
+correspond to subgroups of $GL(\dim(V/\kappa), \GF(2))$:
+$\kappa = 0$ (nothing seen, full symmetry) $\leftrightarrow$
+the full group;
+$\kappa = V$ (everything seen, no symmetry)
+$\leftrightarrow$ the trivial group. The lattice of
+sub-regimes is isomorphic to the lattice of subgroups,
+reversed.
+
+This Galois structure was not designed into the
+framework. It follows from the short exact sequence of
+the $\kappa$-split, which is a property of the exterior
+algebra over $\GF(2)$.
+
+\subsection{The bilinear pairing is the one structure}
+\label{sec:one-structure}
+
+The meta-analysis of Appendix \ref{app:meta} reveals
+that the paper's six closure techniques ---
+characteristic 2, Leibniz, linearity, strictness,
+the short exact sequence, and the Galois group ---
+are six facets of one object: the bilinear evaluation
+pairing $\mathrm{ev}(d, a) = \langle d, a \rangle$
+over $\GF(2)$. The field ($1{+}1{=}0$), the boundary
+compatibility (Leibniz), the second-argument linearity,
+the product strictness, the $\kappa$-decomposition,
+and the basis-invariance are six views of this pairing.
+The paper's 47 audited claims are 47 projections of
+one bilinear form onto different parts of the
+mathematical landscape.
+
+\subsection{The residue mechanism is uniform}
+\label{sec:residue-uniform}
+
+The framework has one mechanism for handling information
+that exists at a finer resolution but is invisible at a
+coarser one: the \emph{residue}. This mechanism appears
+at every level of the paper:
+
+\begin{itemize}[nosep]
+  \item \textbf{Set theory} (\S4): gap $(0,0)$ and overlap
+    $(1,1)$ in the four-cell profile. A datum whose
+    properties are unresolved by the current $\kappa$.
+  \item \textbf{Homology} (\S5): $[R] \in H_k$,
+    a non-trivial homology class. A $k$-cycle not
+    bounding a $(k+1)$-chain.
+  \item \textbf{Truncation} (\S5, Cor 5.8): non-unique
+    fillings under truncated $\kappa$. Distinct at
+    finer resolution, collapsed at coarser.
+  \item \textbf{Categories} (\S6): composition data
+    lost under 1-categorical projection. The 2-cell
+    $d_1 \wedge d_2$ records which discriminations were
+    composed; the 1-categorical shadow forgets this.
+  \item \textbf{Sheaves} (\S9): presheaf failure of
+    the gluing condition. Incompatible local sections
+    producing a residue that triggers $\kappa$-evolution.
+  \item \textbf{Coverage} (\S9): the $\gamma = 0$ state
+    (pre-interrogation). Information that could exist
+    but has not been extracted.
+  \item \textbf{Meta-level} (\S10): the cofibration is
+    the outer tensor product of all domains (sections,
+    theorems, appendix verifications), each carrying
+    fibers (claims, justifications, dependencies). The
+    Cartesian join of these fibers is checked for holes:
+    orphaned appendix sections (fibers without claims),
+    uncovered spine theorems (claims without fibers).
+    This is $\chi = 0$ detection at the meta-level,
+    consumed by editorial $\kappa$-evolution.
+\end{itemize}
+
+In every case: the residue has $\chi = 0$ (XOR signature
+vanishes), it specifies its own filling (the discriminator
+or chain that would resolve it), and $\kappa$-evolution
+consumes it. The mechanism is the same operation ---
+the wedge product detecting non-discrimination ---
+applied to different inputs at different grades.
+
+\subsection{Self-audit: the paper as its own implementation}
+\label{sec:self-audit}
+
+If the framework models itself, the paper is a
+$\kappa$-evolution trace. The spine/appendix structure
+instantiates the framework's own write/read distinction:
+the spine is the \emph{write path} (each section adds
+dimensions, consuming the previous section's residue),
+and Appendix \ref{app:verifications} is the \emph{read
+path} (each verification section filters the
+corresponding spine claim through the algebra, checking
+that the profile is well-formed). The cofibration between
+spine and appendix is the wedge product
+$\text{Spine} \wedge \text{Appendix}$: it identifies
+gaps (spine claims without verification), orphans
+(verifications without spine claims), and overlaps
+(redundant coverage).
+
+\medskip
+\noindent\textbf{$\kappa$-evolution trace (spine).}
+
+\begin{center}
+\small
+\begin{tabular}{p{1.0cm}|p{2.5cm}|p{2.5cm}|p{2.5cm}|p{2.5cm}}
+\textbf{Sec.} & \textbf{Triggering residue} &
+\textbf{Dimensions added} &
+\textbf{(1,0) claims} &
+\textbf{Gaps / Overlaps} \\
+\hline
+\S2 &
+Initial: algebra unapplied &
+$\GF(2)$, $\bigwedge V$, $v \wedge v = 0$ &
+Ground field, nilpotency &
+(0,0): no populations \\
+\hline
+\S3 &
+Algebra not applied &
+Single-predicate $d$, $\tau/\sigma$ as
+datum properties, profile as composed
+discriminator, $\kappa$, residue,
+concrete model ($V = \GF(2)^3$, $|S| = 4$) &
+Four-cell from composition, monoidal read,
+higher-level discriminators as dependent types &
+(0,0): no standard math \\
+\hline
+\S4 &
+No standard math &
+Profile linearity (Definition \ref{def:profile-linear}), operationalist axiom (Definition \ref{def:operationalist}),
+extensionality, Russell, foundation, choice &
+Russell (via linearity), foundation (partial),
+Banach--Tarski &
+(0,1): Russell is relocated restriction.
+Foundation permits cycles $\geq 2$.
+Infinity/choice depend on axiom \\
+\hline
+\S5 &
+Grade structure unused &
+$\partial$, $\partial^2 = 0$, $H_k$, exhaustivity &
+Chain complex, groupoid &
+(1,1): residue $=$ homological hole \\
+\hline
+\S6 &
+Groupoid lacks direction &
+Directed morphisms, 2-category, functors,
+adjunction, Yoneda, limits &
+2-cat axioms, Yoneda &
+(0,1): composition is 2-cell, not 1-cell \\
+\hline
+\S7 &
+Direction at grade 1 only &
+Triangle identity, toroid, $S_3$, $(n,k)$ &
+Free meta-discrimination &
+(0,0): dynamics transfer needs proof \\
+\hline
+\S8 &
+Monoidal not connected &
+$\otimes$, delooping, CD tower, $[{-},{-}]$ &
+Delooping, closure &
+(0,0): CD hexagon axioms resolved (recognizer rotation) \\
+\hline
+\S9 &
+Multiple gaps &
+$\Omega$, topos, FDE, FOL, self-hosting,
+fixed point, sheaves, Fano &
+All resolved or pointer to appendix &
+(0,0): fixed-point uniqueness resolved ($\dim = 1$) \\
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent\textbf{Cofibration: Spine $\wedge$ Appendix B.}
+
+The cofibration checks that every spine claim (a
+$\tau$-assertion) has a matching appendix verification
+(a $\sigma$-assertion), and vice versa. The wedge product
+$\text{Spine} \wedge \text{Appendix}$ is non-zero iff
+there exist claims without verification or verifications
+without claims.
+
+\emph{Result}: after iterative $\kappa$-evolution (the
+editing process that produced the current draft), the
+cofibration is clean:
+\begin{itemize}[nosep]
+  \item \textbf{0 orphaned appendix sections}. Every one
+    of the 23 verification sections in Appendix B is
+    referenced by at least one spine section.
+  \item \textbf{0 uncovered spine theorems} (in
+    \S\S3--6, 8--9). Every theorem has a
+    ``(Full verification: \S B.$x$)'' pointer.
+  \item \textbf{2 spine theorems with inline-only proofs}
+    (\S7: $(n,1)$-structure and free $(n,k)$-structure).
+    These are short structural arguments that serve as
+    their own verification.
+\end{itemize}
+
+The cofibration matrix (spine sections $\times$ appendix
+sections) has the following non-zero entries:
+
+\begin{center}
+\small
+\begin{tabular}{l|l}
+\textbf{Spine} & \textbf{Appendix B coverage} \\
+\hline
+\S3 & Discriminator semantics (B.24),
+  concrete model (\S\ref{sec:concrete-model}) \\
+\S4 & Russell (B.2), Foundation (B.16), Choice (B.17),
+  Banach--Tarski (B.6) \\
+\S5 & Exhaustivity (B.18), Groupoid (B.19) \\
+\S6 & 2-cat axioms (B.20), Adjunction (B.1),
+  Composition (B.3), Yoneda (B.21) \\
+\S8 & Delooping/closure (B.22), CD table (B.7) \\
+\S9 & Self-enrichment (B.8), Subobj.\ (B.9),
+  Power obj.\ (B.4), Proof theory (B.10),
+  FOL (B.15), Self-hosting (B.11),
+  Fixed point (B.12), Irremovable (B.13),
+  Sheaf (B.14), Fano (B.5),
+  Boolean/convergence (B.23) \\
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent\textbf{Wedge product of adjacent sections.}
+
+$\S2 \wedge \S3$: clean interface. The algebra
+acquires populations. Key semantic decisions made:
+discriminators are single predicates, $\tau/\sigma$
+are datum properties (not discriminator outputs),
+and the membership profile is a composed grade-2
+element. These decisions are tracked in
+\S\ref{app:discriminator-semantics}.
+
+$\S3 \wedge \S4$: residue consumed (gap/overlap
+distinction produces Banach--Tarski).
+
+$\S4 \wedge \S5$: overlap consumed (homology $=$
+residues, two concepts identified).
+
+$\S5 \wedge \S6$: residue consumed (groupoid acquires
+direction; composition produces 2-cells, acknowledged).
+
+$\S6 \wedge \S7$: clean (1-categories acquire higher
+structure via triangle identity).
+
+$\S7 \wedge \S8$: clean (delooping provides interface).
+
+$\S8 \wedge \S9$: residue consumed (monoidal closure
+enables self-enrichment; predicate circularity in
+fixed-point theorem acknowledged as internal).
+
+\medskip
+\noindent\textbf{Identified pendants} (moved to
+Appendix \ref{app:analogies}): Surreal framing,
+Grothendieck construction, CW-complex interpretation.
+Non-load-bearing.
+
+\medskip
+\noindent\textbf{Open verifications} (dimensions with
+$\gamma = 0$: not yet interrogated):
+\begin{itemize}[nosep]
+  \item CD hexagon axioms at step 2 (zero divisors may
+    kill alternativity early).
+  \item CH correspondence with forcing models.
+  \item Fixed-point uniqueness (\textbf{resolved}: $\dim = 1$; the $H_2 = 0$
+    toroid).
+  \item SPPF formalization for implementation.
+\end{itemize}
+
+\medskip
+\noindent\textbf{Foundational commitments} (the three
+axioms, explicitly separated):
+\begin{itemize}[nosep]
+  \item \textbf{Algebraic}: $\GF(2)$, $\bigwedge V$,
+    $x \wedge x = 0$. Mathematical facts.
+  \item \textbf{Regulatory}: profile linearity
+    (Definition \ref{def:profile-linear}). Structural
+    axiom. Excludes Russell, enables bilinear form.
+  \item \textbf{Epistemic}: operationalist axiom
+    (Definition \ref{def:operationalist}). Foundational
+    choice. Governs infinity, infinite choice,
+    self-entailment.
+\end{itemize}
+
+\medskip
+\noindent\textbf{Self-wedge}: $\text{Paper} \wedge
+\text{Paper} = 0$. The cofibration analysis found
+no contradictions between spine and appendix: every
+claim is verified, every verification is claimed.
+The paper's $\kappa$-evolution trace, viewed as a
+discrimination complex with the spine as $\tau$ and
+the appendix as $\sigma$, has trivial self-wedge.
+
+\emph{If a distinction is real, it must be constructible;
+if constructible, it must be behaviorally reachable; if
+reachable, it must be observable; if observable, it must
+be coverable; if not, it is not a valid runtime
+distinction.} The paper covers itself.
+
+The self-application operates as three things viewed from
+three vertices of the toroid:
+\emph{As sheafification}: the paper is a presheaf over
+the site of $\kappa$-states (the section-by-section
+construction). The cofibration checks the gluing condition.
+Previous drafts had structural gaps; the editing process
+consumed them. That editing is $\kappa$-evolution.
+\emph{As Grothendieck construction}: the SPPF fibers
+125 formal objects over the poset of axiom classes.
+The axiom-class distribution and dependency chains are
+real structural data, not tautologies.
+\emph{As fixed-point operator}: self-application yields
+the framework. If it yielded something incompatible,
+that would be a genuine failure of self-hosting
+(Theorem \ref{thm:self-hosting}).
+These are one operation from three perspectives.
+The self-audit \emph{improved the paper} through
+iterative residue consumption. That is the claim worth
+making --- not ``the paper passes its own test.''
+
+\begin{remark}[Epistemic limitation of self-audit]
+The self-audit detects internal mismatches (orphaned
+sections, uncovered theorems, cofibration gaps) but
+cannot detect errors of reasoning, equivocations
+between levels of abstraction, or insufficient proofs.
+A self-consistent framework applied to itself will
+always find itself self-consistent. The cofibration
+analysis is structural bookkeeping, not mathematical
+audit. External review is irreplaceable.
+\end{remark}
+
+
+\subsection{Open question index}
+\label{sec:open-questions}
+
+The open questions O1--O6 are stated in the reading guide
+(\S\ref{sec:reading-guide}). Here we note their current
+status after the full development:
+
+\begin{description}[nosep]
+  \item[O1] (\S4, Thm 4.5) \textbf{Resolved.} Scope of evaluation linearity
+    exclusion beyond Russell. Partial answer: 8 of 256
+    functions admissible for $n = 3$. Full characterization
+    of excluded predicate classes: open.
+  \item[O2] (\S4, Thm 4.13) \textbf{Resolved.} Useful forms of
+    $\in$-induction survive with cycles $\geq 2$.
+    Modular $\in$-induction (modulo cycle equivalence):
+    open.
+  \item[O3] (\S4, Thm 4.31) \textbf{By design.} The operationalist axiom's
+    role in infinite choice. The finite case is constructive
+    (class \textsf{A}). The infinite case is axiom-dependent
+    (class \textsf{AO}). Whether intermediate strengths
+    exist: open.
+  \item[O4] (\S9, Thm 9.6) \textbf{Resolved.} Join-semilattice property of
+    $\mathbf{K}$. Stated as a requirement. Whether
+    consistency of profile linearity is preserved under
+    arbitrary joins: resolved. $V^*$ is a vector space;
+subspace lattice is modular (Appendix \ref{app:risc}).
+  \item[O5] (\S9, Thm 9.15) \textbf{Resolved.} Fixed-point
+    uniqueness. $\dim \bigwedge^2(\GF(2)^2) = 1$:
+    exactly one non-zero grade-2 element exists
+    (Appendix \ref{app:fixed-point-stability}).
+  \item[O6] (\S8, Thm 8.8) \textbf{Resolved.} Cayley--Dickson hexagon axioms
+    at CD step 2. Zero divisors confirmed. Whether
+    alternativity survives: open. Whether the Baez--Dolan
+    correspondence holds over $\GF(2)^2$: open.
+\end{description}
+
+\subsection{Computational considerations}
+
+The exterior algebra $\bigwedge(\GF(2)^n)$ has $2^n$
+elements. A naive implementation that materializes the
+full algebra would face exponential blowup as $\kappa$
+grows. This is a genuine concern, but it rests on a
+misunderstanding of what the framework requires at
+runtime.
+
+The framework does not require materialization of the
+full exterior algebra. It requires:
+\begin{enumerate}[label=(\roman*),nosep]
+  \item Storage of the discriminators $d_1, \ldots, d_n$
+    (the basis of $V$): this is $O(n)$.
+  \item Storage of each element's $\tau/\sigma$ profile
+    across all dimensions: $O(n)$ per element, $O(n|S|)$
+    total.
+  \item Computation of wedge products on demand: each
+    wedge product of two basis elements is a constant-time
+    operation (check linear independence, produce the
+    grade-2 element or zero).
+\end{enumerate}
+
+No higher-grade element of the exterior algebra needs to
+be stored unless it is explicitly queried. The natural
+presentation mode is \emph{lazy evaluation}: grade-$k$
+elements are computed when needed and discarded when done.
+The monoidal read path (Proposition \ref{prop:monoidal})
+guarantees that evaluation order does not affect results,
+so lazy evaluation is semantically safe.
+
+The total memory required is the raw quantity for storing
+the original observations: the population $S$ and the
+$\kappa$-regime's discriminators. No additional memory is
+required beyond this, because every derived quantity
+(residues, homology classes, sheaf sections, Fano
+inferences) is computable on demand from the stored
+observations.
+
+If memoization or caching of intermediate results is
+desired for performance, the natural data structure is
+the \emph{shared packed parse forest} (SPPF): a compact
+representation of all possible parse trees that shares
+common sub-structures. The full formalization of an SPPF
+under the discrimination regime --- showing that the SPPF
+structure is itself a $\kappa$-equivalence class of parse
+trees, and that its sharing structure corresponds to
+$\kappa$-deformations that identify isomorphic sub-trees
+--- is an open question for implementation work.
+
+%----------------------------------------------------------------------
+\section*{Acknowledgments}
+%----------------------------------------------------------------------
+
+This paper formalizes ideas developed through extended collaborative
+dialogue. The discrimination framework, the identification of
+$\GF(2)$ as the ground field, the observer-dependent $\kappa$-evolution
+principle, and the philosophical position that Boolean structure
+is derived rather than given are due to the originator of the
+framework.
+

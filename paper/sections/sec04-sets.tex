@@ -1,0 +1,1029 @@
+%----------------------------------------------------------------------
+(Full group-theoretic analysis: \S\ref{app:banach-tarski}.)
+\section{Set-Theoretic Consequences}\label{sec:settheory}
+%----------------------------------------------------------------------
+
+We now construct standard set-theoretic structure from the\footnote{Section-level Toulmin. \emph{Move}: derive set-theoretic axioms as consequences of the framework. \emph{ZFC comparison}: ZFC adopts separation, foundation, infinity, and choice as independent axioms targeted at specific pathologies. Here, Russell exclusion follows from profile linearity (adopted for algebraic faithfulness), foundation from profile linearity + finite $\kappa$, and infinity/choice from the operationalist axiom (adopted for engineering soundness). The framework provides structural \emph{diagnoses}: self-reference produces an affine offset; infinite chains exceed finite $\kappa$; actual/potential infinity are separated by no discriminator at any level of the halting tower. \emph{Consequential elegance}: three independently motivated principles handle what ZFC needs four separate axioms for.}
+discrimination framework (algebra + regulatory axioms),
+noting where axioms of ZFC appear as consequences and
+where the framework diverges.
+
+\subsection{Extensionality}
+
+\begin{definition}[$\kappa$-equivalence]
+Two collections $A$ and $B$ are \emph{$\kappa$-equivalent}, written
+$A \equiv_\kappa B$, if for every discriminator $d$ in $\kappa$ and
+every element $a$ in the ambient population,
+$(\tau_d(a), \sigma_d(a))$ computed over $A$ equals
+$(\tau_d(a), \sigma_d(a))$ computed over $B$.
+\end{definition}
+
+\begin{theorem}[Extensionality]\label{thm:ext}\footnote{Axiom class \textsf{A} $\cdot$ depth 1.  $\kappa$-equivalence is defined by discriminator profiles, and extensionality is immediate from the definition. Finite-$\kappa$: yes. Re-description (standard, in discrimination language).}
+$\kappa$-equivalence is the identity criterion for sets:
+$A \equiv_\kappa B$ if and only if no discriminator in $\kappa$
+distinguishes $A$ from $B$. This is not an axiom but a direct
+consequence of the definition of $\kappa$-equivalence as the
+identity relation on equivalence classes.
+\end{theorem}
+
+\begin{proof}
+Sets \emph{are} $\kappa$-equivalence classes (by construction).
+Two classes are equal if and only if they agree on every discriminator.
+This is the definition of equivalence-class identity.
+\end{proof}
+
+\begin{remark}
+Extensionality in ZFC states that two sets are equal iff they have the
+same members. Here the ``same members'' condition is relativized to
+$\kappa$: two sets are equal \emph{under a given discrimination regime}.
+A finer $\kappa$ may distinguish sets that a coarser $\kappa$ identifies.
+Extensionality is $\kappa$-relative, which is strictly more informative
+than the ZFC version.
+\end{remark}
+
+\subsection{Comprehension and Russell's predicate}
+
+\begin{definition}[Discriminative comprehension]\label{def:comprehension}
+For any predicate $P$ that can be articulated as a discriminator,
+the act of articulation is a $\kappa$-evolution producing a new
+discriminator $d_P$. The set $\{a \in S : P(a)\}$ is the collection
+$\{a \in S : \tau_{d_P}(a) = 1\}$ (or $\sigma_{d_P}(a) = 1$,
+depending on the polarity convention).
+
+Comprehension is unrestricted in the sense that any articulable
+predicate induces a $\kappa$-evolution. It is restricted by the
+algebra: if the resulting wedge product is degenerate, the
+comprehension yields the trivial set or the empty residue.
+\end{definition}
+
+\begin{theorem}[Exclusion of Russell's predicate]\label{thm:russell}\footnote{Axiom class \textsf{AEP} $\cdot$ depth 3 $\cdot$ \S\ref{app:russell-detail}.  \emph{Warrant}: profile linearity requires linear maps; $\tau_{{d_P}}(0) = 1 \neq 0$ is affine. \emph{Backing}: Def~\ref{def:profile-linear}, Def~\ref{def:eval-linear}. \emph{Qualifier}: this is a relocation of restriction, not an elimination (Remark 4.8). \emph{Rebuttal}: ZFC handles this via the separation axiom; here it follows from profile linearity, at the cost of also requiring evaluation linearity. Scope of exclusion: 8 of 256 functions admissible for $n=3$. Finite-$\kappa$: yes. Novel (bilinear form mechanism). Model: \S\ref{sec:concrete-model}. (\S4.6). [O1]}
+The predicate $P(x) = (x \notin x)$ does not produce a non-trivial
+set under discriminative comprehension.
+\end{theorem}
+
+\begin{proof}
+We construct an explicit bilinear form whose diagonal
+gives self-membership and whose antisymmetrization is the
+wedge product.
+
+\emph{Step 1: The profile pairing.}
+By profile linearity (Definition \ref{def:profile-linear}),
+the maps $\tau, \sigma: V \to \GF(2)^S$ (sending each
+discriminator to its $\tau$- or $\sigma$-profile on $S$)
+are linear. When the population $S$ contains elements
+that are also discriminators (i.e.\ $S \cap V \neq
+\varnothing$), we can define the \emph{profile pairing}:
+\begin{equation}\label{eq:profile-pairing}
+  B: V \times V \to \GF(2), \qquad
+  B(x, y) = \tau_x(y),
+\end{equation}
+the $\tau$-profile of discriminator $x$ evaluated at
+element $y$ (where $y$ is also in $V$). By profile
+linearity, $B$ is linear in the first argument:
+$B(x_1 + x_2, y) = \tau_{x_1 + x_2}(y) = \tau_{x_1}(y)
++ \tau_{x_2}(y) = B(x_1, y) + B(x_2, y)$.
+
+For $B$ to be bilinear, it must also be linear in the
+second argument: $B(x, y_1 + y_2) = B(x, y_1) + B(x, y_2)$.
+This requires two conditions: (a) the population $S$
+inherits the $\GF(2)$-vector space structure of $V$ when
+$S \cap V \neq \varnothing$ (so that $y_1 + y_2$ is
+well-defined as a population element), and (b) each
+$\tau_x: S \to \GF(2)$ acts linearly on this inherited
+structure. Condition (a) holds by construction when
+discriminators are elements of $S$. Condition (b) is an
+extension of profile linearity (Definition \ref{def:profile-linear}) to the evaluation argument:
+we require not only that the map $x \mapsto \tau_x$ is
+linear, but that each $\tau_x$ is itself a linear
+functional on $V$. We adopt this as an axiom:
+
+\begin{definition}[Evaluation linearity]\label{def:eval-linear}
+For each discriminator $x \in V$, the $\tau$-profile
+$\tau_x: V \to \GF(2)$ is a $\GF(2)$-linear functional
+when restricted to $S \cap V$. Together with profile
+linearity (Definition \ref{def:profile-linear}), this
+makes the profile pairing $B(x,y) = \tau_x(y)$ a
+bilinear form on $V$.
+
+This is a second regulatory axiom, not a free consequence
+of the framework. Its motivation: if discriminator
+profiles were non-linear in their evaluation argument,
+then composing discriminators (the wedge product) would
+not faithfully represent composed discriminations ---
+the algebraic structure of $\bigwedge V$ would be
+decoupled from the operational behavior of the
+discrimination process. Evaluation linearity (Definition \ref{def:eval-linear}) is the
+axiom that keeps the algebra honest.
+
+\emph{What evaluation linearity excludes.}
+Any predicate whose $\tau$-profile is a non-linear
+function of the evaluation argument is inadmissible.
+Concretely:
+
+\emph{Excluded}: (i) The Russell predicate
+($\tau_{d_P}(x) = 1 + x(x)$, affine). (ii) Threshold
+predicates: ``$a$ has property $\tau$ iff at least two
+of three conditions hold'' --- this is a degree-2
+polynomial over $\GF(2)$, not linear. (iii) Any
+predicate defined by a Boolean function of degree
+$\geq 2$ in the evaluation argument.
+
+\emph{Preserved}: (i) All single-condition predicates:
+``$a$ has property $\tau$ iff condition $C$ holds'' where
+$C$ is a single discriminator evaluation. These are
+linear by construction. (ii) XOR-type predicates:
+``$a$ has $\tau$ iff an odd number of conditions hold''
+--- the sum over $\GF(2)$ of individual conditions is
+linear. (iii) All predicates obtained by composition of
+linear predicates via $\wedge$ and $+$.
+
+Over $\GF(2)$, the linear functions $V \to \GF(2)$ are
+exactly the elements of $V^*$ (the dual space). With
+$\dim(V) = n$, there are $2^n$ linear functionals and
+$2^{2^n}$ total functions $V \to \GF(2)$. Evaluation
+linearity restricts to the linear ones: a fraction
+$2^n / 2^{2^n}$ of all possible predicates. For $n = 3$:
+8 of 256 functions are admissible (3.1\%). The exclusion
+is severe but systematic: it excludes all non-linear
+Boolean functions while preserving the full dual space.
+\end{definition}
+
+\emph{Step 2: Self-membership is the diagonal.}
+Self-membership of $x$ (the question ``is $x \in x$?'')
+is $\tau_x(x) = B(x, x)$: the profile pairing evaluated
+on the diagonal.
+
+\emph{Step 3: The antisymmetrization is the wedge product.}
+The antisymmetrization of $B$ is
+$\widetilde{B}(x, y) = B(x, y) - B(y, x) = B(x, y)
++ B(y, x)$ (since $-1 = 1$ in $\GF(2)$). This is
+$\tau_x(y) + \tau_y(x)$: the XOR of $x$'s $\tau$-verdict
+on $y$ and $y$'s $\tau$-verdict on $x$. This
+antisymmetrized form is the wedge product's evaluation:
+$\widetilde{B}(x, y)$ vanishes when $x = y$ (since
+$\tau_x(x) + \tau_x(x) = 0$ in $\GF(2)$), which is the
+defining property $x \wedge x = 0$.
+
+\emph{Step 4: The Russell predicate is affine, not linear.}
+The Russell predicate $P(x) = (x \notin x)$ requires a
+discriminator $d_P$ whose $\tau$-profile is
+$\tau_{d_P}(x) = 1 + \tau_x(x) = 1 + B(x,x)$
+(the negation in $\GF(2)$ of self-membership).
+
+Over $\GF(2)$, the Frobenius endomorphism $x \mapsto x^2$
+is the identity ($x^2 = x$ for all $x \in \GF(2)$), so
+$B(x,x)$ is actually $\GF(2)$-linear in $x$ (not
+quadratic in the classical sense): $B(x{+}y, x{+}y) =
+B(x,x) + B(x,y) + B(y,x) + B(y,y)$, and the cross-terms
+$B(x,y) + B(y,x) = \widetilde{B}(x,y)$ vanish on any
+pair where the antisymmetrization vanishes. The diagonal
+$Q(x) = B(x,x)$ is therefore a linear functional on $V$.
+
+However, $\tau_{d_P}(x) = 1 + Q(x)$ is \emph{affine},
+not linear: it has a constant offset of $1$. Profile
+linearity (Definition \ref{def:profile-linear}) requires
+that $\tau_d$ be a linear map $V \to \GF(2)$, and linear
+maps must satisfy $\tau_d(0) = 0$. But
+$\tau_{d_P}(0) = 1 + B(0,0) = 1 + 0 = 1 \neq 0$. The
+Russell predicate's profile sends the zero discriminator
+to $1$, which no linear functional does.
+
+Therefore $d_P$ violates profile linearity (Definition \ref{def:profile-linear}) and is not a
+valid grade-1 discriminator. The Russell predicate is
+articulable (it triggers a $\kappa$-evolution), but the
+resulting profile is affine, not linear. No grade-1
+discriminator with a linear $\tau$-profile can carve out
+the Russell set. The predicate is algebraically
+ill-formed --- not prohibited by fiat, but excluded by the
+linearity structure that the framework requires of its
+discriminators.
+\end{proof}
+
+\begin{remark}[Profile linearity as the load-bearing axiom]
+The dissolution depends on profile linearity
+(Definition \ref{def:profile-linear}), not on
+$x \wedge x = 0$ directly. The wedge product's role is
+indirect: $x \wedge x = 0$ ensures that $B(x,x)$ is
+linear over $\GF(2)$, but the Russell predicate's
+constant offset $1 + B(x,x)$ is affine. The dissolution
+is: self-reference produces an affine map; discriminators
+require linear maps; affine $\neq$ linear.
+(Full bilinear form construction: \S\ref{app:russell-detail}.)
+\end{remark}
+
+\begin{remark}[The restriction is relocated]
+Profile linearity (Definition \ref{def:profile-linear}) is a \emph{regulatory axiom}: it
+restricts what counts as a valid discriminator, just as
+ZFC's separation axiom restricts what counts as a valid
+set-formation. The Russell predicate is not
+``algebraically degenerate'' in the exterior algebra ---
+it is \emph{excluded by the linearity requirement on
+$\tau$-profiles}. This is a lateral move from ZFC, not a
+dissolution: the restriction has been relocated from set
+formation to discriminator admissibility.
+
+The relocation is arguably more natural --- profile
+linearity is a single structural axiom that handles
+Russell, foundation, and the bilinear form structure
+simultaneously, whereas ZFC requires separate axioms for
+each pathology. But it is still a restriction. The
+framework does not conjure paradox-freedom from pure
+algebra; it achieves it by requiring discriminators to be
+linear. The paper should be read with this understanding:
+where a restriction appears, it has been
+internalized into the discriminator definition,
+and the paradox reduces to a violation of that definition.
+The restriction is relocated, not removed.
+\end{remark}
+
+\begin{remark}[General pathology protection]
+One may ask whether the framework might be vulnerable to
+set-theoretic pathologies beyond Russell's. The framework
+handles pathologies via two mechanisms:
+\begin{itemize}[nosep]
+  \item \textbf{Profile linearity}
+    (Definition \ref{def:profile-linear}): restricts
+    discriminator admissibility. This excludes the Russell
+    predicate (affine, not linear) and bounds comprehension.
+  \item \textbf{The exterior algebra}: $x \wedge x = 0$
+    ensures self-composition is degenerate, and the
+    four-valued logic is paraconsistent ($p \wedge \neg p$
+    produces $(1,1)$, a residue, not explosion).
+\end{itemize}
+Specific pathologies are handled by: comprehension
+bounded by profile linearity (Definition \ref{def:profile-linear}), foundation by
+linear independence of the profile matrix
+(Theorem \ref{thm:foundation}), and choice scoped to
+Boolean dimensions with the infinite case depending on
+the operationalist axiom (Definition \ref{def:operationalist}) (Theorem \ref{thm:choice}).
+These are structural restrictions, not ad hoc patches,
+but they \emph{are} restrictions. The framework does not
+achieve paradox-freedom from pure algebra alone; it
+achieves it from the algebra together with profile
+linearity and the operationalist axiom.
+\end{remark}
+
+\subsection{Boolean structure as a local achievement}
+
+\begin{definition}[Boolean dimension]\label{def:boolean-dim}
+A dimension $d$ of $\kappa$ is \emph{Boolean over a collection $S$}
+if for every $a \in S$, $\chi_d(a) = 1$ --- that is, exactly one of
+the two predicates fires for every element ($\tau_d(a) = 1$
+and $\sigma_d(a) = 0$, or vice versa). The two independent
+partitions happen to be complementary on $S$: every element
+$\tau$-comprehended is $\sigma$-uncomprehended, and vice versa.
+No gaps (both silent) and no overlaps (both firing). The law of
+excluded middle holds locally on dimension $d$.
+\end{definition}
+
+\begin{proposition}[Non-default Booleanness]\label{prop:nondefault}
+Booleanness of a dimension $d$ over $S$ is not guaranteed by the
+framework. It is an additional structural condition that must hold
+for the specific discriminator and collection. The default state
+--- independent $\tau$ and $\sigma$ with possible gaps and
+overlaps --- is strictly weaker than Boolean partition.
+\end{proposition}
+
+\begin{proof}
+The membership profile takes values in $\GF(2) \times \GF(2)$,
+a space with four elements. Boolean partition requires confinement
+to the subset $\{(1,0), (0,1)\}$, which is a proper subset.
+Nothing in the definition of discriminator (Definition
+\ref{def:discriminator}) enforces this confinement.
+\end{proof}
+
+\begin{remark}
+This is perhaps the central philosophical claim: classical logic's
+excluded middle is not a law of thought but a \emph{theorem}, local
+to specific $\kappa$-dimensions over specific collections, and it
+must be verified constructively. Boolean complementation requires a
+mechanism; it is not free.
+\end{remark}
+
+\subsection{Foundation and well-foundedness}
+
+\begin{theorem}[Partial foundation]\label{thm:foundation}\footnote{Axiom class \textsf{AP} $\cdot$ depth 4 $\cdot$ \S\ref{app:foundation-full}.  \emph{Warrant}: self-membership excluded by profile linearity; chain length bounded by finiteness of $\kappa$. \emph{Qualifier}: weaker than ZFC foundation (permits cycles $\geq 2$). \emph{Rebuttal}: ZFC excludes all cycles via a separate axiom; here self-loops follow from profile linearity, at the cost of permitting longer cycles (Remark~\ref{rem:cycles}). $\in$-induction: resolved. Cycles consume $\leq k{-}1$ dimensions; induct on $\dim(V/\kappa)$ (Appendix \ref{app:o2-cycles}). [O2 resolved.] Finite-$\kappa$: yes. Novel (intermediate position: no self-loops, permits cycles). Model: \S\ref{sec:concrete-model}.}
+\begin{enumerate}[label=(\roman*),nosep]
+  \item Self-membership ($a \in a$) is excluded by
+    profile linearity (Definition \ref{def:profile-linear}) (Theorem \ref{thm:russell}).
+  \item For any finite $\kappa$-state, only finitely many
+    membership relations can be witnessed. The depth of the
+    membership relation is bounded by $\dim(\kappa)$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) is Theorem \ref{thm:russell}: self-membership
+requires an affine profile, which violates profile
+linearity.
+
+(ii) Each membership link $a \in_{d,\kappa} B$ is
+witnessed by a discriminator $d \in \kappa$. With
+$\dim(\kappa) = n$, there are $n$ basis discriminators
+and $2^n - 1$ non-zero elements of $\bigwedge^1 V$. Each
+can witness at most finitely many membership relations
+(bounded by $|S|^2$). Therefore the total number of
+membership links that $\kappa$ can witness is finite.
+(Full analysis: \S\ref{app:foundation-full}.)
+\end{proof}
+
+\begin{remark}[Cycles of length $\geq 2$ are permitted]
+\label{rem:cycles}
+The framework does \emph{not} exclude membership cycles
+of length $\geq 2$. A cycle $a \in b \in a$ can be
+witnessed by two independent discriminators $d_1, d_2$
+with $\tau_{d_1}(a) = 1$, $\sigma_{d_1}(b) = 1$,
+$\tau_{d_2}(b) = 1$, $\sigma_{d_2}(a) = 1$. This is
+algebraically consistent: $d_1 \wedge d_2 \neq 0$ (since
+$d_1, d_2$ are independent), and no profile linearity (Definition \ref{def:profile-linear})
+violation occurs. The two predicates fire independently
+on $a$ and $b$, with no self-reference.
+
+This is a genuine structural difference from ZFC, where
+the axiom of regularity prevents all cycles. In the
+discrimination framework, only self-membership (length 1)
+is excluded. Longer cycles are permitted because they
+do not involve self-reference --- each link is witnessed
+by a separate discriminator acting on distinct elements.
+
+The algebraic obstruction to self-membership is
+$x \wedge x = 0$ (the diagonal of the profile pairing
+vanishes), which prevents an element from bearing a
+discriminative relation to itself. But
+$d_1 \wedge d_2 \neq 0$ for independent $d_1, d_2$, so
+two-element cycles face no such obstruction.
+\end{remark}
+
+\begin{remark}
+In ZFC, Foundation and the axiom of dependent choice
+together prevent both infinite descending chains and
+finite cycles. The framework prevents infinite chains
+(by finiteness of $\kappa$) and self-membership (by
+profile linearity (Definition \ref{def:profile-linear})), but permits finite cycles. This more
+permissive structure may be natural for applications
+where circular reference is meaningful (e.g.\ mutual
+recursion, cyclic data structures, or self-referential
+systems that reference each other without referencing
+themselves).
+
+Within the landscape of non-well-founded set theories,
+the framework's position is: strictly weaker than ZFC's
+foundation (which excludes all cycles), and also distinct
+from Aczel's Anti-Foundation Axiom (AFA), which permits
+all non-well-founded sets via a universal coalgebra.
+The framework excludes self-loops (length 1) but permits
+all longer cycles, without the systematic treatment of
+non-well-founded sets that AFA provides. This is an
+intermediate position that has not, to our knowledge,
+been previously studied.
+
+We trace the consequences of permitting cycles through
+the paper's main structures:
+
+\emph{Extensionality.} Cycles do not threaten
+extensionality. If $a \in b \in a$, then $a$ and $b$
+have distinct $\kappa$-profiles (witnessed by independent
+discriminators $d_1, d_2$). They are distinguishable,
+hence not $\kappa$-equivalent. The membership graph may
+have cycles, but the equivalence relation on objects
+does not.
+
+\emph{Homology.} A membership cycle $a \in b \in a$
+is a cycle in the \emph{membership graph}, not in the
+\emph{chain complex}. The corresponding 2-chain
+$d_1 \wedge d_2$ has boundary
+$\partial(d_1 \wedge d_2) = d_1 + d_2 \neq 0$
+(since $d_1, d_2$ are independent). The membership
+cycle is not a homological cycle: it does not
+represent a gap in the discrimination complex.
+The two notions of ``cycle'' are distinct.
+
+\emph{Sheaf conditions.} Covering the regime by
+sub-regimes containing $d_1$ and $d_2$ respectively:
+the sheaf condition requires compatibility on overlaps.
+Since $d_1$ and $d_2$ are independent, their overlap
+is the trivial sub-regime, and the sheaf condition is
+automatically satisfied. Membership cycles do not
+produce sheaf obstructions.
+
+\emph{$\in$-induction.} This is where cycles have
+genuine consequences. Standard $\in$-induction
+(``if the property holds for all members of $x$, it
+holds for $x$'') fails in the presence of cycles: for
+$a \in b \in a$, establishing the property for $a$
+requires it for $b$, which requires it for $a$. The
+resulting proof obligation is circular, not
+well-founded. A weaker form --- $\in$-induction modulo
+the cycle equivalence relation (identify elements in
+the same cycle) --- may still hold, but this has not
+been verified. Whether useful forms of $\in$-induction
+survive in the framework is an open question.
+\end{remark}
+
+\begin{remark}
+In ZFC, foundation is an axiom imposed to prevent pathologies
+such as $x \in x$. Here, $x \in x$ is already excluded by
+$x \wedge x = 0$ (Theorem \ref{thm:russell}), and the more
+general well-foundedness condition follows from the irreversibility
+of $\kappa$-evolution. Foundation is a consequence of profile linearity (Definition \ref{def:profile-linear})
+(excluding self-membership) and finiteness of $\kappa$
+(bounding chain length). It is not an independent
+assumption in the sense that it follows from axioms
+already adopted for other purposes; but it does depend
+on profile linearity, which is itself a regulatory axiom.
+\end{remark}
+
+\subsection{Empty set and pairing}
+
+\begin{proposition}[Empty set]\label{prop:empty}
+For any discriminator $d$ and collection $S$, the sub-collection
+$\{a \in S : \tau_d(a) = 1 \text{ and } \sigma_d(a) = 1
+\text{ and } \tau_d(a) = 0\}$ (a contradictory filter) yields
+the empty collection. More naturally, a $\kappa$-deformation
+that projects away all dimensions yields the trivially empty result.
+The empty set exists as a possible outcome of filtration.
+\end{proposition}
+
+\begin{proposition}[Pairing]\label{prop:pairing}
+Given elements $a, b$ in a collection $S$, there exists a
+$\kappa$-evolution that introduces a discriminator $d$ for which
+$\tau_d(a) = 1$, $\tau_d(b) = 1$, and $\tau_d(c) = 0$ for all
+$c \in S \setminus \{a,b\}$. The set $\{a,b\}$ is the $\tau$-class
+of $d$. This follows from the ability to articulate arbitrary
+predicates: $a$ and $b$ form a $\kappa$-equivalence class:
+choose $\kappa$ with $a + b \in \kappa^\perp$,
+so every $d \in \kappa$ satisfies $d(a) = d(b)$,
+while other elements are separated
+(Appendix \ref{app:pairing-linearity}),
+hence it triggers a $\kappa$-evolution.
+\end{proposition}
+
+\subsection{Union and the role of $\GF(2)$}
+
+\begin{proposition}[Symmetric difference as primitive]\label{prop:symdiff}
+Given two sets $A$ and $B$ defined as $\tau$-classes of
+discriminators $d_A$ and $d_B$ respectively, the natural
+algebraic combination $\tau_{d_A}(a) + \tau_{d_B}(a)$ in
+$\GF(2)$ yields the \emph{symmetric difference}
+$A \triangle B$, not the union $A \cup B$. This is because
+$1 + 1 = 0$ in $\GF(2)$: elements in both $A$ and $B$ are
+annihilated.
+\end{proposition}
+
+\begin{corollary}
+Boolean union $A \cup B = (A \triangle B) \triangle (A \cap B)$
+is a derived operation requiring explicit construction of the
+intersection $A \cap B$. In the discrimination framework,
+intersection (the overlap cell) is logically prior to union.
+\end{corollary}
+
+\begin{remark}
+This reversal of the usual ZFC presentation --- where union is
+axiomatic and intersection is defined via comprehension --- is
+a direct consequence of working over $\GF(2)$ rather than
+Boolean algebra.
+\end{remark}
+
+\subsection{Power set}
+
+\begin{definition}[Discriminative power set]\label{def:powerset}
+The \emph{power set} of a collection $S$ under regime $\kappa$ is
+the set of all sub-collections of $S$ obtainable by
+$\kappa$-deformations (projections to sub-regimes). If $\kappa$
+has $n$ dimensions, the power set has at most $2^n$ elements.
+\end{definition}
+
+\begin{remark}
+The power set is not a fixed Platonic totality. It is bounded by
+the current $\kappa$-state and grows as $\kappa$ evolves. This
+gives power sets a constructive character absent from ZFC, where
+$\mathcal{P}(\mathbb{N})$ has a fixed (if undetermined)
+cardinality.
+\end{remark}
+
+\begin{conjecture}[Constructive continuum]\label{conj:CH}
+In the discrimination framework, the ``cardinality'' of
+the power set of $\mathbb{N}$ is not a fixed value but an
+open-ended function of the discrimination regime, growing
+with each new predicate articulated over $\mathbb{N}$.
+This suggests a correspondence with the independence of
+the continuum hypothesis from ZFC. However, the
+independence of CH is proved via forcing models (Cohen)
+and inner models (G\"{o}del), and establishing a genuine
+correspondence would require showing that no
+$\kappa$-evolution can witness either CH or $\neg$CH, and
+that this non-witnessability maps onto the specific model-
+theoretic independence results. This remains open.
+\end{conjecture}
+
+\subsection{Infinity}\label{sec:infinity}
+
+The axiom of infinity in ZFC asserts the existence of a
+completed infinite set. The standard constructivist
+objection is that only potential infinity --- the unbounded
+but never completed process --- is legitimate. We argue
+that within the discrimination framework, this distinction
+is not a valid runtime distinction under the
+operationalist axiom (Definition \ref{def:operationalist}),
+and therefore collapses.
+
+\begin{definition}[Discriminative infinity]\label{def:infinity}
+An \emph{inexhaustible collection} is a collection $S$ such
+that for every $\kappa$-state, there exists a predicate whose
+articulation (and therefore whose $\kappa$-evolution) produces
+a non-trivial residue over $S$. That is: no finite $\kappa$
+renders $S$ fully discriminated.
+\end{definition}
+
+\begin{proposition}[Indistinguishability of potential
+  and actual infinity]\label{prop:infinity}
+Let $S$ be an inexhaustible collection. No discriminator
+in any $\kappa$-state separates the following two claims:
+\begin{enumerate}[label=(\roman*),nosep]
+  \item $S$ is a completed infinite totality (actual infinity).
+  \item $S$ is an open-ended process that can always yield
+    another element upon further $\kappa$-evolution (potential
+    infinity).
+\end{enumerate}
+By the operationalist axiom (Definition
+\ref{def:operationalist}), claims that no discriminator
+separates are $\kappa$-equivalent and hence identical by
+extensionality (Theorem \ref{thm:ext}).
+\end{proposition}
+
+\begin{proof}
+Suppose, for contradiction, that a discriminator $d$
+separates actual from potential infinity. Then $d$ is a
+predicate, and its articulation is a $\kappa$-evolution.
+After this evolution, $\kappa$ is finite (Proposition
+\ref{prop:monotone}: each evolution adds exactly one
+dimension). In the new $\kappa$-state, $S$ is still
+inexhaustible (by Definition \ref{def:infinity}: no
+finite $\kappa$ fully discriminates $S$). The
+discriminator $d$ has not resolved the question; it has
+merely added one more dimension to a regime that remains
+inadequate to exhaust $S$.
+
+No finite sequence of such evolutions converges, because
+each produces a $\kappa$-state that is still finite and
+$S$ is still inexhaustible. Therefore no discriminator,
+and no finite composition of discriminators, can separate
+the two claims. They are indistinguishable under every
+$\kappa$-state, and hence identical by $\kappa$-extensionality.
+\end{proof}
+
+\begin{remark}
+This does not deny the usefulness of reasoning about
+completed infinities. Classical mathematics routinely and
+productively treats the natural numbers, the reals, and
+higher cardinalities as completed totalities. The
+framework accommodates this by the same mechanism it
+accommodates all predication: asserting ``the natural
+numbers exist as a completed set'' is an articulable
+predicate, and its articulation is a $\kappa$-evolution.
+The resulting discriminator is absorbed into $\kappa$ and
+is available for subsequent reasoning.
+
+The framework does not restrict \emph{what can be modeled},
+only \emph{how models are described}. A Turing machine is
+modelable within the framework ($\kappa$ can represent its
+state transitions). A Turing machine can serve as a proof
+assistant for classical mathematics, including classical
+reasoning about completed infinities. Therefore the
+framework can reason about anything classical mathematics
+can, via the same indirection that all constructive proof
+assistants employ.
+\end{remark}
+
+\subsection{The operationalist axiom: defense and boundaries}
+\label{sec:operationalist-defense}
+
+The operationalist axiom (Definition \ref{def:operationalist})
+is the framework's most philosophically load-bearing
+commitment. It powers the infinity result (Proposition
+\ref{prop:infinity}), infinite choice (Theorem
+\ref{thm:choice}(ii)), and the pro-system interpretation
+(Corollary \ref{cor:pro-topos}). This subsection
+concentrates the defense.
+
+\begin{remark}[Foundational status of indistinguishability]
+\label{rem:foundational-status}
+Proposition \ref{prop:infinity} is a theorem of the
+axiomatized framework: it follows from the operationalist
+axiom (Definition \ref{def:operationalist}) applied to
+inexhaustible collections. The operationalist axiom plays
+the same foundational role that the Axiom of Infinity plays
+in ZFC: it is a \emph{choice} about what the framework
+admits as meaningful, not a forced mathematical conclusion.
+The proof structure is: (1) no discriminator separates the
+two claims (proved by contradiction), (2) therefore by the
+operationalist axiom (Definition \ref{def:operationalist}), they are identical. Step (2) is an
+application of the axiom, not a mathematical derivation.
+
+A Platonist may accept the proof's mechanics entirely ---
+including the proof-assistant observation (Remark
+\ref{rem:proof-assistant}) that syntactic manipulation of
+infinity is finite --- and still maintain that actual and
+potential infinity are ontologically distinct. The framework
+does not refute Platonism; it \emph{declines to encode it},
+on the grounds that ontological distinctions with no
+observable structural consequences are outside the
+framework's scope (Definition \ref{def:operationalist}).
+\end{remark}
+
+\begin{remark}[Epistemic asymmetry and the halting problem]
+\label{rem:halting}
+The indistinguishability result can be sharpened by analogy
+with the halting problem. Consider a system (the ``program'')
+reasoning over a collection $S$, and an observer who can see
+one $\kappa$-evolution ahead of the system. From the system's
+interior, the state space of $S$ is indistinguishable from
+infinite at every step: there is always another element
+available upon further evolution. From the observer's
+exterior, the state space is potentially infinite: unbounded
+but evaluated only finitely far at any moment.
+
+The distinction between ``truly infinite'' and ``always
+one step ahead'' is exactly the distinction between actual
+and potential infinity. Since the system cannot observe its
+own bound (this would require solving the halting problem
+for its own evolution process), the two are operationally
+identical. The operationalist axiom
+(Definition \ref{def:operationalist}) applies:
+if a distinction is not observable, it is not a valid
+runtime distinction.
+\end{remark}
+
+\begin{remark}[The hyper-recursive tower]
+\label{rem:hyper-recursive}
+The classical escape from Remark \ref{rem:halting} is:
+``I will step outside the system and observe the
+distinction from a meta-level.'' The framework absorbs
+this move. The meta-level observer is itself a
+$\kappa$-regime (a system reasoning about the first
+system's $\kappa$-evolution). It faces the same
+structural situation: finite dimensions, inexhaustible
+target, perpetual non-arrival of the distinction. So
+the critic steps outside \emph{that} --- and arrives in
+another $\kappa$-regime, subject to the same constraints.
+
+The triangle identity (Definition \ref{def:triangle})
+and free meta-discrimination (\S\ref{sec:meta}) provide
+this tower without additional construction: the
+$\sigma$-perspective of a $\kappa$-regime is itself a
+regime, and the $\sigma$-perspective of \emph{that}
+regime is another, and so on. At every level, the
+structural invariant holds: finite $\kappa$, inexhaustible
+collection, distinction not materialized, and the
+\emph{same structural reason} for its non-materialization
+as at the previous level.
+
+This is the halting problem applied hyper-recursively.
+A system that could resolve actual vs.\ potential
+infinity for its tenant would need to solve its own
+halting problem, which would require a higher system,
+which faces the same obstruction. The arithmetical
+hierarchy goes all the way up, and at every level the
+invariant holds. The distinction between actual and
+potential infinity is not suppressed by fiat; it is
+unreachable at every level of a tower that the framework
+already contains.
+
+The operationalist axiom (Definition \ref{def:operationalist})'s role is then precise: it says
+``unreachable at every level means not a valid
+distinction.'' This is a foundational commitment, but
+one for which the framework supplies structural
+motivation at every level of its own recursive
+self-embedding.
+\end{remark}
+
+\begin{remark}[The proof assistant concession]
+\label{rem:proof-assistant}
+A classical mathematician may object that operational
+indistinguishability from the interior does not establish
+ontological identity: perhaps actual and potential infinity
+\emph{are} distinct, and our framework merely cannot see
+the distinction.
+
+This objection is refuted by the practice of formalized
+mathematics itself. Proof assistants (Lean, Coq, Agda)
+run on deterministic, finite-state machines. When a
+mathematician verifies Cantor's theorem in Lean, the
+computer does not instantiate an uncountably infinite set
+in memory. It handles actual infinity \emph{syntactically}:
+the Axiom of Infinity is a finite set of rules for symbol
+manipulation, and the ``actual infinity'' is a node in a
+finite proof tree.
+
+In the discrimination framework, typing the Axiom of
+Infinity into a proof assistant is a $\kappa$-evolution:
+the articulation of a predicate that adds a discriminator
+to a finite regime. The proof assistant then evaluates
+theorems about the infinite set by passing them through
+this finite $\kappa$-state --- exactly as the framework
+prescribes.
+
+By accepting the proof assistant's verdict, the classical
+mathematician endorses the premise that every rigorous
+truth about actual infinity can be completely captured by
+a finite, step-wise process. The only retreat is Platonism:
+the claim that while the proof's syntax is finite and
+potential, the semantic meaning it points to is actually
+infinite. But this is a distinction with no behavioral
+consequence: the Platonic infinity produces no observable
+structural residue that the syntactic infinity does not
+also produce. By the operationalist axiom
+(Definition \ref{def:operationalist}),
+a distinction with no observable consequence is not a
+valid runtime distinction.
+
+The proof assistant is itself a $\kappa$-regime: it has
+finite dimensions, it evolves by consuming axioms
+(residues from the gap between what is provable and what
+is asserted), and it cannot distinguish actual from
+potential infinity in its own operation. The framework
+does not sidestep the formalization of infinity; it
+\emph{describes exactly what proof assistants already do}
+when they handle infinity, and names the mechanism.
+\end{remark}
+
+\begin{remark}[The framework models the open world, not
+  excludes it]
+\label{rem:cwa-owa}
+The operationalist axiom operates under the Closed World
+Assumption (CWA): what is not witnessed by any discriminator
+is not a valid distinction. A critic operating under the
+Open World Assumption (OWA) may posit unwitnessed structure
+beyond the framework's reach.
+
+The framework's response is not exclusion but
+\emph{modeling}. The coverage bit $\gamma$
+(Section \ref{sec:expanded}) encodes ``not yet
+interrogated'' as a positive state in $\GF(2)^3$:
+$\gamma = 0$ represents the region that an OWA ontology
+would populate with unwitnessed structure. This region is
+structurally present, operationally inert until
+interrogated, and precisely delineated by the Fano closure
+(Theorem \ref{thm:fano}): three independent interrogations
+characterize the full shape of what remains opaque.
+
+The recursive tower (Remark \ref{rem:hyper-recursive})
+makes this self-similar: the outer system can see the
+inner system's $\gamma = 0$ region --- it ``knows what the
+inner system doesn't know'' --- but faces its own
+$\gamma = 0$ at the next level. The epistemic horizon is
+characterizable, invariant across levels, and \emph{that
+invariance} is the structural content. Not ``there is
+nothing outside'' but ``the outside has this shape from
+every inside, and that shape is the same shape at every
+level.''
+
+The operationalist axiom is the claim that this
+self-similar epistemic horizon is the finest grain at
+which the inside/outside distinction can be resolved.
+The burden falls on the OWA critic to exhibit a behavioral
+residue --- an observable consequence that survives the
+collapse --- or accept that the CWA is the appropriate
+foundational stance for a framework whose purpose is to
+track what can be constructively witnessed.
+\end{remark}
+
+\subsection{Choice}\label{sec:choice}
+
+The axiom of choice in ZFC asserts that for every collection
+of non-empty sets, there exists a function selecting one
+element from each. Its independence from ZF (without Choice)
+has been a central topic in set theory since Cohen's forcing
+arguments. In the discrimination framework, choice is a
+consequence of operational exhaustivity (Theorem
+\ref{thm:exhaustive}).
+
+\begin{theorem}[Choice from residue consumption]\label{thm:choice}\footnote{Axiom class \textsf{AO} $\cdot$ depth 7 $\cdot$ \S\ref{app:choice-full}.  \emph{Warrant}: the operationalist axiom collapses the distinction between ``completed selection function'' and ``constructively obtainable for every finite sub-family.'' \emph{Qualifier}: the finite case is class \textsf{A} (constructive). \emph{Rebuttal}: a Platonist may reject the axiom; the finite case stands independently. The operationalist axiom is doing the work that ZFC's axiom of choice does. [O3]}
+Let $\mathcal{F} = \{S_i\}_{i \in I}$ be a collection of
+non-empty sub-collections of a population under regime
+$\kappa$, where the discriminators defining the boundaries
+of the $S_i$ have achieved Boolean status
+(Definition \ref{def:boolean-dim}) on the relevant
+dimensions --- that is, $\chi_d = 1$ for every element
+on every dimension that distinguishes the $S_i$ from
+each other. Then:
+\begin{enumerate}[label=(\roman*),nosep]
+  \item For any finite $\mathcal{F}$, there exists a
+    constructive $\kappa$-evolution that produces a
+    selection function.
+  \item For infinite $\mathcal{F}$, no discriminator
+    separates ``a completed selection function exists''
+    from ``for every finite sub-family, a selection
+    function is constructively obtainable.'' By the
+    operationalist axiom (Definition
+    \ref{def:operationalist}), these claims are
+    $\kappa$-equivalent.
+\end{enumerate}
+Claim (ii) does not prove that choice ``holds'' over
+infinite collections in the classical sense. It proves
+that the distinction between choice-holding and
+choice-not-holding is not a valid runtime distinction
+within the framework. A Platonist may accept (i) and
+reject (ii) by rejecting the operationalist axiom (Definition \ref{def:operationalist}). (Full analysis: \S\ref{app:choice-full}.)
+If the boundaries of the $S_i$ are not Boolean (some
+elements have gaps or overlaps on the defining dimensions),
+the selection function is not well-defined: the sub-collections
+themselves are not sharply delineated, and attempting to
+select from them produces a residue rather than a choice.
+\end{theorem}
+
+\begin{proof}
+\emph{Finite case.}
+A selection function over a finite $\mathcal{F} =
+\{S_1, \ldots, S_m\}$ requires, for each $S_i$, a
+discriminator that isolates a single element of $S_i$
+from the rest. Suppose that under $\kappa$, some $S_i$
+resists such linearization: no discriminator in $\kappa$
+isolates a unique element.
+
+This failure is a discrimination: the wedge product of
+the candidate selections over $S_i$ produces a non-zero
+residue (the elements that remain indistinguishable). By
+Theorem \ref{thm:exhaustive}, this residue fully specifies
+its own shape --- it is the blueprint for the discriminator
+needed to further separate the candidates. Consuming the
+residue via $\kappa$-evolution adds precisely this
+discriminator.
+
+Iterate: at each step, either an element is isolated
+(selection succeeds for $S_i$) or a non-trivial residue
+is produced and consumed, strictly increasing $\dim(\kappa)$
+and strictly reducing the number of indistinguishable
+candidates. Since each $S_i$ contains finitely many
+$\kappa$-equivalence classes (at any finite $\kappa$-state),
+and the number of classes strictly decreases with each
+evolution, the process terminates for each $S_i$ in
+finitely many steps. By Theorem \ref{thm:convergence},
+each dimension requires at most $3$ linearly independent
+interrogations to achieve full sheaf coverage. Over $m$
+finite sub-collections, the total number of evolutions
+is finite and bounded.
+
+\emph{Infinite case.}
+For infinite $\mathcal{F}$, the iterative process does
+not terminate in finitely many steps. However, by
+Proposition \ref{prop:infinity} (indistinguishability of
+potential and actual infinity), the distinction between
+``the selection function exists as a completed object''
+and ``for any finite sub-family $\mathcal{F}' \subset
+\mathcal{F}$, the selection function over $\mathcal{F}'$
+is constructively obtainable'' is not a valid runtime
+distinction: no discriminator separates the two claims.
+
+This avoids impredicativity: we do not quantify over
+``all discriminators that could be performed'' (which
+would be circular). Instead, we observe that the
+constructive finite case extends to the infinite case
+via the same indistinguishability argument that validates
+the axiom of infinity (Proposition \ref{prop:infinity}).
+Choice over infinite collections is available to the same
+degree that infinite collections themselves are available
+(both depend on the operationalist axiom)
+--- and as noted in Remark \ref{rem:proof-assistant},
+this is exactly the degree to which proof assistants
+handle infinite collections when verifying classical
+theorems.
+\end{proof}
+
+\begin{remark}
+A collection resists linearization only under a
+\emph{truncation} of $\kappa$. The ``full $\kappa$'' for
+a finite sub-collection is not a vague limit notion; it
+is the constructive result of exhaustive adjunction
+interrogation: $3$ linearly independent interrogations
+per dimension (Theorem \ref{thm:convergence}), yielding
+a fully glued sheaf (Proposition \ref{prop:presheaf-sheaf}).
+For infinite collections, this constructive process
+extends by indistinguishability (Proposition
+\ref{prop:infinity}).
+
+This is the discrimination framework's account of the
+independence of Choice from ZF: in a truncated regime
+(analogous to a model of ZF without Choice), selection
+functions may not exist because the necessary
+discriminators have been projected away. The residue of
+the failed selection is the precise structure needed to
+recover the missing discriminators. Choice fails only
+when you have deliberately erased the information that
+would provide it.
+\end{remark}
+
+\begin{remark}
+This result follows the same pattern as foundation
+(Theorem \ref{thm:foundation}), Russell's dissolution
+(Theorem \ref{thm:russell}), and infinity (Proposition
+\ref{prop:infinity}): what ZFC treats as an axiom, the
+discrimination framework derives from the algebraic
+structure of $\bigwedge(\GF(2)^n)$, the
+residue-consumption dynamics of $\kappa$, and the
+regulatory axioms (profile linearity (Definition \ref{def:profile-linear}), the operationalist
+axiom).
+\end{remark}
+
+\begin{remark}[Choice as a dependent type via Diaconescu]
+\label{rem:diaconescu}
+In standard topos theory, Diaconescu's theorem establishes
+that the Axiom of Choice implies the Law of Excluded Middle
+globally. In a topos with a four-valued subobject classifier
+$\Omega = \GF(2) \times \GF(2)$, global Choice would force
+$\Omega$ to collapse to $\{(1,0), (0,1)\}$, destroying the
+four-valued foundation.
+
+In the discrimination framework, this is not a contradiction
+but a \emph{typing constraint}. Because Booleanness is a
+local dependent type (Proposition \ref{prop:bool-dependent})
+rather than a global substrate, Choice cannot be a global
+axiom. A selection function exists only over collections
+whose defining discriminators have achieved exclusive,
+exhaustive partition ($\chi_d = 1$) on the relevant
+dimensions. To claim Choice globally would be to claim
+Booleanness globally, which the four-valued internal logic
+explicitly rejects.
+
+Diaconescu's theorem thus becomes a corroborating feature:
+it confirms that the framework's scoping of Choice to
+Boolean dimensions is \emph{necessary} for consistency
+with the four-valued subobject classifier. Choice, like
+classical logic, is earned (constructively verified) per dimension. On dimensions
+where Booleanness has not been earned, attempting to
+select produces a residue (a gap or overlap in the
+sub-collection boundaries), not a selection function. The
+residue signals that the preconditions for Choice have
+not been met, and $\kappa$-evolution is required before
+selection can proceed.
+\end{remark}
+
+\begin{example}[Banach--Tarski is non-paradoxical]\footnote{Axiom class \textsf{A} $\cdot$ depth 2 $\cdot$ \S\ref{app:banach-tarski}.  \emph{Warrant}: the construction goes through; the framework does not force the interpretation under which it would be paradoxical. \emph{Qualifier}: this re-describes the standard observation that the pieces are non-measurable; the framework adds the four-cell tracking of which dimensions have earned Booleanness. Finite-$\kappa$: N/A (requires continuous groups). Re-description (standard non-measurability observation, with four-cell tracking).}
+\label{ex:banach-tarski}
+The Banach--Tarski paradox states that a solid sphere can
+be decomposed into finitely many pieces and reassembled
+into two spheres identical to the original, using only
+rigid motions. This appears to violate conservation of
+volume. In the discrimination framework, the construction
+goes through --- it is not blocked --- but it is
+non-paradoxical, because the framework does not force the
+interpretation under which it would be paradoxical.
+
+The classical construction proceeds as follows: the
+rotation group $SO(3)$ contains a free subgroup $F_2$ on
+two generators. $F_2$ acts on $S^2$ (minus a countable
+set of poles) with orbits that partition the sphere. The
+axiom of choice selects one representative from each
+orbit. The pieces of the decomposition are defined by
+which elements of $F_2$ carry the representative to a
+given point, classified by the first letter of the
+group element's reduced word.
+
+In the discrimination framework, this construction is a
+sequence of $\kappa$-evolutions:
+\begin{enumerate}[label=(\roman*),nosep]
+  \item A discriminator for the free group structure of
+    $F_2 \subset SO(3)$: this classifies rotations by
+    their reduced-word decomposition.
+  \item A discriminator for orbit membership: this
+    classifies points of $S^2$ by which $F_2$-orbit
+    they belong to.
+  \item A choice discriminator selecting one
+    representative per orbit (Theorem \ref{thm:choice}):
+    this is a $\kappa$-evolution consuming the residue of
+    the orbit-selection problem.
+  \item Discriminators $d_A, d_B$ assigning each point
+    to ``sphere $A$'' or ``sphere $B$'' based on the
+    first letter of the group element connecting the
+    point to its orbit representative.
+\end{enumerate}
+
+The resulting pieces are non-measurable. In the
+discrimination framework, this means: the measure
+discriminator $d_\mu$ produces $(0,0)$ (gap) on these
+pieces. The gap arises because $d_\mu$ is defined by
+geometric predicates (countable unions of intervals,
+limits of simple functions) while the pieces are defined
+by algebraic predicates (group-word classification,
+orbit-representative selection). These two families of
+discriminators operate on \emph{algebraically independent
+dimensions of $\kappa$}: the wedge product
+$d_\mu \wedge d_A$ is non-zero (they are linearly
+independent), confirming that they discriminate
+independently and do not constrain each other.
+
+Volume ``doubling'' is the artefact of assuming that
+$d_\mu$ achieves Boolean status
+(Definition \ref{def:boolean-dim}) over all subsets,
+including those defined by algebraically independent
+discriminators. The framework reports: $d_\mu$ and
+$d_A$ do not jointly achieve Booleanness on the
+decomposed pieces. The $(0,0)$ gap on $d_\mu$ is the
+framework correctly recording that measure has no
+verdict on sets constructed by group-theoretic choice
+--- not because measure ``fails,'' but because the
+geometric and algebraic dimensions of $\kappa$ are
+independent, and Booleanness across independent
+dimensions must be earned, not assumed.
+\end{example}
+
