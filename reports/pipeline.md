@@ -6,8 +6,9 @@ This report is produced by:
 2. `scripts/extract_agda.py`   — tree-sitter-agda + indent-lexer for Unicode postulates
 3. `scripts/extract_python.py` — stdlib `ast` walker
 4. `scripts/structural_identity.py` — grammar-reflected wedge-product Id(A), sparse exterior
-5. `scripts/align_perspectives.py` — three-perspective alignment (S3 rotation, IDF, adjacency)
+5. `scripts/align_perspectives.py` — three-perspective alignment (S3 rotation, IDF, adjacency, triangle-consistency)
 6. `scripts/validate_against_comments.py` — post-hoc authorial-annotation check
+7. `scripts/gap_analysis.py` — 3×3 cofiber cell classification, near-triple recovery
 
 No regex runs over source content. No hand-written kind-map. The grammar's
 symbol table is the discriminator basis; `cstz.exterior`-style sparse wedge
@@ -24,19 +25,19 @@ drilldown and κ-evolution are inherited from Appendix F of paper2.
 
 ## Alignment output
 
-- **57** committed triples (high-confidence, unambiguous in Agda pivot)
-- **383** residues (unmatched or ambiguous Agda decls)
-- **22** / 57 triples (38.6%) have explicit authorial cross-reference evidence in docstrings/comments
+- **174** committed triples (high-confidence, unambiguous in Agda pivot)
+- **266** residues (unmatched or ambiguous Agda decls)
+- **56** / 174 triples (32.2%) have explicit authorial cross-reference evidence in docstrings/comments
 
 ### Evidence signal breakdown
 
 | Signal | Count | % of triples |
 |--------|-------|--------------|
-| paper_citation_in_agda | 19 | 33.3% |
-| python_name_in_agda | 11 | 19.3% |
-| python_path_in_agda | 8 | 14.0% |
-| agda_path_in_python | 1 | 1.8% |
-| paper_citation_in_python | 1 | 1.8% |
+| paper_citation_in_agda | 35 | 20.1% |
+| python_name_in_agda | 26 | 14.9% |
+| python_path_in_agda | 10 | 5.7% |
+| paper_citation_in_python | 6 | 3.4% |
+| agda_path_in_python | 4 | 2.3% |
 
 ## What this demonstrates
 

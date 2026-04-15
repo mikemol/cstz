@@ -1,6 +1,6 @@
 # Triples with zero authorial cross-reference evidence
 
-106 out of 154 committed triples have no supporting
+118 out of 174 committed triples have no supporting
 signal in the docstrings/comments.  These are the triples most likely
 to be wrong — the alignment engine matched them on structural
 grounds alone, without the authors ever mentioning the other side.
@@ -18,7 +18,10 @@ grounds alone, without the authors ever mentioning the other side.
 | record:DiscFunctor | definition:def:functor | function:ext_wedge |
 | module:CSTZ.Category.Limits | proposition:prop:limits | module:category |
 | data:LimitKind | definition:def:limit | class:LimitKind |
+| function:equalizerWitness | proposition:prop:2morph | function:equalizer_witness |
+| module:CSTZ.Category.NatTrans | definition:def:category | module:category |
 | module:CSTZ.Category.Yoneda | theorem:thm:yoneda | module:category |
+| module:CSTZ.Examples.GF2Cubed.Category | definition:def:category | module:category |
 | function:class-A-e₁ | definition:def:subobj-class | function:make_ast_class_registry |
 | function:class-A-e₂ | definition:def:subobj-class | function:make_ast_class_registry |
 | function:class-B-e₁ | definition:def:subobj-class | function:make_ast_class_registry |
@@ -28,9 +31,12 @@ grounds alone, without the authors ever mentioning the other side.
 | function:class-D-e₁ | definition:def:subobj-class | function:make_ast_class_registry |
 | function:class-D-e₂ | definition:def:subobj-class | function:make_ast_class_registry |
 | function:cycle2-link | remark:rem:cycles | function:link_vector |
+| module:CSTZ.Examples.GF2Cubed.Framework | proposition:prop:bool-dependent | module:framework |
 | function:triangle-check | remark:rem:triangle-grounding | function:triangle_identity |
+| module:CSTZ.Examples.GF2Cubed.Homotopy | definition:def:directed-homotopy | module:homotopy |
 | function:g3-top | proposition:prop:forgetful | function:unique_top_form |
 | module:CSTZ.Examples.GF2Cubed.Monoidal | proposition:prop:sym-monoidal | module:monoidal |
+| function:monoidal-prod-coeff | definition:def:monoidal-prod | module:monoidal |
 | function:sym-monoidal | proposition:prop:sym-monoidal | function:sym_diff_discriminator |
 | function:pair-annihilator-e₁ | definition:def:eval | function:in_annihilator |
 | function:pair-annihilator-e₃ | definition:def:eval | function:in_annihilator |
@@ -69,8 +75,10 @@ grounds alone, without the authors ever mentioning the other side.
 
     go | example:ex:banach-tarski | module:exterior |
 | function:scalar | remark:anon_105 | function:ext_scalar |
+| function:wedgeBasis | definition:def:boundary | function:check_wedge_self_zero |
 | function:disjoint-comm | proposition:prop:forgetful | function:check_wedge_comm |
 | function:∪-comm | proposition:prop:forgetful | function:check_wedge_comm |
+| function:wedge₂-comm | proposition:prop:commutative | function:check_wedge_comm |
 | module:CSTZ.Framework.FourCell | definition:def:subobj-class | class:CellKind |
 | function:ordered-τ | definition:def:profile | function:is_boolean |
 | function:ordered-σ | definition:def:profile | function:is_boolean |
@@ -81,6 +89,8 @@ grounds alone, without the authors ever mentioning the other side.
 | function:Regime | definition:def:powerset | function:power_set_bound |
 | function:dim-κ | definition:def:boolean-dim | function:dim_kappa |
 | function:evolve | remark:anon_004 | function:evolve |
+| module:CSTZ.Framework.XOR | definition:def:eval-linear | module:framework |
+| function:χ | definition:def:residue | function:chi |
 | module:CSTZ.Higher.Toroid | definition:def:toroid | module:higher |
 | function:τ-point | definition:def:tau-sigma | function:triangle_identity |
 | function:σ-point | definition:def:tau-sigma | function:triangle_identity |
@@ -90,6 +100,7 @@ grounds alone, without the authors ever mentioning the other side.
 | module:CSTZ.Homotopy | definition:def:directed-homotopy | module:homotopy |
 | module:CSTZ.Monoidal.InternalHom | definition:def:internal-hom | module:topos |
 | function:internalHom | definition:def:internal-hom | module:topos |
+| function:_⊗-witness_ | proposition:prop:forgetful | function:equalizer_witness |
 | module:CSTZ.Sets.EmptyPairing | proposition:prop:pairing | module:sets |
 | function:κ-equiv | definition:def:kappa | function:kappa_equiv |
 | function:κ-equiv-refl | definition:def:kappa | function:kappa_equiv |
@@ -107,6 +118,7 @@ grounds alone, without the authors ever mentioning the other side.
 | function:linear-map-zero | definition:def:profile-linear | function:check_linear_map_zero |
 | function:zero-divisor | remark:anon_126 | function:check_cd_commutativity |
 | module:CSTZ.Verification.ChainBound | proposition:prop:boundary | function:chain_depth_bound |
+| function:linkVector | remark:rem:cycles | function:link_vector |
 | module:CSTZ.Verification.ChoiceBound | theorem:thm:choice | function:choice_measure |
 | function:measure | remark:anon_105 | function:choice_measure |
 | function:measure-zero | remark:anon_105 | function:choice_measure |

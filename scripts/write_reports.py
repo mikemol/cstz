@@ -55,6 +55,11 @@ def main():
         for k in r.get("evidence", {}):
             signal_counter[k] += 1
 
+    # Count triples by name-agreement tier
+    both_agree = sum(1 for t in triples if t.get("name_agreement", {}).get("paper") and t.get("name_agreement", {}).get("python"))
+    one_agree  = sum(1 for t in triples if bool(t.get("name_agreement", {}).get("paper")) ^ bool(t.get("name_agreement", {}).get("python")))
+    body_only  = sum(1 for t in triples if not t.get("name_agreement", {}).get("paper") and not t.get("name_agreement", {}).get("python"))
+
     pipeline_lines = [
         "# Paper ↔ Agda ↔ Python alignment pipeline",
         "",
@@ -64,8 +69,9 @@ def main():
         "2. `scripts/extract_agda.py`   — tree-sitter-agda + indent-lexer for Unicode postulates",
         "3. `scripts/extract_python.py` — stdlib `ast` walker",
         "4. `scripts/structural_identity.py` — grammar-reflected wedge-product Id(A), sparse exterior",
-        "5. `scripts/align_perspectives.py` — three-perspective alignment (S3 rotation, IDF, adjacency)",
+        "5. `scripts/align_perspectives.py` — three-perspective alignment (S3 rotation, IDF, adjacency, triangle-consistency)",
         "6. `scripts/validate_against_comments.py` — post-hoc authorial-annotation check",
+        "7. `scripts/gap_analysis.py` — 3×3 cofiber cell classification, near-triple recovery",
         "",
         "No regex runs over source content. No hand-written kind-map. The grammar's",
         "symbol table is the discriminator basis; `cstz.exterior`-style sparse wedge",

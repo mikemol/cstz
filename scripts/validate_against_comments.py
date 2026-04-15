@@ -338,6 +338,7 @@ def main():
     reports = repo / "reports"
 
     triples = _load_manifest(reports / "triples.jsonl")
+    residues_rows = _load_manifest(reports / "residues.jsonl")
     agda_rows = _load_manifest(reports / "agda_decls.jsonl")
     python_rows = _load_manifest(reports / "python_decls.jsonl")
     paper_rows = _load_manifest(reports / "paper_decls.jsonl")
@@ -399,6 +400,7 @@ def main():
         n_signals = len(ev)
         for k in ev:
             signal_counts[k] += 1
+        na = t.get("name_agreement", {})
         rec = {
             "agda": t["agda"],
             "paper": t["paper"],
@@ -408,6 +410,9 @@ def main():
             "python_path": t.get("python_path", ""),
             "evidence": ev,
             "n_signals": n_signals,
+            "name_agreement_both": bool(na.get("paper")) and bool(na.get("python")),
+            "name_agreement_paper": bool(na.get("paper")),
+            "name_agreement_python": bool(na.get("python")),
         }
         records.append(rec)
         if n_signals == 0:
@@ -418,6 +423,84 @@ def main():
         "\n".join(json.dumps(r, ensure_ascii=False) for r in records) + "\n"
     )
 
+    # =======================================================================
+    # ORDERED_σ promotion: search the RESIDUE population for pairs that
+    # have strong citation evidence even though the aligner's structural
+    # score was insufficient to commit.  These are the "citation-only"
+    # tier that Boolean-semantics commit/reject would have missed.
+    # Per Paper Def 9.8: an aligned pair is committed iff it has *some*
+    # positive evidence; structural absence is not evidence-against.
+    # =======================================================================
+    sigma_promoted: list[dict] = []
+    for r in residues_rows:
+        agda_qn = r["agda"]
+        # Try each top-3 candidate on both sides against the citation signal
+        for side_key, cand_key, by_qn_func in [
+            ("paper", "paper_candidates", None),
+            ("python", "python_candidates", None),
+        ]:
+            pass  # placeholder — we check both simultaneously below
+
+        # Build a synthetic triple for each candidate pair and check evidence
+        paper_cands = r.get("paper_candidates", []) or []
+        python_cands = r.get("python_candidates", []) or []
+        for p_cand in paper_cands[:3]:
+            for y_cand in python_cands[:3]:
+                synthetic = {
+                    "agda": agda_qn,
+                    "paper": p_cand[0],
+                    "python": y_cand[0],
+                    "agda_path": r.get("agda_path", ""),
+                }
+                ev = evidence_for_triple(
+                    synthetic,
+                    agda_docs=agda_docs,
+                    python_docs_by_qn=py_docs_by_qn,
+                    python_docs_by_simple=py_docs_by_simple,
+                    paper_label=paper_label,
+                    paper_meta=paper_meta,
+                    python_meta=python_meta,
+                    paper_citations=paper_citations,
+                )
+                if ev:
+                    sigma_promoted.append({
+                        "tier": "ORDERED_σ (0,1) — Cited only",
+                        "agda": agda_qn,
+                        "paper": p_cand[0],
+                        "paper_struct_score": p_cand[1],
+                        "python": y_cand[0],
+                        "python_struct_score": y_cand[1],
+                        "evidence": ev,
+                        "n_signals": len(ev),
+                    })
+                    break
+            else:
+                continue
+            break
+
+    # --- Four-cell tier classification per triple ---
+    # Paper §9 Def 9.8 (evidence semantics): a signal firing is
+    # evidence-for; a signal NOT firing is absence of evidence, never
+    # evidence against.  Applied to our output: each triple gets a
+    # tier based on what positive evidence fired on it, not on what
+    # didn't.  No triple is "rejected" because evidence is absent.
+    by_tier: Counter = Counter()
+    for r in records:
+        ev = r["evidence"]
+        has_authorial = bool(ev)  # σ axis: any author-written citation?
+        # τ axis: structural name-agreement tag from the aligner.  We
+        # recover it by checking the triples.jsonl for ``name_agreement``.
+        has_structural = r.get("name_agreement_both", False)
+        if has_structural and has_authorial:
+            r["tier"] = "OVER (1,1) — Confirmed"
+        elif has_structural:
+            r["tier"] = "ORDERED_τ (1,0) — Structural"
+        elif has_authorial:
+            r["tier"] = "ORDERED_σ (0,1) — Cited"
+        else:
+            r["tier"] = "GAP (0,0) — Pending"
+        by_tier[r["tier"]] += 1
+
     # --- Summary md ---
     n = len(records)
     with_any = sum(1 for r in records if r["n_signals"] > 0)
@@ -425,10 +508,28 @@ def main():
     lines = [
         "# Alignment validation",
         "",
+        "## Four-cell tier classification",
+        "",
+        "Per Paper §9 Def 9.8 (evidence semantics): a signal firing is",
+        "evidence-for; absence of signal is NOT evidence against.  Tiers",
+        "below report each committed triple's position in the (τ, σ)",
+        "plane where τ = structural name-agreement and σ = authorial",
+        "citation in docstrings.  GAP tier is committed-but-pending —",
+        "the aligner's score+margin put it in the triple set, but neither",
+        "confirmation stream has fired yet.  GAP does not mean wrong.",
+        "",
+        "| Tier | Count | % of triples |",
+        "|------|-------|--------------|",
+    ]
+    for t, c in by_tier.most_common():
+        lines.append(f"| {t} | {c} | {100*c/max(n,1):.1f}% |")
+    lines += [
+        "",
+        "## Signal-presence rates",
+        "",
         f"- Total triples: **{n}**",
-        f"- Triples with ≥1 authorial signal: **{with_any}** ({100*with_any/n:.1f}%)",
+        f"- Triples with ≥1 authorial citation: **{with_any}** ({100*with_any/n:.1f}%) — *this is a LOWER BOUND on correctness per the evidence-semantics principle, not an accuracy measure*",
         f"- Average signals per triple: **{avg_signals:.2f}** / 6 possible",
-        f"- Zero-evidence triples (most suspect): **{len(zero_evidence)}** ({100*len(zero_evidence)/n:.1f}%)",
         "",
         "## Signal breakdown",
         "",

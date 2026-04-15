@@ -624,6 +624,64 @@ def align(paper: list[Decl], agda: list[Decl], python: list[Decl]) -> dict:
         p_pick = best_or_none(p_scored, paper_by_qn, a)
         y_pick = best_or_none(y_scored, python_by_qn, a)
 
+        # ---- Triangle-consistency recovery ----
+        # Paper §6 Thm 6.13 (triadic adjunction) + Rem 3.17 (Yoneda):
+        # a paper decl's identity is characterized by its alignment with
+        # BOTH agda and python.  If the loop has a confident python pick
+        # but a blurry paper pick (or vice versa), a paper candidate that
+        # independently agrees with the python pick across the third axis
+        # is the correct triangle closure.  This is the completeness
+        # check the user asked for: "triangle identities to completeness".
+        if y_pick and not p_pick and p_scored:
+            y_decl = python_by_qn[y_pick[0]]
+            cross_scores: list[tuple[str, float]] = []
+            for (p_qn, p_total, p_s1, *_rest) in p_scored[:6]:
+                p_decl = paper_by_qn[p_qn]
+                paper_python_score = pass_1_tokens(p_decl, y_decl, idf)
+                combined = p_s1 + paper_python_score
+                cross_scores.append((p_qn, combined))
+            cross_scores.sort(key=lambda x: -x[1])
+            if cross_scores and cross_scores[0][1] >= 0.70:
+                top_x, top_cs = cross_scores[0]
+                second_cs = cross_scores[1][1] if len(cross_scores) >= 2 else 0.001
+                if top_cs >= 1.2 * max(second_cs, 0.001):
+                    top_tuple = next((s for s in p_scored if s[0] == top_x), p_scored[0])
+                    p_pick = top_tuple
+        if p_pick and not y_pick and y_scored:
+            p_decl = paper_by_qn[p_pick[0]]
+            cross_scores = []
+            for (y_qn, y_total, y_s1, *_rest) in y_scored[:6]:
+                y_decl = python_by_qn[y_qn]
+                paper_python_score = pass_1_tokens(p_decl, y_decl, idf)
+                combined = y_s1 + paper_python_score
+                cross_scores.append((y_qn, combined))
+            cross_scores.sort(key=lambda x: -x[1])
+            if cross_scores and cross_scores[0][1] >= 0.70:
+                top_x, top_cs = cross_scores[0]
+                second_cs = cross_scores[1][1] if len(cross_scores) >= 2 else 0.001
+                if top_cs >= 1.2 * max(second_cs, 0.001):
+                    top_tuple = next((s for s in y_scored if s[0] == top_x), y_scored[0])
+                    y_pick = top_tuple
+
+        # ---- Name-overlap sanity check (soft, recorded not enforced) ----
+        # We experimented with a hard constraint requiring name-token
+        # overlap between the Agda decl and its matched paper/python.
+        # That cut committed triples from 174 to 76 — eliminating more
+        # correct triples (different naming conventions like
+        # ``kappa_equiv ↔ def:ext``) than spurious ones.  Kept as a
+        # SOFT tag on each triple so reviewers can filter by
+        # ``name_agreement`` in the JSONL output rather than having
+        # the aligner silently reject.
+        name_agreement = {"paper": False, "python": False}
+        if p_pick and y_pick:
+            agda_name_toks = normalize_name(a.name.split(".")[-1] if "." in a.name else a.name)
+            p_decl = paper_by_qn[p_pick[0]]
+            y_decl = python_by_qn[y_pick[0]]
+            p_name_toks = normalize_name(p_decl.name) | normalize_name(p_pick[0])
+            y_name_toks = normalize_name(y_decl.name)
+            name_agreement["paper"] = bool(agda_name_toks & p_name_toks)
+            name_agreement["python"] = bool(agda_name_toks & y_name_toks)
+
         if p_pick and y_pick:
             triples.append({
                 "agda": a.qualname,
@@ -634,6 +692,7 @@ def align(paper: list[Decl], agda: list[Decl], python: list[Decl]) -> dict:
                 "python_score": y_pick[1:],
                 "paper_path": f"{paper_by_qn[p_pick[0]].path}",
                 "python_path": f"{python_by_qn[y_pick[0]].path}:{python_by_qn[y_pick[0]].line}",
+                "name_agreement": name_agreement,
             })
         else:
             residues.append({
