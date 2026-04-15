@@ -1,34 +1,30 @@
 {
   "family_scales": {
-    "token": 0.552959965846065,
-    "name_tok": 0.24241445274257586,
+    "token": 0.5551636445665887,
+    "name_tok": 0.23161694628320303,
     "kind": 1.0,
     "edge": 1.0,
-    "cite": 1.2370605971590973,
-    "ngram_name_p2": 0.5
+    "source": 1.0,
+    "cite": 1.1769227323800515,
+    "subtree_shape_p1": 0.5
   },
-  "registry_size": 9618,
+  "registry_size": 3407,
   "registry_families": {
     "token": 2000,
     "name_tok": 465,
-    "kind": 47,
-    "edge": 58,
+    "kind": 137,
+    "edge": 398,
+    "source": 3,
     "cite": 316,
-    "ngram_name_p2": 107,
-    "ngram_name_p3_DROPPED": 14,
-    "ngram_name_p4_DROPPED": 1,
-    "substring_qualname_p3_DROPPED": 1227,
-    "substring_qualname_p4_DROPPED": 1382,
-    "substring_qualname_p5_DROPPED": 1360,
-    "substring_qualname_p6_DROPPED": 1309,
-    "substring_qualname_p7_DROPPED": 1250,
-    "subtree_shape_p1_DROPPED": 41,
-    "subtree_shape_p2_DROPPED": 41
+    "subtree_shape_p1": 44,
+    "subtree_shape_p2_DROPPED": 44
   },
   "oracle_size": 453,
   "final_top1": 79.12621359223301,
   "final_mean_rank": 1.233009708737864,
+  "lexical_mask": false,
+  "wedge_definitions": [],
   "evolved_families": [
-    "ngram_name_p2"
+    "subtree_shape_p1"
   ]
 }

@@ -244,20 +244,28 @@ def gradient_step(
 # ---------------------------------------------------------------------------
 
 
-def calibrate(max_iters: int = 8) -> dict:
+def calibrate(max_iters: int = 8, *, lexical_mask: bool = False,
+              out_dir: str = "reports") -> dict:
     repo = Path.cwd()
     paper, agda, python, *_ = load_all(repo)
 
+    # In structural-only mode, load paper manifest from reports/ regardless
+    # of out_dir — the extractor always writes to reports/.
     agda_docs = _agda_docstring_by_qualname(repo)
     python_docs = _python_docstring_by_qualname(repo)
     paper_rows = [json.loads(l) for l in (repo / "reports" / "paper_decls.jsonl").open()]
 
-    reg = ParallelRegistry()
+    reg = ParallelRegistry(lexical_mask=lexical_mask)
     all_decls = paper + agda + python
     reg.register_tokens(all_decls, top_n_by_idf=2000)
     reg.register_name_tokens(all_decls)
     reg.register_kinds_and_edges(all_decls)
     reg.register_citations(paper_rows)
+
+    mode_label = "STRUCTURAL-ONLY" if lexical_mask else "LEXICAL"
+    print(f"# mode: {mode_label}  registry size: {reg.size()}", file=sys.stderr)
+    for f, n in reg.by_family().items():
+        print(f"#   family {f!r:12s} {n}", file=sys.stderr)
 
     # bitmaps
     bitmaps: dict[str, int] = {}
@@ -302,6 +310,7 @@ def calibrate(max_iters: int = 8) -> dict:
     trace: list[dict] = []
     prev_residue = float("inf")
     stuck_count = 0
+    wedge_grade = 2  # next wedge grade to articulate on plateau
     # Families we've already tried (even if rejected) so we don't propose
     # the same one twice.
     tried_families: set[str] = set()
@@ -495,6 +504,82 @@ def calibrate(max_iters: int = 8) -> dict:
                     _revert_family(fam_tag)
                     tried_families.add(fam_tag)
 
+            # ---- Second phase: wedge-candidate discovery ----
+            # If no primitive-family candidate improved, try grade-k+1
+            # wedges of currently-active bits that co-fire on residue
+            # pairs.  This is the paper's CD-doubling step applied to
+            # our own discriminator algebra.
+            if best_family is None:
+                print(f"#   no primitive-family candidate improved; "
+                      f"trying wedge-grade κ-evolution", file=sys.stderr)
+                # Build the residue-pairs set: oracle pairs where the
+                # current basis ranks the target > 1.
+                residue_pairs: list[tuple[str, str]] = []
+                for src_qn, tgt_qn, _cite, _stream in oracle:
+                    if src_qn not in bitmaps or tgt_qn not in bitmaps:
+                        continue
+                    cands = cands_by_source.get(src_qn)
+                    if not cands:
+                        continue
+                    rank = predicted_rank(reg, bitmaps[src_qn], cands, tgt_qn, family_scales)
+                    if rank > 1:
+                        residue_pairs.append((src_qn, tgt_qn))
+
+                wedge_candidates = list(
+                    candidate_families.enumerate_wedge_candidates(
+                        reg, bitmaps, residue_pairs,
+                        min_co_fire=3, max_candidates=30, grade=wedge_grade,
+                    )
+                )
+                print(f"#   {len(wedge_candidates)} wedge candidates from "
+                      f"{len(residue_pairs)} residue pairs",
+                      file=sys.stderr)
+
+                wedge_adopted = 0
+                for fam_tag, (pa, pb), weight in wedge_candidates:
+                    # Build the registered keys
+                    da = reg._by_id[pa]
+                    db = reg._by_id[pb]
+                    bid = reg.register_wedge(da.family, da.key, db.family, db.key,
+                                              weight=weight, grade=wedge_grade)
+                    if bid is None:
+                        continue
+                    wedge_adopted += 1
+
+                if wedge_adopted > 0:
+                    # Recompute bitmaps (wedges need their parent bits set
+                    # AND then themselves set via the AND rule)
+                    _recompute_bitmaps()
+                    # Give the new wedge family a modest starting scale
+                    new_scale_key = f"wedge_g{wedge_grade}"
+                    family_scales[new_scale_key] = 0.5
+                    # Short gradient run to calibrate the new scale
+                    for _ in range(3):
+                        family_scales, _ = gradient_step(
+                            reg, oracle, bitmaps, cands_by_source, family_scales, eta=0.15,
+                        )
+                    new_mean, new_top1, _ = _eval_current(family_scales)
+                    print(f"# wedge κ-evolution g{wedge_grade}: {wedge_adopted} wedges added, "
+                          f"mean_rank {baseline:.3f} → {new_mean:.3f}",
+                          file=sys.stderr)
+                    trace[-1].setdefault("kappa_evolution", {})
+                    trace[-1]["kappa_evolution"]["wedge_grade"] = wedge_grade
+                    trace[-1]["kappa_evolution"]["wedges_added"] = wedge_adopted
+                    trace[-1]["kappa_evolution"]["wedge_new_mean"] = new_mean
+                    wedge_grade += 1
+                    if new_mean < baseline - 1e-3:
+                        best_family = new_scale_key
+                        best_mean = new_mean
+                        best_scales = family_scales
+                        stuck_count = 0
+                        prev_residue = best_mean
+                    else:
+                        # Revert wedge family (drop it) — the wedges
+                        # didn't help, don't pollute the registry.
+                        reg.drop_family(f"wedge_g{wedge_grade - 1}")
+                        family_scales.pop(new_scale_key, None)
+                        _recompute_bitmaps()
+
             if best_family is not None:
                 print(f"# κ-evolution: keeping family {best_family!r} "
                       f"(mean_rank {baseline:.3f} → {best_mean:.3f})",
@@ -524,8 +609,10 @@ def calibrate(max_iters: int = 8) -> dict:
             reg, oracle, bitmaps, cands_by_source, family_scales, eta=0.15,
         )
 
-    # Write outputs
-    reports = repo / "reports"
+    # Write outputs — ``out_dir`` lets structural-only mode write to
+    # ``reports/structural/`` without clobbering the lexical results.
+    reports = repo / out_dir
+    reports.mkdir(parents=True, exist_ok=True)
     (reports / "calibration_trace.jsonl").write_text(
         "\n".join(json.dumps(t) for t in trace) + "\n"
     )
@@ -534,6 +621,22 @@ def calibrate(max_iters: int = 8) -> dict:
     evolved_families = [
         f for f in active_extras if f not in {"token", "name_tok", "kind", "edge", "cite"}
     ]
+    # Collect wedge definitions so downstream aligners can rebuild them
+    wedge_defs = []
+    for bid, (pa, pb) in getattr(reg, "_wedge_parents", {}).items():
+        d = reg._by_id[bid]
+        if d.weight == 0.0:
+            continue  # dropped
+        da = reg._by_id[pa]
+        db = reg._by_id[pb]
+        wedge_defs.append({
+            "family": d.family,
+            "key": d.key,
+            "weight": d.weight,
+            "parent_a": [da.family, da.key],
+            "parent_b": [db.family, db.key],
+        })
+
     (reports / "calibrated_weights.json").write_text(
         json.dumps({
             "family_scales": family_scales,
@@ -542,6 +645,8 @@ def calibrate(max_iters: int = 8) -> dict:
             "oracle_size": len(oracle),
             "final_top1": trace[-1]["top1_pct"] if trace else 0.0,
             "final_mean_rank": trace[-1]["mean_rank"] if trace else 0.0,
+            "lexical_mask": lexical_mask,
+            "wedge_definitions": wedge_defs,
             "evolved_families": evolved_families,
         }, indent=2)
     )
@@ -549,8 +654,22 @@ def calibrate(max_iters: int = 8) -> dict:
 
 
 def main():
-    result = calibrate(max_iters=10)
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    parser.add_argument("--structural-only", action="store_true",
+                        help="Mask lexical families (token/name_tok/cite) "
+                             "and all lexical primitives; rely only on "
+                             "structural (kind/edge/shape/wedge) signal.")
+    parser.add_argument("--max-iters", type=int, default=10)
+    args = parser.parse_args()
+    out_dir = "reports/structural" if args.structural_only else "reports"
+    result = calibrate(
+        max_iters=args.max_iters,
+        lexical_mask=args.structural_only,
+        out_dir=out_dir,
+    )
     print(json.dumps({
+        "mode": "structural-only" if args.structural_only else "lexical",
         "family_scales": result["family_scales"],
         "final_top1": result["trace"][-1]["top1_pct"] if result["trace"] else 0,
     }, indent=2))

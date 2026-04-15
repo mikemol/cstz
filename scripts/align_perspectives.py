@@ -58,6 +58,7 @@ from structural_identity import (  # noqa: E402
     parse_paper_decls, parse_agda_decls, parse_python_decls,
     structural_hash, tau_profile, token_bag, child_signature,
     adjacency_profile, field_adjacency_profile,
+    deep_kind_set, deep_edge_set,
 )
 
 
@@ -121,6 +122,10 @@ class Decl:
     adj_card: int = 0       # number of distinct (parent,child) edges (grade-2 adj cardinality)
     adj_hash: str = ""      # hash of field-adjacency triples (WL-1 signature)
     subtree_size: int = 0   # number of nodes in subtree
+    # Full-depth structural fingerprint (every kind / edge appearing
+    # ANYWHERE in the decl's subtree, not just direct children):
+    deep_kinds: frozenset = frozenset()   # frozenset[str]
+    deep_edges: frozenset = frozenset()   # frozenset[tuple[str, str]]
 
 
 def _decl_from_paper(n: PandocNode, symtab: SymbolTable, seq: int) -> Decl | None:
@@ -153,6 +158,8 @@ def _decl_from_paper(n: PandocNode, symtab: SymbolTable, seq: int) -> Decl | Non
         adj_card=len(adj),
         adj_hash=adj_h,
         subtree_size=_count_subtree(n),
+        deep_kinds=deep_kind_set(n),
+        deep_edges=deep_edge_set(n),
     )
 
 
@@ -193,6 +200,8 @@ def _decl_from_agda(n: TreeSitterAgdaNode, symtab: SymbolTable) -> Decl | None:
         adj_card=len(adj),
         adj_hash=adj_h,
         subtree_size=_count_subtree(n),
+        deep_kinds=deep_kind_set(n),
+        deep_edges=deep_edge_set(n),
     )
 
 
@@ -226,6 +235,8 @@ def _decl_from_python(n: PyAstNode, symtab: SymbolTable) -> Decl | None:
         adj_card=len(adj),
         adj_hash=adj_h,
         subtree_size=_count_subtree(n),
+        deep_kinds=deep_kind_set(n),
+        deep_edges=deep_edge_set(n),
     )
 
 

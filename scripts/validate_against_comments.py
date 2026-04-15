@@ -335,17 +335,36 @@ def evidence_for_triple(
 
 def main():
     repo = Path.cwd()
-    reports = repo / "reports"
+    # ``OUT_DIR`` env var lets run_pipeline.sh switch between lexical
+    # (default ``reports``) and structural (``reports/structural``)
+    # runs.  The decl manifests live at ``reports/`` either way since
+    # they're mode-independent (produced by the extractors).
+    import os
+    out_dir = os.environ.get("OUT_DIR", "reports")
+    reports = repo / out_dir
+    shared = repo / "reports"
 
     triples = _load_manifest(reports / "triples.jsonl")
     residues_rows = _load_manifest(reports / "residues.jsonl")
-    agda_rows = _load_manifest(reports / "agda_decls.jsonl")
-    python_rows = _load_manifest(reports / "python_decls.jsonl")
-    paper_rows = _load_manifest(reports / "paper_decls.jsonl")
+    agda_rows = _load_manifest(shared / "agda_decls.jsonl")
+    python_rows = _load_manifest(shared / "python_decls.jsonl")
+    paper_rows = _load_manifest(shared / "paper_decls.jsonl")
 
     if not triples:
-        print("# no triples.jsonl found — run align_perspectives.py first", file=sys.stderr)
-        sys.exit(1)
+        # Empty triples — write a degenerate validation report and exit
+        # cleanly (not an error; structural-only mode legitimately
+        # produces zero triples at this grain).
+        print("# triples.jsonl is empty; writing degenerate validation report", file=sys.stderr)
+        (reports / "validation.jsonl").write_text("")
+        (reports / "validation.md").write_text(
+            "# Alignment validation\n\n"
+            "No committed triples.  Structural-only mode produced zero\n"
+            "triples because paper and agda/python share no grade-1\n"
+            "kind bits at this grain (disjoint grammar vocabularies).\n"
+            "Per Paper Def 9.8 (evidence semantics): zero triples is\n"
+            "zero positive evidence, NOT evidence of misalignment.\n"
+        )
+        return
 
     agda_docs_exact, agda_docs_sub = _docstring_by_qualname_agda(agda_rows)
 

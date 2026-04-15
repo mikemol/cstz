@@ -31,13 +31,18 @@ def _clip(s: str, n: int) -> str:
 
 
 def main():
-    reports = Path("reports")
+    import os
+    out_dir = os.environ.get("OUT_DIR", "reports")
+    reports = Path(out_dir)
+    reports.mkdir(parents=True, exist_ok=True)
+    # decl manifests live at plain "reports/" (mode-independent)
+    shared = Path("reports")
     triples = _load(reports / "triples.jsonl")
     residues = _load(reports / "residues.jsonl")
     validation = _load(reports / "validation.jsonl")
-    paper_rows = _load(reports / "paper_decls.jsonl")
-    agda_rows = _load(reports / "agda_decls.jsonl")
-    python_rows = _load(reports / "python_decls.jsonl")
+    paper_rows = _load(shared / "paper_decls.jsonl")
+    agda_rows = _load(shared / "agda_decls.jsonl")
+    python_rows = _load(shared / "python_decls.jsonl")
 
     # Index validation by agda qualname
     val_by_agda = {r["agda"]: r for r in validation}

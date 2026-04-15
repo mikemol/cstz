@@ -1,11 +1,13 @@
 {
-  "size": 2993,
+  "size": 3363,
   "families": {
     "token": 2000,
     "name_tok": 465,
-    "kind": 47,
-    "edge": 58,
+    "kind": 137,
+    "edge": 398,
+    "source": 3,
     "cite": 316,
-    "ngram_name_p2": 107
-  }
+    "subtree_shape_p1": 44
+  },
+  "lexical_mask": false
 }

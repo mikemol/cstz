@@ -63,11 +63,18 @@ class ParallelRegistry:
     hand-specified.  ``fire_bitmap(decl)`` returns a single int whose set
     bits are the discriminators that fire on this decl.  Alignment
     between two decls is then ``weighted_popcount(bm_a & bm_b)``.
+
+    ``lexical_mask`` — when True, all string-derived families (``token``,
+    ``name_tok``, ``cite``) are disabled.  Only structural (AST-derived)
+    discriminators are registered: ``kind``, ``edge``, and any wedges
+    the κ-evolution loop articulates.  This mode answers: "how much
+    alignment signal is purely structural vs. lexical coincidence?"
     """
 
-    def __init__(self) -> None:
+    def __init__(self, lexical_mask: bool = False) -> None:
         self._by_id: list[Discriminator] = []
         self._by_key: dict[tuple[str, str], int] = {}
+        self.lexical_mask = lexical_mask
 
     def _register(self, family: str, key: str, weight: float) -> int:
         k = (family, key)
@@ -80,7 +87,12 @@ class ParallelRegistry:
 
     def register_tokens(self, decls: list, top_n_by_idf: int = 2000) -> None:
         """Register a discriminator for each of the top-N IDF tokens
-        appearing in any decl's normalized token bag."""
+        appearing in any decl's normalized token bag.
+
+        No-op under ``lexical_mask=True`` (string-derived family).
+        """
+        if self.lexical_mask:
+            return
         df: Counter = Counter()
         for d in decls:
             for t in d.tokens:
@@ -94,7 +106,12 @@ class ParallelRegistry:
 
     def register_name_tokens(self, decls: list) -> None:
         """Register a discriminator for each token appearing in any decl's
-        NAME (distinct from body tokens; names are stronger signal)."""
+        NAME (distinct from body tokens; names are stronger signal).
+
+        No-op under ``lexical_mask=True`` (string-derived family).
+        """
+        if self.lexical_mask:
+            return
         seen: set[str] = set()
         for d in decls:
             from align_perspectives import normalize_name  # local import to avoid cycle
@@ -109,25 +126,56 @@ class ParallelRegistry:
                     self._register("name_tok", t, weight=2.0)
 
     def register_kinds_and_edges(self, decls: list) -> None:
-        """Register one discriminator per (source, kind) and per
-        (source, parent_kind, child_kind) edge observed in the corpus."""
-        # Source-qualified so they don't collide across parsers.
+        """Register primitive K's derived from the full subtree of each
+        decl.  Per user directive ("go two-deep, supersample"):
+
+        kind/K    — every descendant-kind anywhere in the decl's subtree
+                    (not just direct children).  These are the AB primitives
+                    at tree depth 1: "is there a descendant of kind K?"
+        edge/B>C  — every parent→child edge anywhere in the decl's
+                    subtree (the BC primitives).  Paths A→B and B→C
+                    become primitive; AB-BC composition emerges as a
+                    grade-2 wedge in κ-evolution.
+        source/S  — source provenance as its own grade-1 K; wedges
+                    of source/S ∧ kind/K reproduce source-qualified
+                    kinds organically, without being hardcoded.
+        """
         kind_freq: Counter = Counter()
         edge_freq: Counter = Counter()
+        source_freq: Counter = Counter()
         for d in decls:
-            # Every kind in child_sig is a grade-2 "has-child-of-kind-K" signal.
-            for field, child_kind in d.child_sig:
-                kind_freq[(d.source, child_kind)] += 1
-                # Edge from decl.kind → child_kind
-                edge_freq[(d.source, d.kind, child_kind)] += 1
-            kind_freq[(d.source, d.kind)] += 1
+            # Prefer full-depth deep_kinds / deep_edges if present
+            # (populated by align_perspectives._decl_from_*); fall
+            # back to child_sig otherwise.
+            if getattr(d, "deep_kinds", None):
+                for k in d.deep_kinds:
+                    kind_freq[k] += 1
+            else:
+                kind_freq[d.kind] += 1
+                for _f, ck in d.child_sig:
+                    kind_freq[ck] += 1
+            if getattr(d, "deep_edges", None):
+                for (p, c) in d.deep_edges:
+                    edge_freq[(p, c)] += 1
+            else:
+                for _f, ck in d.child_sig:
+                    edge_freq[(d.kind, ck)] += 1
+            source_freq[d.source] += 1
+
         total = max(sum(kind_freq.values()), 1)
-        for (src, k), c in kind_freq.items():
+
+        for k, c in kind_freq.items():
             w = math.log(total / c) + 1.0
-            self._register("kind", f"{src}/{k}", weight=w)
-        for (src, p, c_), cnt in edge_freq.items():
+            self._register("kind", k, weight=w)
+        for (p, c_), cnt in edge_freq.items():
             w = math.log(total / cnt) + 1.0
-            self._register("edge", f"{src}/{p}>{c_}", weight=w)
+            self._register("edge", f"{p}>{c_}", weight=w)
+
+        # source/ family — dependent-type K for decl provenance
+        n_total = sum(source_freq.values()) or 1
+        for src, c in source_freq.items():
+            w = math.log(n_total / c) + 1.0
+            self._register("source", src, weight=w)
 
     def register_citations(self, paper_rows: list[dict]) -> None:
         """For each paper decl with a numeric citation, register two
@@ -138,7 +186,12 @@ class ParallelRegistry:
         The discriminator fires:
           * on the paper decl itself (by identity — it IS the cited object)
           * on any other decl whose docstring contains the citation string
+
+        No-op under ``lexical_mask=True`` (string-derived family).
         """
+        if self.lexical_mask:
+            self._paper_owned_cites = {}
+            return
         kind_to_names = {
             "definition": ("Definition", "Def"),
             "theorem": ("Theorem", "Thm"),
@@ -167,6 +220,40 @@ class ParallelRegistry:
                     ("cite", f"{long_form} {cid}"),
                     ("cite", f"{short_form} {cid}"),
                 ])
+
+    def register_wedge(
+        self,
+        family_a: str, key_a: str,
+        family_b: str, key_b: str,
+        weight: float,
+        grade: int = 2,
+    ) -> int | None:
+        """Register a grade-k wedge of two existing discriminators.
+
+        The wedge discriminator fires iff BOTH parent discriminators
+        fire on the same decl.  This is exactly the paper's
+        ``d_a ∧ d_b`` in sparse form: its firing set is the AND of
+        the parents' firing sets.
+
+        Returns the new discriminator's id, or None if either parent
+        isn't registered.  Stored with family tag ``wedge_g{grade}``
+        and key ``a|FAMILY_A/KEY_A__b|FAMILY_B/KEY_B`` so the source
+        components can be recovered.
+        """
+        bid_a = self._by_key.get((family_a, key_a))
+        bid_b = self._by_key.get((family_b, key_b))
+        if bid_a is None or bid_b is None:
+            return None
+        key = f"{family_a}/{key_a}∧{family_b}/{key_b}"
+        family_tag = f"wedge_g{grade}"
+        if (family_tag, key) in self._by_key:
+            return self._by_key[(family_tag, key)]
+        bid = self._register(family_tag, key, weight=weight)
+        # Stash parent bits for bitmap-building
+        if not hasattr(self, "_wedge_parents"):
+            self._wedge_parents: dict[int, tuple[int, int]] = {}
+        self._wedge_parents[bid] = (bid_a, bid_b)
+        return bid
 
     def register_candidate_family(
         self, family_tag: str, items: list[tuple[str, float]]
@@ -239,52 +326,76 @@ class ParallelRegistry:
         bm = 0
         from align_perspectives import normalize_name
 
-        # token/ family
-        for t in decl.tokens:
-            bid = self._by_key.get(("token", t))
-            if bid is not None:
-                bm |= 1 << bid
+        lexical_mask = getattr(self, "lexical_mask", False)
 
-        # name_tok/ family (decl name only)
-        for t in normalize_name(decl.name.split(".")[-1] if "." in decl.name else decl.name):
-            bid = self._by_key.get(("name_tok", t))
-            if bid is not None:
-                bm |= 1 << bid
-        for t in normalize_name(decl.name):
-            bid = self._by_key.get(("name_tok", t))
-            if bid is not None:
-                bm |= 1 << bid
+        # token/ family (string-derived)
+        if not lexical_mask:
+            for t in decl.tokens:
+                bid = self._by_key.get(("token", t))
+                if bid is not None:
+                    bm |= 1 << bid
 
-        # kind/ family (decl's own kind and children's kinds)
-        bid = self._by_key.get(("kind", f"{decl.source}/{decl.kind}"))
+        # name_tok/ family (string-derived — decl name only)
+        if not lexical_mask:
+            for t in normalize_name(decl.name.split(".")[-1] if "." in decl.name else decl.name):
+                bid = self._by_key.get(("name_tok", t))
+                if bid is not None:
+                    bm |= 1 << bid
+            for t in normalize_name(decl.name):
+                bid = self._by_key.get(("name_tok", t))
+                if bid is not None:
+                    bm |= 1 << bid
+
+        # kind/ family (structural; full-subtree kinds, not just direct
+        # children — the AB primitives per user direction)
+        deep_kinds = getattr(decl, "deep_kinds", None) or frozenset()
+        if deep_kinds:
+            for k in deep_kinds:
+                bid = self._by_key.get(("kind", k))
+                if bid is not None:
+                    bm |= 1 << bid
+        else:
+            bid = self._by_key.get(("kind", decl.kind))
+            if bid is not None:
+                bm |= 1 << bid
+            for _f, ck in decl.child_sig:
+                bid = self._by_key.get(("kind", ck))
+                if bid is not None:
+                    bm |= 1 << bid
+
+        # edge/ family (structural; full-subtree edges — the BC primitives)
+        deep_edges = getattr(decl, "deep_edges", None) or frozenset()
+        if deep_edges:
+            for (p, c) in deep_edges:
+                bid = self._by_key.get(("edge", f"{p}>{c}"))
+                if bid is not None:
+                    bm |= 1 << bid
+        else:
+            for _f, ck in decl.child_sig:
+                bid = self._by_key.get(("edge", f"{decl.kind}>{ck}"))
+                if bid is not None:
+                    bm |= 1 << bid
+
+        # source/ family — grade-1 dependent-type K for provenance;
+        # wedges of source/SRC ∧ kind/K reproduce the old
+        # source-qualified kinds on demand (emergent, not hardcoded).
+        bid = self._by_key.get(("source", decl.source))
         if bid is not None:
             bm |= 1 << bid
-        for _field, ckind in decl.child_sig:
-            bid = self._by_key.get(("kind", f"{decl.source}/{ckind}"))
-            if bid is not None:
-                bm |= 1 << bid
 
-        # edge/ family (decl's direct parent→child edges)
-        for _field, ckind in decl.child_sig:
-            bid = self._by_key.get(("edge", f"{decl.source}/{decl.kind}>{ckind}"))
-            if bid is not None:
-                bm |= 1 << bid
-
-        # cite/ family — a paper decl unconditionally fires on the
-        # citations IT owns (since it IS the cited object, by identity).
-        # Any other decl fires only if its docstring contains the
-        # literal citation string.
-        owned = getattr(self, "_paper_owned_cites", {}).get(decl.qualname, [])
-        for key_pair in owned:
-            bid = self._by_key.get(key_pair)
-            if bid is not None:
-                bm |= 1 << bid
-        if docstring:
-            for (fam, key), bid in self._by_key.items():
-                if fam != "cite":
-                    continue
-                if key in docstring:
+        # cite/ family (string-derived — citation substrings in docstring)
+        if not lexical_mask:
+            owned = getattr(self, "_paper_owned_cites", {}).get(decl.qualname, [])
+            for key_pair in owned:
+                bid = self._by_key.get(key_pair)
+                if bid is not None:
                     bm |= 1 << bid
+            if docstring:
+                for (fam, key), bid in self._by_key.items():
+                    if fam != "cite":
+                        continue
+                    if key in docstring:
+                        bm |= 1 << bid
 
         # --- extra_families: candidate families added via κ-evolution ---
         if extra_families:
@@ -302,6 +413,19 @@ class ParallelRegistry:
                     # Some fire functions don't accept docstring kwarg
                     if fire_fn(decl, key):
                         bm |= 1 << bid
+
+        # --- wedge grades: fire iff BOTH parents fire ---
+        # Grade-k wedges are AND of their grade-1 (or lower-grade)
+        # parents.  We apply them AFTER all grade-1 bits are set.
+        # Parents may themselves be wedges (recursive via stored pair).
+        wedge_parents = getattr(self, "_wedge_parents", None)
+        if wedge_parents:
+            # Iterate in registration order so any higher-grade wedge
+            # built on a grade-2 parent sees its parent's bit already.
+            for bid in sorted(wedge_parents.keys()):
+                pa, pb = wedge_parents[bid]
+                if ((bm >> pa) & 1) and ((bm >> pb) & 1):
+                    bm |= 1 << bid
 
         return bm
 

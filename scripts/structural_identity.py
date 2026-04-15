@@ -454,6 +454,36 @@ def tau_profile(node, symtab: SymbolTable) -> int:
     return mask
 
 
+def deep_kind_set(node) -> frozenset[str]:
+    """Every kind appearing in the full subtree rooted at ``node``.
+
+    Kinds are returned VERBATIM (not lowercased, not canonicalized).
+    Earlier versions lowercased to expose accidental cross-source
+    matches (Python ``FunctionDef`` vs Agda ``function``); user
+    feedback made clear this is a hardcoded equivalence assertion
+    that the pipeline shouldn't bake in.  Any such equivalence
+    should EMERGE from residue-driven wedge discovery, not be
+    asserted at registration time.
+
+    The set representation is chosen over a multiset intentionally:
+    we want MEMBERSHIP (does this kind appear) not count, matching
+    the grade-1 wedge semantics.
+    """
+    out: set[str] = {node.kind}
+    for _fname, child in node.fields:
+        out |= deep_kind_set(child)
+    return frozenset(out)
+
+
+def deep_edge_set(node) -> frozenset[tuple[str, str]]:
+    """Every (parent_kind, child_kind) edge in the subtree (verbatim)."""
+    out: set[tuple[str, str]] = set()
+    for _fname, child in node.fields:
+        out.add((node.kind, child.kind))
+        out |= deep_edge_set(child)
+    return frozenset(out)
+
+
 def token_bag(node) -> frozenset[str]:
     """Collect every leaf text token in the subtree rooted at ``node``.
 
@@ -570,8 +600,64 @@ def parse_paper_decls(paper_root: Path) -> Iterator[PandocNode]:
     yield from walk(doc.get("blocks", []))
 
 
-def parse_agda_decls(path: Path) -> Iterator[TreeSitterAgdaNode]:
-    """Yield one TreeSitterAgdaNode per top-level declaration in ``path``."""
+class _TreeSitterAgdaModuleWithBody:
+    """Wrap a tree-sitter-agda module declaration so its ``fields``
+    include all subsequent top-level siblings in the same source_file.
+
+    Tree-sitter-agda represents ``module X where`` as a bare declaration;
+    its body (postulate blocks, function decls, etc.) are emitted as
+    SIBLINGS at the source_file root, not as children.  For alignment,
+    we want the module to "own" its file's contents so its deep_kinds
+    reflect the full scope.  This wrapper delegates ``kind``,
+    ``named_decl``, ``source_line``, and ``text_tokens`` to the
+    underlying module node, but overrides ``fields`` to return the
+    module's own named children PLUS the trailing file-level siblings.
+    """
+
+    def __init__(self, module_node, file_siblings, source_path: str):
+        self._node = module_node
+        self._siblings = file_siblings
+        self.source = "agda"
+        self.source_path = source_path
+
+    @property
+    def kind(self) -> str:
+        return "module"
+
+    @property
+    def fields(self):
+        out = []
+        for ch in self._node.children:
+            if ch.is_named:
+                out.append((None, TreeSitterAgdaNode(ch, self.source_path)))
+        for sib in self._siblings:
+            if sib.is_named:
+                out.append((None, TreeSitterAgdaNode(sib, self.source_path)))
+        return out
+
+    @property
+    def text_tokens(self):
+        return TreeSitterAgdaNode(self._node, self.source_path).text_tokens
+
+    @property
+    def named_decl(self):
+        return TreeSitterAgdaNode(self._node, self.source_path).named_decl
+
+    @property
+    def source_line(self) -> int:
+        return self._node.start_point[0] + 1
+
+
+def parse_agda_decls(path: Path) -> Iterator:
+    """Yield one TreeSitterAgdaNode per top-level declaration in ``path``.
+
+    Agda modules own their file — for module decls we wrap them so that
+    ``fields`` returns the subsequent top-level siblings (postulate /
+    function / record / data declarations declared inside the module's
+    scope) as if they were children.  That lets deep_kind_set /
+    deep_edge_set see the full structural content of the file, which
+    is what we want for alignment.
+    """
     import tree_sitter_agda
     from tree_sitter import Language, Parser
     lang = Language(tree_sitter_agda.language())
@@ -581,8 +667,24 @@ def parse_agda_decls(path: Path) -> Iterator[TreeSitterAgdaNode]:
     root = tree.root_node
     rel_path = str(path)
 
-    for ch in root.children:
-        if ch.type in ("module", "record", "data", "function"):
+    # Identify the module node and collect all top-level siblings that
+    # come after it (those are the module's content per Agda scoping).
+    children = list(root.children)
+    module_idx = None
+    for i, ch in enumerate(children):
+        if ch.type == "module":
+            module_idx = i
+            break
+    siblings_after_module = children[module_idx + 1:] if module_idx is not None else []
+
+    for i, ch in enumerate(children):
+        if ch.type == "module":
+            wrapped = _TreeSitterAgdaModuleWithBody(
+                ch, siblings_after_module, rel_path
+            )
+            if wrapped.named_decl is not None:
+                yield wrapped
+        elif ch.type in ("record", "data", "function", "postulate"):
             node = TreeSitterAgdaNode(ch, rel_path)
             if node.named_decl is not None:
                 yield node

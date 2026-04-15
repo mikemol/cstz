@@ -15,19 +15,18 @@ one of the candidates is a better match than the aligner could tell.
 
 | Agda | top-3 paper candidates |
 |------|-------------------------|
-| module:CSTZ.Axiom.Operationalist | definition:def:opera (5.68) / proposition:prop:inf (4.95) / theorem:thm:choice (4.95) |
-| module:CSTZ.Category.Adjunction | definition:def:categ (0.73) / theorem:thm:adjuncti (0.73) |
-| record:Adjunction | theorem:thm:adjuncti (3.64) / theorem:thm:sheaf (2.91) |
-| module:CSTZ.Category.Directed | definition:def:direc (0.73) / definition:def:categ (0.73) / definition:def:direc (0.73) |
-| function:compose-witnesses | definition:def:categ (4.95) / definition:def:compo (4.95) |
-| module:CSTZ.Category.Functor | definition:def:categ (0.73) / definition:def:funct (0.73) |
-| module:CSTZ.Category.Limits | definition:def:categ (0.73) / proposition:prop:lim (0.73) |
-| record:NatTrans | definition:def:nattr (3.07) / proposition:prop:nat (3.07) |
-| function:interchange-at-F | remark:rem:interchan (0.73) / remark:rem:interchan (0.73) |
-| module:CSTZ.Category.Yoneda | definition:def:categ (0.73) / theorem:thm:yoneda (0.73) |
-| function:retract-e₁ | theorem:thm:adjuncti (2.91) / theorem:thm:sheaf (2.91) |
-| function:chain-cycle-indep | remark:rem:cycles (2.91) / remark:anon_033 (2.91) / corollary:cor:trunca (2.91) |
-| function:profile-lin-check-2 | definition:def:profi (0.73) / definition:def:profi (0.73) |
-| function:residue-a₀-a₂ | definition:def:resid (0.73) / remark:rem:residue-o (0.73) |
-| function:triangle-check | definition:def:trian (0.73) / remark:rem:triangle- (0.73) |
-| function:triangle-rot-σ | definition:def:tau-s (0.73) / definition:def:trian (0.73) / remark:rem:triangle- (0.73) |
+| module:CSTZ.Axiom.Operationalist | definition:def:opera (5.40) / proposition:prop:inf (4.71) / theorem:thm:choice (4.71) |
+| module:CSTZ.Category.Adjunction | definition:def:categ (0.69) / theorem:thm:adjuncti (0.69) |
+| module:CSTZ.Category.Directed | definition:def:direc (0.69) / definition:def:categ (0.69) / definition:def:direc (0.69) |
+| function:compose-witnesses | definition:def:categ (4.71) / definition:def:compo (4.71) |
+| module:CSTZ.Category.Functor | definition:def:categ (0.69) / definition:def:funct (0.69) |
+| module:CSTZ.Category.Limits | definition:def:categ (0.69) / proposition:prop:lim (0.69) |
+| module:CSTZ.Category.NatTrans | definition:def:nattr (2.93) / proposition:prop:nat (2.93) / definition:def:categ (0.69) |
+| record:NatTrans | definition:def:nattr (2.93) / proposition:prop:nat (2.93) |
+| function:interchange-at-F | remark:rem:interchan (0.69) / remark:rem:interchan (0.69) |
+| module:CSTZ.Category.Yoneda | theorem:thm:yoneda (3.62) / remark:anon_006 (2.93) / definition:def:categ (0.69) |
+| function:profile-lin-check-2 | definition:def:profi (0.69) / definition:def:profi (0.69) |
+| function:residue-a₀-a₂ | definition:def:resid (0.69) / remark:rem:residue-o (0.69) |
+| function:triangle-check | definition:def:trian (0.69) / remark:rem:triangle- (0.69) |
+| function:triangle-rot-σ | definition:def:tau-s (0.69) / definition:def:trian (0.69) / remark:rem:triangle- (0.69) |
+| function:triangle-rot-τ | definition:def:tau-s (0.69) / definition:def:trian (0.69) / remark:rem:triangle- (0.69) |

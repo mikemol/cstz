@@ -121,29 +121,64 @@ def score_pair(
     a: Decl, bm_a: int,
     b: Decl, bm_b: int,
     family_scales: dict[str, float] | None = None,
+    ordering_penalty: float = 0.0,
 ) -> tuple[float, int]:
-    """Return (weighted_score, firing_bitmap) with optional family scaling."""
-    firing = bm_a & bm_b
+    """Return (weighted_score, overlap_bitmap).
+
+    Default is pure overlap-weighted popcount (the Belnap (1,1) cell)
+    since full τ/σ Belnap scoring requires separate τ-bitmaps and
+    σ-bitmaps per decl (a deeper refactor).  When ``ordering_penalty``
+    is nonzero, we subtract a small weighted count of (1,0)+(0,1)
+    ordering cells — earning a step toward Boolean discrimination.
+    Keep ordering_penalty ≤ 0.05 because orderings naturally dominate
+    overlap in bit counts.
+    """
+    overlap = bm_a & bm_b
     if family_scales is None:
-        return reg.weighted_popcount(firing), firing
-    total = 0.0
-    x = firing
+        pos = reg.weighted_popcount(overlap)
+        if ordering_penalty == 0.0:
+            return pos, overlap
+        ordering = bm_a ^ bm_b
+        return pos - ordering_penalty * reg.weighted_popcount(ordering), overlap
+
+    pos = 0.0
+    x = overlap
     while x:
         lsb = x & -x
         bid = lsb.bit_length() - 1
         d = reg._by_id[bid]
-        total += d.weight * family_scales.get(d.family, 1.0)
+        pos += d.weight * family_scales.get(d.family, 1.0)
         x &= x - 1
-    return total, firing
+
+    if ordering_penalty == 0.0:
+        return pos, overlap
+
+    neg = 0.0
+    x = bm_a ^ bm_b
+    while x:
+        lsb = x & -x
+        bid = lsb.bit_length() - 1
+        d = reg._by_id[bid]
+        neg += d.weight * family_scales.get(d.family, 1.0)
+        x &= x - 1
+
+    return pos - ordering_penalty * neg, overlap
 
 
-def load_family_scales(repo: Path) -> tuple[dict[str, float] | None, list[str]]:
-    """Load calibrated family weights + list of κ-evolved families."""
-    path = repo / "reports" / "calibrated_weights.json"
+def load_family_scales(
+    repo: Path, out_dir: str = "reports"
+) -> tuple[dict[str, float] | None, list[str], list[dict], bool]:
+    """Load calibrated family weights, evolved families, wedge defs, mask flag."""
+    path = repo / out_dir / "calibrated_weights.json"
     if not path.exists():
-        return None, []
+        return None, [], [], False
     data = json.loads(path.read_text())
-    return data.get("family_scales"), data.get("evolved_families", [])
+    return (
+        data.get("family_scales"),
+        data.get("evolved_families", []),
+        data.get("wedge_definitions", []),
+        data.get("lexical_mask", False),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -236,14 +271,37 @@ def align_parallel(paper: list[Decl], agda: list[Decl], python: list[Decl],
                     python_docs: dict[str, str],
                     family_scales: dict[str, float] | None = None,
                     evolved_families: list[str] | None = None,
+                    wedge_definitions: list[dict] | None = None,
+                    lexical_mask: bool = False,
                     ) -> dict:
     """Parallel alignment pass."""
-    reg = ParallelRegistry()
+    reg = ParallelRegistry(lexical_mask=lexical_mask)
     all_decls = paper + agda + python
     reg.register_tokens(all_decls, top_n_by_idf=2000)
     reg.register_name_tokens(all_decls)
     reg.register_kinds_and_edges(all_decls)
     reg.register_citations(paper_rows)
+
+    # Re-materialize κ-evolved wedges.  Each wedge is registered by
+    # looking up its parent bits and calling register_wedge().  The
+    # parent families must already be registered above.
+    wedge_definitions = wedge_definitions or []
+    wedge_count = 0
+    for wd in wedge_definitions:
+        family_tag = wd["family"]
+        # Parse grade from family_tag "wedge_g{N}"
+        try:
+            grade = int(family_tag.split("_g")[-1])
+        except (ValueError, IndexError):
+            grade = 2
+        pa_fam, pa_key = wd["parent_a"]
+        pb_fam, pb_key = wd["parent_b"]
+        bid = reg.register_wedge(pa_fam, pa_key, pb_fam, pb_key,
+                                  weight=wd["weight"], grade=grade)
+        if bid is not None:
+            wedge_count += 1
+    if wedge_count:
+        print(f"# rehydrated {wedge_count} κ-evolved wedges", file=sys.stderr)
 
     # Register κ-evolved candidate families if calibration found any.
     active_extras: dict = {}
@@ -395,6 +453,13 @@ def _paper_doc(paper_rows: list[dict], qualname: str) -> str:
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__ or "")
+    parser.add_argument("--structural-only", action="store_true",
+                        help="Mask lexical families; rely on kind/edge/wedge only.")
+    args = parser.parse_args()
+    out_dir = "reports/structural" if args.structural_only else "reports"
+
     repo = Path.cwd()
     print("# loading decls from three sources ...", file=sys.stderr)
     paper, agda, python, *_ = load_all(repo)
@@ -405,27 +470,35 @@ def main():
     paper_rows = [json.loads(l) for l in (repo / "reports" / "paper_decls.jsonl").open()]
 
     print(f"# paper={len(paper)} agda={len(agda)} python={len(python)}", file=sys.stderr)
+    mode_label = "STRUCTURAL-ONLY" if args.structural_only else "LEXICAL"
+    print(f"# mode: {mode_label}  out_dir={out_dir}", file=sys.stderr)
 
-    family_scales, evolved_families = load_family_scales(repo)
+    family_scales, evolved_families, wedge_defs, calib_mask = load_family_scales(repo, out_dir)
+    # Respect the mask the calibration ran in; if the user asked for
+    # structural and calibration wasn't run with that, warn and force it.
+    effective_mask = args.structural_only or calib_mask
+    if args.structural_only and not calib_mask:
+        print(f"# warning: --structural-only requested but calibrated_weights.json at "
+              f"{out_dir} was built with lexical_mask=False.  Forcing structural "
+              f"semantics on alignment; may disagree with calibration.", file=sys.stderr)
+
     result = align_parallel(
         paper, agda, python, paper_rows, agda_docs, python_docs,
-        family_scales, evolved_families,
+        family_scales, evolved_families, wedge_defs, effective_mask,
     )
 
-    reports = repo / "reports"
-    reports.mkdir(exist_ok=True)
-    (reports / "triples.jsonl").write_text(
-        "\n".join(json.dumps(t, ensure_ascii=False) for t in result["triples"]) + "\n"
-        if result["triples"] else ""
-    )
-    (reports / "residues.jsonl").write_text(
-        "\n".join(json.dumps(r, ensure_ascii=False) for r in result["residues"]) + "\n"
-        if result["residues"] else ""
-    )
+    reports = repo / out_dir
+    reports.mkdir(parents=True, exist_ok=True)
+    # Always write the file (even empty) so downstream stages find it.
+    triples_txt = "\n".join(json.dumps(t, ensure_ascii=False) for t in result["triples"])
+    (reports / "triples.jsonl").write_text(triples_txt + ("\n" if triples_txt else ""))
+    residues_txt = "\n".join(json.dumps(r, ensure_ascii=False) for r in result["residues"])
+    (reports / "residues.jsonl").write_text(residues_txt + ("\n" if residues_txt else ""))
     (reports / "registry_summary.json").write_text(
         json.dumps({
             "size": result["registry_size"],
             "families": result["registry_families"],
+            "lexical_mask": effective_mask,
         }, indent=2)
     )
 

@@ -60,7 +60,10 @@ def _load(path: Path) -> list:
 
 def main():
     repo = Path.cwd()
-    reports = repo / "reports"
+    import os
+    out_dir = os.environ.get("OUT_DIR", "reports")
+    reports = repo / out_dir
+    reports.mkdir(parents=True, exist_ok=True)
 
     paper, agda, python, *_ = load_all(repo)
     triples = _load(reports / "triples.jsonl")

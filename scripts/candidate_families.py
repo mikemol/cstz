@@ -1,167 +1,53 @@
-"""Parameterized discriminator primitives for κ-evolution.
+"""Candidate discriminator primitives for κ-evolution.
 
-Per user feedback ("You're hardcoding stuff that you should allow the
-system to organically discover/derive/evolve"), this module exposes
-PARAMETERIZED primitives rather than hand-specified family variants.
-Each primitive takes a small integer parameter; the calibration loop
-tries each (primitive, parameter) combination and adopts the one that
-most reduces residue.
+Per user feedback ("Are we introducing new X as aliases of bundle
+permutations of existing-X?"), this module now exposes ONE structural
+primitive (``subtree_shape``) and a residue-driven wedge-candidate
+generator (``enumerate_wedge_candidates``) that builds grade-(k+1)
+discriminators from currently-active grade-k bits which co-fire on
+residue pairs.
 
-The three primitives cover the parse-tree features we can derive
-without picking conventions:
+Grade-k wedge = conjunction of k grade-1 discriminators.  The
+registry stores each wedge as its own bit with parents recorded;
+``fire_bitmap`` sets the wedge bit iff both parents' bits are set.
 
-    ngram_name(k)      k-gram sequence of adjacent normalized tokens
-                       in the decl's name.  k ∈ {2, 3, 4}.
-
-    substring_qualname(k)
-                       k-length character substrings of the full
-                       qualname.  k ∈ {3, 4, 5, 6, 7}.
-
-    subtree_shape(d)   ordered tuple of (kind, child_kinds) down to
-                       depth d in the decl's AST.  d ∈ {1, 2, 3}.
-
-The calibration loop in calibrate_weights.py iterates every
-(primitive, parameter) combination; each becomes a candidate family
-with a generated tag like ``ngram_name(k=3)``.  The system discovers
-which parameters and primitives actually help the oracle — no
-hand-picked "best k" for anything.
-
-Each primitive family's discriminators are corpus-derived: a unique
-discriminator is registered for every ngram / substring / shape
-observed at least twice in the corpus, with IDF-style weights.
+The enumerate_wedge_candidates function implements the paper's
+CD-doubling step (Thm 8.6) as data-driven feature construction:
+each plateau of the calibration residue triggers articulation of
+the next-higher wedge grade, selectively populated from bit-pairs
+that co-fire on the residue (the places where the current basis
+can't separate oracle-confirmed pairs from rivals).
 """
 
 from __future__ import annotations
 
 import hashlib
 import math
-import re
 import sys
 from collections import Counter
+from itertools import combinations
 from pathlib import Path
 from typing import Callable, Iterable
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from align_perspectives import normalize_name  # noqa: E402
-
 
 # ---------------------------------------------------------------------------
-# Primitive 1: n-gram of name tokens
-# ---------------------------------------------------------------------------
-
-
-def _name_tokens(name: str) -> list[str]:
-    """Split a name into normalized adjacent tokens, preserving order."""
-    raw = re.split(r"[^A-Za-z0-9]+", name)
-    parts: list[str] = []
-    for r in raw:
-        for t in sorted(normalize_name(r)):
-            parts.append(t)
-    return parts
-
-
-def _ngrams(seq: list[str], n: int) -> list[tuple[str, ...]]:
-    return [tuple(seq[i : i + n]) for i in range(len(seq) - n + 1)]
-
-
-def gen_ngram_name(k: int, all_decls, paper_rows):
-    """k-gram family: every k-gram of adjacent name tokens observed in ≥2 decls."""
-    counts: Counter = Counter()
-    for d in all_decls:
-        seen = set()
-        # Include both the last segment and the full name
-        name_parts: list[str] = []
-        if "." in d.name:
-            name_parts.extend(_name_tokens(d.name.split(".")[-1]))
-        name_parts.extend(_name_tokens(d.name))
-        for ng in _ngrams(name_parts, k):
-            if ng not in seen:
-                counts[ng] += 1
-                seen.add(ng)
-    n = len(all_decls)
-    max_df = max(int(0.15 * n), 2)
-    for ng, c in counts.items():
-        if c < 2 or c > max_df:
-            continue
-        key = "|".join(ng)
-        w = math.log(n / c) + 1.0
-        yield (key, w)
-
-
-def fires_ngram_name(k: int):
-    """Return a fire-check that tests for a specific k-gram in decl name."""
-    def _fires(decl, key: str, docstring: str = "") -> bool:
-        target = tuple(key.split("|"))
-        if len(target) != k:
-            return False
-        name_parts: list[str] = []
-        if "." in decl.name:
-            name_parts.extend(_name_tokens(decl.name.split(".")[-1]))
-        name_parts.extend(_name_tokens(decl.name))
-        for ng in _ngrams(name_parts, k):
-            if ng == target:
-                return True
-        return False
-    return _fires
-
-
-# ---------------------------------------------------------------------------
-# Primitive 2: character substring of qualname
-# ---------------------------------------------------------------------------
-
-
-def gen_substring_qualname(k: int, all_decls, paper_rows):
-    """k-length character substring family over qualnames."""
-    counts: Counter = Counter()
-    for d in all_decls:
-        s = d.qualname.lower()
-        seen = set()
-        for i in range(len(s) - k + 1):
-            sub = s[i : i + k]
-            # Skip if non-alphanumeric (punctuation-heavy substrings are noise)
-            if not sub.replace(":", "").replace(".", "").replace("-", "").replace("_", "").isalnum():
-                continue
-            if sub in seen:
-                continue
-            seen.add(sub)
-            counts[sub] += 1
-    n = len(all_decls)
-    max_df = max(int(0.12 * n), 2)
-    for sub, c in counts.items():
-        if c < 2 or c > max_df:
-            continue
-        w = math.log(n / c) + 1.0
-        yield (sub, w)
-
-
-def fires_substring_qualname(k: int):
-    def _fires(decl, key: str, docstring: str = "") -> bool:
-        return key in decl.qualname.lower()
-    return _fires
-
-
-# ---------------------------------------------------------------------------
-# Primitive 3: subtree topology hash at fixed depth
+# Structural primitive: subtree topology hash at fixed depth
 # ---------------------------------------------------------------------------
 
 
 def _topology_hash(decl, depth: int) -> str:
     """Compute a bounded-depth topology hash of a decl's child signature.
 
-    Depth 1 = (kind, sorted(child_kinds))
-    Depth 2+ would recurse into children, but we only have one level
-    of child_sig available on a Decl.  For depth > 1 we fall back to
-    concatenating kind + each edge.
+    Depth 1 = kind + sorted multiset of child kinds.
+    Depth 2+ approximates by appending the depth parameter to the
+    hash input (we only have one level of child_sig on a Decl).
     """
-    if not hasattr(decl, "child_sig"):
-        return decl.kind
     children = tuple(sorted(ck for _, ck in decl.child_sig))
     if depth <= 1:
         sig = f"{decl.kind}({','.join(children)})"
     else:
-        # For depth > 1 we can't recurse with only child_sig, so we
-        # approximate by concatenating kind, edge count, and children
         sig = f"{decl.kind}[d={depth}]({','.join(children)})"
     h = hashlib.blake2b(sig.encode("utf-8"), digest_size=6)
     return h.hexdigest()
@@ -188,18 +74,11 @@ def fires_subtree_shape(d: int):
 
 
 # ---------------------------------------------------------------------------
-# Primitive registry: (primitive_name, generator_factory, fire_factory, params)
+# Primitive registry: only structural survivor is subtree_shape
 # ---------------------------------------------------------------------------
-#
-# The calibration loop iterates every (primitive, parameter) pair:
-# it calls ``generator_factory(p)`` to get items for parameter p and
-# ``fire_factory(p)`` to get the fire-check.  Family tag on registration
-# is ``"{primitive}_p{p}"``.
 
 
 PRIMITIVES: dict[str, tuple[Callable, Callable, list[int]]] = {
-    "ngram_name": (gen_ngram_name, fires_ngram_name, [2, 3, 4]),
-    "substring_qualname": (gen_substring_qualname, fires_substring_qualname, [3, 4, 5, 6, 7]),
     "subtree_shape": (gen_subtree_shape, fires_subtree_shape, [1, 2]),
 }
 
@@ -207,11 +86,10 @@ PRIMITIVES: dict[str, tuple[Callable, Callable, list[int]]] = {
 def enumerate_candidate_families(
     all_decls: list, paper_rows: list[dict]
 ) -> Iterable[tuple[str, list[tuple[str, float]], Callable]]:
-    """Enumerate every (primitive, parameter) combination as a candidate
-    family.  Yields (family_tag, items, fire_check_callable) for each.
+    """Enumerate every (primitive, parameter) combination for subtree_shape.
 
-    The calibration loop tries each in turn, adopts the one with the
-    best residue reduction, and records the discovered parameter.
+    This is the non-wedge branch of candidate generation.  For the
+    wedge branch, see ``enumerate_wedge_candidates``.
     """
     for primitive_name, (gen_factory, fire_factory, params) in PRIMITIVES.items():
         for p in params:
@@ -221,3 +99,76 @@ def enumerate_candidate_families(
                 continue
             fire = fire_factory(p)
             yield (tag, items, fire)
+
+
+# ---------------------------------------------------------------------------
+# Wedge-candidate generator — residue-driven grade-k+1 bundle discovery
+# ---------------------------------------------------------------------------
+
+
+def _set_bits(bm: int) -> list[int]:
+    """Return the list of set bit positions in a Python int."""
+    out = []
+    x = bm
+    while x:
+        lsb = x & -x
+        out.append(lsb.bit_length() - 1)
+        x &= x - 1
+    return out
+
+
+def enumerate_wedge_candidates(
+    registry,
+    bitmaps: dict[str, int],
+    residue_pairs: list[tuple[str, str]],
+    *,
+    min_co_fire: int = 3,
+    max_candidates: int = 40,
+    grade: int = 2,
+) -> Iterable[tuple[str, tuple[int, int], float]]:
+    """Propose grade-(k+1) wedges of currently-active discriminators.
+
+    For every pair of bits (i, j) that BOTH fire on at least
+    ``min_co_fire`` residue pairs, yield a candidate wedge.  The
+    candidates are ranked by co-fire count (descending) and limited
+    to ``max_candidates``.
+
+    Each yielded entry is ``(family_tag, (parent_a_bid, parent_b_bid),
+    weight)``.  The calibration driver then calls
+    ``registry.register_wedge`` with the parent family+key strings
+    (looked up from bitmap ids) and re-scores.
+
+    ``residue_pairs`` is a list of (src_qn, target_qn) pairs from the
+    citation oracle where the aligner currently ranks ``target_qn``
+    worse than rank 1 — the places where the current basis can't
+    separate the oracle pair from its rivals.
+    """
+    co_fire: Counter = Counter()
+    n = len(residue_pairs)
+    if n == 0:
+        return
+    for (src_qn, tgt_qn) in residue_pairs:
+        bm_src = bitmaps.get(src_qn, 0)
+        bm_tgt = bitmaps.get(tgt_qn, 0)
+        firing = bm_src & bm_tgt
+        ids = _set_bits(firing)
+        # Skip if no or too many simultaneous firings (would generate
+        # combinatorial blowup without signal)
+        if len(ids) < 2 or len(ids) > 24:
+            continue
+        for i, j in combinations(ids, 2):
+            co_fire[(i, j)] += 1
+
+    # Yield top candidates
+    emitted = 0
+    for (i, j), count in co_fire.most_common():
+        if count < min_co_fire:
+            break
+        # Weight = log(N / co_fire_count) + 1  (rare co-firings are
+        # stronger signal; common ones are downweighted)
+        w = math.log(max(n, 1) / max(count, 1)) + 1.0
+        fam_tag = f"wedge_g{grade}"
+        yield (fam_tag, (i, j), w)
+        emitted += 1
+        if emitted >= max_candidates:
+            break
