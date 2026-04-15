@@ -337,19 +337,31 @@ claim count.
   \item[G7] \emph{Parameter-space enrichment for
     non-vectorized plans.} Discovered by the
     feedback-loop trace of Appendix
-    \ref{app:feedback-loop},
-    \S\ref{app-f:persistent-residue}: plan $\alpha$'s
-    measured cost has a component (Python interpreter
-    overhead) that no scalar update of MODEL-4's
-    existing parameters can close. The loop has
-    \emph{discovered} the need for a per-plan overhead
-    baseline $l_{\mathrm{interp}}$; adding it to the
-    \texttt{Params} dataclass and re-running the loop
-    is a small code change. \textbf{Open (structural
-    refinement discovered by iteration).}$^{d=1}$
+    \ref{app:feedback-loop}. $\alpha$'s residue
+    plateau at $+460\%$ triggered the script's
+    \texttt{suggest\_kappa\_evolution} routine, which
+    fit the residue against a candidate form library
+    and selected \verb|per_pair| with coefficient
+    $38.1$ cycles. \textbf{Witnessed by script; loop
+    closed from $+460\%$ to $-13\%$ in one iteration.}$^{d=1}$
+  \item[G8] \emph{Overdetermination residue and
+    orthogonalization.} Also discovered by the
+    feedback-loop trace: $\gamma$'s $\kappa$-evolution
+    (at iter 5) introduced
+    \verb|l_gamma_per_pair_per_M| correlated with
+    the existing $\oplus$-reduce compare term. The
+    correlated parameters over-close the residue at
+    some instances and under-close at others,
+    producing the four-cell $(1,1)$ signature.
+    [DAF]'s prescription for this profile is
+    orthogonalization or factoring of the
+    correlated axes; the script does not yet
+    implement it. \textbf{Open (overdetermination
+    signature observed; orthogonalization step
+    unimplemented).}$^{d=1}$
 \end{description}
 
-\emph{Meta-governance note.} Tracking these as G1--G7
+\emph{Meta-governance note.} Tracking these as G1--G8
 (with \gmark\ on the affected claims) rather than
 leaving them as implicit \cmark\ is the application of
 [DAF]'s verification framework to this paper. The

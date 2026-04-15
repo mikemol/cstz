@@ -188,42 +188,154 @@ structurally wrong (loop overhead not captured);
 $\gamma$'s atomic baselines are too conservative;
 $\beta$'s model is well-specified.
 
-\subsection{Iteration dynamics}\label{app-f:iterations}
+\subsection{Iteration dynamics with self-applied $\kappa$-evolution}
+\label{app-f:iterations}
 
-The script applies a simple monotone update rule:
-nudge $l_{\mathrm{dot}}$ by $\mathrm{step} \cdot
-\mathrm{mean\_relative\_residue}(\alpha)$ and
+The script applies two rules each iteration:
+\emph{scalar updates} to existing parameters (nudge
 $l_{\zeta\text{-pass}}$ by $\mathrm{step} \cdot
-\mathrm{mean\_relative\_residue}(\gamma)$ with step
-size $0.25$. Trace of the parameter updates:
+\mathrm{mean\_residue\_rel}(\gamma)$), and, when a
+plan's residue remains above threshold for three
+iterations, a \emph{$\kappa$-evolution}: fit the
+residue against a library of candidate functional
+forms and add the best-fitting form as a new
+parameter in the dynamic \texttt{extras} dict. The
+library includes
+\verb|per_pair|, \verb|per_pair_per_M|,
+\verb|per_element|, \verb|per_element_per_M|,
+\verb|constant|, \verb|per_2n|, \verb|per_pair_per_n|.
+The fit picks the form whose residue/form ratio has
+the smallest coefficient of variation across
+instances.
+
+Trace of eight iterations:
 
 \begin{center}
 \footnotesize
-\begin{tabular}{c|cc|c|ccc}
-iter & $l_{\mathrm{dot}}$ & $l_{\zeta\text{-pass}}$ & scale ($\mu$s/cycle) & $\mathrm{res}_{\mathrm{rel}}(\alpha)$\textsuperscript{(a)} & $\mathrm{res}_{\mathrm{rel}}(\gamma)$\textsuperscript{(a)} & winner \\
+\begin{tabular}{c|cc|l|c|ccc}
+iter & $l_{\zeta\text{-pass}}$ & \texttt{extras} & event & scale ($\mu$s/cyc) & $\mathrm{res}_{\mathrm{rel}}(\alpha)$\textsuperscript{(a)} & $\mathrm{res}_{\mathrm{rel}}(\gamma)$\textsuperscript{(a)} \\
 \hline
-0 & 2.000 & 1.000 & 0.274 & $+307\%$ & $-64\%$ & $\beta$ \\
-1 & 2.768 & 0.840 & 0.218 & $+268\%$ & $-54\%$ & $\beta$ \\
-2 & 3.437 & 0.704 & 0.211 & $+228\%$ & $-46\%$ & $\beta$ \\
+0 & 1.000 & $\emptyset$ & initial & 0.232 & $+358\%$ & $-53\%$ \\
+1 & 0.858 & $\emptyset$ & scalar $\gamma$ & 0.249 & $+365\%$ & $-50\%$ \\
+2 & 0.720 & $\emptyset$ & scalar $\gamma$ + $\alpha$ stuck $\to$ $\kappa$-evolve $\alpha$ & 0.228 & $+460\%$ & $-48\%$ \\
+3 & 0.735 & $\{l_{\alpha,\mathrm{per\_pair}}{=}38.1\}$ & post-$\alpha$-evolution & 0.229 & $-13\%$ & $-54\%$ \\
+4 & 0.614 & same & scalar $\gamma$ & 0.238 & $-12\%$ & $-55\%$ \\
+5 & 0.480 & same & $\gamma$ stuck $\to$ $\kappa$-evolve $\gamma$ & 0.241 & $-10\%$ & $-66\%$ \\
+6 & 0.491 & $\{l_{\alpha,\mathrm{per\_pair}}{=}38.1, l_{\gamma,\mathrm{per\_pair\_per\_M}}{=}{-}0.44\}$ & post-$\gamma$-evolution & 0.238 & $-15\%$ & $+15\%$ \\
+7 & 0.614 & same & scalar $\gamma$ & 0.240 & $-20\%$ & $+48\%$ \\
 \end{tabular}
 
 \footnotesize
 \textsuperscript{(a)} mean across three instances.
 \end{center}
 
-After three iterations, $\alpha$'s residue has
-improved from $+307\%$ to $+228\%$; $\gamma$'s from
-$-64\%$ to $-46\%$. Neither has reached zero, and the
-rate of approach is slowing --- consistent with the
-structural-mismatch diagnosis for $\alpha$ (Python
-interpreter overhead is not a scalar parameter) and a
-step-size choice too small for $\gamma$. The winner
-does not change; $\beta$ is Pareto-optimal throughout.
-The point of the trace is not that three iterations
-suffice to converge the profile; it is that the loop
-\emph{runs} and that each step's parameter update is
-computed from a real measurement rather than
-predicted.
+The trace splits into three phases.
+
+\paragraph{Phase A (iter 0--2): scalar calibration
+only.} $l_{\zeta\text{-pass}}$ converges monotonically
+from 1.0 toward a lower bound; $\gamma$'s residue
+shrinks slowly. $\alpha$'s residue is stuck above
+$+300\%$ for all three iterations. The stuck detector
+trips at iter 2.
+
+\paragraph{Phase B (iter 3--5): $\alpha$'s
+$\kappa$-evolution.} At iter 2 the script fits
+$\alpha$'s residue against the candidate library; the
+\verb|per_pair| form wins ($K(K-1)/2$) with a mean
+coefficient of $38.1$ cycles and very low
+cross-instance variance ($\approx 5\%$ CV). The
+script adds \verb|l_alpha_per_pair = 38.136| to
+\texttt{extras}. At iter 3, $\alpha$'s residue drops
+from $+460\%$ to $-13\%$ --- a \textbf{more than 30$\times$
+reduction} in a single iteration, from a single
+parameter articulation. $\alpha$ converges; $\gamma$'s
+residue enters its own stuck regime.
+
+\paragraph{Phase C (iter 6--7): $\gamma$'s
+$\kappa$-evolution and overdetermination.} At iter 5
+the script fits $\gamma$'s residue against the library;
+the \verb|per_pair_per_M| form wins with a \emph{negative}
+mean coefficient ($-0.437$ cycles). The sign is
+meaningful: $\gamma$'s existing prediction was
+\emph{overestimating}, and the new parameter subtracts
+from the predicted cost. After adding
+\verb|l_gamma_per_pair_per_M = -0.437|, $\gamma$'s
+residue at $(32,4,4)$ closes; but at $(8,3,3)$ it swings
+from $-54\%$ to $+40\%$ and at $(64,5,5)$ it over-closes
+by $+139\%$. The mean residue flips sign from $-66\%$
+at iter 5 to $+15\%$ at iter 6 to $+48\%$ at iter 7.
+
+\paragraph{The overdetermination signature.} The sign
+flip and the instance-dependent spread are the four-cell
+(1,1) signature in [DAF]'s vocabulary: both
+\verb|l_gamma_per_pair_per_M| and the existing
+\verb|K*K * max(1, M/w) * l_xor_reduce| compare term
+fire on the same measurement gap. The new parameter's
+scaling (per-pair-per-M) is linearly dependent on the
+existing compare term's scaling at these instance sizes,
+producing redundancy that over-compensates at some
+instances and under-compensates at others. The loop has
+encountered its first \emph{overdetermination residue}:
+a residue whose closure by a single new discriminator
+produces new residues at other instances. [DAF]'s
+prescription for this four-cell profile is
+orthogonalization or factoring (\S8.2 of [DAF]); our
+script does not yet implement that step, but the
+residue signature has been produced and is visible in
+the trace.
+
+\subsection{What the self-extending loop witnesses}
+\label{app-f:self-ext-witness}
+
+The extended trace witnesses three things the earlier
+fixed-parameter version could not:
+
+\begin{itemize}[nosep]
+  \item \textbf{The loop produces its own
+    $\kappa$-evolutions.} The script detects stuck
+    residues and selects a new parameter from a
+    candidate library by cross-instance fit quality.
+    Neither the fact that a new parameter is needed
+    nor its functional form is hardcoded; both are
+    outputs of the measurement process.
+
+  \item \textbf{$\kappa$-evolution can close residues
+    by orders of magnitude in a single iteration.}
+    $\alpha$'s residue dropped from $+460\%$ to
+    $-13\%$ at iter 3 --- a $33\times$ reduction. This
+    is qualitatively different from scalar updates,
+    which reduce residues by single-digit percentages
+    per iteration. $\kappa$-evolution is the
+    loop's high-leverage move; scalar updates are its
+    low-leverage move; the two are algorithmically
+    distinguishable by whether the current parameter
+    space suffices.
+
+  \item \textbf{Overdetermination residues appear
+    empirically.} $\gamma$'s $\kappa$-evolution
+    produces a parameter correlated with an existing
+    term, causing instance-dependent over- and
+    under-closure. This is the four-cell $(1,1)$
+    signature predicted by [DAF]'s algebraic
+    machinery, observed in the script's output. The
+    next $\kappa$-evolution step --- orthogonalization
+    of the correlated parameters --- is a named item
+    (G8, below) recommended by the trace itself.
+\end{itemize}
+
+The signature of the loop's recursive structure is
+therefore visible in a single run. The loop produces
+(1) scalar-correctable residues that close under
+parameter updates (Phase A, $\gamma$'s behavior before
+iter 5); (2) structural residues whose closure
+requires new parameters ($\alpha$'s residue at Phase B);
+(3) overdetermination residues whose closure requires
+re-factoring the parameter space ($\gamma$'s residue at
+Phase C). Each of these is an instance of DAF's
+residue-consumption dynamic at a different four-cell
+profile, and the script distinguishes them by the
+shape of the measurement signal rather than by author
+specification.
 
 \subsection{What the trace witnesses}
 \label{app-f:witnesses}
@@ -320,12 +432,15 @@ The specific structural finding: $\alpha$'s measured cost
 has a component that scales with the number of Python
 interpreter steps, not with the number of $\GF(2)$
 operations. MODEL-4 lacks a parameter for this dimension.
-The remedy is a $\kappa$-evolution on the parameter space:
-introduce a per-plan ``interpreter overhead'' baseline
-$l_{\mathrm{interp}}$ whose contribution is proportional
-to the plan's atomic-operation count \emph{when the plan
-is not vectorized}. Re-running the loop with this richer
-parameter space would drive $\alpha$'s residue to zero.
+The remedy is a $\kappa$-evolution on the parameter space.
+The script (\S\ref{app-f:iterations} Phase B) does this
+automatically: at iteration 2, \verb|detect_stuck| flags
+$\alpha$'s residue; \verb|suggest_kappa_evolution| fits
+the candidate form library; \verb|per_pair| wins with
+coefficient $38.1$ cycles; the script adds
+\verb|l_alpha_per_pair| to the \texttt{extras} dict and
+re-runs. At iteration 3, $\alpha$'s residue has dropped
+from $+460\%$ to $-13\%$.
 
 This is a claim the paper could not make without
 running the loop. Before the trace, the narrative of

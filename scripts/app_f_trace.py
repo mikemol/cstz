@@ -1,28 +1,33 @@
 #!/usr/bin/env python3
-"""Appendix F feedback-loop trace: measure, compute residues, update.
+"""Appendix F feedback-loop trace with self-applied kappa-evolution.
 
 Three candidate plans for kappa_equiv_batched(pop, regime):
 
-    alpha: naive pairwise — for each pair (i,j), compare fingerprints.
-    beta : dot-batched fingerprint matrix, pairwise XOR compare.
-    gamma: packed-bitmask (AND + popcount) fingerprint, pairwise XOR compare.
+    alpha: naive pairwise (Python loop over pairs).
+    beta : dot-batched fingerprint matrix (numpy @ + XOR).
+    gamma: packed-bitmask fingerprint (AND + popcount).
 
-MODEL-4 predicts LAT in symbolic cycles. We measure wall-clock in
-microseconds, fit a single cycle-to-microsecond scaling factor to the
-Pareto-winning plan, then observe the residues on the other plans.
-Residues that exceed a noise threshold trigger parameter updates: the
-offending atom's per-element baseline is adjusted by the regression
-coefficient of its instance count against the residue.
+Each iteration:
+  - measure every plan on every instance;
+  - fit cycle->microsecond scaling to plan beta (pivot);
+  - compute residues on the other plans;
+  - update scalar parameters toward zero residue.
 
-Output is written to stdout as a structured log. The paper's App F
-cites specific lines from this log as witness.
+When a plan's residue plateaus (three iterations with <20% improvement
+in absolute relative residue), the script runs a *kappa-evolution*:
+it fits the remaining residue against a library of candidate
+functional forms and adds the best-fitting form as a new parameter
+in the dynamic `extras` dict. Subsequent iterations use the extended
+parameter space.
+
+This is the framework's residue-consumption dynamic applied to its
+own cost model, executed by the script rather than the author.
 """
 
 from __future__ import annotations
 
 import json
 import statistics
-import sys
 import time
 from dataclasses import asdict, dataclass, field, replace
 from typing import Callable
@@ -31,57 +36,81 @@ import numpy as np
 
 
 # ---------------------------------------------------------------------------
-# MODEL-4 parameters and per-atom baselines
+# Parameter container (static fields + dynamic extras)
 # ---------------------------------------------------------------------------
 
 
 @dataclass
 class Params:
     """Platform parameters; all in symbolic 'cycles' units."""
-    w: int = 8                  # warp width
-    gamma_launch: int = 4       # kernel launch overhead
-    l_dot: float = 2.0          # dot-product per element per discriminator
-    l_xor_reduce: float = 1.0   # XOR reduction per element
-    l_zeta_pass: float = 1.0    # butterfly pass per byte
-    l_syndrome: float = 1.0     # per-byte syndrome accumulation
+    w: int = 8
+    gamma_launch: int = 4
+    l_dot: float = 2.0
+    l_xor_reduce: float = 1.0
+    l_zeta_pass: float = 1.0
+    l_syndrome: float = 1.0
+    # Dynamically-discovered parameters: name -> (plan_name, form_name, value)
+    # Each form_name maps to a callable in CANDIDATE_FORMS below.
+    extras: dict = field(default_factory=dict)
+
+
+# Library of candidate functional forms for kappa-evolution.
+# A new parameter's cost contribution is: value * form(K, n, M).
+CANDIDATE_FORMS: dict[str, Callable[[int, int, int], int]] = {
+    "per_pair":         lambda K, n, M: K * (K - 1) // 2,
+    "per_pair_per_M":   lambda K, n, M: K * (K - 1) // 2 * M,
+    "per_element":      lambda K, n, M: K,
+    "per_element_per_M": lambda K, n, M: K * M,
+    "constant":         lambda K, n, M: 1,
+    "per_2n":           lambda K, n, M: 1 << n,
+    "per_pair_per_n":   lambda K, n, M: K * (K - 1) // 2 * n,
+}
+
+
+def extras_contribution(params: Params, plan: str, K: int, n: int, M: int) -> float:
+    """Sum the contribution of all extras applicable to this plan."""
+    total = 0.0
+    for name, (tag, form_name, value) in params.extras.items():
+        if tag == plan:
+            total += value * CANDIDATE_FORMS[form_name](K, n, M)
+    return total
 
 
 # ---------------------------------------------------------------------------
-# Cost predictors (MODEL-4)
+# Cost predictors (MODEL-4 + extras)
 # ---------------------------------------------------------------------------
 
 
 def pred_alpha(p: Params, K: int, n: int, M: int) -> float:
-    """Naive pairwise: K*(K-1)/2 pairs, each M dot products + 1 reduce."""
     pairs = K * (K - 1) // 2
-    return p.gamma_launch + pairs * (M * p.l_dot + p.l_xor_reduce)
+    base = p.gamma_launch + pairs * (M * p.l_dot + p.l_xor_reduce)
+    return base + extras_contribution(p, "alpha", K, n, M)
 
 
 def pred_beta(p: Params, K: int, n: int, M: int) -> float:
-    """Dot-batched: M rounds of K-wide dot, then K^2 pairwise XOR-compare."""
     warp_passes_dot = M * max(1, K // p.w)
     warp_passes_cmp = (K * K) * max(1, M // p.w) // p.w
-    return p.gamma_launch + warp_passes_dot * p.l_dot + warp_passes_cmp * p.l_xor_reduce
+    base = p.gamma_launch + warp_passes_dot * p.l_dot + warp_passes_cmp * p.l_xor_reduce
+    return base + extras_contribution(p, "beta", K, n, M)
 
 
 def pred_gamma(p: Params, K: int, n: int, M: int) -> float:
-    """Packed-bitmask: K+M packs, K*M (AND + popcount), K^2 compare."""
-    pack = K + M  # one packed int per population/regime element
-    fp_compute = K * M * (p.l_zeta_pass + p.l_syndrome)  # AND + popcount per pair
+    pack = K + M
+    fp_compute = K * M * (p.l_zeta_pass + p.l_syndrome)
     compare = (K * K) * max(1, M // p.w) * p.l_xor_reduce
-    return p.gamma_launch + pack + fp_compute + compare
+    base = p.gamma_launch + pack + fp_compute + compare
+    return base + extras_contribution(p, "gamma", K, n, M)
 
 
 PREDICTORS = {"alpha": pred_alpha, "beta": pred_beta, "gamma": pred_gamma}
 
 
 # ---------------------------------------------------------------------------
-# Plan implementations (runnable reference code)
+# Plan implementations (runnable reference code; unchanged from v1)
 # ---------------------------------------------------------------------------
 
 
 def run_alpha(pop: np.ndarray, regime: np.ndarray) -> np.ndarray:
-    """Naive pairwise."""
     K = pop.shape[0]
     M = regime.shape[0]
     E = np.zeros((K, K), dtype=np.uint8)
@@ -101,27 +130,23 @@ def run_alpha(pop: np.ndarray, regime: np.ndarray) -> np.ndarray:
 
 
 def run_beta(pop: np.ndarray, regime: np.ndarray) -> np.ndarray:
-    """Dot-batched fingerprint matrix, pairwise XOR compare."""
-    V = (pop.astype(np.int64) @ regime.T.astype(np.int64)) & 1  # (K, M)
+    V = (pop.astype(np.int64) @ regime.T.astype(np.int64)) & 1
     diff = V[:, None, :] ^ V[None, :, :]
     E = (diff.sum(axis=2) == 0).astype(np.uint8)
     return E
 
 
 def run_gamma(pop: np.ndarray, regime: np.ndarray) -> np.ndarray:
-    """Packed-bitmask fingerprint via AND + popcount-mod-2, then compare."""
     K, n = pop.shape
     M = regime.shape[0]
-    assert n <= 64, "packed bitmask needs n <= 64"
-    # Pack each element to a single uint64 bitmask.
+    assert n <= 64
     pop_packed = np.zeros(K, dtype=np.uint64)
     for b in range(n):
         pop_packed |= pop[:, b].astype(np.uint64) << np.uint64(b)
     reg_packed = np.zeros(M, dtype=np.uint64)
     for b in range(n):
         reg_packed |= regime[:, b].astype(np.uint64) << np.uint64(b)
-    # Fingerprint: V[i, m] = popcount(pop[i] & regime[m]) & 1
-    anded = pop_packed[:, None] & reg_packed[None, :]  # (K, M)
+    anded = pop_packed[:, None] & reg_packed[None, :]
     V = (np.bitwise_count(anded) & np.uint64(1)).astype(np.uint8)
     diff = V[:, None, :] ^ V[None, :, :]
     E = (diff.sum(axis=2) == 0).astype(np.uint8)
@@ -141,9 +166,7 @@ RUNNERS: dict[str, Callable[[np.ndarray, np.ndarray], np.ndarray]] = {
 
 
 def bench(fn, pop, regime, runs: int = 7) -> float:
-    """Return median wall-clock time in microseconds."""
-    # Warm-up
-    fn(pop, regime)
+    fn(pop, regime)  # warm-up
     times = []
     for _ in range(runs):
         t0 = time.perf_counter()
@@ -154,7 +177,6 @@ def bench(fn, pop, regime, runs: int = 7) -> float:
 
 
 def verify_consistency(pop: np.ndarray, regime: np.ndarray) -> None:
-    """All three plans must produce the same equivalence matrix."""
     Ea = run_alpha(pop, regime)
     Eb = run_beta(pop, regime)
     Eg = run_gamma(pop, regime)
@@ -163,20 +185,17 @@ def verify_consistency(pop: np.ndarray, regime: np.ndarray) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Residue computation and parameter update
+# Residue computation
 # ---------------------------------------------------------------------------
 
 
-def compute_residues(params: Params, instances, pivot: str = "beta"):
-    """Fit cycle->microsecond scaling on `pivot` plan; residues elsewhere."""
+def compute_residues(params: Params, instance_measurements, pivot: str = "beta"):
+    """Fit cycle->microsecond scaling on pivot; residues on all plans."""
     rows = []
-    # Collect all instances' measurements
-    for K, n, M, meas in instances:
+    for K, n, M, meas in instance_measurements:
         preds = {name: PREDICTORS[name](params, K, n, M) for name in PREDICTORS}
         rows.append({"K": K, "n": n, "M": M, "meas": meas, "preds": preds})
 
-    # Fit global cycle scale on the pivot plan across all instances
-    # scale = median(meas[pivot] / pred[pivot])
     ratios = [r["meas"][pivot] / r["preds"][pivot] for r in rows if r["preds"][pivot] > 0]
     scale = statistics.median(ratios)
 
@@ -192,13 +211,68 @@ def compute_residues(params: Params, instances, pivot: str = "beta"):
     return rows, scale
 
 
-def update_params(params: Params, rows) -> Params:
-    """Adjust per-atom baselines by the sign of each plan's relative residue.
+# ---------------------------------------------------------------------------
+# Plateau detection and kappa-evolution
+# ---------------------------------------------------------------------------
 
-    Rule: if plan X's residue averages positive, its dominant atom's
-    baseline is incremented; if negative, decremented. Simple, monotonic,
-    bounded — intended as a demonstration of convergence, not a real fitter.
+
+def detect_stuck(history: list[float], min_iters: int = 3, threshold: float = 0.50) -> bool:
+    """True if |residue| has stayed above threshold for min_iters iterations.
+
+    This is the 'residue refuses to close' signature: scalar parameter
+    updates have been applied for min_iters iterations yet the residue
+    magnitude remains > threshold. In [DAF] four-cell terms, this
+    signals that the current kappa cannot consume the residue; a new
+    discriminator must be articulated.
     """
+    if len(history) < min_iters:
+        return False
+    return all(abs(r) > threshold for r in history[-min_iters:])
+
+
+def suggest_kappa_evolution(plan: str, scale_us_per_cycle: float, rows) -> tuple[str, str, float] | None:
+    """Fit plan's residue against each candidate form; pick best fit.
+
+    Returns (extra_name, form_name, value_in_cycles) or None if no
+    candidate form has consistent ratios across instances.
+    """
+    best = None
+    best_cv = float("inf")
+    for form_name, form in CANDIDATE_FORMS.items():
+        vals = []
+        for r in rows:
+            K, n, M = r["K"], r["n"], r["M"]
+            form_val = form(K, n, M)
+            if form_val == 0:
+                break
+            # residue in *cycles* (divide by scale_us_per_cycle)
+            residue_cycles = r["residue_us"][plan] / scale_us_per_cycle
+            vals.append(residue_cycles / form_val)
+        else:
+            if not vals:
+                continue
+            mean_val = statistics.mean(vals)
+            if mean_val == 0:
+                continue  # form doesn't explain the residue
+            if len(vals) > 1:
+                stdev_val = statistics.stdev(vals)
+                cv = stdev_val / abs(mean_val)  # coefficient of variation
+            else:
+                cv = 0.0
+            # Negative mean is fine: corresponds to an over-prediction and
+            # a negative-valued extra (i.e., subtract this term from pred).
+            if cv < best_cv:
+                best_cv = cv
+                best = (form_name, mean_val, cv)
+    if best is None or best_cv > 0.5:
+        return None
+    form_name, value, cv = best
+    extra_name = f"l_{plan}_{form_name}"
+    return (extra_name, form_name, value)
+
+
+def update_params(params: Params, rows, plateau_history: dict[str, list[float]]) -> Params:
+    """Scalar updates to existing params; kappa-evolution on plateau."""
     def mean_res(name):
         vals = [r["residue_rel"][name] for r in rows]
         return statistics.mean(vals) if vals else 0.0
@@ -207,14 +281,38 @@ def update_params(params: Params, rows) -> Params:
     rb = mean_res("beta")
     rg = mean_res("gamma")
 
-    # Per-plan dominant atom to tune:
-    #   alpha tunes l_dot (dominant inside nested loops)
-    #   gamma tunes l_zeta_pass (dominant in encode phase)
-    delta = 0.25  # small step; ensures monotone updates
+    plateau_history.setdefault("alpha", []).append(ra)
+    plateau_history.setdefault("gamma", []).append(rg)
 
-    l_dot_new = max(0.25, params.l_dot + delta * ra)
+    new_extras = dict(params.extras)
+    kappa_evolved = False
+
+    # Stuck-residue check + kappa-evolution on alpha and gamma
+    for plan in ("alpha", "gamma"):
+        plan_res = ra if plan == "alpha" else rg
+        if detect_stuck(plateau_history[plan], min_iters=3, threshold=0.30):
+            scale = rows[0]["scale"]
+            suggestion = suggest_kappa_evolution(plan, scale, rows)
+            if suggestion:
+                extra_name, form_name, value = suggestion
+                existing_forms = {e[1] for e in params.extras.values() if e[0] == plan}
+                if form_name not in existing_forms:
+                    print(f"  [kappa-evolution] {plan} residue stuck at {plan_res:+.1%} "
+                          f"for >=3 iters; adding extra {extra_name!r} = "
+                          f"{value:.3f} cycles per {form_name}")
+                    new_extras[extra_name] = (plan, form_name, value)
+                    plateau_history[plan].clear()
+                    kappa_evolved = True
+
+    # Scalar update on gamma (l_zeta_pass)
+    delta = 0.25
     l_zeta_new = max(0.25, params.l_zeta_pass + delta * rg)
-    return replace(params, l_dot=round(l_dot_new, 3), l_zeta_pass=round(l_zeta_new, 3))
+
+    # Leave l_dot mostly static — it co-varies with l_interp in alpha's prediction,
+    # leading to overdetermination if both are updated from alpha's residue.
+
+    updated = replace(params, l_zeta_pass=round(l_zeta_new, 3), extras=new_extras)
+    return updated, kappa_evolved
 
 
 # ---------------------------------------------------------------------------
@@ -222,23 +320,21 @@ def update_params(params: Params, rows) -> Params:
 # ---------------------------------------------------------------------------
 
 
-def feedback_loop(instances_spec, iterations: int = 3):
+def feedback_loop(instances_spec, max_iterations: int = 8):
     np.random.seed(42)
-
-    # Materialize populations and regimes once.
     materialized = []
     for K, n, M in instances_spec:
         pop = np.random.randint(0, 2, (K, n), dtype=np.uint8)
         regime = np.random.randint(0, 2, (M, n), dtype=np.uint8)
-        # sanity-check consistency
         verify_consistency(pop, regime)
         materialized.append((K, n, M, pop, regime))
 
     params = Params()
-
+    plateau_history = {}
     log = []
-    for it in range(iterations):
-        # Measure every instance under current params
+
+    for it in range(max_iterations):
+        # Measure every instance
         instance_measurements = []
         for K, n, M, pop, regime in materialized:
             meas = {name: bench(RUNNERS[name], pop, regime) for name in RUNNERS}
@@ -246,17 +342,9 @@ def feedback_loop(instances_spec, iterations: int = 3):
 
         rows, scale = compute_residues(params, instance_measurements)
 
-        log.append({
-            "iteration": it,
-            "params": asdict(params),
-            "cycle_us": scale,
-            "rows": rows,
-        })
-
-        # Report
         print(f"\n===== ITERATION {it} =====")
         print(f"params: l_dot={params.l_dot}, l_zeta_pass={params.l_zeta_pass}, "
-              f"gamma_launch={params.gamma_launch}")
+              f"extras={list(params.extras.keys())}")
         print(f"cycle scaling (fit to beta): 1 cycle = {scale:.6f} us")
         print(f"{'(K,n,M)':<12} {'plan':<6} "
               f"{'pred(c)':>10} {'pred(us)':>10} {'meas(us)':>10} "
@@ -269,20 +357,26 @@ def feedback_loop(instances_spec, iterations: int = 3):
                       f"{r['meas'][name]:>10.3f} {r['residue_us'][name]:>+10.3f} "
                       f"{r['residue_rel'][name]:>+9.1%}")
 
-        # Winner reporting
-        for r in rows:
-            tag = f"({r['K']},{r['n']},{r['M']})"
-            pred_winner = min(r["preds"], key=r["preds"].get)
-            meas_winner = min(r["meas"], key=r["meas"].get)
-            agree = "OK" if pred_winner == meas_winner else "MISMATCH"
-            print(f"  {tag:<12} predicted-winner={pred_winner:<6} "
-                  f"measured-winner={meas_winner:<6} [{agree}]")
+        log.append({
+            "iteration": it,
+            "params": {
+                **{k: v for k, v in asdict(params).items() if k != "extras"},
+                "extras": params.extras,
+            },
+            "cycle_us": scale,
+            "rows": rows,
+        })
 
-        # Decide whether to iterate
-        if it < iterations - 1:
-            new_params = update_params(params, rows)
-            if new_params == params:
-                print(f"\n(params stable at iteration {it}; terminating early)")
+        if it < max_iterations - 1:
+            new_params, kappa_evolved = update_params(params, rows, plateau_history)
+            # Convergence check: both plans within ±10%
+            ra = statistics.mean(r["residue_rel"]["alpha"] for r in rows)
+            rg = statistics.mean(r["residue_rel"]["gamma"] for r in rows)
+            if abs(ra) < 0.10 and abs(rg) < 0.10:
+                print(f"\n(both alpha and gamma residues within ±10%; converged at iter {it})")
+                break
+            if new_params == params and not kappa_evolved:
+                print(f"\n(params stable at iteration {it}; nothing more to try)")
                 break
             params = new_params
 
@@ -295,19 +389,20 @@ def feedback_loop(instances_spec, iterations: int = 3):
 
 
 def main():
-    # Three workload instances scaled for CPU-numpy execution.
-    # Real GPU MODEL-4 would use K=256, n=8, M=8; we downshift so naive
-    # plan-alpha completes in seconds, not hours.
     instances = [
         (8, 3, 3),
         (32, 4, 4),
         (64, 5, 5),
     ]
-    log = feedback_loop(instances, iterations=3)
+    log = feedback_loop(instances, max_iterations=8)
 
-    # Emit JSON blob for embedding in the paper
     print("\n===== TRACE JSON =====")
-    print(json.dumps(log, indent=2, default=float))
+    # Custom default to handle frozen tuples in extras
+    def default(o):
+        if isinstance(o, tuple):
+            return list(o)
+        return float(o)
+    print(json.dumps(log, indent=2, default=default))
 
 
 if __name__ == "__main__":
