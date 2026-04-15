@@ -198,20 +198,22 @@ Grammar soundness (\ref{thm:soundness}) & \textsf{A} & \cmark &
   Induction on derivations \\
 Cost-bounded Earley completeness (\ref{thm:earley-complete}) & \textsf{AH} & \cmark &
   Admissible heuristic; App.\ \ref{app:b} \\
-Planner complexity (\ref{thm:complexity}) & \textsf{AH} & \cmark &
-  $O(N^3 \cdot |\mathrm{Pareto}|)$; std. Earley \\
+Planner complexity (\ref{thm:complexity}) & \textsf{AH} & \gmark &
+  $O(N^3 \cdot |\mathrm{Pareto}|)$; |Pareto| unbounded WC (G3) \\
 Lagrangian achievability (\ref{thm:lagrangian}) & \textsf{AH} & \omark &
-  LP relaxation; integrality gap bounded \\
+  LP relaxation; integrality gap bounded (X3) \\
 Pareto portfolio extraction (\ref{prop:pareto}) & \textsf{AH} & \cmark &
   Dominance check on chart \\
-Parse-packing soundness (\ref{thm:parse-packing}) & \textsf{AHO}$_{\mathrm{exec}}$ & \cmark &
-  Mask disjointness + \textsf{O}$_{\mathrm{exec}}$ \\
+Parse-packing soundness (\ref{thm:parse-packing}) & \textsf{AHO}$_{\mathrm{exec}}$ & \gmark &
+  Atom-seq.\ equiv.\ (Def \ref{def:atom-equiv}) semantically underdet.\ (G4) \\
 Plan-equivalence transitivity (\ref{prop:plan-trans}) & \textsf{AO}$_{\mathrm{exec}}$ & \cmark &
   Direct from Definition \ref{def:exec-operationalist} \\
-Register-time-space bound (\ref{thm:reg-bound}) & \textsf{AH} & \cmark &
-  Interval graph; App.\ \ref{app:b} \\
+Register-time-space bound (\ref{thm:reg-bound}) & \textsf{AH} & \gmark &
+  Strip-packing; rectangular-plan abstraction unverified (G5) \\
 Incremental replanning (\ref{prop:incremental}) & \textsf{AH} & \cmark &
   Earley chart locality \\
+Heuristic monotonicity (\ref{prop:heuristic-monotone}) & \textsf{AH} & \gmark &
+  Admissible but near-trivial; effective pruning unmeasured (G6) \\
 \end{tabular}
 \end{center}
 
@@ -244,37 +246,95 @@ Incremental replanning (\ref{prop:incremental}) & \textsf{AH} & \cmark &
     dimension). Dynamic $n$ is expressible as a
     family of plans indexed by $n$, but the family's
     joint optimization is outside this paper's scope.
+  \item[X5] \emph{Proof gap vs.\ implementation gap.}
+    [DAF]'s verification framework classifies gaps
+    into ``proof gap'' (need to complete an argument)
+    and ``open-acknowledged'' (choice not to prove).
+    This paper introduces a third category:
+    \emph{implementation gap} (need to build and
+    measure). Items G1 and G2 of the gap priorities
+    are implementation gaps, not proof gaps. We rely
+    on [DAF]'s meta-governance to make the
+    distinction visible: the \gmark\ mark on \textsf{H}-class
+    claims does not mean the \emph{proof} is incomplete
+    --- it means the \emph{witnessing measurement}
+    does not exist yet.
 \end{description}
 
 \medskip
 \noindent\textbf{Gap priorities} (from downstream
-impact on the DAF→planner→kernel pipeline).
+impact on the DAF$\to$planner$\to$kernel pipeline).
+Numbered G1--G6 in the [DAF] convention; $^d$ = downstream
+claim count.
 
 \emph{Tier 1 --- load-bearing}
 (closing these unblocks the most downstream results):
 
 \begin{description}[nosep,leftmargin=0.8cm]
-  \item[S1] Calibration profile for a reference GPU
-    (A100 or H100). \textbf{Open.} Unblocks all
-    \textsf{H}-class claims with concrete numerics.
-  \item[S2] Implementation of the Earley chart parser
+  \item[G1] \emph{Calibration profile for a reference GPU}
+    (A100 or H100). \textbf{Open (implementation).}$^{d=14}$
+    Unblocks all \textsf{H}-class claims with concrete
+    numerics; downgrades every \textsf{H}-class \gmark\
+    except G3 to \cmark\ once a profile is fit.
+  \item[G2] \emph{Earley chart parser implementation}
     against the atom inventory of Section \ref{sec:grammar}.
-    \textbf{Open.} Unblocks integration with the
-    existing Pallas kernel layer.
+    \textbf{Open (implementation).}$^{d=11}$
+    Unblocks integration with the existing Pallas kernel
+    layer. A reference implementation would also close
+    G4 and G5 by direct measurement.
+  \item[G3] \emph{Pareto-frontier size characterization.}
+    The factor $|\mathrm{Pareto}|$ in Theorem
+    \ref{thm:complexity} is worst-case exponential in
+    the number of resource dimensions. Empirical
+    bounds on realistic workloads are needed to
+    promote \ref{thm:complexity} from \gmark\ to
+    \cmark. \textbf{Open (measurement).}$^{d=3}$
 \end{description}
 
 \emph{Tier 2 --- structural}:
 
 \begin{description}[nosep,leftmargin=0.8cm]
-  \item[S3] Grammar well-formedness check (no
-    left-recursion on non-linear atoms; admissible
-    heuristic is monotone). \textbf{Partial.}
-    Sufficient conditions stated; grammar-level
-    decidability deferred.
-  \item[S4] Property-based equivalence test against
-    a naive reference implementation.
-    \textbf{Outlined; not executed.}
+  \item[G4] \emph{Atom-sequence equivalence decidability.}
+    Definition \ref{def:atom-equiv} is syntactic; the
+    soundness of Theorem \ref{thm:parse-packing} relies
+    on a reading of equivalence that treats encoding
+    tags and mask indices as non-semantic. A precise
+    algorithmic characterization of when two plans
+    share an instruction stream is needed.
+    \textbf{Partial (definitional).}$^{d=2}$
+  \item[G5] \emph{Rectangular-plan abstraction.}
+    Theorem \ref{thm:reg-bound} models each plan as a
+    rectangle in the register-time grid. Plans with
+    variable-width phases (e.g.\ a fused prefix
+    followed by a time-shared suffix) do not fit this
+    abstraction cleanly. A tighter bound for stepped
+    profiles is open.
+    \textbf{Open (analysis).}$^{d=1}$
+  \item[G6] \emph{Heuristic effectiveness.}
+    Proposition \ref{prop:heuristic-monotone} proves
+    $h^*$ admissible, but $h^*$ is essentially a
+    constant lower bound (per-atom minimum across
+    remaining workload). Effective pruning requires a
+    tighter heuristic. Measurement of pruning rate on
+    realistic workloads --- and replacement of $h^*$
+    with a better heuristic if needed --- is open.
+    \textbf{Open (measurement).}$^{d=2}$
 \end{description}
+
+\emph{Meta-governance note.} Tracking these as G1--G6
+(with \gmark\ on the affected claims) rather than
+leaving them as implicit \cmark\ is the application of
+[DAF]'s verification framework to this paper. The
+framework is self-regulating: a claim whose
+\emph{warrant} is load-bearing cost-model arithmetic
+but whose \emph{backing} is an uncalibrated profile is
+exactly what \gmark\ is designed to record. A reader who
+feels uncomfortable about the rigor differential
+between [DAF] (whose \textsf{A}-class claims are backed
+by mechanized Agda) and this paper (whose \textsf{H}-class
+claims are backed by ``a suitable profile''
+would be correct; the framework's response to that
+discomfort is this subsection, not a hidden footnote.
 
 \subsection{What changes from [DAF]}
 

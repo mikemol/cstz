@@ -210,6 +210,103 @@ the execution-level manifestation of the same
 principle that licenses [DAF]'s sheafification to
 treat $\kappa$-equivalence as identity.
 
+\subsection{Governance as parity check}
+
+The verification map (Section \ref{sec:reading-guide})
+is not an editorial nicety: it is [DAF]'s XOR
+signature $\chi = \tau \oplus \sigma$ applied to the
+paper itself. Each claim is probed by two
+independent discriminators --- \textsf{proven} and
+\textsf{witnessed} --- whose XOR gives the claim's
+status:
+\begin{center}
+\begin{tabular}{c|c|c}
+\textsf{proven} & \textsf{witnessed} & mark \\
+\hline
+1 & 1 & \cmark\ (``verified'': argument complete AND
+    witness exists) \\
+1 & 0 & \gmark\ (``gap'': argument complete, specific
+    witness missing) \\
+0 & 1 & --- (inadmissible: a witnessed but
+    unproven claim is not a claim) \\
+0 & 0 & \omark\ (``open'': framework declines to
+    prove, not a defect)
+\end{tabular}
+\end{center}
+
+The \gmark\ mark is exactly the four-cell structure's
+\emph{residue}: a signature with $\chi = 0$ that
+signals a discrimination is available but not yet
+performed. [DAF]'s residue analysis prescribes what to
+do with such signatures: treat the residue as a
+discriminator-articulation request and $\kappa$-evolve
+the regime to resolve it.
+
+Applying this to the paper: each \gmark\ in the
+verification map is paired with a named gap item
+(G1--G6) that specifies \emph{exactly} which
+$\kappa$-evolution would convert the residue to a
+\cmark. The framework is not just self-diagnostic;
+it is \emph{self-prescriptive}. The following table
+records the parity check's output:
+
+\medskip
+\begin{center}
+\footnotesize
+\begin{tabular}{l|c|l|l}
+\textbf{Claim} & \textbf{Mark} & \textbf{Residue} & \textbf{Required $\kappa$-evolution} \\
+\hline
+Complexity (\ref{thm:complexity}) & \gmark &
+  $|\mathrm{Pareto}|$ unbounded WC & G3: measure frontier on real workloads \\
+Heuristic monotone (\ref{prop:heuristic-monotone}) & \gmark &
+  $h^*$ near-trivial & G6: measure pruning rate; strengthen if needed \\
+Parse-packing (\ref{thm:parse-packing}) & \gmark &
+  Def \ref{def:atom-equiv} underdet.\ & G4: algorithmic decidability of atom-seq.\ equiv.\ \\
+Reg-time-space (\ref{thm:reg-bound}) & \gmark &
+  Rectangular abstraction & G5: stepped-profile generalization \\
+Lagrangian (\ref{thm:lagrangian}) & \omark &
+  Integer gap bound & X3: prove tight bound (or accept open) \\
+All \textsf{H}-class \cmark & (conditional) &
+  Uncalibrated $\pi$ & G1: fit profile for ref.\ GPU \\
+\multicolumn{2}{l}{--- operational validity} &
+  No parser binary & G2: implement Earley chart parser \\
+\end{tabular}
+\end{center}
+
+\medskip
+
+Every residue has a named discriminator. A reader who
+feels the rigor-differential between [DAF]'s
+\textsf{A}-class claims (backed by mechanized Agda)
+and this paper's \textsf{H}-class claims (backed by
+``a suitable profile'') has correctly detected
+residues G1 and G2. The framework's response is not
+to explain away the discomfort but to act on it:
+close G1 and G2, and the proportion of \cmark\ marks
+on \textsf{H}-class claims equals the proportion on
+\textsf{A}-class claims automatically, without
+changing any definition or proof.
+
+In this sense, the paper is a properly-labeled
+intermediate state of a program that [DAF]
+initiated. The relationship between [DAF] and this
+paper is not ``predecessor--successor'' in the sense
+of two independent works; it is $\kappa_t$ and
+$\kappa_{t+1}$ in the same regime, where the
+evolution from one to the next is the articulation
+of the execution-operationalist axiom
+(Definition \ref{def:exec-operationalist}) and the
+corresponding \textsf{H} / \textsf{R} / \textsf{F}
+axiom classes. The next evolution, $\kappa_{t+2}$,
+is the paper that substitutes measured numbers for
+MODEL-4's symbolic parameters and promotes the
+\gmark\ marks in the table above to \cmark\ by
+witnessing.
+
+The governance does not ask the reader to suspend
+discomfort; it asks the reader to let discomfort
+drive the next $\kappa$-evolution.
+
 \subsection{Conclusion}
 
 We have extended the discrimination framework of
