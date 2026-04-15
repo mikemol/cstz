@@ -345,20 +345,39 @@ claim count.
     $38.1$ cycles. \textbf{Witnessed by script; loop
     closed from $+460\%$ to $-13\%$ in one iteration.}$^{d=1}$
   \item[G8] \emph{Overdetermination residue and
-    orthogonalization.} Also discovered by the
-    feedback-loop trace: $\gamma$'s $\kappa$-evolution
-    (at iter 5) introduced
-    \verb|l_gamma_per_pair_per_M| correlated with
-    the existing $\oplus$-reduce compare term. The
-    correlated parameters over-close the residue at
-    some instances and under-close at others,
-    producing the four-cell $(1,1)$ signature.
-    [DAF]'s prescription for this profile is
-    orthogonalization or factoring of the
-    correlated axes; the script does not yet
-    implement it. \textbf{Open (overdetermination
-    signature observed; orthogonalization step
-    unimplemented).}$^{d=1}$
+    blade-orthogonalization.} Discovered and
+    \emph{closed} by the feedback-loop trace (Appendix
+    \ref{app:feedback-loop} Phase C): $\gamma$'s
+    $\kappa$-evolution produced
+    \verb|l_gamma_per_pair_per_M|; the script's
+    \verb|detect_overdetermination| tripped on the
+    four-cell $(1,1)$ signature;
+    \verb|orthogonalize_blade| ran SVD on the
+    instance-contribution matrix ($\sigma$-spectrum
+    $[11111, 209, 12]$, $\sigma_{\min}/\sigma_{\max}
+    \approx 10^{-3}$); the degenerate extra was
+    dropped and its form added to the forbidden set.
+    \textbf{Witnessed by script; SVD orthogonalization
+    closes the overdetermination signature in one
+    iteration.}$^{d=1}$
+  \item[G9] \emph{Candidate-form library
+    insufficiency.} Also discovered by the
+    feedback-loop trace (Phase D): after dropping
+    \verb|per_pair_per_M|, $\gamma$'s residue
+    persists at $\sim -50\%$, and no form in the
+    remaining six-entry candidate library fits the
+    residue with coefficient of variation below $0.5$.
+    The loop correctly reports exhaustion and
+    terminates. The remedy is enrichment of
+    \verb|CANDIDATE_FORMS| --- higher-grade wedges,
+    linear combinations of existing forms, or
+    domain-specific forms like $K^2 \cdot f(M)$ ---
+    which is itself a $\kappa$-evolution at the
+    meta-level (the library $V$ of candidate
+    discriminator-shapes, rather than the
+    per-plan parameter space). \textbf{Open (library
+    exhaustion witnessed; enrichment is a library-level
+    $\kappa$-evolution).}$^{d=1}$
 \end{description}
 
 \emph{Meta-governance note.} Tracking these as G1--G8

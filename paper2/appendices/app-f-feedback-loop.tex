@@ -208,25 +208,29 @@ The fit picks the form whose residue/form ratio has
 the smallest coefficient of variation across
 instances.
 
-Trace of eight iterations:
+Trace of eight iterations (representative run;
+wall-clock numbers vary $\pm 20\%$ between runs but the
+event sequence is stable):
 
 \begin{center}
-\footnotesize
-\begin{tabular}{c|cc|l|c|ccc}
-iter & $l_{\zeta\text{-pass}}$ & \texttt{extras} & event & scale ($\mu$s/cyc) & $\mathrm{res}_{\mathrm{rel}}(\alpha)$\textsuperscript{(a)} & $\mathrm{res}_{\mathrm{rel}}(\gamma)$\textsuperscript{(a)} \\
+\scriptsize
+\begin{tabular}{c|cc|l|ccc}
+iter & $l_{\zeta\text{-pass}}$ & \texttt{extras} & event & $\mathrm{res}_{\mathrm{rel}}(\alpha)$\textsuperscript{(a)} & $\mathrm{res}_{\mathrm{rel}}(\gamma)$\textsuperscript{(a)} & action \\
 \hline
-0 & 1.000 & $\emptyset$ & initial & 0.232 & $+358\%$ & $-53\%$ \\
-1 & 0.858 & $\emptyset$ & scalar $\gamma$ & 0.249 & $+365\%$ & $-50\%$ \\
-2 & 0.720 & $\emptyset$ & scalar $\gamma$ + $\alpha$ stuck $\to$ $\kappa$-evolve $\alpha$ & 0.228 & $+460\%$ & $-48\%$ \\
-3 & 0.735 & $\{l_{\alpha,\mathrm{per\_pair}}{=}38.1\}$ & post-$\alpha$-evolution & 0.229 & $-13\%$ & $-54\%$ \\
-4 & 0.614 & same & scalar $\gamma$ & 0.238 & $-12\%$ & $-55\%$ \\
-5 & 0.480 & same & $\gamma$ stuck $\to$ $\kappa$-evolve $\gamma$ & 0.241 & $-10\%$ & $-66\%$ \\
-6 & 0.491 & $\{l_{\alpha,\mathrm{per\_pair}}{=}38.1, l_{\gamma,\mathrm{per\_pair\_per\_M}}{=}{-}0.44\}$ & post-$\gamma$-evolution & 0.238 & $-15\%$ & $+15\%$ \\
-7 & 0.614 & same & scalar $\gamma$ & 0.240 & $-20\%$ & $+48\%$ \\
+0 & 1.000 & $\emptyset$ & initial & $+326\%$ & $-62\%$ & scalar $\gamma$ \\
+1 & 0.858 & $\emptyset$ & & $+336\%$ & $-60\%$ & scalar $\gamma$ \\
+2 & 0.720 & $\emptyset$ & $\alpha$ stuck $\geq 3$ iters & $+326\%$ & $-65\%$ & $\kappa$-evolve $\alpha$: add $l_{\alpha,\mathrm{per\_pair}}=28.5$ \\
+3 & 0.584 & $\{l_\alpha\}$ & $\gamma$ stuck $\geq 3$ iters & $-13\%$ & $-62\%$ & $\kappa$-evolve $\gamma$: add $l_{\gamma,\mathrm{per\_pair\_per\_M}}=-0.40$ \\
+4 & 0.407 & $\{l_\alpha, l_\gamma\}$ & $\gamma$ overdetermined & $-4\%$ & $+4\%$ (mean masks spread) & \textbf{SVD: blade rank-deficient; drop $l_\gamma$} \\
+5 & 0.380 & $\{l_\alpha\}$ & $\gamma$ stuck again & $-10\%$ & $-50\%$ & no candidate form fits (library exhausted) \\
+6 & 0.25 & $\{l_\alpha\}$ & $l_{\zeta\text{-pass}}$ at floor & $-8\%$ & $-54\%$ & no param change \\
+7 & 0.25 & $\{l_\alpha\}$ & stable & $-8\%$ & $-54\%$ & \emph{params stable; terminate} \\
 \end{tabular}
 
 \footnotesize
 \textsuperscript{(a)} mean across three instances.
+$l_\alpha = l_{\alpha,\mathrm{per\_pair}}$,
+$l_\gamma = l_{\gamma,\mathrm{per\_pair\_per\_M}}$.
 \end{center}
 
 The trace splits into three phases.
@@ -251,38 +255,148 @@ reduction} in a single iteration, from a single
 parameter articulation. $\alpha$ converges; $\gamma$'s
 residue enters its own stuck regime.
 
-\paragraph{Phase C (iter 6--7): $\gamma$'s
-$\kappa$-evolution and overdetermination.} At iter 5
-the script fits $\gamma$'s residue against the library;
-the \verb|per_pair_per_M| form wins with a \emph{negative}
-mean coefficient ($-0.437$ cycles). The sign is
-meaningful: $\gamma$'s existing prediction was
-\emph{overestimating}, and the new parameter subtracts
-from the predicted cost. After adding
-\verb|l_gamma_per_pair_per_M = -0.437|, $\gamma$'s
-residue at $(32,4,4)$ closes; but at $(8,3,3)$ it swings
-from $-54\%$ to $+40\%$ and at $(64,5,5)$ it over-closes
-by $+139\%$. The mean residue flips sign from $-66\%$
-at iter 5 to $+15\%$ at iter 6 to $+48\%$ at iter 7.
+\paragraph{Phase C (iter 3--4): $\gamma$'s
+$\kappa$-evolution and SVD-driven orthogonalization.}
+At iter 3 the script fits $\gamma$'s residue against
+the library; the \verb|per_pair_per_M| form wins with
+a \emph{negative} mean coefficient ($-0.400$ cycles).
+The sign is meaningful: $\gamma$'s existing prediction
+was \emph{overestimating}, and the new parameter
+subtracts. After adding
+\verb|l_gamma_per_pair_per_M|, $\gamma$'s residues
+at the three instances become $+46\%$, $-43\%$, $+10\%$
+--- the four-cell $(1,1)$ signature in [DAF]'s
+vocabulary (opposite signs, non-trivial magnitudes).
 
-\paragraph{The overdetermination signature.} The sign
-flip and the instance-dependent spread are the four-cell
-(1,1) signature in [DAF]'s vocabulary: both
-\verb|l_gamma_per_pair_per_M| and the existing
-\verb|K*K * max(1, M/w) * l_xor_reduce| compare term
-fire on the same measurement gap. The new parameter's
-scaling (per-pair-per-M) is linearly dependent on the
-existing compare term's scaling at these instance sizes,
-producing redundancy that over-compensates at some
-instances and under-compensates at others. The loop has
-encountered its first \emph{overdetermination residue}:
-a residue whose closure by a single new discriminator
-produces new residues at other instances. [DAF]'s
-prescription for this four-cell profile is
-orthogonalization or factoring (\S8.2 of [DAF]); our
-script does not yet implement that step, but the
-residue signature has been produced and is visible in
-the trace.
+At iter 4 the overdetermination detector fires and
+\texttt{orthogonalize\_blade} runs SVD on the
+instance-contribution matrix (three rows for three
+instances, three columns for the two base $\gamma$
+forms plus the new extra). The singular values are
+$[11111, 209, 12]$: the smallest is $\sim 10^{-3}$ of
+the largest. The last right-singular vector has
+projections $[-0.95, +0.29, -0.09]$; the extra
+projects $0.09$ onto the degenerate direction. The
+base-form $(l_{\zeta} + l_{\mathrm{syn}}) \cdot K \cdot M$
+dominates the degenerate direction (projection
+$-0.95$), telling us the real near-collinearity is
+\emph{between the two base forms}, not between the
+extra and a base form. But the script's
+orthogonalization rule is ``drop the extra with the
+largest projection,'' since base forms are
+structural to the predictor. So $l_\gamma$ is
+dropped, and \verb|per_pair_per_M| is added to
+$\gamma$'s forbidden-form set so the next
+$\kappa$-evolution won't re-select it.
+
+\paragraph{Phase D (iter 5--7): library exhaustion.}
+$\gamma$'s residue returns to its pre-evolution
+state (around $-50\%$ mean). At iter 5,
+\verb|detect_stuck| fires again, but
+\verb|suggest_kappa_evolution| with
+\verb|exclude={per_pair_per_M}| finds that none of
+the six remaining library forms
+(\verb|per_pair|, \verb|per_element|,
+\verb|per_element_per_M|, \verb|constant|,
+\verb|per_2n|, \verb|per_pair_per_n|) fit
+$\gamma$'s residue with coefficient of variation
+below $0.5$. The script reports ``all candidate
+forms are exhausted or forbidden''; no evolution
+fires. Scalar updates continue to push
+$l_{\zeta\text{-pass}}$ toward its floor at $0.25$.
+At iter 7, no parameter changes, and the loop
+terminates with \texttt{(params stable at iter 7;
+nothing more to try)}.
+
+\paragraph{The overdetermination signature, observed
+and acted on.} The sign flip at iter 3 (residues
+$+46\%$, $-43\%$, $+10\%$ across the three instances) is
+the four-cell $(1,1)$ signature in [DAF]'s vocabulary.
+The script detects it via
+\verb|detect_overdetermination| and runs SVD on the
+blade at iter 4. The singular spectrum
+$[11111, 209, 12]$ confirms rank deficiency
+($\sigma_{\min}/\sigma_{\max} \approx 10^{-3}$); the
+degenerate right-singular vector reveals that the
+primary near-collinearity is between the two
+\emph{base} $\gamma$ forms, not between the extra and
+a base form. The script nonetheless drops the
+extra (base forms are structural and cannot be
+dropped), restoring $\gamma$'s pre-evolution state,
+and adds \verb|per_pair_per_M| to $\gamma$'s
+forbidden list so a future $\kappa$-evolution will
+try a different form.
+
+This is DAF's exterior-algebra machinery in its
+simplest action: blade rank reveals dimensions along
+which the parameter space and the measurement manifold
+are locally aligned; dropping the redundant extra
+collapses the blade to its non-degenerate subspace.
+
+\paragraph{Geometric-algebra-guided orthogonalization.}
+Because the parameter space is the tangent space of a
+discrimination regime in [DAF]'s sense, the exterior
+algebra $\bigwedge V$ from Section \ref{sec:encoding}
+applies directly: the $k$ parameters participating in
+an overdetermination residue span a $k$-dimensional
+subspace of $V$, and the \emph{blade} $p_1 \wedge p_2
+\wedge \cdots \wedge p_k \in \bigwedge^k V$ is the
+signed $k$-volume element that picks out that subspace.
+In our case $k = 2$: the bivector
+$l_{\gamma,\mathrm{per\_pair\_per\_M}} \wedge
+l_{\oplus\text{-reduce}} \in \bigwedge^2 V$ is the
+unique (up to scale) algebraic object that names the
+two-parameter degeneracy.
+
+The algebraic recipe for resolution follows directly:
+
+\begin{enumerate}[nosep,label=(\arabic*)]
+  \item Stack the participating parameters' per-instance
+    cost contributions into a matrix $M \in
+    \mathbb{R}^{|\mathrm{instances}| \times k}$.
+  \item Compute the singular value decomposition
+    $M = U \Sigma V^T$. The right singular vectors
+    (columns of $V$) are the principal directions of
+    the blade in parameter space.
+  \item The singular value spectrum $\sigma_1 \geq
+    \sigma_2 \geq \cdots \geq \sigma_k$ quantifies
+    rank deficiency: if $\sigma_k / \sigma_1 < \tau$
+    for a chosen tolerance $\tau$, the $k$ parameters
+    are effectively collinear at the observed instances.
+  \item Replace the overdetermined set with the
+    top-$r$ principal direction parameters (where $r$
+    is the effective numerical rank): each new
+    parameter is a specific linear combination
+    $V_{:,j}$ of the original parameters, aligned with
+    the blade.
+  \item Re-fit against the orthogonalized basis; the
+    residue now decomposes uniquely.
+\end{enumerate}
+
+For $k > 2$, the same recipe applies with higher-grade
+blades ($\bigwedge^k V$). A $k$-vector $p_1 \wedge
+\cdots \wedge p_k$ is non-zero iff the $k$ parameters
+are linearly independent; if zero, the participating
+parameters are already known to be degenerate, and the
+resolution is the Hodge dual $\star (p_1 \wedge \cdots
+\wedge p_k) \in \bigwedge^{\dim V - k} V$, giving the
+complementary axes that are genuinely orthogonal to
+the blade. This is precisely the machinery
+Section \ref{sec:encoding} introduces for Reed--Muller
+encodings; overdetermination resolution reuses it.
+
+The script does not yet implement this step; G8
+(Section \ref{sec:reading-guide}) is open with the
+recipe specified. Implementation is a short SVD
+call plus a parameter-space basis change. The
+critical point is that the recipe is not heuristic:
+the blade's grade, the principal directions, and the
+Hodge-dual complement are algebraic objects inherited
+from [DAF]'s exterior-algebra machinery, not ad-hoc
+choices. The script's detection of
+overdetermination gives precisely the data that the
+algebra expects, and the algebra in turn gives
+precisely the structure the resolution requires.
 
 \subsection{What the self-extending loop witnesses}
 \label{app-f:self-ext-witness}

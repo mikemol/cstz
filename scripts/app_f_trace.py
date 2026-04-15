@@ -203,9 +203,12 @@ def compute_residues(params: Params, instance_measurements, pivot: str = "beta")
         r["scale"] = scale
         r["pred_us"] = {name: r["preds"][name] * scale for name in PREDICTORS}
         r["residue_us"] = {name: r["meas"][name] - r["pred_us"][name] for name in PREDICTORS}
+        # Use |pred_us| in the denominator so negative predictions (parameter
+        # overcorrection) produce honest large-magnitude residues instead of
+        # silently clipping to zero.
         r["residue_rel"] = {
-            name: (r["meas"][name] - r["pred_us"][name]) / r["pred_us"][name]
-                   if r["pred_us"][name] > 0 else 0.0
+            name: (r["meas"][name] - r["pred_us"][name]) / abs(r["pred_us"][name])
+                   if r["pred_us"][name] != 0 else float("inf")
             for name in PREDICTORS
         }
     return rows, scale
@@ -230,15 +233,162 @@ def detect_stuck(history: list[float], min_iters: int = 3, threshold: float = 0.
     return all(abs(r) > threshold for r in history[-min_iters:])
 
 
-def suggest_kappa_evolution(plan: str, scale_us_per_cycle: float, rows) -> tuple[str, str, float] | None:
+def detect_overdetermination(plan: str, rows) -> bool:
+    """Four-cell (1,1) signature: residue flips sign across instances.
+
+    After a kappa-evolution adds a new extra, if the new parameter's
+    form is linearly correlated with an existing term, the combined
+    prediction over-closes the residue at some instances and
+    under-closes at others. The empirical signature is opposite signs
+    of residue_rel across instances with at least one of significant
+    magnitude.
+    """
+    residues = [r["residue_rel"][plan] for r in rows]
+    if all(abs(r) < 0.20 for r in residues):
+        return False
+    has_pos = any(r > 0.30 for r in residues)
+    has_neg = any(r < -0.30 for r in residues)
+    return has_pos and has_neg
+
+
+# Per-plan base forms: (name, form_callable, value_extractor).
+# Each base form is one term that appears in the plan's predictor
+# with a known functional shape and parameter dependence.
+BASE_FORMS: dict[str, list] = {
+    "alpha": [
+        ("l_dot x per_pair_per_M",
+         lambda K, n, M: K * (K - 1) // 2 * M,
+         lambda p: p.l_dot),
+        ("l_xor x per_pair",
+         lambda K, n, M: K * (K - 1) // 2,
+         lambda p: p.l_xor_reduce),
+    ],
+    "beta": [
+        ("l_dot x M*ceil(K/w)",
+         lambda K, n, M: M * max(1, K // 8),
+         lambda p: p.l_dot),
+        ("l_xor x compare",
+         lambda K, n, M: (K * K) * max(1, M // 8) // 8,
+         lambda p: p.l_xor_reduce),
+    ],
+    "gamma": [
+        ("(l_zeta+l_syn) x K*M",
+         lambda K, n, M: K * M,
+         lambda p: p.l_zeta_pass + p.l_syndrome),
+        ("l_xor x compare",
+         lambda K, n, M: (K * K) * max(1, M // 8),
+         lambda p: p.l_xor_reduce),
+    ],
+}
+
+
+def collect_contributions(plan: str, params: Params):
+    """Enumerate every form contributing to plan's prediction.
+
+    Returns list of (name, form_fn, current_value) tuples.
+    """
+    result = []
+    for name, form_fn, value_fn in BASE_FORMS.get(plan, []):
+        result.append((name, form_fn, value_fn(params)))
+    for extra_name, (tag, form_name, value) in params.extras.items():
+        if tag == plan:
+            result.append((extra_name, CANDIDATE_FORMS[form_name], value))
+    return result
+
+
+def analyze_blade(plan: str, params: Params, rows):
+    """SVD-based diagnostic of the plan's parameter-space blade.
+
+    Constructs the instance-contribution matrix M where M[i, j] is the
+    per-instance value of contribution j at instance i (already scaled
+    by its current parameter value). Returns (contributions, M, S, Vt)
+    where S is the singular spectrum and Vt the right singular vectors.
+    """
+    contribs = collect_contributions(plan, params)
+    if len(contribs) < 2:
+        return contribs, None, None, None
+    M = np.array(
+        [[f(r["K"], r["n"], r["M"]) for (_, f, _) in contribs] for r in rows],
+        dtype=float,
+    )
+    if M.shape[0] < M.shape[1]:
+        # underdetermined: not enough instances to fit all params
+        return contribs, M, None, None
+    U, S, Vt = np.linalg.svd(M, full_matrices=False)
+    return contribs, M, S, Vt
+
+
+def orthogonalize_blade(
+    plan: str, params: Params, rows, tol: float = 0.15
+) -> tuple[Params, bool, str]:
+    """Detect and resolve rank-deficient blades in the plan's parameter space.
+
+    If SVD reveals a near-zero singular value (sigma_min / sigma_max < tol),
+    the participating forms are linearly dependent at the observed instances:
+    the blade p_1 ∧ ... ∧ p_k has rank < k.  The resolution (Hodge
+    complement / principal-direction retention) is implemented as: drop
+    the extra parameter whose column has the largest projection onto the
+    degenerate right-singular-vector direction.  Base parameters are
+    preserved (their forms are structural to the predictor; only extras
+    are disposable).
+
+    Returns (new_params, did_orthogonalize, diagnostic_message).
+    """
+    contribs, M, S, Vt = analyze_blade(plan, params, rows)
+    if S is None:
+        return params, False, f"plan={plan}: blade analysis skipped (too few contribs / instances)"
+
+    ratio = S[-1] / S[0] if S[0] > 0 else 1.0
+    lines = [
+        f"plan={plan}: singular values = {S.round(3).tolist()}  "
+        f"(sigma_min/sigma_max = {ratio:.3f})"
+    ]
+    for j, (name, _, v) in enumerate(contribs):
+        proj = Vt[-1, j]  # projection onto the smallest singular direction
+        lines.append(
+            f"    contrib[{j}] {name!r}: value={v:+.4f}, "
+            f"V[last, {j}] = {proj:+.3f}"
+        )
+
+    if ratio >= tol:
+        lines.append("    verdict: full-rank; residue is not collinearity")
+        return params, False, "\n  ".join(lines)
+
+    # Rank deficient. Find the extra whose contribution projects most
+    # strongly onto the degenerate direction.
+    extras_indices = [
+        j for j, (name, _, _) in enumerate(contribs) if name in params.extras
+    ]
+    if not extras_indices:
+        lines.append("    verdict: rank-deficient but only base params participate; cannot drop")
+        return params, False, "\n  ".join(lines)
+
+    worst = max(extras_indices, key=lambda j: abs(Vt[-1, j]))
+    worst_name = contribs[worst][0]
+    dropped_form = params.extras[worst_name][1]  # form_name
+    lines.append(f"    verdict: rank-deficient; dropping extra {worst_name!r} (form={dropped_form})")
+    new_extras = {k: v for k, v in params.extras.items() if k != worst_name}
+    return replace(params, extras=new_extras), True, "\n  ".join(lines)
+
+
+def suggest_kappa_evolution(
+    plan: str,
+    scale_us_per_cycle: float,
+    rows,
+    exclude: set[str] | None = None,
+) -> tuple[str, str, float] | None:
     """Fit plan's residue against each candidate form; pick best fit.
 
     Returns (extra_name, form_name, value_in_cycles) or None if no
-    candidate form has consistent ratios across instances.
+    candidate form has consistent ratios across instances. Forms in
+    `exclude` are skipped (used for avoiding previously-forbidden forms).
     """
+    exclude = exclude or set()
     best = None
     best_cv = float("inf")
     for form_name, form in CANDIDATE_FORMS.items():
+        if form_name in exclude:
+            continue
         vals = []
         for r in rows:
             K, n, M = r["K"], r["n"], r["M"]
@@ -271,23 +421,49 @@ def suggest_kappa_evolution(plan: str, scale_us_per_cycle: float, rows) -> tuple
     return (extra_name, form_name, value)
 
 
-def update_params(params: Params, rows, plateau_history: dict[str, list[float]]) -> Params:
-    """Scalar updates to existing params; kappa-evolution on plateau."""
+def update_params(
+    params: Params,
+    rows,
+    plateau_history: dict[str, list[float]],
+    forbidden_forms: dict[str, set] | None = None,
+):
+    """Scalar updates, kappa-evolution on stuck residue, blade orthogonalization on overdetermination."""
+
     def mean_res(name):
         vals = [r["residue_rel"][name] for r in rows]
         return statistics.mean(vals) if vals else 0.0
 
     ra = mean_res("alpha")
-    rb = mean_res("beta")
     rg = mean_res("gamma")
 
     plateau_history.setdefault("alpha", []).append(ra)
     plateau_history.setdefault("gamma", []).append(rg)
 
-    new_extras = dict(params.extras)
+    new_params = params
     kappa_evolved = False
 
+    forbidden_forms = forbidden_forms if forbidden_forms is not None else {}
+
+    # Blade orthogonalization: four-cell (1,1) signature check, per plan.
+    # Run this *before* kappa-evolution so that a freshly-degenerate
+    # extra gets cleaned up before a new one is added on top.
+    for plan in ("alpha", "beta", "gamma"):
+        if detect_overdetermination(plan, rows):
+            pre_extras_forms = {e[1] for e in new_params.extras.values() if e[0] == plan}
+            new_params, did_orth, diag = orthogonalize_blade(plan, new_params, rows)
+            print(f"  [overdetermination] {diag}")
+            if did_orth:
+                # Record dropped forms as forbidden for future kappa-evolutions.
+                # Do NOT clear plateau_history: the residue was present before the
+                # dropped extra was added, so the history accurately reflects that
+                # the current (post-drop) parameter space still can't consume it.
+                post_extras_forms = {e[1] for e in new_params.extras.values() if e[0] == plan}
+                dropped = pre_extras_forms - post_extras_forms
+                forbidden_forms.setdefault(plan, set()).update(dropped)
+                kappa_evolved = True
+
     # Stuck-residue check + kappa-evolution on alpha and gamma
+    new_extras = dict(new_params.extras)
     for plan in ("alpha", "gamma"):
         plan_res = ra if plan == "alpha" else rg
         if detect_stuck(plateau_history[plan], min_iters=3, threshold=0.30):
@@ -295,7 +471,17 @@ def update_params(params: Params, rows, plateau_history: dict[str, list[float]])
             suggestion = suggest_kappa_evolution(plan, scale, rows)
             if suggestion:
                 extra_name, form_name, value = suggestion
-                existing_forms = {e[1] for e in params.extras.values() if e[0] == plan}
+                existing_forms = {e[1] for e in new_extras.values() if e[0] == plan}
+                forbidden = forbidden_forms.get(plan, set())
+                if form_name in forbidden:
+                    # Best-fit form already known to be rank-deficient;
+                    # try the next-best non-forbidden form.
+                    alt = suggest_kappa_evolution(plan, scale, rows, exclude=existing_forms | forbidden)
+                    if alt is None:
+                        print(f"  [kappa-evolution] {plan} residue stuck at {plan_res:+.1%} "
+                              f"but all candidate forms are exhausted or forbidden")
+                        continue
+                    extra_name, form_name, value = alt
                 if form_name not in existing_forms:
                     print(f"  [kappa-evolution] {plan} residue stuck at {plan_res:+.1%} "
                           f"for >=3 iters; adding extra {extra_name!r} = "
@@ -306,12 +492,13 @@ def update_params(params: Params, rows, plateau_history: dict[str, list[float]])
 
     # Scalar update on gamma (l_zeta_pass)
     delta = 0.25
-    l_zeta_new = max(0.25, params.l_zeta_pass + delta * rg)
+    l_zeta_new = max(0.25, new_params.l_zeta_pass + delta * rg)
 
-    # Leave l_dot mostly static — it co-varies with l_interp in alpha's prediction,
-    # leading to overdetermination if both are updated from alpha's residue.
-
-    updated = replace(params, l_zeta_pass=round(l_zeta_new, 3), extras=new_extras)
+    updated = replace(
+        new_params,
+        l_zeta_pass=round(l_zeta_new, 3),
+        extras=new_extras,
+    )
     return updated, kappa_evolved
 
 
@@ -320,7 +507,7 @@ def update_params(params: Params, rows, plateau_history: dict[str, list[float]])
 # ---------------------------------------------------------------------------
 
 
-def feedback_loop(instances_spec, max_iterations: int = 8):
+def feedback_loop(instances_spec, max_iterations: int = 12):
     np.random.seed(42)
     materialized = []
     for K, n, M in instances_spec:
@@ -331,6 +518,9 @@ def feedback_loop(instances_spec, max_iterations: int = 8):
 
     params = Params()
     plateau_history = {}
+    # Track (plan, form_name) pairs that orthogonalization has dropped so
+    # that subsequent kappa-evolutions avoid re-adding the same redundant form.
+    forbidden_forms: dict[str, set] = {}
     log = []
 
     for it in range(max_iterations):
@@ -368,12 +558,15 @@ def feedback_loop(instances_spec, max_iterations: int = 8):
         })
 
         if it < max_iterations - 1:
-            new_params, kappa_evolved = update_params(params, rows, plateau_history)
-            # Convergence check: both plans within ±10%
-            ra = statistics.mean(r["residue_rel"]["alpha"] for r in rows)
-            rg = statistics.mean(r["residue_rel"]["gamma"] for r in rows)
-            if abs(ra) < 0.10 and abs(rg) < 0.10:
-                print(f"\n(both alpha and gamma residues within ±10%; converged at iter {it})")
+            new_params, kappa_evolved = update_params(
+                params, rows, plateau_history, forbidden_forms
+            )
+            # Convergence check: every residue within ±15% on every instance.
+            max_abs_res = max(
+                abs(r["residue_rel"][p]) for r in rows for p in ("alpha", "gamma")
+            )
+            if max_abs_res < 0.15:
+                print(f"\n(all alpha/gamma residues within ±15% per-instance; converged at iter {it})")
                 break
             if new_params == params and not kappa_evolved:
                 print(f"\n(params stable at iteration {it}; nothing more to try)")
@@ -394,7 +587,7 @@ def main():
         (32, 4, 4),
         (64, 5, 5),
     ]
-    log = feedback_loop(instances, max_iterations=8)
+    log = feedback_loop(instances, max_iterations=12)
 
     print("\n===== TRACE JSON =====")
     # Custom default to handle frozen tuples in extras

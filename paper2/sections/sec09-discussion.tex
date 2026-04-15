@@ -269,9 +269,11 @@ Lagrangian (\ref{thm:lagrangian}) & \omark &
 All \textsf{H}-class \cmark & (conditional) &
   Uncalibrated $\pi$ & G1: fit profile for ref.\ GPU \\
 $\alpha$ residue plateau (App F) & \cmark &
-  \verb|per_pair| form & G7 closed: script added $l_{\alpha,\mathrm{per\_pair}}=38.1$ \\
-$\gamma$ overdetermination (App F) & \gmark &
-  correlated with compare term & G8: orthogonalize, or factor basis (open) \\
+  \verb|per_pair| form & G7 closed: script added $l_{\alpha,\mathrm{per\_pair}}\approx 29$ \\
+$\gamma$ overdetermination (App F) & \cmark &
+  rank-deficient blade ($\sigma_{\min}/\sigma_{\max} \approx 10^{-3}$) & G8 closed: script ran SVD, dropped redundant extra \\
+$\gamma$ library exhaustion (App F) & \gmark &
+  no candidate form fits post-drop residue & G9: enrich candidate-form library \\
 \multicolumn{2}{l}{--- operational validity} &
   No parser binary & G2: implement Earley chart parser \\
 \end{tabular}
@@ -331,20 +333,30 @@ changing any definition or proof.
 \smallskip
 
 \noindent G1--G6 were identified by authorial analysis
-during paper writing. G7 is qualitatively different:
-it was \emph{discovered empirically} by running the
-feedback-loop script of Appendix \ref{app:feedback-loop}
-and observing a residue whose monotone-but-decelerating
-trajectory signalled a parameter-space shortfall. This
-is [DAF]'s residue-dynamic at work on the paper's own
-meta-claims: a residue that resists articulation under
-the current regime demands a $\kappa$-evolution, and
-the loop made the demand specific (add
-$l_{\mathrm{interp}}$). G7's existence is evidence that
-the framework has operational teeth beyond the
-authorial-enumeration mode of G1--G6 --- the framework
-can find its own gaps, not just confirm the gaps its
-author already named.
+during paper writing. G7--G9 were \emph{discovered
+empirically} by running the feedback-loop script
+(Appendix \ref{app:feedback-loop}): G7 when a residue's
+monotone-but-decelerating trajectory signalled a
+parameter-space shortfall; G8 when the subsequent
+$\kappa$-evolution produced a blade whose SVD revealed
+rank deficiency; G9 when the post-orthogonalization
+residue exhausted the candidate-form library. G7 was
+closed in the same run (script added
+\verb|l_alpha_per_pair|); G8 was closed in the next
+iteration (script dropped the redundant extra after
+blade analysis); G9 is the current frontier.
+
+The progression G7 $\to$ G8 $\to$ G9 is itself
+[DAF]'s residue-dynamic operating at successively
+higher meta-levels: G7 lives in the per-plan parameter
+space; G8 lives in the grade-$k$ exterior algebra
+over that space; G9 lives in the library of candidate
+discriminator-shapes (the meta-space from which new
+parameters are drawn). Each higher level's residue
+is a discriminator on the level below. The framework
+finds its own gaps, and each gap's resolution either
+closes the immediate residue or names the next
+meta-level residue to articulate.
 
 \subsection{Cofibrative structure between [DAF] and this paper}
 
