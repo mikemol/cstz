@@ -225,15 +225,25 @@ def index_labels(paper_root: Path) -> dict[str, tuple[str, int]]:
 def extract_theorems(ast: dict, labels: dict[str, tuple[str, int]]) -> Iterator[dict]:
     """Yield one row per theorem-like Div in the document.
 
-    Header nodes are tracked as we walk so each row carries its
-    containing-section chain.
+    Tracks two counters so each row carries its "paper-numeric"
+    citation (e.g. §3, Def 3.5):
+
+      * section: increments every time a Header-level-1 is visited
+      * theorem: per-section shared counter over every theorem-like
+        Div, resets at each new section.  This matches the paper's
+        preamble convention
+        (``\\newtheorem{theorem}{Theorem}[section]`` with every other
+        theorem-like env declared via ``[theorem]``), which is what
+        Agda comments use when they cite ``Paper §3, Def 3.5``.
     """
     section_stack: list[tuple[int, str]] = []
+    section_counter = [0]
+    per_section_theorem_counter = [0]
 
-    def visit(node, ancestors):
+    def visit(node):
         if isinstance(node, list):
             for item in node:
-                yield from visit(item, ancestors)
+                yield from visit(item)
             return
         if not isinstance(node, dict):
             return
@@ -245,16 +255,12 @@ def extract_theorems(ast: dict, labels: dict[str, tuple[str, int]]) -> Iterator[
                 attr = c[1]
                 inlines = c[2]
                 title = inline_to_text(inlines)
-                # Pop deeper-or-equal levels off the stack
                 while section_stack and section_stack[-1][0] >= level:
                     section_stack.pop()
                 section_stack.append((level, title))
-                yield {
-                    "t_type": "Header",
-                    "level": level,
-                    "title": title,
-                    "id": attr[0] if isinstance(attr, list) else "",
-                }
+                if level == 1:
+                    section_counter[0] += 1
+                    per_section_theorem_counter[0] = 0
             return
         if t == "Div":
             c = node.get("c", [])
@@ -263,9 +269,12 @@ def extract_theorems(ast: dict, labels: dict[str, tuple[str, int]]) -> Iterator[
                 id_, classes, _ = attr if isinstance(attr, list) and len(attr) == 3 else ("", [], [])
                 theorem_class = next((cl for cl in classes if cl in THEOREM_CLASSES), None)
                 if theorem_class is not None:
+                    per_section_theorem_counter[0] += 1
                     env_name = extract_env_name(content)
                     body_text = _body_preview(content)
                     file_, line_ = labels.get(id_, ("", 0))
+                    section_num = section_counter[0]
+                    item_num = per_section_theorem_counter[0]
                     yield {
                         "t_type": "Div",
                         "env": theorem_class,
@@ -275,17 +284,16 @@ def extract_theorems(ast: dict, labels: dict[str, tuple[str, int]]) -> Iterator[
                         "section_stack": list(section_stack),
                         "file": file_,
                         "line": line_,
+                        "section_num": section_num,
+                        "item_num": item_num,
+                        "numeric_citation": f"{section_num}.{item_num}",
                     }
-                    # Don't descend — theorem bodies can contain nested Divs
-                    # (e.g. proof), but we don't want to emit those as
-                    # named objects (they're not declared objects).
                     return
-        # Recurse into children
         for k, v in node.items():
             if k != "t":
-                yield from visit(v, ancestors + (t or "",))
+                yield from visit(v)
 
-    for item in visit(ast.get("blocks", []), ()):
+    for item in visit(ast.get("blocks", [])):
         if item.get("t_type") == "Div":
             yield item
 
@@ -340,6 +348,9 @@ def main():
             "label": id_,
             "section": section_title,
             "section_stack": [s[1] for s in item["section_stack"]],
+            "section_num": item["section_num"],
+            "item_num": item["item_num"],
+            "numeric_citation": item["numeric_citation"],
         }
         print(json.dumps(row, ensure_ascii=False))
         count += 1

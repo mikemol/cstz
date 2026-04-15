@@ -157,10 +157,47 @@ def _paper_label_by_qualname(rows: list[dict]) -> dict[str, str]:
     for r in rows:
         label = r.get("label") or ""
         kind = r["kind"]
-        # The alignment engine uses label as the disambiguator if present,
-        # or "anon_NNN" otherwise.  We can only validate labeled decls.
         if label:
             out[f"paper:{kind}:{label}"] = label
+    return out
+
+
+_KIND_TO_CITATIONS = {
+    "definition":  ("Definition", "Def"),
+    "theorem":     ("Theorem", "Thm"),
+    "proposition": ("Proposition", "Prop"),
+    "lemma":       ("Lemma", "Lem"),
+    "corollary":   ("Corollary", "Cor"),
+    "remark":      ("Remark", "Rem"),
+    "example":     ("Example", "Ex"),
+    "conjecture":  ("Conjecture", "Conj"),
+    "openquestion":("Open Question", "OQ"),
+}
+
+
+def _paper_citations_by_qualname(rows: list[dict]) -> dict[str, list[str]]:
+    """Index paper rows by alignment qualname → list of citation variants.
+
+    For a paper definition at section 3 position 5, the citation
+    variants are ``[Definition 3.5, Def 3.5]``.  The validator looks
+    for any of these as a literal substring in Agda/Python docstrings.
+
+    Variants come from LaTeX's standard citation conventions — no
+    custom format invented here; we just materialize
+    ``<EnvName> <section>.<item>`` and the short-form alias.
+    """
+    out: dict[str, list[str]] = {}
+    for r in rows:
+        label = r.get("label") or ""
+        kind = r["kind"]
+        section_num = r.get("section_num")
+        item_num = r.get("item_num")
+        if not label or not section_num or not item_num:
+            continue
+        qn = f"paper:{kind}:{label}"
+        long_form, short_form = _KIND_TO_CITATIONS.get(kind, (kind.title(), kind[:3].title()))
+        cite_id = f"{section_num}.{item_num}"
+        out[qn] = [f"{long_form} {cite_id}", f"{short_form} {cite_id}"]
     return out
 
 
@@ -209,6 +246,7 @@ def evidence_for_triple(
     paper_label: dict[str, str],
     paper_meta: dict[str, tuple[str, int, str]],
     python_meta: dict[str, tuple[str, int]],
+    paper_citations: dict[str, list[str]] | None = None,
 ) -> dict:
     """Compute evidence for a single triple."""
     ev: dict[str, list[str]] = {}
@@ -227,6 +265,17 @@ def evidence_for_triple(
     # --- Signal 2: paper label mentioned in python docstring ---
     if p_label and p_label in py_doc:
         ev.setdefault("paper_label_in_python", []).append(p_label)
+
+    # --- Signal 1b: paper numeric citation (Def 3.5, Theorem 6.17) in agda/python docs ---
+    if paper_citations:
+        for cite in paper_citations.get(paper_qn, []):
+            if cite in agda_doc:
+                ev.setdefault("paper_citation_in_agda", []).append(cite)
+                break
+        for cite in paper_citations.get(paper_qn, []):
+            if cite in py_doc:
+                ev.setdefault("paper_citation_in_python", []).append(cite)
+                break
 
     # --- Signal 3: paper path mentioned (e.g. "paper/sections/sec01-intro.tex") ---
     p_path, p_line, p_section = paper_meta.get(paper_qn, ("", 0, ""))
@@ -328,6 +377,7 @@ def main():
     agda_docs = _AgdaDocs()
     py_docs_by_qn, py_docs_by_simple = _docstring_by_qualname_python(python_rows)
     paper_label = _paper_label_by_qualname(paper_rows)
+    paper_citations = _paper_citations_by_qualname(paper_rows)
     paper_meta = _paper_path_by_qualname(paper_rows)
     python_meta = _python_path_by_qualname(python_rows)
 
@@ -344,6 +394,7 @@ def main():
             paper_label=paper_label,
             paper_meta=paper_meta,
             python_meta=python_meta,
+            paper_citations=paper_citations,
         )
         n_signals = len(ev)
         for k in ev:
