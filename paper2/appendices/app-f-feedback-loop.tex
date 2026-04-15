@@ -1,0 +1,287 @@
+%----------------------------------------------------------------------
+\section{Worked example: $\kappa$-equivalence batched across a population}
+\label{app:feedback-loop}
+%----------------------------------------------------------------------
+
+Appendix \ref{app:examples} grounded the planner's
+arithmetic on a simple workload with MODEL-4's stated
+parameters. This appendix extends the exercise to a
+non-trivial, parameterized algorithm from the existing
+CSTZ codebase and traces the design-space dynamics the
+planner exposes. The point is no longer ``see, the
+planner makes this fast''; it is ``see, the planner is
+a feedback loop in the engineering search space.''
+
+\subsection{The algorithm}\label{app-f:alg}
+
+$\kappa$-equivalence on pairs of elements,
+\texttt{cstz.sets.kappa\_equiv} (\S[DAF] 4.3, Def
+\ref{def:exec-operationalist}), is the fundamental
+operationalist check. Batched across a population of
+$K$ elements under a regime of $M$ discriminators at
+dimension $n$, the algorithm computes the $K \times K$
+equivalence matrix $E \in \GF(2)^{K \times K}$:
+\begin{equation*}
+  E[i, j] = \bigwedge_{m=1}^{M} \bigl[\langle d_m, a_i \rangle = \langle d_m, a_j \rangle\bigr].
+\end{equation*}
+In [DAF]'s language this is the sheafification of the
+local admissibility-match predicate over all ordered
+pairs; operationally it is the core of the
+\texttt{observe.ObservationState} equivalence-class
+computation.
+
+The free parameters are $(K, n, M)$. Realistic values:
+$K \in \{2^3, 2^8, 2^{12}\}$, $n \in \{3, 8, 16\}$,
+$M \in \{3, n, 2n\}$. The planner's job is to choose
+an execution strategy that fits a stated hardware
+profile; we will see that the ``right'' strategy is
+not a function of $(K, n, M)$ alone but of $(K, n, M)$
+against a budget vector $B$.
+
+\subsection{Three plan families}\label{app-f:families}
+
+Each family can be further refined (fused vs.\
+time-shared, $\Lambda$ vs.\ $\mathrm{RM}$ basis) but
+the high-level shapes are:
+
+\paragraph{Plan $\alpha$: pairwise na\"{\i}ve.}
+Iterate over $\binom{K}{2}$ pairs; for each, run
+\texttt{kappa\_equiv} synchronously on a single lane.
+$\VRAM$ traffic is
+$\binom{K}{2} \cdot (2n + \lceil M/8 \rceil)$ bytes.
+$\LAT$ is $\binom{K}{2}$ iterations at the
+single-lane cost of one \texttt{kappa\_equiv}
+evaluation ($M$ AND-reductions of $n$-bit dot
+products). No batching advantage; minimum $\REG$
+(two elements live).
+
+\paragraph{Plan $\beta$: dot-product batching in $\Lambda$.}
+For each discriminator $d_m$, batch-compute $(d_m \cdot a_i)_{i=1}^K$
+in a single warp pass of $\lceil K/w \rceil$
+iterations. This populates a
+$K \times M$ \emph{evaluation matrix} $V$ with
+$V[i, m] = \langle d_m, a_i \rangle$. The equivalence
+matrix is then $E[i, j] = 1 - \max_m |V[i, m] -
+V[j, m]|$, computed by XOR-reducing $M$-bit rows
+pairwise. $\VRAM$ writes: $KM$ bits of $V$.
+$\LAT$: $M \cdot \lceil K/w \rceil$ dot-product
+iterations plus $\binom{K}{2} \cdot \lceil M/w \rceil$
+XOR-reduction iterations. $\REG$: moderate
+($V$'s row width plus accumulators).
+
+\paragraph{Plan $\gamma$: encode to $\mathrm{RM}$, syndrome-compare.}
+Butterfly-encode each $a_i$ into $\zeta(a_i) \in
+\GF(2)^{2^n}$ (Section \ref{sec:encoding}). Under the
+RM basis, $\kappa$-equivalence at the discriminator
+set $\kappa$ reduces to: $\zeta(a_i) \oplus \zeta(a_j)$
+has zero syndrome under the parity-check matrix
+obtained from $\kappa$. Encode cost: $K \cdot n \cdot
+\lceil 2^n / w \rceil$ XORs. Pairwise comparison:
+$\binom{K}{2} \cdot \lceil 2^n / w \rceil$ XORs plus
+syndrome GEMV. $\REG$: high ($2^n$-byte registers).
+
+\subsection{Concretization under MODEL-4}
+\label{app-f:model4}
+
+Using the MODEL-4 parameters of Appendix
+\ref{app-e:platform} ($w = 8$, $\alpha = 4$, $\beta =
+1$, $\gamma = 4$, $\ell_\oplus = 1$), we derive
+exact cost vectors for each family at three
+workload instances. All numbers are arithmetic
+consequences of the parameters above; none are
+measured.
+
+\paragraph{Instance 1: small population.}
+$(K, n, M) = (8, 3, 3)$. $\binom{K}{2} = 28$.
+\begin{center}
+\begin{tabular}{l|rrrr}
+Plan & $\VRAM$ & $\SMEM$ & $\REG$ & $\LAT$ \\
+\hline
+$\alpha$ & $28 \cdot (6 + 1) = 196$ & 0 & 2 & $\gamma + 28 \cdot (M \cdot \ell_\oplus + 1) = 116$ \\
+$\beta$ & $KM + K \cdot n = 48$ & 0 & 3 & $\gamma + M + 28 \cdot 1 = 35$ \\
+$\gamma$ & $K \cdot 2^n + K \cdot 2^n / w = 72$ & 0 & 8 & $\gamma + n \cdot K + 28 \cdot (2^n + M) = 332$ \\
+\end{tabular}
+\end{center}
+Frontier: $\{\beta\}$. Plan $\beta$ dominates both
+alternatives on every axis except $\REG$ (where
+$\alpha$ is smaller by 1); at any $B_{\REG} \geq
+3$, $\beta$ is the sole frontier element. Plan
+$\gamma$'s encoding overhead swamps its syndrome
+advantage at this small $n$.
+
+\paragraph{Instance 2: moderate population, larger $n$.}
+$(K, n, M) = (256, 8, 8)$. $\binom{K}{2} = 32{,}640$.
+\begin{center}
+\begin{tabular}{l|rrrr}
+Plan & $\VRAM$ & $\SMEM$ & $\REG$ & $\LAT$ \\
+\hline
+$\alpha$ & $32{,}640 \cdot 17 \approx 5.5 \cdot 10^5$ & 0 & 2 & $\gamma + 32{,}640 \cdot 9 \approx 2.9 \cdot 10^5$ \\
+$\beta$ & $KM + Kn = 4096$ & 0 & 3 & $\gamma + 8 \cdot 32 + 32{,}640 \cdot 1 \approx 3.3 \cdot 10^4$ \\
+$\gamma$ & $K \cdot 2^8 + \cdots \approx 73{,}728$ & 256 & 32 & $\gamma + 8 \cdot 256 + 32{,}640 \cdot 40 \approx 1.3 \cdot 10^6$ \\
+\end{tabular}
+\end{center}
+Frontier still $\{\beta\}$ under generous budgets;
+under a tight $\VRAM$ budget ($B_{\VRAM} < 4096$),
+all three are infeasible and the workload cannot run.
+$\gamma$'s growth in $2^n$ is prohibitive.
+
+\paragraph{Instance 3: large $n$, small $M$.}
+$(K, n, M) = (256, 16, 4)$. Here the
+grade-structure of $\kappa$ (only 4 of 16 possible
+discriminators active) means $\gamma$ can use a
+\emph{grade-truncated} RM basis of dimension
+$R_1 = 1 + n = 17$ rather than $2^{16} = 65{,}536$.
+\begin{center}
+\begin{tabular}{l|rrrr}
+Plan & $\VRAM$ & $\SMEM$ & $\REG$ & $\LAT$ \\
+\hline
+$\alpha$ & $32{,}640 \cdot 33 \approx 1.1 \cdot 10^6$ & 0 & 2 & $\gamma + 32{,}640 \cdot 17 \approx 5.5 \cdot 10^5$ \\
+$\beta$ & $KM + Kn = 5120$ & 0 & 3 & $\gamma + 4 \cdot 512 + 32{,}640 \approx 3.4 \cdot 10^4$ \\
+$\gamma^*$ (grade $\leq 1$) & $K R_1 + K R_1 / w = 4896$ & 0 & 5 & $\gamma + n \cdot K + 32{,}640 \cdot (R_1 + M) \approx 6.9 \cdot 10^5$ \\
+\end{tabular}
+\end{center}
+Frontier: $\{\beta\}$ for $\LAT$-binding budgets;
+$\gamma^*$ is a close second and becomes frontier when
+$B_{\REG} \leq 3$ is relaxed to allow $R_1$-bit
+registers. The grade truncation is the key lever:
+without it, $\gamma$ is infeasible at $n = 16$; with it,
+$\gamma^*$ is competitive.
+
+\subsection{How complexity questions are concretized}
+\label{app-f:complexity}
+
+Three classical complexity questions, restated in the
+planner's vocabulary:
+
+\emph{(a) Is this algorithm dominated by compute or by
+memory?} Plan $\beta$'s $\LAT$ in Instance 2 is
+$3.3 \cdot 10^4$ cycles; if that exceeds $B_{\LAT}$,
+the binding resource is $\LAT$ and the dual price
+$\lambda^*_{\LAT}$ is positive. If instead the
+binding resource is $\VRAM$, $\lambda^*_{\VRAM}$ is
+positive. The planner's dual-price output
+(Section \ref{sec:lagrangian}) answers the question
+directly without profiling runs.
+
+\emph{(b) What happens as $K \to \infty$?} Examine the
+$\LAT$ scaling: $\alpha$ is $\Theta(K^2 M)$,
+$\beta$ is $\Theta(KM + K^2 \lceil M/w \rceil)$,
+$\gamma^*$ is $\Theta(K n R_r + K^2 (R_r + M))$. At
+fixed $n, M$: $\beta$ and $\gamma^*$ are both
+asymptotically $\Theta(K^2)$; $\alpha$ is worse by a
+factor of $M$. The planner picks $\beta$ or
+$\gamma^*$ based on whichever has the smaller
+constant at the binding dimension.
+
+\emph{(c) What's the minimum hardware that executes
+this at budget $B$?} This is the inverse LP of
+Section \ref{sec:lagrangian}: given $(K, n, M)$,
+find the smallest $B$ such that at least one plan
+is admissible. Plan $\beta$ at Instance 2 requires
+$B_{\VRAM} \geq 4096$, $B_{\SMEM} \geq 0$, $B_{\REG}
+\geq 3$, $B_{\LAT} \geq 3.3 \cdot 10^4$. If any of
+these is tightened below threshold, the answer is
+infeasibility; otherwise $\beta$ is realizable.
+
+\subsection{The feedback loop}
+\label{app-f:feedback}
+
+The claims above are \emph{predictions} under
+MODEL-4's symbolic parameters. In practice:
+
+\begin{enumerate}[nosep,label=(\arabic*)]
+  \item \emph{Specify} a workload $(K, n, M)$ and a
+    budget $B$.
+  \item \emph{Plan}: the planner returns a Pareto
+    portfolio and dual prices.
+  \item \emph{Execute} one or more plans from the
+    portfolio on a real device; collect measured
+    $(\VRAM, \SMEM, \REG, \LAT)$ values.
+  \item \emph{Compare} measured vs.\ predicted cost.
+    If the measured value deviates, update the
+    hardware profile $\pi$: correct the per-atom
+    baseline or the per-production combinator rule
+    that produced the mis-prediction.
+  \item \emph{Replan} with the updated $\pi$. The
+    portfolio may change; phase boundaries shift.
+    Re-measure.
+  \item \emph{Iterate} until the profile stabilizes
+    (successive replans produce the same plan) or
+    until a target engineering budget is met.
+\end{enumerate}
+
+This loop is not a degenerate case. It is the
+planner's operational mode. MODEL-4 with invented
+parameters is the loop at iteration 0 with a
+guessed $\pi$; item G1 of the reading guide is
+iteration 1 (profile fit against a reference
+device); item G2 is the binary that closes
+the loop by making measurement possible at all.
+
+The feedback structure is itself a $\kappa$-evolution
+in [DAF]'s sense: each iteration refines the
+discrimination regime $\Delta_\pi$ (the admissibility
+regime indexed by the current profile). As $\pi$
+converges, $\Delta_\pi$ stabilizes; the operationalist
+axiom (Definition \ref{def:exec-operationalist})
+becomes a statement about the limit regime, and the
+portfolio output converges to the true Pareto
+frontier for the measured hardware.
+
+The shift in value proposition is concrete:
+
+\begin{itemize}[nosep]
+  \item \emph{Fast-execution framing:} the planner
+    outputs a plan; the plan runs faster than a
+    hand-coded alternative; profit. This framing
+    requires implementation and benchmark wins to
+    have any weight --- items G1, G2 \emph{and} a
+    downstream demonstration.
+  \item \emph{Feedback-loop framing:} the planner
+    outputs a plan together with a cost prediction
+    and dual prices; running the plan produces a
+    measurement; the deviation between prediction
+    and measurement is itself a \emph{discriminator}
+    on the current hardware profile, in the
+    operationalist sense. Engineering investment
+    targets the residues with the largest downstream
+    impact ($\lambda^*_r$ multiplied by the
+    plan-family's sensitivity to $r$). The
+    framework becomes an instrument for
+    architecture-informed algorithm selection, not
+    a one-shot compiler.
+\end{itemize}
+
+In the feedback-loop framing, the paper's $\gmark$
+marks on \textsf{H}-class claims are not unresolved
+defects --- they are \emph{loop invariants at
+iteration 0}. Each iteration converts $\gmark$ to
+$\cmark$ on the claims whose residues that iteration
+witnessed; the paper's verification map is a
+\emph{state} of the loop, not an end-state.
+
+\subsection{Relationship to [DAF]'s self-hosting}
+\label{app-f:self-hosting}
+
+[DAF]'s Theorem 9.14 (Self-hosting) states that the
+framework can serve as its own substrate: $\GF(2)
+\to$ Belnap $\to$ Boolean dependent type $\to
+\GF(2) \to \cdots$. The feedback loop described
+above is a specific instance of this: the framework
+specifies a $\kappa$ on plans, that $\kappa$ is
+measured against hardware, the measurement updates
+$\kappa$, and the loop continues.
+
+Each iteration is an evolution in [DAF]'s sense; the
+fixed point of the loop (if it exists) is a
+hardware-calibrated planner whose $\gmark$ marks
+have all been converted to $\cmark$, without any
+definition or proof having changed.  The paper's
+current state is the pre-fixed-point approximation.
+
+This is the strongest form of the
+framework-as-feedback-loop claim: the paper,
+implementation, calibration, and measurement are
+not four independent artifacts but four stages of
+a single $\kappa$-evolving discrimination system
+whose limit is the operationally-stable planner.

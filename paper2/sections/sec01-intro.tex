@@ -90,13 +90,21 @@ chart items whose aggregate cost would exceed the budget. Optimality
 under hard budgets is the Lagrangian dual of chart parsing; the
 output portfolio is the Pareto-nondominated frontier of that parse.
 
-\subsection{The successor axiom}
+\subsection{The operationalist axiom at the execution stratum}
 
 [DAF]'s operationalist axiom states that a distinction that cannot
 be witnessed by any discriminator under any $\kappa$-evolution is
-not a valid distinction. We add an execution-level analogue, labeled
-\textsf{O}$_{\mathrm{exec}}$ to distinguish it from the foundational
-axiom:
+not a valid distinction. This paper does not add a \emph{new}
+foundational commitment; it continues the same commitment at a
+different stratum. The plan-discrimination regime
+$\Delta = \{\delta_B : B \in \mathbb{N}^4\}$
+(Definition \ref{def:admissibility-family} below) is a $\kappa$ in
+[DAF]'s sense, whose elements are the admissibility discriminators;
+what [DAF] proves about $\kappa$ on the set-theoretic stratum
+transports to $\Delta$ on the execution stratum without weakening
+or reinterpretation. We label the restatement
+\textsf{O}$_{\mathrm{exec}}$ only to track the stratum, not to
+suggest an independent commitment:
 
 \begin{definition}[Execution-operationalist axiom]
   \label{def:exec-operationalist}
@@ -105,20 +113,22 @@ axiom:
   \mathbb{N}^4$ denote the cost vector of $P_i$
   under a stated hardware profile. If for every resource $r$ in the
   budget vector $B$ we have $c(P_1)_r \leq B_r$ and $c(P_2)_r \leq
-  B_r$, and if no subsequent measurement (latency, bytes, flops,
-  register spills) can distinguish $P_1$ from $P_2$ on the target
-  hardware, then $P_1$ and $P_2$ are \emph{execution-equivalent} on
-  that hardware. The planner is free to emit either, or a
-  lane-packed mixture of both.
+  B_r$, and if no discriminator in $\Delta$ separates them, then
+  $P_1$ and $P_2$ are \emph{execution-equivalent} on that hardware.
+  The planner is free to emit either, or a lane-packed mixture of
+  both.
 \end{definition}
 
-The execution-operationalist axiom is to plans what [DAF]'s
-operationalist axiom is to discriminations: it declares the
-execution-equivalence relation to be the coarsest relation
-consistent with observable cost behavior on a stated substrate.
-It licenses the portfolio output---if two plans are cost-indistinguishable,
-the planner need not choose---and it is the formal basis for the
-ambiguous-parse packing of Section \ref{sec:portfolios}.
+Definition \ref{def:exec-operationalist} is [DAF]'s operationalist
+axiom (Def 1.1 of [DAF]) with plans substituted for elements and
+$\Delta$ substituted for $\kappa$; it is not an independent
+commitment. Its new work is to license the portfolio output and
+the ambiguous-parse packing of Section \ref{sec:portfolios} by
+certifying that [DAF]'s operationalism transfers across strata.
+The framework's reflexive self-hosting property (Theorem 9.14 of
+[DAF]: the framework reconstructs its own substrate) predicts
+exactly this: $\Delta$ is a self-hosted $\kappa$ in [DAF]'s
+sense, and every [DAF] theorem about $\kappa$-regimes applies.
 
 \subsection{Reading guide: how to verify this paper's claims}
 \label{sec:reading-guide}
@@ -340,11 +350,14 @@ claims are backed by ``a suitable profile''
 would be correct; the framework's response to that
 discomfort is this subsection, not a hidden footnote.
 
-\subsection{What changes from [DAF]}
+\subsection{What changes from [DAF], and what transfers}
 
-The successor axiom \textsf{O}$_{\mathrm{exec}}$ is the only
-genuinely new foundational commitment. Everything else is a
-lifting of [DAF]'s algebraic machinery into an execution model:
+This paper introduces no new foundational axiom. The
+execution-operationalist axiom
+(Definition \ref{def:exec-operationalist}) is [DAF]'s
+operationalist axiom at the execution stratum: same commitment,
+different substrate. The paper's structural moves are
+instances of DAF's constructions rather than new constructions:
 
 \begin{itemize}[nosep]
   \item [DAF]'s four-cell structure becomes the atom encoding
@@ -355,20 +368,47 @@ lifting of [DAF]'s algebraic machinery into an execution model:
     $\kappa$-evolution extends the regime.
   \item [DAF]'s Yoneda-style identification of objects by
     morphism profiles becomes the equivalence relation on
-    plans: plans are identified by their observable cost
-    signature (\textsf{O}$_{\mathrm{exec}}$).
+    plans under the admissibility regime
+    (Definition \ref{def:admissibility-family}), with cost
+    vectors as morphism profiles.
+  \item [DAF]'s $\kappa$-truncation (the projection to a
+    sub-regime that retains only a subset of discriminators)
+    underwrites atom-sequence equivalence
+    (Section \ref{sec:portfolios}, Definition
+    \ref{def:atom-equiv}): two plans share an atom sequence
+    iff they are equivalent under the $\kappa$-truncation that
+    projects away all discriminators except atom identity.
+  \item [DAF]'s fibered-topos construction (Theorem 9.6 of [DAF])
+    prefigures the plan chart: $\Delta$ is a discrete analog of
+    [DAF]'s site of regimes $\mathfrak{S}$, with budgets
+    playing the role of $\kappa$-stages and dominance
+    $\succ$ playing the role of sub-regime inclusion.
   \item [DAF]'s Fano-plane and Reed--Muller structure at
     Section 9 appears here as the native tile size for
     Hamming-compressed syndrome operations
     (Proposition \ref{prop:lcm-density}).
 \end{itemize}
 
-The paper's novelty is not in the mathematical content of any
-individual lifting but in the synthesis: treating the
-compiler's internal data structure as a chart in the same
-sense that [DAF] treats the discrimination kernel's internal
-state as a sheaf, with cost vectors playing the role of
-morphism profiles.
+The paper's genuine novelty is located precisely: this is the
+\emph{first operationalization of [DAF]'s discrimination-regime
+machinery outside [DAF]'s home domain}. Proposition
+\ref{prop:op-equals-pareto} (Pareto dominance from admissibility)
+and Proposition \ref{prop:frontier-char} (frontier as
+admissible-and-non-dominated) are individually short proofs, but
+their status is distinctive: they witness that [DAF]'s
+regime/quotient/residue vocabulary lands on a computer-engineering
+object (multi-objective plan selection) and produces a
+non-vacuous derivation. Everything else in this paper is
+engineering; these two propositions are the transfer theorem.
+
+[DAF]'s self-hosting claim (Theorem 9.14: the framework
+reconstructs its own substrate) predicts that such transfer
+theorems exist for every domain where one can specify a
+discrimination regime; this paper is the first observation of
+one. Future strata (networked execution, energy-budget
+scheduling, multi-device coordination) will presumably support
+their own transfer theorems; their existence is licensed by the
+self-hosting property rather than re-proven.
 
 \subsection{Roadmap}
 
@@ -392,4 +432,10 @@ parser theory; Appendix \ref{app:b} gives detailed proofs;
 Appendix \ref{app:kernels} sketches Pallas kernels;
 Appendix \ref{app:meta} presents the closure-technique
 matrix for this paper's proofs; Appendix \ref{app:examples}
-works through a complete example end-to-end.
+works through a small worked example end-to-end on a
+hypothetical platform (MODEL-4); Appendix
+\ref{app:feedback-loop} works a non-trivial algorithm
+(batched $\kappa$-equivalence) across three workload
+instances and articulates the feedback-loop value
+proposition that the framework supports as a successor to
+[DAF]'s self-hosting dynamic.
