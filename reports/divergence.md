@@ -1,13 +1,24 @@
 # Triples with zero authorial cross-reference evidence
 
-35 out of 57 committed triples have no supporting
+106 out of 154 committed triples have no supporting
 signal in the docstrings/comments.  These are the triples most likely
 to be wrong — the alignment engine matched them on structural
 grounds alone, without the authors ever mentioning the other side.
 
 | agda | paper | python |
 |------|-------|--------|
+| record:Adjunction | theorem:thm:adjunction | function:check_bilinear_left |
+| data:Axis | corollary:cor:free-fgt | function:power_set_bound |
+| module:CSTZ.Category.Directed | definition:def:category | class:DirectedMorphism |
+| record:DirectedMorphism | definition:def:eval | class:DirectedMorphism |
+| record:DiscCtx | definition:def:directed-morphism | function:make_field_registry |
+| function:σ-target | definition:def:eval | class:DirectedMorphism |
+| function:compose-witnesses | proposition:prop:forgetful | function:compose_witnesses |
+| module:CSTZ.Category.Functor | definition:def:functor | module:category |
+| record:DiscFunctor | definition:def:functor | function:ext_wedge |
+| module:CSTZ.Category.Limits | proposition:prop:limits | module:category |
 | data:LimitKind | definition:def:limit | class:LimitKind |
+| module:CSTZ.Category.Yoneda | theorem:thm:yoneda | module:category |
 | function:class-A-e₁ | definition:def:subobj-class | function:make_ast_class_registry |
 | function:class-A-e₂ | definition:def:subobj-class | function:make_ast_class_registry |
 | function:class-B-e₁ | definition:def:subobj-class | function:make_ast_class_registry |
@@ -17,28 +28,92 @@ grounds alone, without the authors ever mentioning the other side.
 | function:class-D-e₁ | definition:def:subobj-class | function:make_ast_class_registry |
 | function:class-D-e₂ | definition:def:subobj-class | function:make_ast_class_registry |
 | function:cycle2-link | remark:rem:cycles | function:link_vector |
+| function:triangle-check | remark:rem:triangle-grounding | function:triangle_identity |
+| function:g3-top | proposition:prop:forgetful | function:unique_top_form |
+| module:CSTZ.Examples.GF2Cubed.Monoidal | proposition:prop:sym-monoidal | module:monoidal |
 | function:sym-monoidal | proposition:prop:sym-monoidal | function:sym_diff_discriminator |
+| function:pair-annihilator-e₁ | definition:def:eval | function:in_annihilator |
+| function:pair-annihilator-e₃ | definition:def:eval | function:in_annihilator |
+| function:pair-e₁-agree | definition:def:eval | function:is_paired |
+| function:pair-e₃-agree | definition:def:eval | function:is_paired |
 | function:link-v₁ | remark:rem:cycles | function:link_vector |
 | function:link-v₂ | remark:rem:cycles | function:link_vector |
 | function:link-v₃ | remark:rem:cycles | function:link_vector |
 | function:choice-unresolved-S₂ | theorem:thm:choice | function:choice_measure |
 | function:choice-resolved-S₁ | theorem:thm:choice | function:choice_measure |
 | function:choice-resolved-S₂ | theorem:thm:choice | function:choice_measure |
+| function:conj-overlap-τ | definition:def:tau-sigma | function:omega_conj |
 | function:em-bool | proposition:prop:bool-dependent | function:ext_is_zero |
+| function:galois-order-full | definition:def:info-order | function:walk |
+| function:neg-gap | remark:anon_125 | function:omega_neg |
 | function:neg-τ | definition:def:tau-sigma | function:omega_neg |
 | function:neg-σ | definition:def:tau-sigma | function:omega_neg |
+| function:neg-overlap | remark:anon_125 | function:omega_neg |
+| function:dne-τ | definition:def:tau-sigma | function:dne |
+| function:dne-σ | definition:def:tau-sigma | function:dne |
+| function:dne-overlap | remark:anon_070 | function:dne |
+| function:conj-τ-τ | definition:def:tau-sigma | function:omega_conj |
+| function:conj-σ-σ | definition:def:tau-sigma | function:omega_conj |
+| function:conj-over-τ | definition:def:tau-sigma | function:omega_conj |
+| function:disj-τ-σ | definition:def:tau-sigma | function:omega_neg |
+| function:disj-gap-τ | definition:def:tau-sigma | function:omega_disj |
 | function:em-τ | definition:def:tau-sigma | function:omega_neg |
 | function:em-σ | definition:def:tau-sigma | function:omega_neg |
 | function:expl-τ | definition:def:tau-sigma | function:omega_neg |
+| module:CSTZ.Exterior.Basis | definition:def:boundary | function:ext_basis |
 | function:Subset | proposition:prop:forgetful | function:power_set_bound |
+| function:basis | definition:def:boundary | function:ext_basis |
+| function:where
+    open import Data.Nat using (_<_ ; _≤_ ; z≤n ; s≤s)
+    open import Data.Nat.Properties using (≤-refl ; m≤n⇒m≤1+n)
+
+    go | example:ex:banach-tarski | module:exterior |
 | function:scalar | remark:anon_105 | function:ext_scalar |
 | function:disjoint-comm | proposition:prop:forgetful | function:check_wedge_comm |
 | function:∪-comm | proposition:prop:forgetful | function:check_wedge_comm |
 | module:CSTZ.Framework.FourCell | definition:def:subobj-class | class:CellKind |
+| function:ordered-τ | definition:def:profile | function:is_boolean |
+| function:ordered-σ | definition:def:profile | function:is_boolean |
+| function:gap | definition:def:profile-linear | function:is_residue |
+| data:CellKind | remark:anon_004 | class:CellKind |
+| function:isBoolean | proposition:prop:bool-dependent | function:is_boolean |
+| function:isResidue | proposition:prop:bool-dependent | function:is_residue |
+| function:Regime | definition:def:powerset | function:power_set_bound |
+| function:dim-κ | definition:def:boolean-dim | function:dim_kappa |
 | function:evolve | remark:anon_004 | function:evolve |
 | module:CSTZ.Higher.Toroid | definition:def:toroid | module:higher |
+| function:τ-point | definition:def:tau-sigma | function:triangle_identity |
+| function:σ-point | definition:def:tau-sigma | function:triangle_identity |
+| function:triangle | remark:rem:triangle-grounding | function:triangle_identity |
+| module:CSTZ.Homotopy.Exhaustivity | definition:def:directed-homotopy | module:homotopy |
+| function:self-inverse-morphism | definition:def:directed-morphism | class:DirectedMorphism |
 | module:CSTZ.Homotopy | definition:def:directed-homotopy | module:homotopy |
+| module:CSTZ.Monoidal.InternalHom | definition:def:internal-hom | module:topos |
+| function:internalHom | definition:def:internal-hom | module:topos |
+| module:CSTZ.Sets.EmptyPairing | proposition:prop:pairing | module:sets |
+| function:κ-equiv | definition:def:kappa | function:kappa_equiv |
+| function:κ-equiv-refl | definition:def:kappa | function:kappa_equiv |
+| function:κ-equiv-sym | proposition:prop:sym-monoidal | function:sym_diff_discriminator |
+| module:CSTZ.Sets.PowerSet | remark:anon_041 | function:power_set_bound |
+| function:powerSetBound | remark:anon_116 | function:power_set_bound |
 | module:CSTZ.Sets.SymDiff | proposition:prop:sym-monoidal | function:sym_diff_discriminator |
+| record:FiberedMor | definition:def:fibered | function:dim_kappa |
+| function:unique-top-form | proposition:prop:forgetful | function:unique_top_form |
+| function:em-holds-at-τ | definition:def:tau-sigma | class:CellKind |
+| function:em-holds-at-σ | definition:def:tau-sigma | class:CellKind |
+| module:CSTZ.Topos.SubobjClassifier | definition:def:subobj-class | module:__init__ |
+| function:_∧Ω_ | definition:def:subobj-class | function:omega_conj |
+| function:+V-cancel | remark:rem:interchange-selfhosting | module:gf2 |
+| function:linear-map-zero | definition:def:profile-linear | function:check_linear_map_zero |
+| function:zero-divisor | remark:anon_126 | function:check_cd_commutativity |
+| module:CSTZ.Verification.ChainBound | proposition:prop:boundary | function:chain_depth_bound |
+| module:CSTZ.Verification.ChoiceBound | theorem:thm:choice | function:choice_measure |
+| function:measure | remark:anon_105 | function:choice_measure |
+| function:measure-zero | remark:anon_105 | function:choice_measure |
+| function:terminates-in-n | remark:anon_105 | function:in_annihilator |
+| function:all-grade2-subsets-of-2 | proposition:prop:naturality | function:unique_top_form |
+| module:CSTZ.Verification.OmegaChain | proposition:prop:boundary | function:chain_depth_bound |
 | function:pairing-via-annihilator | proposition:prop:pairing | function:in_annihilator |
 | module:CSTZ.Verification.RISC | theorem:thm:topos | function:check_risc |
 | function:total-boolean-at-3 | definition:def:boolean-dim | function:is_boolean |
+| function:admissible-at-3 | theorem:thm:russell | function:check_risc |

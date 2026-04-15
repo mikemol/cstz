@@ -563,26 +563,66 @@ def align(paper: list[Decl], agda: list[Decl], python: list[Decl]) -> dict:
         p_scored = composite(paper_cands, paper_by_qn)
         y_scored = composite(python_cands, python_by_qn)
 
-        def best_or_none(scored):
-            """Commit iff absolute score ≥0.30 AND margin over second ≥1.2×.
+        def best_or_none(scored, by_qn, pivot: "Decl"):
+            """Commit a candidate using Appendix F's κ-evolution on ambiguity.
 
-            Margin measured as ratio top/second with second defaulting
-            to 0.001 when there's only one candidate.  Pure top-is-
-            winner "I guessed" picks (ratio near 1.0) go to residue so
-            the loop can κ-evolve them later.
+            Flow:
+              1. If top < 0.30, no commit.
+              2. If top beats second by ≥1.2×, commit immediately.
+              3. Otherwise the top-K candidates are *ambiguous in the
+                 current discriminator basis* — a four-cell (1,1)
+                 overlap residue in DAF's language.  Articulate a new
+                 discriminator by looking at the symmetric difference
+                 of the tied candidates' token bags against the pivot:
+                 whichever candidate has more tokens that are in the
+                 pivot AND not shared with its rivals wins the tiebreak.
+                 This IS κ-evolution: the new discriminator is generated
+                 from the data, not picked from a hand-written library.
+
+            Returns the winning tuple or None.
             """
             if not scored:
                 return None
-            top = scored[0][1]
-            if top < 0.30:
+            top_score = scored[0][1]
+            if top_score < 0.30:
                 return None
             second = scored[1][1] if len(scored) >= 2 else 0.001
-            if top >= 1.2 * max(second, 0.001):
+            if top_score >= 1.2 * max(second, 0.001):
                 return scored[0]
-            return None
 
-        p_pick = best_or_none(p_scored)
-        y_pick = best_or_none(y_scored)
+            # --- κ-evolution: residue drilldown on token symmetric diff ---
+            tied = [s for s in scored if s[1] >= 0.85 * top_score]
+            if len(tied) < 2:
+                return None
+            # Collect each candidate's "unique-to-me" tokens: tokens it has
+            # that none of its rivals in the tied group have.
+            tied_decls = [by_qn[qn] for qn, *_ in tied]
+            uniqueness: dict[str, frozenset[str]] = {}
+            for i, d in enumerate(tied_decls):
+                others = frozenset().union(*(tied_decls[j].tokens for j in range(len(tied_decls)) if j != i))
+                uniqueness[d.qualname] = d.tokens - others
+            # Score each tied candidate by how many of its unique tokens
+            # are ALSO in the pivot's bag — IDF-weighted.
+            def kappa_score(d: "Decl") -> float:
+                uniq = uniqueness[d.qualname]
+                hits = uniq & pivot.tokens
+                if not hits:
+                    return 0.0
+                return sum(idf.get(t, 1.0) for t in hits)
+            # Re-rank by combined (original composite + κ-evolution score)
+            re_ranked = sorted(
+                tied,
+                key=lambda s: -(s[1] + 0.30 * kappa_score(by_qn[s[0]])),
+            )
+            new_top = re_ranked[0]
+            # Require the κ-evolution winner to have a non-zero unique-token
+            # overlap with the pivot; otherwise it's still ambiguous.
+            if kappa_score(by_qn[new_top[0]]) == 0.0:
+                return None
+            return new_top
+
+        p_pick = best_or_none(p_scored, paper_by_qn, a)
+        y_pick = best_or_none(y_scored, python_by_qn, a)
 
         if p_pick and y_pick:
             triples.append({
