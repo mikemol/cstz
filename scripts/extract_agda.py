@@ -436,15 +436,20 @@ def _count_parameters(node: Node) -> int:
     return count
 
 
-def _clean_doc(text: str, maxlen: int = 400) -> str:
-    """Strip leading ``--`` markers and return the first non-empty line."""
+def _clean_doc(text: str, maxlen: int = 4000) -> str:
+    """Strip leading ``--`` markers and return the full cleaned comment block.
+
+    Preserves line breaks so downstream validators can search for
+    multi-line references like ``src/cstz/axioms.py ::`` and
+    ``Python cofibration (STUDY.md §8.1)`` intact.
+    """
+    lines = []
     for line in text.splitlines():
         stripped = line.strip()
         if stripped.startswith("-"):
             stripped = stripped.lstrip("- ").strip()
-        if stripped:
-            return stripped[:maxlen]
-    return ""
+        lines.append(stripped)
+    return "\n".join(lines)[:maxlen].strip()
 
 
 # ---------------------------------------------------------------------------
