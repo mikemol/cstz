@@ -1,6 +1,6 @@
 # Residues: unmatched or ambiguous Agda declarations
 
-266 Agda declarations did not produce a high-confidence triple.
+337 Agda declarations did not produce a high-confidence triple.
 The columns show the top-3 paper/python candidates and why they were rejected
 (absolute score below 0.30 or top/second margin below 1.2×).
 
@@ -13,154 +13,154 @@ In Appendix F's terms, each residue here is a four-cell signature:
 
 | Agda | Missing side(s) | Top paper cand. | Top python cand. |
 |------|-----------------|------------------|-------------------|
-| module:CSTZ.All | paper | definition:def:representable (0.32) | function:check_boundary_squa (0.52) |
-| module:CSTZ.Axiom.EvalLinearity | python | definition:def:eval (0.45) | function:check_eval_linearit (0.57) |
-| module:CSTZ.Axiom.ProfileLinearity | python | definition:def:profile-linea (0.48) | function:check_profile_linea (0.58) |
-| function:compose-coeff | paper | — | function:compose_coeff (0.70) |
-| function:project | python | definition:def:enrichment-da (0.44) | function:gf2_mul (0.48) |
-| function:include | python | definition:def:enrichment-da (0.44) | function:gf2_mul (0.48) |
-| record:NatTrans | python | definition:def:functor (0.47) | module:gf2 (0.45) |
-| function:yoneda-faithful | python | theorem:thm:yoneda (0.63) | function:check_eval_linearit (0.46) |
-| function:compose-e₁-e₂ | python | definition:def:evidence (0.37) | function:compose_witnesses (0.63) |
-| function:compose-disjoint | paper + python | — | function:compose_witnesses (0.69) |
-| function:retract-e₁ | paper + python | theorem:thm:sheaf (0.40) | function:check_eval_linearit (0.47) |
-| function:yoneda-A-B | python | theorem:thm:yoneda (0.56) | function:check_eval_linearit (0.46) |
-| function:yoneda-A-B' | python | theorem:thm:yoneda (0.56) | function:check_eval_linearit (0.46) |
-| function:yoneda-A-C | python | theorem:thm:yoneda (0.56) | function:check_eval_linearit (0.46) |
-| function:yoneda-A-D | python | theorem:thm:yoneda (0.56) | function:check_eval_linearit (0.46) |
-| module:CSTZ.Examples.GF2Cubed.Cycles | python | remark:rem:cycles (0.44) | function:gf2_mul (0.43) |
+| module:CSTZ.All | paper | — | function:check_boundary_squa (3.00) |
+| module:CSTZ.Axiom.EvalLinearity | python | definition:def:eval-linear (7.00) | function:check_eval_linearit (6.00) |
+| module:CSTZ.Axiom.ProfileLinearity | python | definition:def:profile-linea (7.00) | function:check_profile_linea (6.00) |
+| module:CSTZ.Category.Adjunction | paper + python | definition:def:category (3.00) | module:category (3.00) |
+| record:Adjunction | python | theorem:thm:adjunction (8.27) | — |
+| data:Axis | paper + python | corollary:cor:free-fgt (5.56) | — |
+| module:CSTZ.Category.Directed | paper + python | definition:def:directed-morp (3.00) | module:category (3.00) |
+| module:CSTZ.Category.Emergent | python | definition:def:category (12.56) | module:category (3.00) |
+| record:DiscCtx | python | definition:def:category (4.00) | module:pyast (5.27) |
+| function:σ-target | python | definition:def:category (4.00) | module:pyast (5.27) |
+| function:compose-witnesses | paper | definition:def:category (4.00) | function:compose_witnesses (6.00) |
+| module:CSTZ.Category.Functor | paper + python | definition:def:category (3.00) | module:category (3.00) |
+| record:DiscFunctor | python | definition:def:functor (3.00) | — |
+| function:project | paper + python | — | — |
+| function:include | paper + python | — | module:pyast (5.27) |
+| module:CSTZ.Category.Limits | paper + python | definition:def:category (3.00) | module:category (3.00) |
+| function:equalizerWitness | paper | — | function:equalizer_witness (6.00) |
+| module:CSTZ.Category.NatTrans | python | definition:def:category (3.00) | module:category (3.00) |
+| record:NatTrans | paper + python | definition:def:nattrans (5.56) | — |
+| module:CSTZ.Category.TwoCategory | python | definition:def:category (3.00) | module:category (3.00) |
+| function:interchange-at-F | paper | remark:rem:interchange-selfh (3.00) | function:interchange (3.00) |
+| module:CSTZ.Category.Yoneda | paper + python | definition:def:category (3.00) | module:category (3.00) |
+| function:yoneda-faithful | python | theorem:thm:yoneda (8.56) | — |
+| module:CSTZ.Category | python | definition:def:category (3.00) | module:category (3.00) |
+| module:CSTZ.Examples.GF2Cubed.Category | python | definition:def:category (3.00) | module:category (3.00) |
+| function:compose-e₁-e₂ | python | definition:def:composition (4.00) | function:compose_witnesses (3.00) |
+| function:compose-disjoint | paper + python | — | function:compose_witnesses (3.00) |
+| function:retract-e₁ | paper + python | theorem:thm:adjunction (5.27) | — |
+| function:yoneda-A-B | python | theorem:thm:yoneda (3.00) | — |
+| function:yoneda-A-B' | python | theorem:thm:yoneda (3.00) | — |
+| function:yoneda-A-C | python | theorem:thm:yoneda (3.00) | — |
+| function:yoneda-A-D | python | theorem:thm:yoneda (3.00) | — |
+| module:CSTZ.Examples.GF2Cubed.Cycles | python | remark:rem:cycles (3.00) | module:examples (2.00) |
+| function:cycle2-link | paper | — | function:link_vector (3.00) |
 | function:cycle3-v₁ | paper + python | — | — |
 | function:cycle3-v₂ | paper + python | — | — |
 | function:cycle3-v₃ | paper + python | — | — |
 | function:cycle3-closes | paper + python | — | — |
-| function:profile-lin-check-1 | python | definition:def:profile-linea (0.59) | function:check_profile_linea (0.68) |
-| function:profile-lin-check-2 | python | definition:def:profile-linea (0.59) | function:check_profile_linea (0.68) |
-| function:residue-a₀-a₂ | paper | definition:def:residue (0.60) | function:is_residue (0.63) |
-| function:resolve-a₀-a₂ | python | proposition:prop:presheaf-sh (0.41) | function:check_eval_linearit (0.46) |
-| function:resolve-a₀-a₂' | python | proposition:prop:presheaf-sh (0.41) | function:check_eval_linearit (0.46) |
-| function:order-indep | python | definition:def:info-order (0.61) | function:check_eval_linearit (0.46) |
-| module:CSTZ.Examples.GF2Cubed.Higher | paper | corollary:cor:free-direction (0.31) | module:higher (0.47) |
-| function:self-inverse-e₁e₂ | python | corollary:cor:self-model (0.65) | function:check_vec_self_inve (0.66) |
-| function:triangle-rot-σ | paper | definition:def:triangle (0.59) | function:triangle_identity (0.65) |
-| function:triangle-rot-τ | paper | definition:def:triangle (0.59) | function:triangle_identity (0.65) |
-| function:g0-basis | python | definition:def:boundary (0.36) | function:basis (0.67) |
-| function:g0-grade | paper | remark:anon_099 (0.40) | function:ext_grade (0.71) |
+| function:chain-link | paper + python | — | function:chain_complex_check (3.00) |
+| function:chain-cycle-indep | paper + python | remark:rem:cycles (5.27) | function:chain_complex_check (3.00) |
+| module:CSTZ.Examples.GF2Cubed.Framework | paper | — | module:framework (3.00) |
+| function:profile-lin-check-1 | python | definition:def:profile-linea (7.00) | function:check_profile_linea (6.00) |
+| function:profile-lin-check-2 | paper + python | definition:def:profile (3.00) | function:check_profile_linea (6.00) |
+| function:residue-a₀-a₂ | paper | definition:def:residue (3.00) | function:is_residue (3.00) |
+| function:resolve-a₀-a₂ | paper + python | — | — |
+| function:resolve-a₀-a₂' | paper + python | — | — |
+| function:order-indep | python | proposition:prop:monoidal (4.00) | — |
+| module:CSTZ.Examples.GF2Cubed.Higher | paper | — | module:higher (3.00) |
+| function:self-inverse-e₁e₂ | python | theorem:thm:n1cat (4.00) | function:check_vec_self_inve (6.00) |
+| function:triangle-check | paper + python | definition:def:triangle (3.00) | function:check_profile_linea (3.00) |
+| function:triangle-rot-σ | paper | definition:def:tau-sigma (3.00) | function:triangle_identity (3.00) |
+| function:triangle-rot-τ | paper | definition:def:tau-sigma (3.00) | function:triangle_identity (3.00) |
+| function:g0-basis | paper + python | — | function:ext_basis (3.00) |
+| function:g0-grade | paper + python | — | function:ext_grade (3.00) |
 | function:g1-e₁ | paper + python | — | — |
 | function:g1-e₂ | paper + python | — | — |
 | function:g1-e₃ | paper + python | — | — |
-| function:g2-e₁e₂ | python | proposition:prop:forgetful (0.34) | — |
-| function:g2-e₁e₃ | python | proposition:prop:forgetful (0.34) | — |
-| function:g2-e₂e₃ | python | proposition:prop:forgetful (0.34) | — |
-| function:g2-e₁e₂-grade | paper + python | remark:anon_099 (0.41) | function:ext_grade (0.66) |
-| function:g2-e₁e₃-grade | paper + python | remark:anon_099 (0.41) | function:ext_grade (0.66) |
-| function:g2-e₂e₃-grade | paper + python | remark:anon_099 (0.41) | function:ext_grade (0.66) |
-| function:g3-top-grade | paper | remark:anon_099 (0.40) | function:unique_top_form (0.67) |
-| function:dd-cancels-e₁ | paper + python | — | — |
+| function:g2-e₁e₂ | paper + python | — | — |
+| function:g2-e₁e₃ | paper + python | — | — |
+| function:g2-e₂e₃ | paper + python | — | — |
+| function:g2-e₁e₂-grade | paper + python | — | function:ext_grade (3.00) |
+| function:g2-e₁e₃-grade | paper + python | — | function:ext_grade (3.00) |
+| function:g2-e₂e₃-grade | paper + python | — | function:ext_grade (3.00) |
+| function:g3-top | paper | — | function:unique_top_form (3.00) |
+| function:g3-top-grade | paper + python | — | function:ext_grade (3.00) |
+| function:dd-cancels-e₁ | python | proposition:prop:boundary (4.00) | function:check_boundary_squa (4.00) |
 | function:dd-cancels-e₂ | paper + python | — | — |
 | function:dd-cancels-e₃ | paper + python | — | — |
-| function:dd-explicit | paper + python | corollary:anon_038 (0.48) | class:StringRoot (0.46) |
-| function:comm-subset | paper | proposition:prop:forgetful (0.48) | function:check_wedge_comm (0.65) |
-| function:univ-diff | paper | — | function:sym_diff_discrimina (0.70) |
-| function:univ-separated | python | proposition:prop:pairing (0.39) | function:check_eval_linearit (0.46) |
-| function:univ-separated' | python | proposition:prop:pairing (0.39) | function:check_eval_linearit (0.46) |
+| function:dd-explicit | paper + python | — | — |
+| function:univ-separated | paper + python | — | — |
+| function:univ-separated' | paper + python | — | — |
+| module:CSTZ.Examples.GF2Cubed.Monoidal | paper | proposition:prop:monoidal (3.00) | module:monoidal (3.00) |
+| function:monoidal-prod-coeff | python | definition:def:monoidal-prod (11.56) | function:compose_coeff (3.00) |
 | function:assoc-lhs | paper + python | — | — |
 | function:assoc-rhs | paper + python | — | — |
-| function:strict-assoc | python | theorem:thm:cat-axioms (0.45) | — |
-| module:CSTZ.Examples.GF2Cubed.Sets | paper | remark:anon_041 (0.31) | module:sets (0.46) |
-| function:ext-a₀≢a₁ | python | theorem:thm:ext (0.54) | function:ext_grade (0.68) |
-| function:ext-a₃≢a₅ | python | theorem:thm:ext (0.54) | function:ext_grade (0.68) |
-| function:russell-at-zero | python | remark:rem:interchange-russe (0.57) | function:check_linear_map_ze (0.66) |
-| function:russell-nonlinear | paper | remark:rem:interchange-russe (0.60) | function:russell_exclusion (0.61) |
-| function:pair-separated | python | definition:def:residue (0.44) | function:check_eval_linearit (0.47) |
+| function:strict-assoc | python | theorem:thm:cat-axioms (5.96) | — |
+| function:sym-monoidal | python | proposition:prop:sym-monoida (6.00) | module:monoidal (3.00) |
+| module:CSTZ.Examples.GF2Cubed.Sets | paper | — | module:sets (3.00) |
+| function:ext-a₀≢a₁ | python | theorem:thm:ext (7.00) | function:ext_zero (3.00) |
+| function:ext-a₃≢a₅ | python | theorem:thm:ext (3.00) | function:ext_zero (3.00) |
+| function:russell-at-zero | python | theorem:thm:russell (7.00) | function:ext_zero (3.00) |
+| function:russell-nonlinear | paper | theorem:thm:russell (3.00) | function:russell_exclusion (3.00) |
+| function:pair-annihilator-e₁ | paper | — | function:in_annihilator (3.00) |
+| function:pair-annihilator-e₃ | paper | — | function:in_annihilator (3.00) |
+| function:pair-e₁-agree | paper + python | — | — |
+| function:pair-e₃-agree | paper + python | — | — |
+| function:pair-separated | paper + python | — | — |
+| function:link-v₂ | paper | — | function:link_vector (3.00) |
 | function:links-indep | paper + python | — | — |
-| function:symdiff-a₂ | python | proposition:prop:symdiff (0.58) | function:check_eval_linearit (0.46) |
-| function:symdiff-a₆ | python | proposition:prop:symdiff (0.58) | function:check_eval_linearit (0.46) |
-| function:indist-e₁ | paper + python | definition:def:eval (0.40) | function:check_eval_linearit (0.47) |
-| function:indist-e₂ | paper + python | definition:def:eval (0.40) | function:check_eval_linearit (0.47) |
-| function:indist-diff | paper | — | function:sym_diff_discrimina (0.70) |
-| module:CSTZ.Examples.GF2Cubed.Setup | paper + python | — | function:gf2_mul (0.43) |
-| function:a₀ | paper + python | — | function:gf2_mul (0.51) |
-| function:a₁ | paper + python | — | function:gf2_mul (0.51) |
-| function:a₂ | paper + python | — | function:gf2_mul (0.51) |
-| function:a₃ | paper + python | — | function:gf2_mul (0.51) |
-| function:a₄ | paper + python | — | function:gf2_mul (0.51) |
-| function:a₅ | paper + python | — | function:gf2_mul (0.51) |
-| function:a₆ | paper + python | — | function:gf2_mul (0.51) |
-| function:a₇ | paper + python | — | function:gf2_mul (0.51) |
-| function:e₁ | paper + python | — | function:gf2_mul (0.51) |
-| function:e₂ | paper + python | — | function:gf2_mul (0.51) |
-| function:e₃ | paper + python | — | function:gf2_mul (0.51) |
-| function:eval | paper + python | definition:def:eval (0.55) | function:check_eval_linearit (0.63) |
-| function:e₁-a₀ | paper + python | definition:def:eval (0.39) | function:check_eval_linearit (0.46) |
-| function:e₁-a₄ | paper + python | definition:def:eval (0.39) | function:check_eval_linearit (0.46) |
-| function:e₁-a₅ | paper + python | definition:def:eval (0.39) | function:check_eval_linearit (0.46) |
-| function:e₁-a₇ | paper + python | definition:def:eval (0.39) | function:check_eval_linearit (0.46) |
-| function:e₂-a₂ | paper + python | definition:def:eval (0.39) | function:check_eval_linearit (0.46) |
-| function:e₂-a₅ | paper + python | definition:def:eval (0.39) | function:check_eval_linearit (0.46) |
-| function:e₃-a₁ | paper + python | definition:def:eval (0.39) | function:check_eval_linearit (0.46) |
-| function:e₃-a₄ | paper + python | definition:def:eval (0.39) | function:check_eval_linearit (0.46) |
-| function:e₁+e₂ | paper + python | — | function:gf2_mul (0.51) |
-| function:e₁+e₃ | paper + python | — | function:gf2_mul (0.51) |
-| function:e₂+e₃ | paper + python | — | function:gf2_mul (0.51) |
-| function:e₁+e₂+e₃ | paper + python | — | function:gf2_mul (0.51) |
-| function:e₁+e₂-val | python | definition:def:evidence (0.36) | function:ext_boundary (0.43) |
-| function:e₁+e₂+e₃-val | paper + python | — | function:ext_boundary (0.42) |
-| module:CSTZ.Examples.GF2Cubed.Topos | paper | corollary:cor:pro-topos (0.50) | module:topos (0.46) |
-| function:classify-inside | paper | remark:anon_061 (0.40) | function:classify (0.66) |
-| function:classify-outside | paper | remark:anon_061 (0.40) | function:classify (0.66) |
-| function:fiber-κ₁-size | python | definition:def:kappa (0.51) | function:dim_kappa (0.64) |
-| function:fiber-κ₂-size | python | definition:def:kappa (0.51) | function:dim_kappa (0.64) |
-| function:fiber-κ₃-size | python | definition:def:kappa (0.51) | function:dim_kappa (0.64) |
-| function:conj-τ-σ | paper + python | definition:def:swap-conj (0.62) | function:omega_conj (0.71) |
-| function:em-gap | paper + python | definition:def:info-order (0.48) | function:check_truth_tables (0.48) |
-| function:dne-check | paper + python | — | function:dne (0.66) |
-| function:fano-1 | python | theorem:thm:fano (0.55) | function:verify_fano_line (0.70) |
-| function:fano-4 | python | theorem:thm:fano (0.55) | function:verify_fano_line (0.70) |
-| function:fano-7 | python | theorem:thm:fano (0.55) | function:verify_fano_line (0.70) |
-| module:CSTZ.Examples.GF2Cubed | paper + python | — | function:gf2_mul (0.60) |
-| module:CSTZ.Examples.TruthTables | paper | remark:rem:proof-assistant (0.27) | function:check_truth_tables (0.54) |
-| function:dne-gap | paper | definition:def:info-order (0.47) | function:dne (0.67) |
-| function:conj-τ-σ | paper + python | definition:def:swap-conj (0.62) | function:omega_conj (0.71) |
-| function:conj-gap-any | paper | definition:def:swap-conj (0.61) | function:omega_conj (0.71) |
-| function:disj-gap-gap | paper | definition:def:info-order (0.48) | function:omega_disj (0.70) |
-| function:em-gap | paper + python | definition:def:info-order (0.48) | function:check_truth_tables (0.48) |
-| module:CSTZ.Examples | paper | — | module:examples (0.48) |
-| function:∅ | python | proposition:prop:forgetful (0.35) | — |
-| function:singleton | python | proposition:prop:forgetful (0.37) | function:make_list_registry (0.41) |
-| function:_∪_ | python | proposition:prop:forgetful (0.39) | — |
-| function:disjoint | python | proposition:prop:bool-depend (0.40) | function:tensor_witness (0.50) |
-| function:card | python | proposition:prop:forgetful (0.36) | — |
-| function:_∈S_ | python | proposition:prop:bool-depend (0.40) | function:verify_fano_line (0.40) |
-| function:Exterior | paper + python | definition:def:complex (0.35) | function:ext_zero (0.52) |
-| function:𝟎E | paper + python | — | function:ext_zero (0.41) |
-| function:_+E_ | paper + python | — | function:ext_basis (0.39) |
-| function:basisEq | python | definition:def:boundary (0.41) | function:ext_basis (0.67) |
-| function:eqBool | python | proposition:prop:bool-depend (0.55) | function:verify_fano_line (0.52) |
-| module:CSTZ.Exterior.Boundary | python | proposition:prop:boundary (0.60) | function:check_boundary_squa (0.55) |
-| function:∂ | python | proposition:prop:boundary (0.68) | function:check_boundary_squa (0.63) |
-| function:∂∘∂≡0 | python | proposition:prop:boundary (0.64) | function:check_boundary_squa (0.68) |
-| module:CSTZ.Exterior.Graded | paper | — | module:exterior (0.47) |
-| function:grade | python | remark:anon_099 (0.40) | function:ext_grade (0.68) |
-| function:restrictToGrade | paper | proposition:prop:monotone (0.45) | function:ext_restrict_grade (0.74) |
-| function:unitE | paper | definition:def:boundary (0.37) | function:ext_zero (0.40) |
-| module:CSTZ.Exterior.Wedge | paper + python | proposition:prop:commutative (0.34) | function:check_wedge_comm (0.56) |
-| function:disjoint-self-false | python | corollary:cor:self-model (0.64) | function:check_wedge_self_ze (0.63) |
-| function:wedge-self-zero | python | corollary:cor:self-model (0.66) | function:check_wedge_self_ze (0.67) |
-| module:CSTZ.Exterior | paper + python | definition:def:complex (0.31) | module:__init__ (0.52) |
-| module:CSTZ.Framework.Discriminator | python | definition:def:discriminator (0.46) | function:sym_diff_discrimina (0.61) |
-| function:Disc | paper | — | function:power_set_bound (0.47) |
-| function:_⟨_⟩ | paper + python | — | — |
-| record:DiscPair | paper | definition:def:residue (0.39) | function:power_set_bound (0.48) |
-| function:over | paper | proposition:prop:commutative (0.38) | function:check_profile_linea (0.56) |
-| function:classify | paper | remark:anon_061 (0.36) | function:classify (0.91) |
-| module:CSTZ.Framework.Profile | paper + python | definition:def:profile-linea (0.46) | function:profile (0.55) |
-| function:Profile | paper + python | definition:def:profile-linea (0.49) | function:profile (0.57) |
-| function:profile | python | definition:def:profile-linea (0.57) | function:profile (0.64) |
-| module:CSTZ.Framework.Regime | paper | proposition:prop:forgetful (0.40) | module:framework (0.47) |
-| function:evolve-dim | paper | definition:def:boolean-dim (0.59) | function:evolve (0.70) |
-| function:_⊆κ_ | paper + python | definition:def:kappa (0.58) | function:dim_kappa (0.70) |
-| module:CSTZ.Framework.WriteRead | paper | definition:anon_013 (0.36) | module:framework (0.48) |
-| function:isDiscriminated | python | proposition:prop:bool-depend (0.55) | function:is_boolean (0.72) |
-| function:isResidueχ | python | definition:def:residue (0.58) | function:is_residue (0.83) |
-| module:CSTZ.GF2.Properties | paper | proposition:prop:dynamics-tr (0.32) | module:gf2 (0.47) |
-| … (116 more) | | | |
+| function:link-v₃ | paper | — | function:link_vector (3.00) |
+| function:symdiff-a₂ | python | proposition:prop:symdiff (12.56) | — |
+| function:symdiff-a₆ | python | proposition:prop:symdiff (8.56) | — |
+| function:indist-e₁ | python | proposition:prop:infinity (4.00) | — |
+| function:indist-e₂ | paper + python | — | — |
+| function:indist-diff | paper | — | function:sym_diff_discrimina (3.00) |
+| module:CSTZ.Examples.GF2Cubed.Setup | paper + python | — | module:examples (2.00) |
+| function:a₀ | paper + python | — | — |
+| function:a₁ | paper + python | — | — |
+| function:a₂ | paper + python | — | — |
+| function:a₃ | paper + python | — | — |
+| function:a₄ | paper + python | — | — |
+| function:a₅ | paper + python | — | — |
+| function:a₆ | paper + python | — | — |
+| function:a₇ | paper + python | — | — |
+| function:e₁ | paper + python | — | — |
+| function:e₂ | paper + python | — | — |
+| function:e₃ | paper + python | — | — |
+| function:eval | paper + python | definition:def:eval-linear (3.00) | function:check_eval_linearit (3.00) |
+| function:e₁-a₀ | python | definition:def:discriminator (4.00) | — |
+| function:e₁-a₄ | paper + python | — | — |
+| function:e₁-a₅ | paper + python | — | — |
+| function:e₁-a₇ | paper + python | — | — |
+| function:e₂-a₂ | paper + python | — | — |
+| function:e₂-a₅ | paper + python | — | — |
+| function:e₃-a₁ | paper + python | — | — |
+| function:e₃-a₄ | paper + python | — | — |
+| function:e₁+e₂ | paper + python | — | — |
+| function:e₁+e₃ | paper + python | — | — |
+| function:e₂+e₃ | paper + python | — | — |
+| function:e₁+e₂+e₃ | paper + python | — | — |
+| function:e₁+e₂-val | paper + python | — | — |
+| function:e₁+e₂+e₃-val | paper + python | — | — |
+| module:CSTZ.Examples.GF2Cubed.Topos | paper | theorem:thm:topos (3.00) | module:topos (3.00) |
+| function:classify-inside | paper | remark:rem:cwa-owa (5.56) | function:classify (3.00) |
+| function:classify-outside | paper | — | function:classify (3.00) |
+| function:fiber-κ₁-size | python | theorem:thm:sheaf (5.27) | function:dim_kappa (3.00) |
+| function:fiber-κ₂-size | python | theorem:thm:sheaf (5.27) | function:dim_kappa (3.00) |
+| function:fiber-κ₃-size | python | theorem:thm:sheaf (5.27) | function:dim_kappa (3.00) |
+| function:conj-overlap-τ | paper | definition:def:tau-sigma (3.00) | function:omega_conj (3.00) |
+| function:em-gap | paper + python | — | — |
+| function:em-bool | python | proposition:prop:bool-depend (3.00) | — |
+| function:dne-check | paper + python | — | function:check_profile_linea (3.00) |
+| function:fano-4 | python | theorem:thm:fano (3.00) | function:verify_fano_line (3.00) |
+| function:fano-7 | python | theorem:thm:fano (3.00) | function:verify_fano_line (3.00) |
+| module:CSTZ.Examples.GF2Cubed | paper + python | — | module:examples (2.00) |
+| function:neg-gap | paper | — | function:omega_neg (3.00) |
+| function:neg-overlap | paper | — | function:omega_neg (3.00) |
+| function:dne-gap | paper | — | function:dne (3.00) |
+| function:dne-overlap | paper | — | function:dne (3.00) |
+| function:conj-τ-τ | paper | definition:def:tau-sigma (3.00) | function:omega_conj (3.00) |
+| function:conj-σ-σ | paper | definition:def:tau-sigma (3.00) | function:omega_conj (3.00) |
+| function:conj-gap-any | paper | conjecture:conj:CH (3.00) | function:omega_conj (3.00) |
+| function:conj-over-τ | paper | definition:def:tau-sigma (3.00) | function:omega_conj (3.00) |
+| function:disj-gap-gap | paper | — | function:omega_disj (3.00) |
+| function:em-gap | paper + python | — | — |
+| function:em-τ | python | definition:def:tau-sigma (3.00) | — |
+| function:em-σ | python | definition:def:tau-sigma (3.00) | — |
+| function:em-overlap | paper + python | — | — |
+| function:expl-overlap | paper + python | — | module:verification (5.27) |
+| function:expl-τ | python | definition:def:tau-sigma (3.00) | module:verification (5.27) |
+| … (187 more) | | | |

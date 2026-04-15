@@ -6,7 +6,7 @@ This report is produced by:
 2. `scripts/extract_agda.py`   — tree-sitter-agda + indent-lexer for Unicode postulates
 3. `scripts/extract_python.py` — stdlib `ast` walker
 4. `scripts/structural_identity.py` — grammar-reflected wedge-product Id(A), sparse exterior
-5. `scripts/align_perspectives.py` — three-perspective alignment (S3 rotation, IDF, adjacency, triangle-consistency)
+5. `scripts/align_parallel.py`  — **canonical aligner.**  Uses `ParallelRegistry` (hundreds of discriminators in parallel: IDF tokens, name-tokens, kind discriminators, adjacency-edge discriminators, paper-citation discriminators).  Pair scoring is `weighted_popcount(bitmap_a & bitmap_b)`.  `align_perspectives.py` (legacy 4-pass composite) retained for comparison.
 6. `scripts/validate_against_comments.py` — post-hoc authorial-annotation check
 7. `scripts/gap_analysis.py` — 3×3 cofiber cell classification, near-triple recovery
 
@@ -25,19 +25,19 @@ drilldown and κ-evolution are inherited from Appendix F of paper2.
 
 ## Alignment output
 
-- **174** committed triples (high-confidence, unambiguous in Agda pivot)
-- **266** residues (unmatched or ambiguous Agda decls)
-- **56** / 174 triples (32.2%) have explicit authorial cross-reference evidence in docstrings/comments
+- **103** committed triples (high-confidence, unambiguous in Agda pivot)
+- **337** residues (unmatched or ambiguous Agda decls)
+- **75** / 103 triples (72.8%) have explicit authorial cross-reference evidence in docstrings/comments
 
 ### Evidence signal breakdown
 
 | Signal | Count | % of triples |
 |--------|-------|--------------|
-| paper_citation_in_agda | 35 | 20.1% |
-| python_name_in_agda | 26 | 14.9% |
-| python_path_in_agda | 10 | 5.7% |
-| paper_citation_in_python | 6 | 3.4% |
-| agda_path_in_python | 4 | 2.3% |
+| paper_citation_in_agda | 73 | 70.9% |
+| paper_citation_in_python | 33 | 32.0% |
+| agda_path_in_python | 10 | 9.7% |
+| python_name_in_agda | 9 | 8.7% |
+| python_path_in_agda | 1 | 1.0% |
 
 ## What this demonstrates
 

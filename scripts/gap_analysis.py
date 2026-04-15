@@ -134,16 +134,36 @@ def main():
     paper_python_pairs.sort(key=lambda x: -x[2])
 
     # --- Find agda-python 2-way matches among unmatched agda decls ---
+    # For each, also check whether there's a PLAUSIBLE paper candidate at
+    # a lower (below-alignment-threshold) score.  Those are "near-triples"
+    # — items that should have been committed but got kicked to residue
+    # by the ambiguity check.  Distinguishing them from TRUE paper gaps
+    # (no paper candidate scores above 0.25) is the user's ask.
     agda_python_pairs = []
+    near_triples = []
+    true_paper_gaps = []
     for a in agda_out:
-        best = (None, 0.0)
+        best_py = (None, 0.0)
         for y in python:
             s = score_pair(a, y)
-            if s > best[1]:
-                best = (y, s)
-        if best[0] and best[1] >= 0.30:
-            agda_python_pairs.append((a, best[0], best[1]))
+            if s > best_py[1]:
+                best_py = (y, s)
+        if not best_py[0] or best_py[1] < 0.30:
+            continue
+        # We have an agda+python 2-way match.  Now check the paper side.
+        best_p = (None, 0.0)
+        for p in paper:
+            s = score_pair(a, p)
+            if s > best_p[1]:
+                best_p = (p, s)
+        agda_python_pairs.append((a, best_py[0], best_py[1]))
+        if best_p[0] and best_p[1] >= 0.40:
+            near_triples.append((a, best_py[0], best_py[1], best_p[0], best_p[1]))
+        elif best_p[1] < 0.25:
+            true_paper_gaps.append((a, best_py[0], best_py[1], best_p[0] if best_p[0] else None, best_p[1]))
     agda_python_pairs.sort(key=lambda x: -x[2])
+    near_triples.sort(key=lambda x: -(x[2] + x[4]))  # rank by combined signal
+    true_paper_gaps.sort(key=lambda x: -x[2])
 
     # =======================================================================
     # Emit reports/gaps.md
@@ -203,20 +223,51 @@ def main():
 
     lines += [
         "",
-        "### Agda-Python pairs where the paper is missing (M/E/E candidates)",
+        "### True paper gaps — agda+python present, no plausible paper match (M/E/E)",
         "",
-        "Formally specified AND runtime-verified concepts that the paper does not",
-        "explicitly name.  These are the strongest signal of paper completeness",
-        "gaps.  Action: add a definition or remark to the paper, or document why",
-        "the construct is \"internal\" to the framework.",
+        "Formally specified AND runtime-verified concepts where the paper has",
+        "**no** scoring candidate above 0.25.  These are the strongest signals",
+        "of genuine paper completeness gaps — the paper truly doesn't name",
+        "what Agda and Python both implement.  Action: add a definition or",
+        "remark to the paper, or document why the construct is \"internal\"",
+        "to the framework.",
         "",
-        "| agda | best python | score |",
-        "|------|-------------|-------|",
+        f"*{len(true_paper_gaps)} items in this bucket.*",
+        "",
+        "| agda | python (score) | best paper (low score) |",
+        "|------|----------------|------------------------|",
     ]
-    for a, y, s in agda_python_pairs[:40]:
-        lines.append(f"| {a.qualname.replace('agda:','')[:50]} | {y.qualname.replace('python:','')[:50]} | {s:.3f} |")
-    if len(agda_python_pairs) > 40:
-        lines.append(f"| … ({len(agda_python_pairs) - 40} more) | | |")
+    for a, y, s_y, p_best, s_p in true_paper_gaps[:40]:
+        p_str = f"{p_best.qualname.replace('paper:','')[:24]} ({s_p:.2f})" if p_best else "—"
+        lines.append(
+            f"| {a.qualname.replace('agda:','')[:45]} | {y.qualname.replace('python:','')[:40]} ({s_y:.2f}) | {p_str} |"
+        )
+    if len(true_paper_gaps) > 40:
+        lines.append(f"| … ({len(true_paper_gaps) - 40} more) | | |")
+
+    lines += [
+        "",
+        "### Near-triples — all three corners have signal but ambiguity blocked commit",
+        "",
+        "These are items that would be committed triples if the alignment engine",
+        "had resolved the ambiguity correctly: agda has a strong python match",
+        "AND a plausible paper match (≥0.40).  If a human reviewer agrees with",
+        "the paper candidate, these are **alignment-engine failures to recover**,",
+        "not gaps.  They are the highest-leverage targets for refining the",
+        "alignment pipeline.",
+        "",
+        f"*{len(near_triples)} items in this bucket.*",
+        "",
+        "| agda | python | paper | py+paper score |",
+        "|------|--------|-------|----------------|",
+    ]
+    for a, y, s_y, p, s_p in near_triples[:40]:
+        combined = s_y + s_p
+        lines.append(
+            f"| {a.qualname.replace('agda:','')[:40]} | {y.qualname.replace('python:','')[:30]} ({s_y:.2f}) | {p.qualname.replace('paper:','')[:28]} ({s_p:.2f}) | {combined:.2f} |"
+        )
+    if len(near_triples) > 40:
+        lines.append(f"| … ({len(near_triples) - 40} more) | | | |")
 
     lines += [
         "",
@@ -276,11 +327,20 @@ def main():
                 "paper": p.qualname, "agda": None, "python": y.qualname,
                 "score": s,
             }) + "\n")
-        for a, y, s in agda_python_pairs:
+        for a, y, s_y, p_best, s_p in true_paper_gaps:
             f.write(json.dumps({
-                "cell": "M/E/E", "reason": "agda+python, paper missing",
+                "cell": "M/E/E", "reason": "agda+python aligned, paper truly absent",
                 "paper": None, "agda": a.qualname, "python": y.qualname,
-                "score": s,
+                "score": s_y,
+                "best_paper_attempt": p_best.qualname if p_best else None,
+                "best_paper_score": s_p,
+            }) + "\n")
+        for a, y, s_y, p, s_p in near_triples:
+            f.write(json.dumps({
+                "cell": "near-triple",
+                "reason": "all three have signal but ambiguity blocked commit",
+                "paper": p.qualname, "agda": a.qualname, "python": y.qualname,
+                "py_score": s_y, "paper_score": s_p, "combined": s_y + s_p,
             }) + "\n")
 
     # =======================================================================
@@ -327,13 +387,14 @@ def main():
     # Console summary
     # =======================================================================
     print("Gap analysis summary:")
-    print(f"  E/E/E (committed):        {cell_EEE}")
-    print(f"  E/E/M  paper+agda, need python:  {len(paper_agda_pairs)}")
-    print(f"  E/M/E  paper+python, need agda:  {len(paper_python_pairs)}")
-    print(f"  M/E/E  agda+python, need paper:  {len(agda_python_pairs)}")
-    print(f"  E/M/M (paper-only):       {len(paper_out)}")
-    print(f"  M/E/M (agda-only):        {len(agda_out)}")
-    print(f"  M/M/E (python-only):      {len(python_out)}")
+    print(f"  E/E/E (committed):                 {cell_EEE}")
+    print(f"  E/E/M  paper+agda, need python:    {len(paper_agda_pairs)}")
+    print(f"  E/M/E  paper+python, need agda:    {len(paper_python_pairs)}")
+    print(f"  M/E/E  agda+python, NO paper cand: {len(true_paper_gaps)}")
+    print(f"  near-triples (alignment recoverable): {len(near_triples)}")
+    print(f"  E/M/M (paper-only):                {len(paper_out)}")
+    print(f"  M/E/M (agda-only):                 {len(agda_out)}")
+    print(f"  M/M/E (python-only):               {len(python_out)}")
     print(f"\n  wrote: reports/{{gaps,conflicts}}.md, gaps.jsonl")
 
 

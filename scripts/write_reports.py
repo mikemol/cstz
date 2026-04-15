@@ -69,7 +69,7 @@ def main():
         "2. `scripts/extract_agda.py`   — tree-sitter-agda + indent-lexer for Unicode postulates",
         "3. `scripts/extract_python.py` — stdlib `ast` walker",
         "4. `scripts/structural_identity.py` — grammar-reflected wedge-product Id(A), sparse exterior",
-        "5. `scripts/align_perspectives.py` — three-perspective alignment (S3 rotation, IDF, adjacency, triangle-consistency)",
+        "5. `scripts/align_parallel.py`  — **canonical aligner.**  Uses `ParallelRegistry` (hundreds of discriminators in parallel: IDF tokens, name-tokens, kind discriminators, adjacency-edge discriminators, paper-citation discriminators).  Pair scoring is `weighted_popcount(bitmap_a & bitmap_b)`.  `align_perspectives.py` (legacy 4-pass composite) retained for comparison.",
         "6. `scripts/validate_against_comments.py` — post-hoc authorial-annotation check",
         "7. `scripts/gap_analysis.py` — 3×3 cofiber cell classification, near-triple recovery",
         "",

@@ -132,8 +132,13 @@ class ParallelRegistry:
     def register_citations(self, paper_rows: list[dict]) -> None:
         """For each paper decl with a numeric citation, register two
         discriminators (long-form ``Definition 1.1`` and short-form
-        ``Def 1.1``).  These fire when the literal citation appears
-        in another decl's docstring."""
+        ``Def 1.1``) AND record the paper qualname that "owns" each
+        so we can unconditionally fire those bits on the owning decl.
+
+        The discriminator fires:
+          * on the paper decl itself (by identity — it IS the cited object)
+          * on any other decl whose docstring contains the citation string
+        """
         kind_to_names = {
             "definition": ("Definition", "Def"),
             "theorem": ("Theorem", "Thm"),
@@ -144,15 +149,24 @@ class ParallelRegistry:
             "example": ("Example", "Ex"),
             "conjecture": ("Conjecture", "Conj"),
         }
+        # paper_qualname → set of (family, key) pairs it owns
+        self._paper_owned_cites: dict[str, list[tuple[str, str]]] = {}
         for r in paper_rows:
             section_num = r.get("section_num")
             item_num = r.get("item_num")
+            label = r.get("label") or ""
             if not section_num or not item_num:
                 continue
             long_form, short_form = kind_to_names.get(r["kind"], (r["kind"].title(), r["kind"][:3].title()))
             cid = f"{section_num}.{item_num}"
             self._register("cite", f"{long_form} {cid}", weight=4.0)
             self._register("cite", f"{short_form} {cid}", weight=4.0)
+            if label:
+                owner_qn = f"paper:{r['kind']}:{label}"
+                self._paper_owned_cites.setdefault(owner_qn, []).extend([
+                    ("cite", f"{long_form} {cid}"),
+                    ("cite", f"{short_form} {cid}"),
+                ])
 
     def size(self) -> int:
         return len(self._by_id)
@@ -215,9 +229,15 @@ class ParallelRegistry:
             if bid is not None:
                 bm |= 1 << bid
 
-        # cite/ family — requires docstring substring matching.  This
-        # firing depends on docstring text, which pandoc/tree-sitter/ast
-        # already parsed.  We search for literal citation strings.
+        # cite/ family — a paper decl unconditionally fires on the
+        # citations IT owns (since it IS the cited object, by identity).
+        # Any other decl fires only if its docstring contains the
+        # literal citation string.
+        owned = getattr(self, "_paper_owned_cites", {}).get(decl.qualname, [])
+        for key_pair in owned:
+            bid = self._by_key.get(key_pair)
+            if bid is not None:
+                bm |= 1 << bid
         if docstring:
             for (fam, key), bid in self._by_key.items():
                 if fam != "cite":

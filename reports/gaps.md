@@ -10,10 +10,10 @@ for the runtime.
 
 | Cell | Count | Meaning |
 |------|-------|---------|
-| E/E/E | 174 | Committed triple: paper+agda+python all present and aligned |
-| E/M/M | 94 | Paper object without triple — need agda+python or clearer name |
-| M/E/M | 266 | Agda decl without triple — either algebraic lemma (acceptable) or paper needs to state it |
-| M/M/E | 119 | Python object without triple — ad-hoc runtime or classification/observe subsystem |
+| E/E/E | 103 | Committed triple: paper+agda+python all present and aligned |
+| E/M/M | 112 | Paper object without triple — need agda+python or clearer name |
+| M/E/M | 337 | Agda decl without triple — either algebraic lemma (acceptable) or paper needs to state it |
+| M/M/E | 140 | Python object without triple — ad-hoc runtime or classification/observe subsystem |
 
 ## Partial-signal gaps (high value actionable items)
 
@@ -29,33 +29,37 @@ structural (no runtime witness needed).
 
 | paper | best agda | score |
 |-------|-----------|-------|
-| definition:def:enrichment-data | record:EnrichmentData | 0.655 |
+| definition:def:residue | function:isResidueχ | 0.588 |
+| definition:def:internal-hom | module:CSTZ.Monoidal.InternalHom | 0.574 |
+| definition:def:functor | record:DiscFunctor | 0.573 |
+| remark:rem:interchange-russell | function:claim-F | 0.572 |
 | corollary:cor:self-model | function:wedge-self-zero | 0.570 |
+| definition:def:fibered | record:FiberedObj | 0.569 |
+| definition:def:membership | function:Membership | 0.568 |
+| definition:def:site | record:Site | 0.566 |
+| definition:def:profile-linear | module:CSTZ.Axiom.ProfileLinearity | 0.561 |
+| theorem:thm:adjunction | record:Adjunction | 0.557 |
+| proposition:prop:bool-dependent | function:isDiscriminated | 0.555 |
 | definition:def:swap-conj | function:conj-over-τ | 0.555 |
-| theorem:thm:self-enrich | module:CSTZ.Topos.SelfEnrichment | 0.545 |
-| definition:def:complex | function:gradeComponent | 0.543 |
-| theorem:thm:subobj | module:CSTZ.Topos.SubobjClassifier | 0.541 |
+| proposition:prop:limits | module:CSTZ.Verification.LimitsExhaustive | 0.547 |
+| definition:def:boundary | function:∂∘∂≡0 | 0.547 |
+| definition:def:eval | record:DirectedMorphism | 0.546 |
+| definition:def:kappa | function:_⊆κ_ | 0.541 |
 | corollary:cor:free-direction | module:CSTZ.Higher.FreeNK | 0.541 |
-| proposition:prop:symdiff | function:symdiff-a₂ | 0.538 |
-| proposition:prop:fol | module:CSTZ.Topos.FOL | 0.534 |
+| theorem:thm:yoneda | function:yoneda-faithful | 0.541 |
+| definition:def:info-order | function:order-indep | 0.540 |
 | definition:def:infinity | module:CSTZ.Sets.Infinity | 0.533 |
 | corollary:cor:pro-topos | module:CSTZ.Topos | 0.532 |
-| theorem:thm:deloop | module:CSTZ.Monoidal.DeloopCollapse | 0.530 |
-| proposition:prop:infinity | module:CSTZ.Sets.Infinity | 0.528 |
-| definition:def:triangle | function:triangle-σ | 0.528 |
+| theorem:thm:self-hosting | module:CSTZ.Topos.SelfHosting | 0.532 |
 | proposition:prop:empty | module:CSTZ.Sets.EmptyPairing | 0.525 |
 | proposition:prop:presheaf-sheaf | module:CSTZ.Topos.Sheaf | 0.525 |
 | definition:def:n-groupoid | module:CSTZ.Homotopy.Groupoid | 0.524 |
 | proposition:prop:monoidal | module:CSTZ.Monoidal | 0.522 |
 | conjecture:conj:CH | function:conj-over-τ | 0.522 |
-| theorem:thm:ext | function:ext-a₀≢a₁ | 0.521 |
-| theorem:thm:groupoid | module:CSTZ.Homotopy.Groupoid | 0.521 |
 | remark:rem:residue-origins | function:isResidue | 0.521 |
-| theorem:thm:irremovable | module:CSTZ.Topos.Irremovable | 0.520 |
-| definition:def:discriminator | module:CSTZ.Framework.Discriminator | 0.518 |
-| theorem:thm:exhaustive | module:CSTZ.Verification.LimitsExhaustive | 0.518 |
-| remark:rem:native-univalence | module:CSTZ.Homotopy.Univalence | 0.513 |
-| remark:rem:proof-assistant | module:CSTZ.Topos.ProofTheory | 0.505 |
+| remark:rem:triangle-grounding | function:triangle-σ | 0.521 |
+| definition:def:profile | function:profile | 0.519 |
+| … (4 more) | | |
 
 ### Paper objects with strong Python match but no Agda (E/M/E candidates)
 
@@ -64,37 +68,37 @@ add an Agda module or postulate.
 
 | paper | best python | score |
 |-------|-------------|-------|
+| definition:def:residue | function:is_residue | 0.666 |
+| proposition:prop:commutative | function:check_wedge_comm | 0.662 |
 | definition:def:composition | class:DirectedMorphism | 0.653 |
 | definition:def:swap-conj | function:omega_neg | 0.644 |
+| definition:def:boundary | function:ext_boundary | 0.623 |
+| proposition:prop:limits | module:category | 0.621 |
+| remark:rem:interchange-russell | function:interchange | 0.600 |
 | definition:def:evolution | function:is_residue | 0.597 |
 | theorem:thm:cat-axioms | module:category | 0.596 |
 | proposition:prop:k-morph | module:homotopy | 0.595 |
+| definition:def:eval | function:is_paired | 0.590 |
+| definition:def:profile | module:exterior | 0.590 |
 | definition:def:representable | class:DirectedMorphism | 0.590 |
-| remark:rem:proof-assistant | module:axioms | 0.589 |
+| definition:def:profile-linear | function:check_profile_linearity | 0.589 |
 | theorem:prop:periodic-2d | module:exterior | 0.583 |
-| theorem:thm:deloop | module:category | 0.582 |
 | theorem:thm:n1cat | module:category | 0.582 |
-| definition:def:complex | module:exterior | 0.580 |
-| definition:def:triangle | function:triangle_identity | 0.576 |
-| theorem:thm:exhaustive | function:exhaustive_filling | 0.575 |
+| definition:def:eval-linear | module:framework | 0.581 |
+| proposition:prop:bool-dependent | module:framework | 0.579 |
+| definition:def:functor | function:ext_boundary | 0.578 |
+| definition:def:kappa | function:is_paired | 0.576 |
 | definition:def:nattrans | class:DirectedMorphism | 0.573 |
-| definition:def:discriminator | class:Discriminator | 0.573 |
+| proposition:prop:naturality | module:category | 0.573 |
 | definition:def:n-groupoid | function:check_wedge_self_zero | 0.571 |
+| remark:rem:interchange-selfhosting | module:category | 0.570 |
 | remark:rem:residue-origins | function:is_residue | 0.569 |
 | proposition:prop:dynamics-transfer | class:Perspective | 0.566 |
-| theorem:thm:subobj | function:unique_top_form | 0.565 |
 | definition:def:comprehension | function:check_wedge_self_zero | 0.560 |
-| definition:def:enrichment-data | function:triangle_identity | 0.556 |
-| theorem:thm:ext | function:ext_wedge | 0.548 |
+| definition:def:membership | function:membership | 0.555 |
+| theorem:thm:self-hosting | function:check_wedge_self_zero | 0.547 |
 | proposition:prop:monoidal | module:monoidal | 0.545 |
-| corollary:cor:self-model | function:check_wedge_self_zero | 0.545 |
-| theorem:thm:entailed | function:unique_top_form | 0.540 |
-| theorem:thm:irremovable | function:exhaustive_filling | 0.539 |
-| corollary:cor:pro-topos | module:topos | 0.538 |
-| remark:rem:hyper-recursive | function:bytes_to_tree | 0.528 |
-| theorem:thm:self-enrich | function:check_wedge_self_zero | 0.522 |
-| conjecture:conj:CH | function:omega_conj | 0.519 |
-| … (11 more) | | |
+| … (24 more) | | |
 
 ### True paper gaps — agda+python present, no plausible paper match (M/E/E)
 
@@ -105,51 +109,51 @@ what Agda and Python both implement.  Action: add a definition or
 remark to the paper, or document why the construct is "internal"
 to the framework.
 
-*94 items in this bucket.*
+*117 items in this bucket.*
 
 | agda | python (score) | best paper (low score) |
 |------|----------------|------------------------|
 | function:classify | function:classify (1.03) | remark:anon_061 (0.22) |
+| function:measure | function:choice_measure (0.98) | remark:anon_105 (0.25) |
+| function:linkVector | function:link_vector (0.87) | definition:def:profile-l (0.23) |
+| function:evolve | function:evolve (0.76) | remark:anon_004 (0.21) |
+| function:equalizerWitness | function:equalizer_witness (0.76) | proposition:prop:2morph (0.22) |
 | function:cd-mul | function:check_cd_commutativity (0.74) | definition:def:cayley-di (0.22) |
 | function:·V-zeroˡ | function:vec_zero (0.73) | corollary:cor:self-model (0.22) |
 | function:·V-zeroʳ | function:vec_zero (0.73) | corollary:cor:self-model (0.22) |
-| function:restrictToGrade | function:ext_restrict_grade (0.72) | definition:def:discrimin (0.24) |
+| function:χ | function:chi (0.72) | proposition:prop:extrema (0.24) |
 | function:disj-gap-gap | function:omega_disj (0.72) | proposition:prop:extrema (0.23) |
+| function:scalar | function:ext_scalar (0.71) | remark:anon_105 (0.22) |
 | function:inAnnihilator | function:in_annihilator (0.71) | proposition:prop:commuta (0.23) |
-| function:dne | function:dne (0.69) | definition:def:subobj-cl (0.05) |
+| module:CSTZ.Exterior.Basis | function:ext_basis (0.70) | definition:def:boundary (0.22) |
+| function:_∧Ω_ | function:omega_conj (0.69) | definition:def:subobj-cl (0.25) |
+| function:basis | function:ext_basis (0.69) | definition:def:boundary (0.22) |
+| function:measure-zero | function:choice_measure (0.69) | corollary:cor:self-model (0.22) |
 | function:cd-step1-comm | function:check_cd_commutativity (0.69) | definition:def:cayley-di (0.22) |
 | function:g0-grade | function:ext_grade (0.68) | remark:anon_099 (0.23) |
 | function:+F-cancel | function:check_double_cancel (0.68) | remark:rem:interchange-s (0.21) |
 | function:+F-cancel⁻ | function:check_double_cancel (0.68) | remark:rem:interchange-s (0.21) |
+| function:neg-gap | function:omega_neg (0.66) | remark:anon_125 (0.24) |
+| function:link-v₂ | function:link_vector (0.66) | remark:rem:cycles (0.21) |
+| function:link-v₃ | function:link_vector (0.66) | remark:rem:cycles (0.21) |
 | function:dne-gap | function:dne (0.66) | proposition:prop:extrema (0.23) |
-| function:univ-diff | function:sym_diff_discriminator (0.66) | — |
+| function:neg-overlap | function:omega_neg (0.66) | proposition:prop:extrema (0.24) |
 | function:indist-diff | function:sym_diff_discriminator (0.66) | — |
-| function:compose-coeff | function:compose_coeff (0.66) | — |
+| function:dne-overlap | function:dne (0.66) | proposition:prop:extrema (0.24) |
 | function:compose-disjoint | function:compose_witnesses (0.66) | corollary:cor:self-model (0.03) |
 | function:dne-check | function:dne (0.65) | definition:def:subobj-cl (0.04) |
+| function:compose-witnesses | function:compose_witnesses (0.65) | proposition:prop:2morph (0.22) |
+| function:+V-cancel | function:check_double_cancel (0.65) | remark:rem:interchange-s (0.21) |
 | function:g3-top-grade | function:unique_top_form (0.64) | remark:anon_105 (0.23) |
+| function:cycle2-link | function:link_vector (0.63) | remark:rem:cycles (0.21) |
 | function:𝟘 | function:vec_zero (0.63) | corollary:cor:self-model (0.22) |
 | module:CSTZ.Verification.Annihilator | function:in_annihilator (0.63) | remark:anon_126 (0.01) |
+| function:pair-annihilator-e₁ | function:in_annihilator (0.63) | definition:def:membershi (0.24) |
+| function:pair-annihilator-e₃ | function:in_annihilator (0.63) | definition:def:membershi (0.24) |
+| module:CSTZ.Verification.RISC | function:check_risc (0.63) | theorem:thm:topos (0.22) |
+| function:wedge₂-comm | function:check_wedge_comm (0.63) | proposition:prop:commuta (0.24) |
 | function:classify-outside | function:classify (0.62) | remark:anon_061 (0.22) |
-| function:classify-inside | function:classify (0.62) | remark:anon_061 (0.22) |
-| module:CSTZ.Vec | function:vec_zero (0.62) | — |
-| module:CSTZ.Examples.TruthTables | function:check_truth_tables (0.62) | remark:rem:proof-assista (0.21) |
-| function:+F-identity-𝟘ˡ | function:vec_zero (0.62) | definition:def:enrichmen (0.24) |
-| module:CSTZ.GF2 | function:gf2_mul (0.61) | — |
-| function:g0-basis | function:basis (0.61) | definition:def:boundary (0.22) |
-| function:basisEq | function:basis (0.61) | definition:def:boundary (0.25) |
-| module:CSTZ.Topos.FixedPoint | function:check_fixed_point_stability (0.61) | definition:anon_014 (0.23) |
-| function:annihilator-to-equality | function:in_annihilator (0.61) | definition:anon_013 (0.23) |
-| function:GF2Vec | function:vec_zero (0.60) | definition:def:represent (0.03) |
-| module:CSTZ.Exterior.Wedge | function:check_wedge_comm (0.60) | proposition:prop:commuta (0.24) |
-| function:grade | function:ext_grade (0.60) | remark:anon_099 (0.23) |
-| module:CSTZ.Verification.FixedPointStab | function:check_fixed_point_stability (0.60) | definition:anon_014 (0.23) |
-| function:+V-identityˡ | function:triangle_identity (0.59) | definition:def:enrichmen (0.23) |
-| function:+V-identityʳ | function:triangle_identity (0.59) | definition:def:enrichmen (0.23) |
-| function:Ω | function:omega_disj (0.59) | definition:def:subobj-cl (0.25) |
-| module:CSTZ.Verification.CDHexagon | function:check_cd_commutativity (0.59) | remark:anon_126 (0.24) |
-| function:_⊗-coeff_ | function:compose_coeff (0.59) | — |
-| … (54 more) | | |
+| … (77 more) | | |
 
 ### Near-triples — all three corners have signal but ambiguity blocked commit
 
@@ -160,16 +164,20 @@ the paper candidate, these are **alignment-engine failures to recover**,
 not gaps.  They are the highest-leverage targets for refining the
 alignment pipeline.
 
-*73 items in this bucket.*
+*99 items in this bucket.*
 
 | agda | python | paper | py+paper score |
 |------|--------|-------|----------------|
 | function:isResidueχ | function:is_residue (0.89) | definition:def:residue (0.59) | 1.48 |
-| function:triangle-σ | function:triangle_identity (0.81) | definition:def:tau-sigma (0.54) | 1.35 |
-| function:triangle-τ | function:triangle_identity (0.81) | definition:def:tau-sigma (0.54) | 1.34 |
+| function:dim-κ | function:dim_kappa (0.82) | definition:def:kappa (0.54) | 1.36 |
+| function:sym-monoidal | function:sym_diff_discriminato (0.68) | proposition:prop:sym-monoida (0.67) | 1.35 |
 | function:self-inverse | function:check_vec_self_invers (0.82) | corollary:cor:self-model (0.52) | 1.34 |
-| function:conj-τ-σ | function:omega_conj (0.75) | definition:def:swap-conj (0.55) | 1.30 |
-| function:conj-τ-σ | function:omega_conj (0.75) | definition:def:swap-conj (0.55) | 1.30 |
+| function:isResidue | function:is_residue (0.79) | definition:def:residue (0.55) | 1.34 |
+| function:self-inverse-morphism | function:check_vec_self_invers (0.78) | definition:def:directed-morp (0.53) | 1.31 |
+| function:conj-τ-τ | function:omega_conj (0.76) | definition:def:swap-conj (0.54) | 1.30 |
+| function:conj-σ-σ | function:omega_conj (0.76) | definition:def:swap-conj (0.54) | 1.30 |
+| function:conj-over-τ | function:omega_conj (0.75) | definition:def:swap-conj (0.55) | 1.30 |
+| function:conj-overlap-τ | function:omega_conj (0.74) | definition:def:swap-conj (0.54) | 1.28 |
 | function:conj-gap-any | function:omega_conj (0.74) | definition:def:swap-conj (0.52) | 1.26 |
 | function:evolve-dim | function:evolve (0.73) | definition:def:boolean-dim (0.53) | 1.26 |
 | function:self-inverse-e₁e₂ | function:check_vec_self_invers (0.71) | corollary:cor:self-model (0.55) | 1.26 |
@@ -179,100 +187,101 @@ alignment pipeline.
 | function:_⊆κ_ | function:dim_kappa (0.67) | definition:def:kappa (0.54) | 1.21 |
 | module:CSTZ.Axiom.ProfileLinearity | function:check_profile_lineari (0.65) | definition:def:profile-linea (0.56) | 1.21 |
 | function:∂ | function:check_boundary_square (0.60) | proposition:prop:boundary (0.60) | 1.20 |
+| function:monoidal-prod-coeff | function:compose_coeff (0.64) | definition:def:monoidal-prod (0.56) | 1.20 |
 | function:triangle-rot-σ | function:triangle_identity (0.66) | definition:def:tau-sigma (0.54) | 1.20 |
 | function:triangle-rot-τ | function:triangle_identity (0.66) | definition:def:tau-sigma (0.53) | 1.20 |
 | module:CSTZ.Exterior.Boundary | function:check_boundary_square (0.60) | proposition:prop:boundary (0.60) | 1.19 |
-| function:wedge-self-zero | function:check_wedge_self_zero (0.62) | corollary:cor:self-model (0.57) | 1.19 |
-| function:fano-1 | function:verify_fano_line (0.67) | theorem:thm:fano (0.52) | 1.19 |
+| module:CSTZ.Topos.SubobjClassifier | class:ToyBinaryClassifier (0.55) | definition:def:subobj-class (0.65) | 1.19 |
 | function:fano-4 | function:verify_fano_line (0.67) | theorem:thm:fano (0.52) | 1.19 |
 | function:fano-7 | function:verify_fano_line (0.67) | theorem:thm:fano (0.52) | 1.19 |
 | function:ext-a₀≢a₁ | function:ext_zero (0.66) | theorem:thm:ext (0.52) | 1.18 |
 | function:ext-a₃≢a₅ | function:ext_zero (0.66) | theorem:thm:ext (0.52) | 1.18 |
 | function:russell-at-zero | function:check_linear_map_zero (0.66) | theorem:thm:russell (0.52) | 1.18 |
-| function:russell-exclusion | function:russell_exclusion (0.63) | remark:rem:interchange-russe (0.54) | 1.16 |
-| function:swap | function:check_swap_involutive (0.63) | definition:def:swap-conj (0.53) | 1.16 |
+| function:triangle-check | function:ext_is_zero (0.65) | definition:def:triangle (0.52) | 1.17 |
+| function:self-membership-excluded | function:membership (0.62) | corollary:cor:self-model (0.54) | 1.16 |
+| function:em-σ | function:omega_neg (0.62) | definition:def:tau-sigma (0.54) | 1.15 |
+| function:self-host-neg | function:omega_neg (0.63) | theorem:thm:self-hosting (0.52) | 1.15 |
+| function:em-τ | function:omega_neg (0.62) | definition:def:tau-sigma (0.54) | 1.15 |
 | function:profile-lin-check-1 | function:check_profile_lineari (0.63) | definition:def:profile-linea (0.52) | 1.15 |
 | function:profile-lin-check-2 | function:check_profile_lineari (0.63) | definition:def:profile-linea (0.52) | 1.15 |
-| module:CSTZ.Axiom.EvalLinearity | function:check_eval_linearity_ (0.63) | definition:def:eval (0.52) | 1.15 |
-| module:CSTZ.Topos.SelfEnrichment | function:check_vec_self_invers (0.59) | definition:def:enrichment-da (0.56) | 1.14 |
-| module:CSTZ.Verification.LimitsExhaustiv | function:check_profile_lineari (0.58) | proposition:prop:limits (0.55) | 1.13 |
-| module:CSTZ.Higher.Triangle | function:triangle_identity (0.61) | definition:def:triangle (0.52) | 1.13 |
-| function:gradeComponent | function:ext_grade (0.58) | definition:def:complex (0.54) | 1.12 |
-| module:CSTZ.Topos.SelfHosting | function:check_vec_self_invers (0.59) | theorem:thm:self-hosting (0.53) | 1.12 |
-| module:CSTZ.Verification.PairingBilinear | function:check_bilinear_left (0.60) | proposition:prop:pairing (0.52) | 1.12 |
-| function:residue-a₀-a₂ | function:is_residue (0.58) | definition:def:residue (0.53) | 1.11 |
-| function:toLinear | function:check_linear_map_zero (0.57) | definition:def:profile-linea (0.54) | 1.11 |
-| module:CSTZ.Framework.Discriminator | function:sym_diff_discriminato (0.59) | definition:def:discriminator (0.52) | 1.11 |
-| function:disjoint-self-false | function:check_vec_self_invers (0.56) | corollary:cor:self-model (0.55) | 1.11 |
-| … (33 more) | | | |
+| module:CSTZ.Framework.Membership | function:membership (0.61) | definition:def:membership (0.54) | 1.15 |
+| module:CSTZ.Sets.Choice | function:choice_measure (0.64) | theorem:thm:choice (0.51) | 1.15 |
+| function:em-bool | function:ext_is_zero (0.63) | proposition:prop:bool-depend (0.52) | 1.15 |
+| function:chain-complex-profile | function:chain_complex_check (0.62) | definition:def:complex (0.52) | 1.15 |
+| … (59 more) | | | |
 
 ## Single-source items (cofiber tips)
 
 ### Paper-only (E/M/M)
 
-94 paper decls have no plausible agda or python match.
+112 paper decls have no plausible agda or python match.
 Most are likely **remarks** and **examples** that are rhetorical
 context rather than formal objects to be mechanised.  First 20:
 
-- `paper:definition:def:discriminator`  *definition*
+- `paper:definition:def:profile`  *definition*
+- `paper:definition:def:profile-linear`  *definition*
+- `paper:definition:def:residue`  *definition*
 - `paper:remark:rem:residue-origins`  *remark*
+- `paper:definition:def:kappa`  *definition*
 - `paper:definition:def:evolution`  *definition*
 - `paper:proposition:prop:monotone`  *proposition*
 - `paper:proposition:prop:monoidal`  *proposition*
-- `paper:theorem:thm:ext`  *theorem*
+- `paper:definition:def:membership`  *definition*
 - `paper:definition:def:comprehension`  *definition*
+- `paper:definition:def:eval-linear`  *definition*
 - `paper:proposition:prop:nondefault`  *proposition*
+- `paper:remark:rem:cycles`  *remark*
 - `paper:proposition:prop:empty`  *proposition*
-- `paper:proposition:prop:symdiff`  *proposition*
+- `paper:definition:def:powerset`  *definition*
 - `paper:conjecture:conj:CH`  *conjecture*
 - `paper:definition:def:infinity`  *definition*
-- `paper:proposition:prop:infinity`  *proposition*
 - `paper:remark:rem:foundational-status`  *remark*
 - `paper:remark:rem:halting`  *remark*
 - `paper:remark:rem:hyper-recursive`  *remark*
-- `paper:remark:rem:proof-assistant`  *remark*
-- `paper:remark:rem:cwa-owa`  *remark*
-- `paper:remark:rem:diaconescu`  *remark*
-- `paper:definition:def:complex`  *definition*
 
 ### Agda-only (M/E/M)
 
-266 agda decls have no paper/python match.  Many are
+337 agda decls have no paper/python match.  Many are
 low-level algebraic lemmas in GF2/Vec/Exterior — acceptable per
 STUDY.md §8.  First 20:
 
 - `agda:module:CSTZ.All`  (*module*, /home/user/cstz/agda/CSTZ/All.agda)
 - `agda:module:CSTZ.Axiom.EvalLinearity`  (*module*, /home/user/cstz/agda/CSTZ/Axiom/EvalLinearity.agda)
 - `agda:module:CSTZ.Axiom.ProfileLinearity`  (*module*, /home/user/cstz/agda/CSTZ/Axiom/ProfileLinearity.agda)
-- `agda:function:compose-coeff`  (*function*, /home/user/cstz/agda/CSTZ/Category/Emergent.agda)
+- `agda:module:CSTZ.Category.Adjunction`  (*module*, /home/user/cstz/agda/CSTZ/Category/Adjunction.agda)
+- `agda:record:Adjunction`  (*record*, /home/user/cstz/agda/CSTZ/Category/Adjunction.agda)
+- `agda:data:Axis`  (*data*, /home/user/cstz/agda/CSTZ/Category/Adjunction.agda)
+- `agda:module:CSTZ.Category.Directed`  (*module*, /home/user/cstz/agda/CSTZ/Category/Directed.agda)
+- `agda:module:CSTZ.Category.Emergent`  (*module*, /home/user/cstz/agda/CSTZ/Category/Emergent.agda)
+- `agda:record:DiscCtx`  (*record*, /home/user/cstz/agda/CSTZ/Category/Emergent.agda)
+- `agda:function:σ-target`  (*function*, /home/user/cstz/agda/CSTZ/Category/Emergent.agda)
+- `agda:function:compose-witnesses`  (*function*, /home/user/cstz/agda/CSTZ/Category/Emergent.agda)
+- `agda:module:CSTZ.Category.Functor`  (*module*, /home/user/cstz/agda/CSTZ/Category/Functor.agda)
+- `agda:record:DiscFunctor`  (*record*, /home/user/cstz/agda/CSTZ/Category/Functor.agda)
 - `agda:function:project`  (*function*, /home/user/cstz/agda/CSTZ/Category/Functor.agda)
 - `agda:function:include`  (*function*, /home/user/cstz/agda/CSTZ/Category/Functor.agda)
+- `agda:module:CSTZ.Category.Limits`  (*module*, /home/user/cstz/agda/CSTZ/Category/Limits.agda)
+- `agda:function:equalizerWitness`  (*function*, /home/user/cstz/agda/CSTZ/Category/Limits.agda)
+- `agda:module:CSTZ.Category.NatTrans`  (*module*, /home/user/cstz/agda/CSTZ/Category/NatTrans.agda)
 - `agda:record:NatTrans`  (*record*, /home/user/cstz/agda/CSTZ/Category/NatTrans.agda)
-- `agda:function:yoneda-faithful`  (*function*, /home/user/cstz/agda/CSTZ/Category/Yoneda.agda)
-- `agda:function:compose-e₁-e₂`  (*function*, /home/user/cstz/agda/CSTZ/Examples/GF2Cubed/Category.agda)
-- `agda:function:compose-disjoint`  (*function*, /home/user/cstz/agda/CSTZ/Examples/GF2Cubed/Category.agda)
-- `agda:function:retract-e₁`  (*function*, /home/user/cstz/agda/CSTZ/Examples/GF2Cubed/Category.agda)
-- `agda:function:yoneda-A-B`  (*function*, /home/user/cstz/agda/CSTZ/Examples/GF2Cubed/Category.agda)
-- `agda:function:yoneda-A-B'`  (*function*, /home/user/cstz/agda/CSTZ/Examples/GF2Cubed/Category.agda)
-- `agda:function:yoneda-A-C`  (*function*, /home/user/cstz/agda/CSTZ/Examples/GF2Cubed/Category.agda)
-- `agda:function:yoneda-A-D`  (*function*, /home/user/cstz/agda/CSTZ/Examples/GF2Cubed/Category.agda)
-- `agda:module:CSTZ.Examples.GF2Cubed.Cycles`  (*module*, /home/user/cstz/agda/CSTZ/Examples/GF2Cubed/Cycles.agda)
-- `agda:function:cycle3-v₁`  (*function*, /home/user/cstz/agda/CSTZ/Examples/GF2Cubed/Cycles.agda)
-- `agda:function:cycle3-v₂`  (*function*, /home/user/cstz/agda/CSTZ/Examples/GF2Cubed/Cycles.agda)
-- `agda:function:cycle3-v₃`  (*function*, /home/user/cstz/agda/CSTZ/Examples/GF2Cubed/Cycles.agda)
-- `agda:function:cycle3-closes`  (*function*, /home/user/cstz/agda/CSTZ/Examples/GF2Cubed/Cycles.agda)
+- `agda:module:CSTZ.Category.TwoCategory`  (*module*, /home/user/cstz/agda/CSTZ/Category/TwoCategory.agda)
 
 ### Python-only (M/M/E)
 
-119 python decls have no paper/agda match.  Most come
+140 python decls have no paper/agda match.  Most come
 from the `classify/` and `observe.py` subsystems — Python-native
 runtime concerns per STUDY.md §8.3.  First 20:
 
-- `python:module:axioms`  (*module*, /home/user/cstz/src/cstz/axioms.py)
+- `python:module:__init__`  (*module*, /home/user/cstz/src/cstz/__init__.py)
 - `python:function:check_profile_linearity`  (*function*, /home/user/cstz/src/cstz/axioms.py)
 - `python:function:check_eval_linearity`  (*function*, /home/user/cstz/src/cstz/axioms.py)
 - `python:function:check_bilinearity`  (*function*, /home/user/cstz/src/cstz/axioms.py)
-- `python:function:compose_coeff`  (*function*, /home/user/cstz/src/cstz/category.py)
+- `python:function:check_operationalist`  (*function*, /home/user/cstz/src/cstz/axioms.py)
+- `python:module:category`  (*module*, /home/user/cstz/src/cstz/category.py)
+- `python:function:compose_witnesses`  (*function*, /home/user/cstz/src/cstz/category.py)
+- `python:function:interchange`  (*function*, /home/user/cstz/src/cstz/category.py)
+- `python:function:equalizer_witness`  (*function*, /home/user/cstz/src/cstz/category.py)
+- `python:module:__init__`  (*module*, /home/user/cstz/src/cstz/classify/__init__.py)
 - `python:module:adapter`  (*module*, /home/user/cstz/src/cstz/classify/adapter.py)
 - `python:function:emit_patch`  (*function*, /home/user/cstz/src/cstz/classify/adapter.py)
 - `python:module:base`  (*module*, /home/user/cstz/src/cstz/classify/base.py)
@@ -283,8 +292,3 @@ runtime concerns per STUDY.md §8.3.  First 20:
 - `python:class:ByteNil`  (*class*, /home/user/cstz/src/cstz/classify/bytes.py)
 - `python:class:ByteLeaf`  (*class*, /home/user/cstz/src/cstz/classify/bytes.py)
 - `python:class:ByteSeg`  (*class*, /home/user/cstz/src/cstz/classify/bytes.py)
-- `python:function:morton2`  (*function*, /home/user/cstz/src/cstz/classify/bytes.py)
-- `python:function:byte_key`  (*function*, /home/user/cstz/src/cstz/classify/bytes.py)
-- `python:function:bytes_to_tree`  (*function*, /home/user/cstz/src/cstz/classify/bytes.py)
-- `python:function:_build`  (*function*, /home/user/cstz/src/cstz/classify/bytes.py)
-- `python:function:byte_children`  (*function*, /home/user/cstz/src/cstz/classify/bytes.py)
