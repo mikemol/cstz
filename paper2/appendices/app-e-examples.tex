@@ -207,20 +207,47 @@ $\REG$ unit for $256$ bytes of $\SMEM$.
 
 \begin{center}
 \begin{tabular}{l|rrrr|l}
-Plan & $\VRAM$ & $\SMEM$ & $\REG$ & $\LAT$ & Domination \\
+Plan & $\VRAM$ & $\SMEM$ & $\REG$ & $\LAT$ & Status \\
 \hline
-A & 288 & 0   & 4 & 388 & -- \\
-C & 288 & 0   & 3 & 452 & -- \\
-D & 544 & 0   & 3 & 520 & dominated by C \\
-E & 288 & 256 & 2 & 452 & -- \\
+A & 288 & 0   & 4 & 388 & frontier \\
+C & 288 & 0   & 3 & 452 & frontier \\
+D & 544 & 0   & 3 & 520 & $C \succ D$ (see below) \\
+E & 288 & 256 & 2 & 452 & frontier \\
 \end{tabular}
 \end{center}
 
-Plan D is Pareto-dominated by Plan C (same $\SMEM$,
-same $\REG$, higher $\VRAM$ and $\LAT$). The Pareto
-frontier is $\{A, C, E\}$: Plan A minimizes $\LAT$,
-Plan E minimizes $\REG$, Plan C is the middle
-compromise.
+Plan D's exclusion from the frontier is derived, not
+imposed. The admissibility set (Definition
+\ref{def:admiss-set})
+\begin{equation*}
+  A(D) = \{B : B \geq (544, 0, 3, 520)\}
+\end{equation*}
+is strictly contained in
+\begin{equation*}
+  A(C) = \{B : B \geq (288, 0, 3, 452)\}.
+\end{equation*}
+Witness: any $B = (V, S, 3, L)$ with $288 \leq V <
+544$ \emph{or} $452 \leq L < 520$ (other coordinates
+sufficient) lies in $A(C) \setminus A(D)$; under
+such $B$, $\delta_B(C) = 1$ but $\delta_B(D) = 0$.
+The simplest witness is $B = c(C) = (288, 0, 3, 452)$
+itself. By
+Proposition \ref{prop:op-equals-pareto}, $C \succ
+D$; by Proposition \ref{prop:frontier-char}, $D$ is
+not on the frontier. The residue $c(D) - c(C) =
+(256, 0, 0, 68)$ is the explicit XOR-signature
+(Remark \ref{rem:witnessed-residue}) of $C$ and $D$
+under the admissibility regime.
+
+Plans A, C, E are mutually non-dominating: A has
+lower $\LAT$ but higher $\REG$ than C; C has zero
+$\SMEM$ but higher $\REG$ than E; E has lower
+$\REG$ but higher $\SMEM$ than C and higher $\LAT$
+than A. No pair's cost vectors are componentwise
+ordered, so no pair's admissibility sets are
+strictly contained. All three remain on the
+frontier; no operationalist exclusion rule
+identifies any of them.
 
 \subsection{Phase transitions under $B_{\REG}$}
 \label{app-e:phase-reg}

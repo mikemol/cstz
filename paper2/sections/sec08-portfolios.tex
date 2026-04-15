@@ -7,36 +7,53 @@
 
 \begin{definition}[Pareto frontier of a workload]
   \label{def:pareto}
-  Given a workload $W$, grammar $G$, and budget $B$,
-  the \emph{Pareto frontier} $\mathrm{PF}(W, G, B)$ is
-  the set of admissible plans $P$ whose cost vector
-  $\bar{c}(P)$ is not componentwise dominated by any
-  other admissible plan's cost vector.
+  The \emph{Pareto frontier} $\mathrm{PF}(W, G, B)$ is
+  defined by Proposition \ref{prop:frontier-char}: the
+  set of plans admissible under $B$ that are not
+  operationalist-dominated (Definition
+  \ref{def:op-dominance}) by any other plan. The
+  frontier is thus derived from the admissibility
+  discriminator family (Definition
+  \ref{def:admissibility-family}), not imposed as a
+  multi-objective-optimization convention; the witness
+  of dominance is a budget in the asymmetric
+  difference of admissibility sets.
 \end{definition}
 
 \begin{proposition}[Pareto extraction from the chart]
   \label{prop:pareto}
-  \footnote{Class \textsf{AH}. Warrant: dominance
-  pruning maintains the Pareto frontier as an
-  invariant of the chart. Qualifier: assumes the
-  chart parser of Section \ref{sec:parsing} prunes
-  dominated items eagerly. Finite-$\kappa$ valid.}
+  \footnote{Class \textsf{AH}. Warrant: a chart-item
+  dominance check implements the partial order of
+  Definition \ref{def:op-dominance} on the partial
+  plans encoded as chart items. Qualifier: assumes
+  eager pruning preserves the frontier; equal-cost
+  items are both retained because neither dominates
+  the other (Remark in
+  Section \ref{def:admissibility-family} ff.).
+  Finite-$\kappa$ valid.}
   The Pareto frontier $\mathrm{PF}(W, G, B)$ is the
-  set of items in the chart cell
-  $\chi[0, N]$ whose production is the workload's
-  output nonterminal and whose cost vector is
-  non-dominated among them.
+  set of items in the chart cell $\chi[0, N]$ whose
+  production is the workload's output nonterminal,
+  whose cost vector satisfies $\bar{c} \leq B$
+  (admissibility), and for which no other chart item
+  with the same output nonterminal has a strictly
+  smaller cost vector (non-dominance).
 \end{proposition}
 
 \begin{proof}
   The cost-bounded completer of
-  Section \ref{sec:parsing} rejects items with costs
-  exceeding $B$, so every surviving item is
-  admissible. Pareto-dominance pruning (applied
-  eagerly in the chart's insertion step) discards
-  items whose cost vector is dominated by another
-  item's, so the surviving items at $\chi[0, N]$ for
-  the output production are exactly
+  Section \ref{sec:parsing} rejects chart items whose
+  cost vector exceeds $B$, so every surviving item is
+  admissible. Dominance pruning (applied eagerly on
+  insertion) retains an item iff no existing item
+  strictly dominates it in the sense of Definition
+  \ref{def:op-dominance}. Items with equal cost
+  vectors do not dominate each other, so are both
+  retained; their distinguishability, if any, comes
+  from the semantic attributes $(E, r, d)$ or the
+  underlying atom sequence. By Proposition
+  \ref{prop:frontier-char}, the surviving items at
+  $\chi[0, N]$ for the output production are exactly
   $\mathrm{PF}(W, G, B)$.
 \end{proof}
 

@@ -275,6 +275,43 @@ All \textsf{H}-class \cmark & (conditional) &
 
 \medskip
 
+Pareto dominance (Section \ref{sec:encoding} onward)
+is itself an instance of the parity-check mechanism.
+For two plans $P, P'$, the \emph{admissibility
+XOR-signature} at budget $B$ is
+\begin{equation*}
+  \chi_B(P, P') = \delta_B(P) \oplus \delta_B(P').
+\end{equation*}
+$\chi_B = 0$ when both are equally admissible under
+$B$ (both fit or neither fits); $\chi_B = 1$ when
+the admissibility regime distinguishes them. Plan
+$P'$ operationalist-dominates $P$ iff $\chi_B = 0$
+for every $B \in A(P)$ (every budget that admits $P$
+also admits $P'$) and $\chi_B = 1$ for some
+$B \in A(P') \setminus A(P)$ (at least one budget
+admits $P'$ but not $P$). The witness-budgets in the
+asymmetric difference $A(P') \setminus A(P)$ are the
+residues; they index exactly the dimensions on which
+$c(P) - c(P') \geq 0$ has strict-positive support.
+This is the admissibility regime's XOR signature,
+applied reflexively to the paper's exclusion rule.
+
+The framework's self-regulation applied recursively:
+a reader uncomfortable with an \emph{un}derived
+exclusion rule (as was rightly the case in an
+earlier draft that imported Pareto dominance
+wholesale) has detected an operationalist-unwitnessed
+claim. The remedy (Propositions
+\ref{prop:op-equals-pareto} and
+\ref{prop:frontier-char}) supplies the witness that
+converts the $\gmark$ to $\cmark$ without moving any
+cost vector or phase boundary; only the
+\emph{derivation} changes, from imported MOO
+convention to algebraic consequence of
+exec-operationalism on the admissibility regime.
+
+\medskip
+
 Every residue has a named discriminator. A reader who
 feels the rigor-differential between [DAF]'s
 \textsf{A}-class claims (backed by mechanized Agda)
