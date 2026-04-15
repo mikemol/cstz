@@ -1,0 +1,237 @@
+%----------------------------------------------------------------------
+\section{Parsing: Earley with Cost-Bounded Completion}
+\label{sec:parsing}\footnote{Section-level Toulmin. \emph{Move}: turn the grammar of Section \ref{sec:grammar} and its compound productions of Sections \ref{sec:fusion}--\ref{sec:time-sharing} into an executable chart parser with explicit cost-bound pruning. \emph{[DAF] comparison}: [DAF] grows a sheaf by applying the gluing axiom to local sections until a global section is synthesized; the chart parser grows a plan by applying productions to local chart items until a plan spanning the entire workload DAG is synthesized. \emph{Residue instance}: a chart item rejected by the cost-bound check is a residue that the planner records (for dominance pruning and for post-hoc diagnostics) but does not expand.}
+%----------------------------------------------------------------------
+
+\subsection{Chart items}
+
+\begin{definition}[Chart item]\label{def:chart-item}
+  A \emph{chart item} is a tuple
+  \begin{equation}
+    (A \to \alpha \bullet \beta, i, j, \bar{a}, \bar{c})
+  \end{equation}
+  where $A \to \alpha \beta$ is a production of the
+  grammar, the dot separates matched ($\alpha$) from
+  unmatched ($\beta$) children, $[i, j]$ is the range
+  of workload atoms consumed by $\alpha$, $\bar{a}$
+  is the semantic attribute tuple
+  (Section \ref{sec:attributes}), and $\bar{c}
+  \in \mathbb{N}^4$ is the Pareto-minimal cost
+  vector achieving the item.
+\end{definition}
+
+\begin{definition}[Chart]\label{def:chart}
+  The \emph{chart} $\chi$ is a map
+  $\chi : [0, N] \times [0, N] \to \mathcal{P}(
+  \text{chart items})$, where $N = |W|$ is the
+  number of atoms in the workload. For each range
+  $[i, j]$, $\chi[i, j]$ contains the
+  Pareto-nondominated chart items active on that
+  range.
+\end{definition}
+
+\subsection{Earley operations with cost bounds}
+
+The standard Earley operations (predictor, scanner,
+completer) extend naturally to the attributed,
+cost-bounded setting.
+
+\begin{description}[nosep,leftmargin=0.8cm]
+  \item[\textsc{Predictor}] From a waiting item
+    $(A \to \alpha \bullet B \gamma, i, j, \bar{a},
+    \bar{c})$, for each production $B \to \delta$,
+    add a new item $(B \to \bullet \delta, j, j,
+    \bar{a}_B, \bar{c}_B)$ where $\bar{a}_B$ and
+    $\bar{c}_B$ are initialized from $B$'s baseline.
+  \item[\textsc{Scanner}] If the workload's $j$-th
+    atom matches the next terminal in a waiting item
+    $(A \to \alpha \bullet a \gamma, i, j, \bar{a},
+    \bar{c})$, produce $(A \to \alpha a \bullet
+    \gamma, i, j+1, \bar{a}', \bar{c}')$ with
+    updated cost and semantic attributes.
+  \item[\textsc{Completer}] From a finished item
+    $(B \to \delta \bullet, j, k, \bar{a}_B,
+    \bar{c}_B)$ and a waiting item $(A \to \alpha
+    \bullet B \gamma, i, j, \bar{a}, \bar{c})$,
+    produce $(A \to \alpha B \bullet \gamma, i, k,
+    \bar{a}'', \bar{c}'')$ where $\bar{c}''$ is the
+    production-appropriate combination of $\bar{c}$
+    and $\bar{c}_B$.
+\end{description}
+
+What is non-standard is the \textsc{Completer}'s
+guard:
+
+\begin{definition}[Cost-bounded completer]
+  \label{def:cost-bounded}
+  Given a budget $B$, the completer rejects any
+  resulting item whose $\bar{c}'' \not\leq B$ (i.e.,
+  exceeds the budget on some component). The
+  rejected item is not added to the chart; no
+  derivation that would extend it is ever
+  considered.
+\end{definition}
+
+This single modification is the heart of the
+planner: it turns Earley into branch-and-bound
+search over the parse forest, with the budget
+vector as the pruning bound.
+
+\subsection{Admissible heuristic}
+
+To make the search proper A$^*$ rather than mere
+branch-and-bound, the completer additionally
+evaluates a \emph{heuristic} that lower-bounds the
+cost of completing the derivation from the current
+chart state:
+
+\begin{definition}[Admissible heuristic]\label{def:heuristic}
+  A function $h : \text{chart item} \to
+  \mathbb{N}^4$ is \emph{admissible} if for every
+  chart item $I$ with a completion $P$ (an extension
+  to a plan covering the full workload), $h(I) \leq
+  \bar{c}(P) - \bar{c}(I)$ componentwise.
+\end{definition}
+
+\begin{proposition}[Cost-budget heuristic]
+  \label{prop:heuristic-monotone}
+  \footnote{Class \textsf{AH}. Warrant: standard
+  heuristic-admissibility argument from the AI search
+  literature (Hart, Nilsson, Raphael 1968; Dechter \&
+  Pearl 1985). Qualifier: assumes the hardware
+  profile is monotone and sub-additive
+  (Definition \ref{def:profile}). Finite-$\kappa$
+  valid.}
+  The function
+  \begin{equation}
+    h^*(I) = \big(
+      \min_{a \in W_{\mathrm{rem}(I)}} \pi_0(a, 1)_r
+    \big)_r
+  \end{equation}
+  (the componentwise minimum over remaining atoms of
+  the profile's baseline per atom at batch $k=1$) is
+  admissible and monotone.
+\end{proposition}
+
+\begin{proof}
+  Admissibility: each remaining atom contributes at
+  least its baseline cost to the completion; the
+  componentwise minimum over the remaining atoms is
+  a lower bound on the completion cost.
+  Monotonicity: as the chart item advances (more
+  atoms consumed), the remaining workload shrinks,
+  so the min over it grows weakly. Hence
+  $h^*(I_\text{after}) \geq h^*(I_\text{before}) -
+  \bar{c}(\text{step})$.
+\end{proof}
+
+With an admissible monotone heuristic, the
+cost-bounded completer becomes A$^*$ search over
+the parse forest, and retains the completeness and
+optimality properties of A$^*$.
+
+\begin{theorem}[Cost-bounded Earley completeness]
+  \label{thm:earley-complete}
+  \footnote{Class \textsf{AH}. Warrant: A$^*$
+  completeness (Dechter--Pearl). Qualifier: assumes
+  at least one admissible plan exists; otherwise the
+  algorithm correctly reports infeasibility.
+  Finite-$\kappa$ valid.}
+  If there exists any plan $P$ with $\bar{c}(P)
+  \leq B$, the cost-bounded Earley parser with
+  heuristic $h^*$ will find an optimal such plan
+  in finite time.
+\end{theorem}
+
+\begin{proof}
+  See Appendix \ref{app:b}, Subsection
+  \ref{app:b-earley}. The argument is the standard
+  A$^*$ completeness argument restricted to the
+  parse-forest graph.
+\end{proof}
+
+\subsection{Complexity}
+
+\begin{theorem}[Planner complexity]\label{thm:complexity}
+  \footnote{Class \textsf{AH}. Warrant:
+  standard Earley complexity argument (Earley 1970;
+  Aycock--Horspool 2002) extended to attributed
+  items with Pareto dominance pruning. Qualifier:
+  the $|\mathrm{Pareto}|$ factor is empirically
+  small (on the order of tens to hundreds for the
+  workloads we consider) but worst-case can be
+  exponential in the number of resource dimensions.
+  Finite-$\kappa$ valid.}
+  The cost-bounded Earley parser runs in time
+  $O(N^3 \cdot |\mathrm{Pareto}| \cdot |\mathcal{P}|)$
+  where $N$ is the workload size, $|\mathrm{Pareto}|$
+  is the maximum Pareto frontier size per chart cell,
+  and $|\mathcal{P}|$ is the number of productions.
+\end{theorem}
+
+\begin{proof}
+  Standard Earley is $O(N^3 \cdot |\mathcal{P}|)$ for
+  the number of chart operations. The attribute
+  extension multiplies by the number of distinct
+  attribute tuples per chart cell, which after
+  Pareto-dominance pruning is bounded by
+  $|\mathrm{Pareto}|$. Each operation is $O(1)$
+  after the pruning step, which itself is $O(|\mathrm{Pareto}|)$
+  amortized over chart insertions.
+\end{proof}
+
+\subsection{The \texttt{spill\_register} production}
+
+Non-linear atoms break the XOR-bridge, requiring an
+explicit register materialization step.
+
+\begin{definition}[\texttt{spill\_register}]
+  \label{def:spill}
+  The \texttt{spill\_register} production writes the
+  current register state to shared memory (or, if
+  SMEM is over budget, to VRAM), reads it back
+  later. Its cost:
+  \begin{align}
+    \VRAM &+= 0 \text{ (if to SMEM)}
+          \quad \text{or} \quad
+          \text{register width} \text{ (if to VRAM)} \\
+    \SMEM &+= \text{register width (if to SMEM)} \\
+    \REG  &:= 0 \text{ after spill, then reload} \\
+    \LAT  &+= 2 \cdot \LAT_{\mathrm{spill}}
+  \end{align}
+\end{definition}
+
+\texttt{spill\_register} is the cost-aware boundary
+between $\GF(2)$-linear linear runs and non-linear
+atoms. The planner inserts it only when forced by a
+non-linear atom in the DAG or by a register-budget
+violation detected by the cost-bounded completer.
+
+\subsection{Incremental replanning}
+
+\begin{proposition}[Incremental replanning]
+  \label{prop:incremental}
+  \footnote{Class \textsf{AH}. Warrant: Earley charts
+  are locally constructed; adding an atom at the
+  end of $W$ only requires re-running the predictor,
+  scanner, and completer on chart cells touching the
+  new atom. Finite-$\kappa$ valid.}
+  Extending the workload $W$ by one atom at the end
+  requires at most $O(N \cdot |\mathrm{Pareto}|
+  \cdot |\mathcal{P}|)$ additional chart operations,
+  not the full $O(N^3 \cdots)$ re-parse.
+\end{proposition}
+
+\begin{proof}
+  New chart cells are created only for ranges that
+  end at the new atom's position; existing chart
+  items with earlier ranges are unaffected. The
+  completer only revisits items whose waiting
+  production expected the new atom's terminal
+  symbol.
+\end{proof}
+
+Incremental replanning matters for workloads that
+are themselves constructed incrementally, such as
+the streaming observation-state of [DAF]'s
+classification subsystem.

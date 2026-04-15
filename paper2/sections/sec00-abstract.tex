@@ -1,0 +1,40 @@
+\begin{abstract}
+The companion manuscript \emph{Discrimination as Foundation} establishes
+a constructive foundation for set theory over the exterior algebra
+$\bigwedge(\GF(2)^n)$ in which the primitive notion is discrimination
+and the four-cell membership profile is valued in $\GF(2)^2$. The
+present paper extends that framework from mathematical foundations to
+execution. We treat the compiled discrimination kernel as a grammar:
+each atomic operation ($\oplus$, $\wedge$, $\zeta$, $\partial$,
+$\mathrm{popcount}$, syndrome) is a terminal; each compound plan is
+a derivation; the cost of a plan is an attribute vector over four
+hardware resources (VRAM, shared memory, registers, wall-clock
+latency) that propagates through the derivation. Two compound
+productions---block-diagonal matrix fusion (MIMD lane partitioning)
+and XOR-bridged register time-sharing (temporal multiplexing of a
+single register across GF(2)-linear atoms)---capture the two axes
+along which independent atoms can share a kernel dispatch. A single
+encoding involution ($\zeta = \zeta^{-1}$ over $\GF(2)$) lets the
+planner translate losslessly between the coefficient ($\Lambda$)
+basis and the Reed--Muller syndrome (RM) basis, so that encoding
+becomes an explicit phase rather than an implicit convention; under
+LCM tile packing, the effective hardware-block utilization is 100\%
+independently of the CSTZ tile size. The planner itself is an Earley
+chart-parser with cost-bounded completion: candidate chart items are
+pruned when their aggregate cost exceeds the budget vector; an
+admissible heuristic makes completion an A$^*$ search over the
+parse forest. Constrained optimization uses Lagrangian duality over
+the resource vector, whose dual prices give a direct diagnostic of
+which resource is binding. The planner emits a \emph{portfolio}
+rather than a single plan: the Pareto-nondominated subset of the
+chart, groupable by identical atom sequences, which may be packed
+into a single dispatch via mask partitioning to exploit the batch
+coarseness forced by LCM tiling. We show that the planner is sound
+(every plan computes the same $\GF(2)$ value as the naive execution),
+that cost-bounded Earley retains completeness at the optimal cost,
+and that the portfolio output generalizes $k$-best parsing to
+Pareto-$k$-best. The successor axiom is an operationalist claim
+about execution itself: a plan that cannot be cost-distinguished
+from another plan on the stated budget vector is execution-equivalent
+on that hardware.
+\end{abstract}

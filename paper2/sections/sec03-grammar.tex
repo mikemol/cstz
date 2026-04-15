@@ -1,0 +1,259 @@
+%----------------------------------------------------------------------
+\section{The Attribute Grammar}\label{sec:grammar}\footnote{Section-level Toulmin. \emph{Move}: fix the RISC-style atom inventory and the base productions that combine atoms into plans. \emph{[DAF] comparison}: [DAF] builds sets from discriminators via $\kappa$-evolution and residues; we build plans from atoms via productions and cost attributes. \emph{Residue instance}: each production's cost vector is the residue of the difference between its children's sum-of-costs and the combined cost after fusion, time-sharing, or encoding change.}
+%----------------------------------------------------------------------
+
+\subsection{The atom inventory}\label{sec:atoms}
+
+The grammar's terminals are the \emph{atoms}: primitive
+kernels corresponding to one hardware dispatch each. The
+inventory is intentionally small. Every compound behavior
+is built from these terminals via the productions of
+Section \ref{sec:productions}.
+
+\begin{definition}[Atom]\label{def:atom}
+  An \emph{atom} is a quadruple $(\mathrm{id},
+  \mathrm{sig}, \pi_0, \mathrm{body})$ where
+  $\mathrm{id}$ is a name in the set
+  \begin{center}
+  \begin{tabular}{ll}
+    $\oplus$ & pointwise XOR in encoding $E$ \\
+    $\wedge_{\mathrm{tile}}$ & GF(2) AND in encoding $E$ \\
+    $\mathrm{pcnt}_2$ & popcount mod 2 (GF(2) reduce) \\
+    $\zeta_{\mathrm{pass}}$ & one butterfly pass of the zeta transform \\
+    $\partial_{\mathrm{gather}}$ & boundary gather--XOR at fixed $n$ \\
+    $\wedge_{\mathrm{yates}}$ & ranked-zeta wedge step \\
+    $\mathrm{rot}_{2 \times 2}$ & perspective rotation tile \\
+    $\mathrm{cd}_{2 \times 2}$ & Cayley--Dickson tile \\
+    $\mathrm{syn}_{7 \times 3}$ & Hamming syndrome tile \\
+    $\mathrm{fano}_3$ & Fano-line predicate \\
+    $\mathrm{enc}_{\Lambda \to \mathrm{RM}}$ & encode $\Lambda \to \mathrm{RM}$ ($n$ butterflies) \\
+    $\mathrm{dec}_{\mathrm{RM} \to \Lambda}$ & decode $\mathrm{RM} \to \Lambda$ (identical to encode over $\GF(2)$) \\
+    $\mathrm{enc}_{\Lambda \to \mathrm{Ham}}$ & encode $\Lambda \to $ Hamming compressed \\
+    $\mathrm{dec}_{\mathrm{Ham} \to \Lambda}$ & decode Hamming $\to \Lambda$ \\
+    $\mathrm{gather}$, $\mathrm{scatter}$ & stride-regular memory reshape \\
+  \end{tabular}
+  \end{center}
+  $\mathrm{sig}$ is the atom's signature (input and
+  output encoding, grade budget, tile size, batch
+  class); $\pi_0$ is its baseline cost vector drawn from
+  the hardware profile; $\mathrm{body}$ is the Pallas
+  kernel text (Appendix \ref{app:kernels}).
+\end{definition}
+
+\begin{remark}
+  The atom inventory is closed under [DAF]'s algebra in
+  the sense that every CSTZ operation from \S\S3--9 of
+  [DAF] decomposes into finitely many atoms from the
+  list above. Section \ref{sec:discussion} gives the
+  explicit mapping. No atom is marked as non-linear
+  except $\mathrm{pcnt}_2$, which reduces an
+  $n$-bit input to a single bit.
+\end{remark}
+
+\subsection{The attribute domain}\label{sec:attributes}
+
+Each nonterminal (= partial plan) carries an attribute
+tuple
+\begin{equation}
+  \bar{a} = (E, r, d, k; \bar{c}) \in
+  \mathcal{E} \times \mathbb{N} \times \mathbb{N}
+  \times \mathbb{N} \times \mathbb{N}^4,
+\end{equation}
+where $E$ is the output encoding (an element of the
+encoding lattice $\mathcal{E}$ of
+Section \ref{sec:encoding}), $r$ the grade budget, $d$
+the natural tile size of the output, $k$ the batch
+class, and $\bar{c}$ the cost vector.
+
+Two plans with identical $(E, r, d, k)$ are
+comparable: their $\bar{c}$ values partially order
+them. The Pareto-nondominated subset of a set of
+plans with identical semantic attributes is what the
+parser carries forward; Section \ref{sec:portfolios}
+shows how to extract it.
+
+\subsection{Base productions}\label{sec:productions}
+
+\begin{definition}[Plan]\label{def:plan}
+  A \emph{plan} is a derivation tree rooted at the
+  workload's output nonterminal, whose leaves are
+  atoms and whose internal nodes are productions. The
+  grammar consists of the productions below.
+\end{definition}
+
+Three classes of productions operate on plans. The
+first (base) corresponds directly to atoms; the second
+class (linear) fuses chains of $\GF(2)$-linear atoms;
+the third (compound) introduces spatial fusion
+(Section \ref{sec:fusion}) or temporal time-sharing
+(Section \ref{sec:time-sharing}).
+
+\subsubsection*{Base productions}
+
+\begin{center}
+\small
+\begin{tabular}{l}
+\verb|Plan(E, r, d, k) ::= Atom[E, r, d, k]|\\[2pt]
+\verb|Plan(E2, r, d, k) ::= enc[E1 -> E2] Plan(E1, r, d, k)|\\[2pt]
+\verb|Plan(E, r-1, d, k) ::= partial[E] Plan(E, r, d, k)|\\[2pt]
+\verb|Plan(E, r1+r2, d, k) ::= wedge[E] Plan(E, r1, d, k) Plan(E, r2, d, k)|
+\end{tabular}
+\end{center}
+
+Each base production's cost is the concatenation of
+its children's costs plus the atom's $\pi_0$, under
+the \emph{serial} cost-combination rule:
+\begin{align}
+  \VRAM &= \max_i \VRAM_i + \VRAM_{\mathrm{atom}} \\
+  \SMEM &= \max_i \SMEM_i + \SMEM_{\mathrm{atom}} \\
+  \REG  &= \max_i \REG_i  + \REG_{\mathrm{atom}}  \\
+  \LAT  &= \sum_i \LAT_i + \LAT_{\mathrm{atom}}
+\end{align}
+which captures that base productions run their
+children in sequence: latencies add, but peak resources
+are not simultaneously live (one child's resources are
+released before the next child begins).
+
+\subsubsection*{Linearity-fusion productions}
+
+\begin{center}
+\small
+\begin{tabular}{l}
+\verb|Plan(E, r, d, k+k') ::= xor_fused Plan(E, r, d, k) Plan(E, r, d, k')|
+\end{tabular}
+\end{center}
+
+where both children end with an $\oplus$ atom on the
+same $(E, r, d)$. This exploits
+Proposition \ref{prop:encoding-commute}: chained XORs
+combine into one by associativity, amortizing the
+kernel-launch cost across children.
+
+\subsection{Soundness}
+
+\begin{theorem}[Grammar soundness]\label{thm:soundness}
+  \footnote{Class \textsf{A}. Warrant: structural
+  induction on the grammar productions. Qualifier:
+  assumes each atom's Pallas body is faithful to its
+  stated $\GF(2)$ semantics; this is the subject of
+  property-based equivalence testing rather than of
+  grammar-level proof. Finite-$\kappa$ valid.}
+  Let $P$ be any plan derivable under the grammar
+  from a workload $W$. Executing $P$ on a stated
+  hardware profile produces the same $\GF(2)$ output
+  as executing $W$ in the reference interpreter of
+  [DAF].
+\end{theorem}
+
+\begin{proof}
+  Induction on the derivation of $P$. Base case: a
+  single atom is semantically identical to its
+  reference interpretation by the atom's
+  specification. Inductive case: each production's
+  semantic rule is a $\GF(2)$-linear identity
+  (XOR fusion, encoding commutation
+  (Proposition \ref{prop:encoding-commute}), grade
+  projection), compound productions
+  (Sections \ref{sec:fusion}--\ref{sec:time-sharing})
+  have their own correctness propositions
+  (Propositions \ref{prop:fused-correctness},
+  \ref{prop:xor-bridge}), and the compositional
+  structure of the grammar composes these locally
+  sound rules into a globally sound derivation.
+\end{proof}
+
+\begin{remark}[Reference interpretation]
+  The reference interpretation of $W$ is the naive
+  sequential execution of each atom in its specified
+  encoding, with explicit materialization at every
+  atom boundary. This is the ``oracle'' used in the
+  property-based testing of item S4 in the reading
+  guide: random workloads generated at small $n$ are
+  executed twice, once by the reference interpreter
+  and once by a planned schedule, and their $\GF(2)$
+  outputs are XOR-compared for equality.
+\end{remark}
+
+\subsection{Well-formedness}
+
+\begin{definition}[Well-formed grammar]\label{def:wf-grammar}
+  The grammar is \emph{well-formed} if
+  \begin{enumerate}[nosep,label=(\roman*)]
+    \item every production preserves the semantic
+      attributes $(E, r, d)$ exactly (i.e.\ the output
+      encoding, grade budget, and tile size are
+      functions of the children's attributes only, not
+      of cost);
+    \item no production is left-recursive on a
+      non-linear atom (ensures the Earley parser of
+      Section \ref{sec:parsing} terminates);
+    \item the admissible heuristic $h^*$ of
+      Section \ref{sec:parsing} is monotone
+      (Section \ref{sec:parsing}, Proposition
+      \ref{prop:heuristic-monotone}).
+  \end{enumerate}
+\end{definition}
+
+\begin{proposition}[Base grammar is well-formed]
+  \label{prop:base-wf}
+  The productions defined above satisfy conditions
+  (i)--(iii) of Definition \ref{def:wf-grammar}.
+\end{proposition}
+
+\begin{proof}
+  (i) is direct from the production signatures above.
+  (ii) holds because the only non-linear atom is
+  $\mathrm{pcnt}_2$, which has arity 1 and therefore
+  cannot be left-recursive. (iii) is deferred to
+  Proposition \ref{prop:heuristic-monotone} in
+  Section \ref{sec:parsing}.
+\end{proof}
+
+\subsection{Commutativity within productions}
+
+\begin{proposition}[XOR-fusion commutativity]
+  \label{prop:xor-commute}
+  \footnote{Class \textsf{A}. Warrant: XOR is
+  commutative and associative. Finite-$\kappa$ valid.}
+  Under the \texttt{xor\_fused} production, the
+  ordering of children is irrelevant: any permutation
+  produces an equivalent plan.
+\end{proposition}
+
+\begin{proof}
+  By commutativity and associativity of $\oplus$ in
+  $\GF(2)$. The cost vector is symmetric under
+  permutation because each component's combination
+  rule (max or sum) is commutative.
+\end{proof}
+
+This innocuous-looking proposition licenses the
+parser to avoid enumerating permutations of fused
+XOR subplans, shrinking the chart by a factor of
+$k!$ for a $k$-way fusion.
+
+\subsection{Relationship to [DAF]}
+
+The grammar structure mirrors [DAF]'s discrimination
+regime:
+
+\begin{center}
+\small
+\begin{tabular}{l|l}
+\textbf{[DAF] construct} & \textbf{This paper's analogue} \\
+\hline
+Discriminator $d \in \bigwedge^1 V$ & Atom $a \in \mathcal{A}$ \\
+$\kappa$-evolution & Production rule firing in the chart \\
+Residue $R(S)$ & Cost vector difference \\
+Membership profile $(\tau, \sigma)$ & Semantic attribute $(E, r)$ \\
+Operationalist axiom & Execution-operationalist (Def.\ \ref{def:exec-operationalist}) \\
+Sheafification & Chart closure under completer \\
+SPPF & Plan portfolio (\S\ref{sec:portfolios}) \\
+\end{tabular}
+\end{center}
+
+Each row is a functorial correspondence rather than
+a strict identity, but the analogy is close enough
+that this paper's machinery can be described
+informally as ``applying [DAF]'s sheaf-theoretic
+pattern to the compiler's scheduling problem.''

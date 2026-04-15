@@ -1,0 +1,203 @@
+%----------------------------------------------------------------------
+\section{Worked example: $\partial \circ \partial = 0$ on $\bigwedge(\GF(2)^3)$}
+\label{app:examples}
+%----------------------------------------------------------------------
+
+This appendix instantiates the planner's machinery
+on one concrete workload: verifying the
+boundary-squared identity at $n = 3$ over all
+exterior elements. In the CSTZ codebase this is
+\texttt{cstz.verification.check\_boundary\_squared\_all(3)}
+(\texttt{src/cstz/verification.py:32}); in [DAF]
+it is Proposition 5.5.
+
+\subsection{The workload}
+
+For each of the $2^8 = 256$ exterior elements
+$f \in \bigwedge(\GF(2)^3)$, compute $\partial
+(\partial f)$ and assert it equals zero. The DAG
+has 256 independent instances of the atom sequence:
+
+\begin{enumerate}[nosep,label=(\arabic*)]
+  \item $\partial_{\mathrm{gather}}$ at $n = 3$:
+    input $f$ (8 bits), output $\partial f$ (8
+    bits).
+  \item $\partial_{\mathrm{gather}}$ at $n = 3$:
+    input $\partial f$, output $\partial^2 f$
+    (8 bits).
+  \item $\mathrm{is\_zero}$: input $\partial^2 f$,
+    output a single bit (1 iff all 8 coefficients
+    are 0).
+  \item $\mathrm{assert}$: fail the workload if the
+    bit is 0.
+\end{enumerate}
+
+All 256 instances are independent; the natural
+tile size of $\partial_{\mathrm{gather}}$ is
+$d = 3$ (operates on 8-bit vectors indexed by
+3-bit subsets).
+
+\subsection{Hardware profile}
+
+For illustration, assume a hardware profile with
+\[
+  M = 16,
+  \quad B_{\VRAM} = 10^9 \text{ B},
+  \quad B_{\SMEM} = 10^5 \text{ B/SM},
+  \quad B_{\REG} = 10^3 \text{ words/thread}.
+\]
+(These numbers are fabricated for illustration; a
+real profile is calibrated per Appendix
+\ref{app:kernels}.)
+
+\subsection{Chart build-up}
+
+\emph{Scanner.} The parser reads the workload's
+256 instances in turn. For each, it creates a
+chart item for the 4-atom sequence, carrying
+attributes $(E = \Lambda, r = \text{full}, d = 3,
+k = 1, \bar{c} = \pi_0(\partial))$.
+
+\emph{Linearity fusion.} $\partial$ is
+$\GF(2)$-linear. The grammar's
+linearity-fusion production combines the 256
+instances into one batched $\partial$ dispatch
+with $k = 256$. Cost combiner for the batched
+$\oplus$-style production: \VRAM\ sums (each
+instance's input), \LAT\ is amortized.
+
+\emph{Iterated $\partial$.} The second
+$\partial$ applies to each of the 256 outputs of
+the first. Same fusion: one batched dispatch,
+$k = 256$.
+
+\emph{Encoding choice.} The grammar offers two
+encodings:
+\begin{itemize}[nosep]
+  \item \emph{Plan A} ($\Lambda$-dense): 256 input
+    elements, each 8 bits. Per-atom cost:
+    $\partial$ as gather-XOR.
+  \item \emph{Plan B} (RM-packed): first encode
+    to $\zeta(f)$ ($n = 3$ butterfly), apply
+    $\partial$ as a linear operator in the RM basis
+    (which drops the grade budget by one per
+    application), then decode. Overhead: 2 encode
+    + 2 decode butterflies.
+\end{itemize}
+
+Plan B's grade drop is load-bearing: after two
+$\partial$ applications, the grade budget is
+$r - 2$, which at $r = 3$ is $r = 1$, a
+much-compressed representation. The
+\emph{is\_zero} check, however, requires the full
+output, so Plan B must decode before the final
+check, erasing the grade-compression advantage.
+The cost-bounded completer extracts both plans as
+Pareto-nondominated.
+
+\subsection{Pareto frontier}
+
+At the workload's output nonterminal, chart cell
+$\chi[0, 256]$, the completer finds:
+
+\begin{center}
+\scriptsize
+\begin{tabular}{l|cccc|c}
+\textbf{Plan} & \VRAM & \SMEM & \REG & \LAT &
+  \textbf{Dual prices} \\
+\hline
+A ($\Lambda$-dense) & 4 kB & 2 kB & 32 w & 120 & - \\
+B (RM) & 4 kB & 4 kB & 48 w & 200 & - \\
+\end{tabular}
+\end{center}
+
+(Units and numbers are illustrative.)
+
+Both plans satisfy the budget. Plan A dominates
+Plan B componentwise: the Pareto frontier is
+$\{A\}$, and Plan B is pruned.
+
+\subsection{Alternative: the grade-truncated
+variant}
+
+If the workload's output nonterminal is not
+\texttt{is\_zero} but \texttt{grade\_restrict(1)}
+(take the grade-1 component of $\partial^2 f$),
+then Plan B would retain the compressed RM form
+through the grade restriction:
+
+\emph{Plan B$'$} cost: 4 kB VRAM, 3 kB SMEM,
+32 w REG, 150 LAT.
+
+Plan B$'$ now \emph{does not} dominate Plan A and
+vice versa (A has lower \LAT, B$'$ has lower
+\SMEM). Both are in the Pareto frontier; the
+portfolio output is
+$\mathcal{P} = \{A, B'\}$.
+
+\subsection{Portfolio packing}
+
+At $d = 3, M = 16$: $L = \lcm(3, 16) = 48$.
+Minimum batch coarseness: $(48/3)^2 = 256$.
+
+The workload has exactly 256 instances.
+Coincidence: 256 is the minimum coarseness, so
+the LCM-packed dispatch has zero spare lanes. No
+ambiguous-parse packing is possible for this
+workload at this batch size.
+
+If the workload were 128 instances instead, 128
+spare lanes would be available. The planner could
+pack Plan A on lanes 0--127 and Plan B$'$ on lanes
+128--255, giving a concurrent TMR-style
+portfolio (one plan per half of the warp). The
+extraction rule would be \textsc{First} (the
+answer is the same from both plans, assuming both
+pass).
+
+\subsection{Dual prices as diagnostic}
+
+At the optimum of Plan A, the binding resource is
+(illustratively) \LAT. The dual prices:
+\begin{align*}
+  \lambda_{\VRAM}^* &= 0 \quad \text{(slack; not binding)} \\
+  \lambda_{\SMEM}^* &= 0 \quad \text{(slack; not binding)} \\
+  \lambda_{\REG}^*  &= 0 \quad \text{(slack; not binding)}
+\end{align*}
+All budgets have slack; the objective \LAT\ is
+limited only by the atoms' intrinsic costs. The
+diagnostic message to the user would be: ``Budget
+is not binding; reducing latency requires
+algorithm changes or hardware changes, not budget
+changes.''
+
+At a smaller budget --- say $B_{\REG} = 30$ words
+--- Plan A would violate. The planner would
+fallback to a time-shared variant (Plan C) with
+\REG\ = 16, \LAT\ = 240. Dual price $\lambda_{\REG}^*$
+becomes positive, signaling that relaxing the
+register budget would most improve latency at
+this configuration.
+
+\subsection{Summary}
+
+The example exercises every grammar feature
+discussed in the paper:
+
+\begin{itemize}[nosep]
+  \item Linearity fusion (batched $\partial$).
+  \item Encoding choice ($\Lambda$ vs RM).
+  \item Pareto dominance pruning.
+  \item Portfolio extraction at spare-lane
+    batches.
+  \item Dual-price diagnostics.
+  \item \texttt{time\_share\_register} fallback
+    under \REG-binding budget.
+\end{itemize}
+
+It does not exercise \texttt{fused\_matrix\_apply}
+with heterogeneous atoms, because the workload's
+atoms are homogeneous. A second worked example
+exercising heterogeneous fusion (e.g.\ a Fano
+line check batched alongside several perspective
+rotations) is deferred to follow-up work.

@@ -1,0 +1,117 @@
+%----------------------------------------------------------------------
+\section{Structural Analogies}\label{app:analogies}
+%----------------------------------------------------------------------
+
+The following interpretive frameworks provide useful
+intuition for the scheduler but are not load-bearing
+for any theorem in the main text. They are collected
+here for readers familiar with these areas.
+
+\subsection{RISC ISA design}
+
+The atom inventory of Section \ref{sec:atoms} is, in
+form, a RISC instruction set. Each atom has fixed
+arity, fixed latency (modulo batch-size scaling),
+and a regular cost model. Compound productions play
+the role of instruction fusion in the sense of
+super-scalar CPU design: multiple atomic instructions
+are dispatched together when their data dependencies
+admit it. The analogy is close enough that
+\texttt{fused\_matrix\_apply} corresponds roughly to
+AVX-512 VPAND-VPXOR chains, and
+\texttt{time\_share\_register} corresponds to
+register-renaming across a pipeline stall boundary.
+
+Where the analogy breaks down: the CSTZ planner
+operates on $\GF(2)$-linear atoms exclusively for
+fusion, whereas CPU super-scalar dispatch handles
+arbitrary instructions by reordering under data
+dependencies. Our ``linearity constraint'' corresponds
+to the CPU's implicit reliance on architectural
+registers being the only shared state: two
+instructions can execute concurrently if and only if
+their register live sets are disjoint.
+
+\subsection{Software pipelining and kernel fusion}
+
+Compiler-theoretic software pipelining (Muchnick 1997
+Chapter 20) overlaps successive iterations of a loop
+by staggering their scheduling. Kernel fusion in the
+GPGPU literature (Sung et al.\ 2010) merges two GPU
+kernels into one by interleaving their operations.
+Our \texttt{time\_share\_register} is a degenerate
+case of both: it pipelines $n$ distinct operations on
+one register without loop structure, and it fuses
+them into one kernel dispatch without crossing a
+lane boundary.
+
+\subsection{Pareto-A$^*$ search}
+
+Mandow and P\'{e}rez-de-la-Cruz (2010) formulate
+multi-objective shortest-path search as A$^*$ over a
+partially ordered cost space. Their algorithm
+generalizes uniform-cost A$^*$ by maintaining a
+Pareto frontier of candidate paths per node rather
+than a single best-cost-so-far. Our chart parser is
+essentially their algorithm applied to the parse
+forest: chart cells are nodes, Pareto-nondominated
+items are candidate paths, and the admissible
+heuristic is the component-wise minimum over
+remaining workload atoms.
+
+\subsection{Constrained parsing in machine translation}
+
+The statistical machine translation literature
+(Chiang 2005, Lopez 2008, Huang 2008) has developed
+extensive Lagrangian-dual techniques for constrained
+parse-forest search, motivated by decoding
+constraints (language model integration, length
+penalties, feature-weight optimization). Our
+Section \ref{sec:lagrangian} imports this framework
+with the substitution of the resource vector for
+the feature vector. The subgradient iterations are
+identical; only the interpretation of the dual
+prices differs.
+
+\subsection{Sheaves on sites}
+
+[DAF]'s sheafification over Grothendieck topologies
+and our chart parser are, at an abstract level,
+instances of the same construction: starting from
+local data (presheaf / workload atoms) and a
+topology (site / production rules), extend to a
+global section (sheaf / plan) by applying the
+gluing axiom (intersection consistency /
+cost-bounded completer). The analogy is developed
+further in Section \ref{sec:discussion}, and
+formalizing it as a functor between the two
+categories is a natural direction for follow-up.
+
+\subsection{Reed--Muller codes and the Plotkin construction}
+
+Reed--Muller codes $\mathrm{RM}(r, m)$ are
+recursively defined via the Plotkin construction
+$\mathrm{RM}(r, m+1) = \mathrm{RM}(r, m) |
+\mathrm{RM}(r-1, m)$, where $|$ is the
+concatenation operation. Our encoding lattice
+(Section \ref{sec:encoding}) exploits this
+recursion: the zeta transform butterfly of
+Definition \ref{def:zeta} is precisely the
+Plotkin concatenation read as a change of basis.
+The grade filtration of $\bigwedge V$ corresponds
+to the order filtration of RM: a grade-$\leq r$
+element is encoded losslessly into
+$\mathrm{RM}(r, n)$'s information dimension.
+
+\subsection{SPPF and the plan portfolio}
+
+[DAF]'s SPPF retains multiple parse derivations as
+packed alternatives; our portfolio retains multiple
+plan derivations. The structural parallel runs
+deep: in both cases, ambiguity is information, not
+noise; in both cases, the data structure is
+chosen to admit compact representation of
+exponential ambiguity without enumerating. A
+portfolio with $|\mathcal{P}| = k$ is the
+scheduler's analogue of an SPPF packed node with
+$k$ alternatives.

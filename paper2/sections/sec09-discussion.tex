@@ -1,0 +1,242 @@
+%----------------------------------------------------------------------
+\section{Discussion}\label{sec:discussion}
+%----------------------------------------------------------------------
+
+\subsection{Summary of results}
+
+The following table summarizes the correspondence
+between [DAF]'s foundational machinery and the
+scheduling machinery developed here.
+
+\medskip
+\begin{center}
+\begin{tabular}{l|l|l}
+\textbf{[DAF] construct} & \textbf{This paper's analogue} & \textbf{Status} \\
+\hline
+Discriminator $d$ & Atom $a \in \mathcal{A}$ & Definition \\
+$\kappa$-evolution & Chart item insertion & Theorem \ref{thm:soundness} \\
+Membership profile $(\tau, \sigma)$ & Semantic attributes $(E, r)$ & Definition \\
+Four-cell structure & Encoding lattice $\mathcal{E}$ & Definition \ref{def:lambda}ff. \\
+Residue $R(S)$ & Cost-vector slack $B - \bar{c}$ & Definition \ref{def:cost-vector} \\
+Extensionality & Plan-equivalence (Definition \ref{def:exec-operationalist}) & Proposition \ref{prop:plan-trans} \\
+Operationalist & Execution-operationalist & Definition \ref{def:exec-operationalist} \\
+Gluing axiom & Cost-bounded completer & Definition \ref{def:cost-bounded} \\
+Sheafification & Chart closure & Theorem \ref{thm:earley-complete} \\
+SPPF & Plan portfolio & Definition \ref{def:portfolio} \\
+Fano closure & LCM density & Proposition \ref{prop:lcm-density} \\
+Yoneda embedding & Cost-signature equivalence & Proposition \ref{prop:plan-trans} \\
+Chain complex $\partial \circ \partial = 0$ & Grade-drop chain under $\partial$ in RM & Section \ref{sec:encoding} \\
+\end{tabular}
+\end{center}
+
+Each row is a functorial correspondence: the
+structural role [DAF] assigns to the left-hand
+concept is played, in this paper, by the right-hand
+concept. The parallel is close enough that both
+papers can be read as instances of a single
+underlying pattern: sheafification applied to the
+derivation DAG of an open-world computation, with
+the sheaf's sections being local plans or local
+set-membership claims, and the gluing axiom being
+satisfied by either cost-bounded parsing or
+$\GF(2)$-linear constraint solving.
+
+\subsection{Relationship to existing work}
+
+The components are drawn from well-established
+literatures. The novelty lies in the specific
+synthesis.
+
+\begin{itemize}[nosep]
+  \item \textbf{Earley parsing with attributes}.
+    Knuth (1968), Earley (1970), Aycock \& Horspool
+    (2002). The attribute-grammar extension of
+    Earley is classical; the specialization of its
+    attribute domain to a multi-dimensional cost
+    lattice is well-known in weighted CFG parsing
+    (Chiang et al., Huang, Lopez) for natural-language
+    translation applications.
+  \item \textbf{Lagrangian relaxation for CFG parsing}.
+    Chiang, Knight, Haghighi (2008) introduced
+    Lagrangian techniques for constrained
+    decoding; Huang (2008) extended them to
+    $k$-best parsing. Our contribution is to
+    multi-resource constraints, where the dual
+    variable is itself vector-valued.
+  \item \textbf{Pareto-A$^*$ search}. Mandow \&
+    P\'{e}rez-de-la-Cruz (2010) give the
+    general-purpose algorithm for multi-objective
+    shortest paths; we import their framework
+    essentially unchanged.
+  \item \textbf{Block-diagonal matrix fusion}.
+    Standard in BLAS implementations for
+    block-sparse problems; the scheduling
+    application to heterogeneous atoms sharing a
+    SIMT register is a specialization not found in
+    the BLAS literature.
+  \item \textbf{GF(2) matrix methods}. Valiant
+    (1975) reduces CFG parsing to matrix
+    multiplication; the converse, recognizing a
+    parse as a GF(2)-linear algebraic computation,
+    is implicit in our grammar but not exploited for
+    the parsing algorithm itself (we use Earley,
+    not matmul-based methods).
+  \item \textbf{Kernel fusion and software
+    pipelining}. The compiler-optimization
+    literature (Muchnick 1997; Allen \& Kennedy
+    2001) gives the algorithmic foundation for
+    kernel fusion; our \texttt{fused\_matrix\_apply}
+    is a specific instantiation of that idea for
+    $\GF(2)$-linear atoms over masked registers.
+\end{itemize}
+
+The novelty is the \emph{composition}: a grammar
+whose productions are GPU scheduling
+transformations, whose attributes are hardware
+resource vectors, whose parser is Earley with
+cost-bounded completion, whose output is a Pareto
+plan portfolio. Each piece is individually classical;
+their synthesis as an integrated compiler for the
+CSTZ algebra is new.
+
+\subsection{Practical limitations}
+
+\paragraph{Calibration burden.} The hardware profile
+$\pi$ is the locus of device-specific information.
+Calibrating $\pi$ from published SM specifications
+is plausible but non-trivial; calibrating from
+measured benchmarks on a specific device requires a
+benchmark sweep across the atom inventory. This is
+the principal engineering investment required to
+bring the planner from design to operation.
+(\S1 item S1, Appendix \ref{app:kernels} hints at
+the measurement protocol.)
+
+\paragraph{Grammar completeness.} The atom inventory
+of Section \ref{sec:atoms} covers the CSTZ algebra
+as developed in [DAF]'s Sections 3--9. Extensions to
+downstream frameworks --- adjoint functor lifting,
+higher-category morphism composition, sheaf
+restriction maps --- would add atoms. Each new
+atom requires a cost signature and a property test;
+the grammar structure accommodates arbitrary
+additions, but completeness against any particular
+downstream framework is the user's responsibility.
+
+\paragraph{Non-linear atoms.} The XOR-bridge and
+fused-matrix mechanics of Sections
+\ref{sec:fusion}--\ref{sec:time-sharing} apply only
+to $\GF(2)$-linear atoms. Popcount, comparison,
+and other reductions force register spills. Whether
+a broader class of atoms admits a ``semi-reversible''
+extension of the XOR-bridge is the subject of
+Conjecture \ref{conj:nonlinear}.
+
+\paragraph{Dynamic shapes.} The planner presupposes
+static $n$ (exterior dimension). Workloads that
+require runtime $n$-variability would need to be
+split into a family of plans, one per $n$, with
+dispatch to the correct plan selected at kernel
+invocation. This is expressible in the grammar but
+adds complexity to the parsing stage and is deferred.
+
+\paragraph{LP integrality gap.} The Lagrangian
+relaxation of Section \ref{sec:lagrangian} has a
+provably-zero gap in the affine-cost case, but the
+general worst-case gap is only empirically bounded.
+A tight theoretical bound is listed as open (X3).
+
+\subsection{Future directions}
+
+\paragraph{Grammar-level verification in Agda.}
+The predecessor [DAF] is mechanized in Agda
+(\texttt{agda/CSTZ/}); the planner grammar
+could similarly be formalized, with each
+production type-checked against an Agda
+specification of the underlying $\GF(2)$ atom
+semantics. This would give a mechanical proof
+of Theorem \ref{thm:soundness} at the grammar
+level.
+
+\paragraph{Streaming planner for ObservationState.}
+[DAF]'s classification subsystem emits an
+ObservationState that grows monotonically as
+new classifier observations are ingested.
+Proposition \ref{prop:incremental} lets the
+planner update in place; a streaming integration
+between the Python ObservationState
+(\texttt{src/cstz/observe.py}) and the planner's
+chart would give real-time plan updates as new
+observations arrive.
+
+\paragraph{Cost-profile calibration framework.}
+A benchmark suite that measures per-atom resource
+consumption on a target device, then fits a
+hardware profile $\pi$, would close item S1 of
+the reading guide. This is essentially the same
+shape as a BLAS autotuning loop.
+
+\paragraph{Multi-device scheduling.} The current
+budget vector is per-device. Extending the grammar
+to a multi-device cluster (data-parallel or
+model-parallel) would add a communication cost
+dimension and would require a production rule for
+cross-device atoms. This is a natural extension
+but not attempted here.
+
+\subsection{The operationalist through-line}
+
+Both [DAF] and this paper rest on an operationalist
+commitment: that a distinction which cannot be
+witnessed is not a valid distinction. [DAF]
+applies this to the metaphysics of discrimination
+(``if no discriminator separates $a$ and $b$ under
+any $\kappa$-evolution, then $a = b$''). We apply
+it to the metaphysics of execution (``if no
+measurement separates $P_1$ and $P_2$ on the
+target hardware, then $P_1$ and $P_2$ are
+execution-equivalent'').
+
+The commitment is philosophically the same. In
+both cases, identifying two entities that would
+otherwise be distinct is an engineering act, not a
+forced mathematical conclusion; in both cases, the
+engineering motivation is that the framework that
+admits un-witnessable distinctions cannot be
+implemented, tested, or falsified. The planner's
+portfolio output, which retains alternative plans
+whose costs are measurement-indistinguishable, is
+the execution-level manifestation of the same
+principle that licenses [DAF]'s sheafification to
+treat $\kappa$-equivalence as identity.
+
+\subsection{Conclusion}
+
+We have extended the discrimination framework of
+[DAF] from mathematical foundations to execution
+engineering. A weighted attribute grammar captures
+the admissible schedules; an Earley chart parser
+with cost-bounded completion selects among them;
+Lagrangian duality over a four-dimensional resource
+vector gives the constraint-enforcement mechanism;
+Pareto portfolios retain non-dominated alternatives;
+ambiguous-parse packing exploits the batch coarseness
+that LCM tile alignment enforces to run alternatives
+concurrently at no extra dispatch cost. The two
+compound productions --- spatial MIMD fusion via
+block-diagonal masked matrix, and temporal
+multiplexing via XOR-bridged register sharing ---
+are opposite poles of the fusion-vs-sequencing
+tradeoff, and their nesting is what the planner's
+search is searching over.
+
+The one genuinely new foundational commitment is
+the execution-operationalist axiom
+(Definition \ref{def:exec-operationalist}), which
+declares plan-equivalence to be the coarsest
+relation consistent with observable cost behavior
+on stated hardware. Everything else is a lifting
+of [DAF]'s algebraic machinery into an execution
+model, an operation that---like sheafification over
+a site---produces a substantially richer output
+than any single derivation would admit.

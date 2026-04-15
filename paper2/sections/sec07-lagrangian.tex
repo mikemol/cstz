@@ -1,0 +1,189 @@
+%----------------------------------------------------------------------
+\section{Lagrangian Dual over the Resource Vector}
+\label{sec:lagrangian}\footnote{Section-level Toulmin. \emph{Move}: formulate the planner's constrained-optimization problem as a linear program, derive its dual, and show how the dual prices give a direct diagnostic of binding resources. \emph{[DAF] comparison}: [DAF]'s $\kappa^\perp = \{0\}$ characterization of a saturated regime is the convex-optimization analogue of our dual-feasibility condition --- a regime is saturated exactly when no further resource can be spared. \emph{Residue instance}: the slack variable in the LP ($c - B$) is the budget's residue, and the dual variable (the $\lambda$) is the planner's shadow price for that residue.}
+%----------------------------------------------------------------------
+
+\subsection{The primal}
+
+The planner's optimization problem is: find the cheapest
+admissible plan $P$ for a workload $W$.
+
+\begin{definition}[Primal plan selection]
+  \label{def:primal}
+  Given workload $W$, grammar $G$, budget vector
+  $B \in \mathbb{N}^4$, and a scalar objective function
+  $\phi : \mathbb{N}^4 \to \mathbb{R}$, the primal is
+  \begin{equation}
+    \min_{P \in \mathrm{plans}_G(W)} \phi(\bar{c}(P))
+    \quad \text{s.t.} \quad \bar{c}(P) \leq B
+    \text{ componentwise}.
+  \end{equation}
+\end{definition}
+
+Choosing $\phi$ is a policy decision. Two natural
+choices:
+
+\begin{itemize}[nosep]
+  \item $\phi(\bar{c}) = \bar{c}_{\LAT}$: minimize
+    latency subject to memory budgets. Most common
+    for latency-sensitive workloads.
+  \item $\phi(\bar{c}) = \bar{c}_{\FLOPS}$ if we
+    extend the resource vector to include FLOPS:
+    minimize total compute subject to latency and
+    memory budgets. Most common for
+    throughput-sensitive workloads.
+\end{itemize}
+
+The two reduce to each other by adding the other
+resource to the budget vector, so without loss of
+generality we take $\phi(\bar{c}) = \bar{c}_{\LAT}$
+below.
+
+\subsection{The dual}
+
+The Lagrangian for the primal with $\phi = \bar{c}_{\LAT}$
+and budget constraints $\bar{c}_r \leq B_r$ for
+$r \in \{\VRAM, \SMEM, \REG\}$ (we omit $\LAT$ from
+the constraint side since it is the objective) is
+\begin{equation}\label{eq:lagrangian}
+  \mathcal{L}(P, \lambda_V, \lambda_S, \lambda_R) =
+  \bar{c}_{\LAT}(P) +
+  \lambda_V (\bar{c}_{\VRAM}(P) - B_{\VRAM}) +
+  \lambda_S (\bar{c}_{\SMEM}(P) - B_{\SMEM}) +
+  \lambda_R (\bar{c}_{\REG}(P) - B_{\REG}).
+\end{equation}
+
+The dual function is
+\begin{equation}
+  g(\lambda_V, \lambda_S, \lambda_R) =
+  \min_{P \in \mathrm{plans}_G(W)}
+  \mathcal{L}(P, \lambda_V, \lambda_S, \lambda_R),
+\end{equation}
+and the dual problem is $\max_{\lambda \geq 0} g(\lambda)$.
+
+For fixed $\lambda$, $\mathcal{L}$ is a weighted sum over
+$\bar{c}$, and the inner minimization reduces to a
+single unweighted chart parse with the combined scalar
+cost $\phi_\lambda(\bar{c}) = \bar{c}_{\LAT} +
+\sum_r \lambda_r \bar{c}_r$. We call this the
+\emph{weighted parse at Lagrangian price $\lambda$}.
+
+\subsection{Subgradient update}
+
+The outer maximization over $\lambda$ is solved by
+subgradient ascent:
+
+\begin{definition}[Subgradient update]\label{def:subgrad}
+  Starting from $\lambda^{(0)} = 0$:
+  \begin{enumerate}[nosep,label=(\arabic*)]
+    \item Solve the weighted parse at $\lambda^{(t)}$,
+      obtaining $P^{(t)}$.
+    \item Compute the slack vector $s^{(t)} =
+      \bar{c}(P^{(t)}) - B$ (restricted to the
+      constraint dimensions).
+    \item Update: $\lambda^{(t+1)} = \max(0,
+      \lambda^{(t)} + \eta_t \cdot s^{(t)})$
+      componentwise, with step size $\eta_t
+      = c / \sqrt{t}$.
+  \end{enumerate}
+\end{definition}
+
+Convergence of this subgradient scheme under the LP
+relaxation is standard (Bertsekas 1999, Chapter 6).
+
+\subsection{Dual prices as diagnostics}
+
+\begin{proposition}[Dual price interpretation]
+  \label{prop:dual-prices}
+  At the optimal dual solution $\lambda^*$:
+  \begin{itemize}[nosep]
+    \item $\lambda_r^* > 0$ iff the constraint on
+      resource $r$ is active (binding) at the primal
+      optimum;
+    \item $\lambda_r^*$ is the marginal decrease in
+      the objective per unit increase in the budget
+      $B_r$.
+  \end{itemize}
+\end{proposition}
+
+\begin{proof}
+  Complementary slackness of LP duality: at optimum,
+  either $\lambda_r^* = 0$ or $s_r^* = 0$, and the
+  sensitivity interpretation is the standard envelope
+  theorem applied to $\mathcal{L}$.
+\end{proof}
+
+In operational terms: if the planner returns a plan
+whose dual price $\lambda_{\REG}^*$ is high, the user
+knows that loosening the register budget (e.g.\ by
+using a device with a larger register file) would
+most improve execution latency. This is a direct,
+actionable architectural insight.
+
+\subsection{Achievability and the integrality gap}
+
+\begin{theorem}[Lagrangian achievability]
+  \label{thm:lagrangian}
+  \footnote{Class \textsf{AH}, status \omark\ (open
+  integrality gap). Warrant: LP duality applies to
+  the LP relaxation of the plan-selection problem.
+  Qualifier: the gap between LP-optimal and
+  IP-optimal plan cost is bounded only empirically
+  in our experiments; a formal worst-case bound is
+  open (\S1 item X3). Finite-$\kappa$ valid.}
+  The LP relaxation of the primal problem has a
+  computable dual optimum $\lambda^*$, and the
+  primal plan obtained by executing a chart parse at
+  price $\lambda^*$ is within a bounded factor of
+  the LP-relaxed optimum. The gap is zero when the
+  grammar's production costs are affine in batch
+  size.
+\end{theorem}
+
+\begin{proof}
+  See Appendix \ref{app:b}, Subsection
+  \ref{app:b-lagrangian}. The affine-in-batch case
+  is classical; the general case depends on the
+  step function character of certain productions
+  (e.g.\ batch saturation of LCM packing) and is
+  bounded by a small constant (typically $\leq 2$)
+  in practice.
+\end{proof}
+
+\subsection{Practical consequences}
+
+Three consequences worth stating explicitly:
+
+\begin{itemize}[nosep]
+  \item The planner can report, alongside each plan,
+    the three dual prices $(\lambda_{\VRAM}^*,
+    \lambda_{\SMEM}^*, \lambda_{\REG}^*)$. These form
+    a human-readable diagnostic of which resource is
+    the current bottleneck.
+  \item Tightening any single budget produces a new
+    plan whose cost may differ by at most the
+    corresponding $\lambda_r^*$ per unit of tightening.
+    This is exactly the sensitivity the user wants
+    when deciding which resource to invest in.
+  \item The weighted parse at a fixed $\lambda$ is a
+    single Earley pass; the outer subgradient
+    iteration typically converges in $O(\log 1 /
+    \epsilon)$ iterations for tolerance $\epsilon$.
+    Total cost is therefore the Earley complexity of
+    Theorem \ref{thm:complexity} multiplied by a
+    logarithmic factor.
+\end{itemize}
+
+\subsection{Relationship to constrained parse-forest optimization}
+
+The Lagrangian dual formulation is a specific instance
+of the general framework of constrained CFG parsing
+(Chiang et al.\ 2013; Lopez 2008; Huang 2008). The
+specialization to our setting is that the resource
+vector and its associated cost lattice are
+multi-dimensional, and the productions combine costs
+by different rules per dimension (sum, max). These
+additions do not break the LP-duality argument; they
+only complicate the Lagrangian gradient, which remains
+a subgradient at the piecewise-linear points where
+two productions' costs are equal.
