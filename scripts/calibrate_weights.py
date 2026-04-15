@@ -55,6 +55,7 @@ from align_parallel import (  # noqa: E402
     _python_docstring_by_qualname,
     _paper_doc,
 )
+import candidate_families  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -296,11 +297,138 @@ def calibrate(max_iters: int = 8) -> dict:
     for k, v in python_paper_cands.items():
         cands_by_source[k] = v
 
-    # Calibration loop
+    # Calibration loop with κ-evolution on plateau
     family_scales: dict[str, float] = {f: 1.0 for f in reg.by_family()}
     trace: list[dict] = []
     prev_residue = float("inf")
     stuck_count = 0
+    # Families we've already tried (even if rejected) so we don't propose
+    # the same one twice.
+    tried_families: set[str] = set()
+    # Active extra families: family_tag → fire-check fn
+    active_extras: dict = {}
+
+    paper_row_by_qn = {
+        f"paper:{r['kind']}:{r.get('label','')}": r
+        for r in paper_rows if r.get("label")
+    }
+
+    def _recompute_bitmaps():
+        """Refresh all decl bitmaps after a new family is registered."""
+        for p in paper:
+            bitmaps[p.qualname] = reg.fire_bitmap(
+                p,
+                docstring=_paper_doc(paper_rows, p.qualname),
+                extra_families=active_extras,
+            )
+        for a in agda:
+            bitmaps[a.qualname] = reg.fire_bitmap(
+                a,
+                docstring=agda_docs.get(a.qualname, ""),
+                extra_families=active_extras,
+            )
+        for y in python:
+            bitmaps[y.qualname] = reg.fire_bitmap(
+                y,
+                docstring=python_docs.get(y.qualname, ""),
+                extra_families=active_extras,
+            )
+
+    def _eval_current(scales) -> tuple[float, float, int]:
+        """Evaluate top-1 accuracy + mean rank under ``scales``."""
+        ranks: list[int] = []
+        top1 = 0
+        for src_qn, target_qn, _cite, _stream in oracle:
+            if src_qn not in bitmaps or target_qn not in bitmaps:
+                continue
+            cands = cands_by_source.get(src_qn)
+            if not cands:
+                continue
+            # Rebuild candidate bitmaps (cands still has old bitmap ints,
+            # but bitmaps dict has fresh ones).
+            fresh_cands = [(qn, bitmaps.get(qn, 0)) for qn, _ in cands]
+            rank = predicted_rank(reg, bitmaps[src_qn], fresh_cands, target_qn, scales)
+            ranks.append(rank)
+            if rank == 1:
+                top1 += 1
+        if not ranks:
+            return 0.0, 0.0, 0
+        return statistics.mean(ranks), 100.0 * top1 / len(ranks), len(ranks)
+
+    def _try_candidate_family(family_tag: str, scales) -> tuple[float, int, dict[str, float]]:
+        """Register a candidate family, calibrate it, measure improvement.
+
+        Per Appendix F's pattern ``suggest_kappa_evolution``: add the new
+        form, fit its coefficient to the residue, then compare.  Here we
+        use 3 iterations of family-scale gradient descent so the new
+        family's scale finds its proper level.  Returns (new_mean_rank,
+        n_added, calibrated_scales) so caller can decide to keep or
+        revert.
+        """
+        gen = candidate_families.FAMILY_GENERATORS[family_tag]
+        fire_fn = candidate_families.FIRE_FUNCTIONS[family_tag]
+        items = list(gen(paper + agda + python, paper_rows))
+        items = [(k, w) for (_tag, k, w) in items]
+        if not items:
+            return float("inf"), 0, {}
+
+        n_added = reg.register_candidate_family(family_tag, items)
+        if n_added == 0:
+            return float("inf"), 0, {}
+
+        # Hook the fire-check
+        if family_tag == "section_num":
+            prev_fn = fire_fn
+            def _wrapped(decl, key, docstring=""):
+                return prev_fn(decl, key, paper_row_by_qn=paper_row_by_qn, docstring=docstring)
+            active_extras[family_tag] = _wrapped
+        else:
+            active_extras[family_tag] = fire_fn
+
+        _recompute_bitmaps()
+
+        # Rebuild candidate bitmaps (the extra family may now fire on
+        # pairs that previously had 0 intersection)
+        def rebuild_cands(source_decls, target_decls):
+            out = {}
+            for s in source_decls:
+                hits = []
+                for t in target_decls:
+                    if bitmaps.get(s.qualname, 0) & bitmaps.get(t.qualname, 0):
+                        hits.append((t.qualname, bitmaps[t.qualname]))
+                out[s.qualname] = hits
+            return out
+
+        # Start the new family at a modest scale (0.5) so it doesn't
+        # flood the score space; gradient will pull it toward its
+        # proper level.  Other existing scales retained.
+        scales_with = dict(scales)
+        scales_with[family_tag] = 0.5
+
+        # Run 3 gradient iterations focused on the new family
+        # We build a refreshed candidate map that might include pairs
+        # newly-connected via the extra family.
+        refreshed = rebuild_cands(agda + python, paper)
+        # Merge with existing cands_by_source (keep larger candidate sets)
+        cands_refreshed = dict(cands_by_source)
+        for k, v in refreshed.items():
+            if k not in cands_refreshed or len(v) > len(cands_refreshed[k]):
+                cands_refreshed[k] = v
+
+        for _ in range(3):
+            scales_with, _ = gradient_step(
+                reg, oracle, bitmaps, cands_refreshed, scales_with, eta=0.15,
+            )
+
+        # Final evaluation under the calibrated scales
+        mean_r, top1, _n = _eval_current(scales_with)
+        return mean_r, n_added, scales_with
+
+    def _revert_family(family_tag: str):
+        """Undo a tentative family registration."""
+        reg.drop_family(family_tag)
+        active_extras.pop(family_tag, None)
+        _recompute_bitmaps()
 
     for it in range(max_iters):
         # Measure current state
@@ -338,9 +466,62 @@ def calibrate(max_iters: int = 8) -> dict:
         else:
             stuck_count = 0
         prev_residue = mean_r
+
         if stuck_count >= 2:
-            print(f"# plateau detected at iter {it}; terminating", file=sys.stderr)
-            break
+            # κ-evolution: try each candidate family, keep the one
+            # that best reduces mean_rank.  This is the Appendix F
+            # pattern ``detect_stuck → suggest_kappa_evolution`` but
+            # adapted to alignment (discriminator families instead of
+            # cost-model parameter forms).
+            print(f"# plateau at iter {it}; articulating candidate families", file=sys.stderr)
+            baseline = mean_r
+            best_family = None
+            best_mean = baseline
+            best_scales: dict[str, float] | None = None
+            per_family_results: dict[str, tuple[float, int]] = {}
+            for fam_tag in candidate_families.FAMILY_GENERATORS:
+                if fam_tag in tried_families:
+                    continue
+                if fam_tag in active_extras:
+                    continue
+                new_mean, n_added, cal_scales = _try_candidate_family(fam_tag, family_scales)
+                per_family_results[fam_tag] = (new_mean, n_added)
+                improvement = baseline - new_mean
+                print(f"#   candidate {fam_tag!r:14s}  +{n_added} discriminators, "
+                      f"mean_rank {baseline:.3f} → {new_mean:.3f} (Δ{improvement:+.3f}) "
+                      f"[family_scale={cal_scales.get(fam_tag, 0):.2f}]",
+                      file=sys.stderr)
+                if new_mean < best_mean - 1e-3:
+                    best_family = fam_tag
+                    best_mean = new_mean
+                    best_scales = cal_scales
+                else:
+                    _revert_family(fam_tag)
+                    tried_families.add(fam_tag)
+
+            if best_family is not None:
+                print(f"# κ-evolution: keeping family {best_family!r} "
+                      f"(mean_rank {baseline:.3f} → {best_mean:.3f})",
+                      file=sys.stderr)
+                family_scales = best_scales  # adopt calibrated scales
+                stuck_count = 0
+                prev_residue = best_mean
+                trace[-1]["kappa_evolution"] = {
+                    "adopted": best_family,
+                    "baseline": baseline,
+                    "new_mean": best_mean,
+                    "candidates": per_family_results,
+                    "adopted_scale": best_scales.get(best_family, 0.0),
+                }
+            else:
+                print(f"# no candidate family improves residue; terminating", file=sys.stderr)
+                trace[-1]["kappa_evolution"] = {
+                    "adopted": None,
+                    "baseline": baseline,
+                    "candidates": per_family_results,
+                    "verdict": "all candidates rejected",
+                }
+                break
 
         # Gradient step
         family_scales, _ = gradient_step(
@@ -352,6 +533,11 @@ def calibrate(max_iters: int = 8) -> dict:
     (reports / "calibration_trace.jsonl").write_text(
         "\n".join(json.dumps(t) for t in trace) + "\n"
     )
+    # Record which candidate families were articulated via κ-evolution,
+    # so downstream aligners (align_parallel.py) can register them too.
+    evolved_families = [
+        f for f in active_extras if f not in {"token", "name_tok", "kind", "edge", "cite"}
+    ]
     (reports / "calibrated_weights.json").write_text(
         json.dumps({
             "family_scales": family_scales,
@@ -360,6 +546,7 @@ def calibrate(max_iters: int = 8) -> dict:
             "oracle_size": len(oracle),
             "final_top1": trace[-1]["top1_pct"] if trace else 0.0,
             "final_mean_rank": trace[-1]["mean_rank"] if trace else 0.0,
+            "evolved_families": evolved_families,
         }, indent=2)
     )
     return {"family_scales": family_scales, "trace": trace}

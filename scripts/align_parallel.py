@@ -137,13 +137,13 @@ def score_pair(
     return total, firing
 
 
-def load_family_scales(repo: Path) -> dict[str, float] | None:
-    """Load calibrated family weights if they exist, else None."""
+def load_family_scales(repo: Path) -> tuple[dict[str, float] | None, list[str]]:
+    """Load calibrated family weights + list of κ-evolved families."""
     path = repo / "reports" / "calibrated_weights.json"
     if not path.exists():
-        return None
+        return None, []
     data = json.loads(path.read_text())
-    return data.get("family_scales")
+    return data.get("family_scales"), data.get("evolved_families", [])
 
 
 # ---------------------------------------------------------------------------
@@ -235,6 +235,7 @@ def align_parallel(paper: list[Decl], agda: list[Decl], python: list[Decl],
                     agda_docs: dict[str, str],
                     python_docs: dict[str, str],
                     family_scales: dict[str, float] | None = None,
+                    evolved_families: list[str] | None = None,
                     ) -> dict:
     """Parallel alignment pass."""
     reg = ParallelRegistry()
@@ -244,25 +245,49 @@ def align_parallel(paper: list[Decl], agda: list[Decl], python: list[Decl],
     reg.register_kinds_and_edges(all_decls)
     reg.register_citations(paper_rows)
 
+    # Register κ-evolved candidate families if calibration found any.
+    active_extras: dict = {}
+    paper_row_by_qn = {
+        f"paper:{r['kind']}:{r.get('label', '')}": r
+        for r in paper_rows if r.get("label")
+    }
+    if evolved_families:
+        import candidate_families
+        for fam_tag in evolved_families:
+            gen = candidate_families.FAMILY_GENERATORS.get(fam_tag)
+            fire_fn = candidate_families.FIRE_FUNCTIONS.get(fam_tag)
+            if gen is None or fire_fn is None:
+                continue
+            items = [(k, w) for (_, k, w) in gen(all_decls, paper_rows)]
+            reg.register_candidate_family(fam_tag, items)
+            if fam_tag == "section_num":
+                prev = fire_fn
+                def _wrap(decl, key, docstring="", _prev=prev):
+                    return _prev(decl, key, paper_row_by_qn=paper_row_by_qn, docstring=docstring)
+                active_extras[fam_tag] = _wrap
+            else:
+                active_extras[fam_tag] = fire_fn
+            print(f"# κ-evolved family registered: {fam_tag}", file=sys.stderr)
+
     print(f"# registry: {reg.size()} discriminators", file=sys.stderr)
     for fam, n in reg.by_family().items():
         print(f"#   family {fam!r:12s} {n}", file=sys.stderr)
     if family_scales:
         print(f"# using calibrated scales: {family_scales}", file=sys.stderr)
 
-    # Compute bitmaps
+    # Compute bitmaps — include κ-evolved extras in every decl's fingerprint
     bm_paper: dict[str, int] = {}
     for p in paper:
         doc = _paper_doc(paper_rows, p.qualname)
-        bm_paper[p.qualname] = reg.fire_bitmap(p, docstring=doc)
+        bm_paper[p.qualname] = reg.fire_bitmap(p, docstring=doc, extra_families=active_extras)
     bm_agda: dict[str, int] = {}
     for a in agda:
         doc = agda_docs.get(a.qualname, "")
-        bm_agda[a.qualname] = reg.fire_bitmap(a, docstring=doc)
+        bm_agda[a.qualname] = reg.fire_bitmap(a, docstring=doc, extra_families=active_extras)
     bm_python: dict[str, int] = {}
     for y in python:
         doc = python_docs.get(y.qualname, "")
-        bm_python[y.qualname] = reg.fire_bitmap(y, docstring=doc)
+        bm_python[y.qualname] = reg.fire_bitmap(y, docstring=doc, extra_families=active_extras)
 
     paper_by_qn = {p.qualname: p for p in paper}
     python_by_qn = {y.qualname: y for y in python}
@@ -381,8 +406,11 @@ def main():
 
     print(f"# paper={len(paper)} agda={len(agda)} python={len(python)}", file=sys.stderr)
 
-    family_scales = load_family_scales(repo)
-    result = align_parallel(paper, agda, python, paper_rows, agda_docs, python_docs, family_scales)
+    family_scales, evolved_families = load_family_scales(repo)
+    result = align_parallel(
+        paper, agda, python, paper_rows, agda_docs, python_docs,
+        family_scales, evolved_families,
+    )
 
     reports = repo / "reports"
     reports.mkdir(exist_ok=True)

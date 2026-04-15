@@ -1,10 +1,11 @@
 {
-  "size": 2886,
+  "size": 3007,
   "families": {
     "token": 2000,
     "name_tok": 465,
     "kind": 47,
     "edge": 58,
-    "cite": 316
+    "cite": 316,
+    "name_bigram": 121
   }
 }

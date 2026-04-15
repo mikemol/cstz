@@ -10,10 +10,10 @@ for the runtime.
 
 | Cell | Count | Meaning |
 |------|-------|---------|
-| E/E/E | 109 | Committed triple: paper+agda+python all present and aligned |
-| E/M/M | 111 | Paper object without triple — need agda+python or clearer name |
-| M/E/M | 331 | Agda decl without triple — either algebraic lemma (acceptable) or paper needs to state it |
-| M/M/E | 140 | Python object without triple — ad-hoc runtime or classification/observe subsystem |
+| E/E/E | 96 | Committed triple: paper+agda+python all present and aligned |
+| E/M/M | 115 | Paper object without triple — need agda+python or clearer name |
+| M/E/M | 344 | Agda decl without triple — either algebraic lemma (acceptable) or paper needs to state it |
+| M/M/E | 141 | Python object without triple — ad-hoc runtime or classification/observe subsystem |
 
 ## Partial-signal gaps (high value actionable items)
 
@@ -29,6 +29,7 @@ structural (no runtime witness needed).
 
 | paper | best agda | score |
 |-------|-----------|-------|
+| definition:def:enrichment-data | record:EnrichmentData | 0.655 |
 | definition:def:residue | function:isResidueχ | 0.588 |
 | definition:def:internal-hom | module:CSTZ.Monoidal.InternalHom | 0.574 |
 | definition:def:functor | record:DiscFunctor | 0.573 |
@@ -40,6 +41,7 @@ structural (no runtime witness needed).
 | theorem:thm:adjunction | record:Adjunction | 0.557 |
 | proposition:prop:bool-dependent | function:isDiscriminated | 0.555 |
 | definition:def:swap-conj | function:conj-over-τ | 0.555 |
+| definition:def:operationalist | module:CSTZ.Axiom.Operationalist | 0.547 |
 | proposition:prop:limits | module:CSTZ.Verification.LimitsExhaustive | 0.547 |
 | definition:def:boundary | function:∂∘∂≡0 | 0.547 |
 | definition:def:eval | record:DirectedMorphism | 0.546 |
@@ -47,6 +49,8 @@ structural (no runtime witness needed).
 | corollary:cor:free-direction | module:CSTZ.Higher.FreeNK | 0.541 |
 | theorem:thm:yoneda | function:yoneda-faithful | 0.541 |
 | definition:def:info-order | function:order-indep | 0.540 |
+| theorem:thm:fano | function:fano-line-1 | 0.538 |
+| proposition:prop:perspectives | module:CSTZ.Higher.Perspectives | 0.534 |
 | definition:def:infinity | module:CSTZ.Sets.Infinity | 0.533 |
 | corollary:cor:pro-topos | module:CSTZ.Topos | 0.532 |
 | theorem:thm:self-hosting | module:CSTZ.Topos.SelfHosting | 0.532 |
@@ -55,11 +59,7 @@ structural (no runtime witness needed).
 | definition:def:n-groupoid | module:CSTZ.Homotopy.Groupoid | 0.524 |
 | proposition:prop:monoidal | module:CSTZ.Monoidal | 0.522 |
 | conjecture:conj:CH | function:conj-over-τ | 0.522 |
-| remark:rem:residue-origins | function:isResidue | 0.521 |
-| remark:rem:triangle-grounding | function:triangle-σ | 0.521 |
-| definition:def:profile | function:profile | 0.519 |
-| remark:rem:interchange-selfhosting | function:claim-F | 0.518 |
-| … (3 more) | | |
+| … (7 more) | | |
 
 ### Paper objects with strong Python match but no Agda (E/M/E candidates)
 
@@ -74,6 +74,8 @@ add an Agda module or postulate.
 | definition:def:swap-conj | function:omega_neg | 0.644 |
 | definition:def:boundary | function:ext_boundary | 0.623 |
 | proposition:prop:limits | module:category | 0.621 |
+| definition:def:operationalist | function:is_paired | 0.617 |
+| theorem:thm:fano | function:check_fano_lines | 0.611 |
 | remark:rem:interchange-russell | function:interchange | 0.600 |
 | definition:def:evolution | function:is_residue | 0.597 |
 | theorem:thm:cat-axioms | module:category | 0.596 |
@@ -81,6 +83,7 @@ add an Agda module or postulate.
 | definition:def:eval | function:is_paired | 0.590 |
 | definition:def:profile | module:exterior | 0.590 |
 | definition:def:representable | class:DirectedMorphism | 0.590 |
+| proposition:prop:perspectives | class:Perspective | 0.584 |
 | theorem:prop:periodic-2d | module:exterior | 0.583 |
 | theorem:thm:n1cat | module:category | 0.582 |
 | proposition:prop:bool-dependent | module:framework | 0.579 |
@@ -93,12 +96,9 @@ add an Agda module or postulate.
 | remark:rem:residue-origins | function:is_residue | 0.569 |
 | proposition:prop:dynamics-transfer | class:Perspective | 0.566 |
 | definition:def:comprehension | function:check_wedge_self_zero | 0.560 |
+| definition:def:enrichment-data | function:triangle_identity | 0.556 |
 | definition:def:membership | function:membership | 0.555 |
-| theorem:thm:self-hosting | function:check_wedge_self_zero | 0.547 |
-| proposition:prop:monoidal | module:monoidal | 0.545 |
-| corollary:cor:self-model | function:check_wedge_self_zero | 0.545 |
-| definition:def:fibered | module:category | 0.544 |
-| … (22 more) | | |
+| … (26 more) | | |
 
 ### True paper gaps — agda+python present, no plausible paper match (M/E/E)
 
@@ -164,11 +164,18 @@ the paper candidate, these are **alignment-engine failures to recover**,
 not gaps.  They are the highest-leverage targets for refining the
 alignment pipeline.
 
-*95 items in this bucket.*
+*107 items in this bucket.*
 
 | agda | python | paper | py+paper score |
 |------|--------|-------|----------------|
 | function:isResidueχ | function:is_residue (0.89) | definition:def:residue (0.59) | 1.48 |
+| function:fano-line-1 | function:verify_fano_line (0.86) | theorem:thm:fano (0.54) | 1.39 |
+| function:fano-line-2 | function:verify_fano_line (0.86) | theorem:thm:fano (0.54) | 1.39 |
+| function:fano-line-3 | function:verify_fano_line (0.86) | theorem:thm:fano (0.54) | 1.39 |
+| function:fano-line-4 | function:verify_fano_line (0.86) | theorem:thm:fano (0.54) | 1.39 |
+| function:fano-line-5 | function:verify_fano_line (0.86) | theorem:thm:fano (0.54) | 1.39 |
+| function:fano-line-6 | function:verify_fano_line (0.86) | theorem:thm:fano (0.54) | 1.39 |
+| function:fano-line-7 | function:verify_fano_line (0.86) | theorem:thm:fano (0.54) | 1.39 |
 | function:dim-κ | function:dim_kappa (0.82) | definition:def:kappa (0.54) | 1.36 |
 | function:sym-monoidal | function:sym_diff_discriminato (0.68) | proposition:prop:sym-monoida (0.67) | 1.35 |
 | function:self-inverse | function:check_vec_self_invers (0.82) | corollary:cor:self-model (0.52) | 1.34 |
@@ -191,6 +198,7 @@ alignment pipeline.
 | function:triangle-rot-τ | function:triangle_identity (0.66) | definition:def:tau-sigma (0.53) | 1.20 |
 | module:CSTZ.Exterior.Boundary | function:check_boundary_square (0.60) | proposition:prop:boundary (0.60) | 1.19 |
 | module:CSTZ.Topos.SubobjClassifier | class:ToyBinaryClassifier (0.55) | definition:def:subobj-class (0.65) | 1.19 |
+| function:fano-1 | function:verify_fano_line (0.67) | theorem:thm:fano (0.52) | 1.19 |
 | function:fano-4 | function:verify_fano_line (0.67) | theorem:thm:fano (0.52) | 1.19 |
 | function:fano-7 | function:verify_fano_line (0.67) | theorem:thm:fano (0.52) | 1.19 |
 | function:ext-a₀≢a₁ | function:ext_zero (0.66) | theorem:thm:ext (0.52) | 1.18 |
@@ -200,24 +208,17 @@ alignment pipeline.
 | function:self-membership-excluded | function:membership (0.62) | corollary:cor:self-model (0.54) | 1.16 |
 | function:em-σ | function:omega_neg (0.62) | definition:def:tau-sigma (0.54) | 1.15 |
 | function:self-host-neg | function:omega_neg (0.63) | theorem:thm:self-hosting (0.52) | 1.15 |
-| function:em-τ | function:omega_neg (0.62) | definition:def:tau-sigma (0.54) | 1.15 |
-| function:profile-lin-check-2 | function:check_profile_lineari (0.63) | definition:def:profile-linea (0.52) | 1.15 |
-| module:CSTZ.Framework.Membership | function:membership (0.61) | definition:def:membership (0.54) | 1.15 |
-| module:CSTZ.Sets.Choice | function:choice_measure (0.64) | theorem:thm:choice (0.51) | 1.15 |
-| function:em-bool | function:ext_is_zero (0.63) | proposition:prop:bool-depend (0.52) | 1.15 |
-| function:chain-complex-profile | function:chain_complex_check (0.62) | definition:def:complex (0.52) | 1.15 |
-| module:CSTZ.Verification.ChoiceBound | function:chain_depth_bound (0.64) | theorem:thm:choice (0.51) | 1.14 |
-| function:expl-τ | function:omega_neg (0.61) | definition:def:tau-sigma (0.53) | 1.14 |
-| … (55 more) | | | |
+| … (67 more) | | | |
 
 ## Single-source items (cofiber tips)
 
 ### Paper-only (E/M/M)
 
-111 paper decls have no plausible agda or python match.
+115 paper decls have no plausible agda or python match.
 Most are likely **remarks** and **examples** that are rhetorical
 context rather than formal objects to be mechanised.  First 20:
 
+- `paper:definition:def:operationalist`  *definition*
 - `paper:definition:def:profile`  *definition*
 - `paper:definition:def:residue`  *definition*
 - `paper:remark:rem:residue-origins`  *remark*
@@ -237,15 +238,15 @@ context rather than formal objects to be mechanised.  First 20:
 - `paper:remark:rem:halting`  *remark*
 - `paper:remark:rem:hyper-recursive`  *remark*
 - `paper:remark:rem:cwa-owa`  *remark*
-- `paper:remark:rem:diaconescu`  *remark*
 
 ### Agda-only (M/E/M)
 
-331 agda decls have no paper/python match.  Many are
+344 agda decls have no paper/python match.  Many are
 low-level algebraic lemmas in GF2/Vec/Exterior — acceptable per
 STUDY.md §8.  First 20:
 
 - `agda:module:CSTZ.All`  (*module*, /home/user/cstz/agda/CSTZ/All.agda)
+- `agda:module:CSTZ.Axiom.Operationalist`  (*module*, /home/user/cstz/agda/CSTZ/Axiom/Operationalist.agda)
 - `agda:module:CSTZ.Category.Adjunction`  (*module*, /home/user/cstz/agda/CSTZ/Category/Adjunction.agda)
 - `agda:record:Adjunction`  (*record*, /home/user/cstz/agda/CSTZ/Category/Adjunction.agda)
 - `agda:data:Axis`  (*data*, /home/user/cstz/agda/CSTZ/Category/Adjunction.agda)
@@ -264,11 +265,10 @@ STUDY.md §8.  First 20:
 - `agda:record:NatTrans`  (*record*, /home/user/cstz/agda/CSTZ/Category/NatTrans.agda)
 - `agda:module:CSTZ.Category.TwoCategory`  (*module*, /home/user/cstz/agda/CSTZ/Category/TwoCategory.agda)
 - `agda:function:interchange-at-F`  (*function*, /home/user/cstz/agda/CSTZ/Category/TwoCategory.agda)
-- `agda:module:CSTZ.Category.Yoneda`  (*module*, /home/user/cstz/agda/CSTZ/Category/Yoneda.agda)
 
 ### Python-only (M/M/E)
 
-140 python decls have no paper/agda match.  Most come
+141 python decls have no paper/agda match.  Most come
 from the `classify/` and `observe.py` subsystems — Python-native
 runtime concerns per STUDY.md §8.3.  First 20:
 

@@ -168,6 +168,46 @@ class ParallelRegistry:
                     ("cite", f"{short_form} {cid}"),
                 ])
 
+    def register_candidate_family(
+        self, family_tag: str, items: list[tuple[str, float]]
+    ) -> int:
+        """Register every (key, weight) pair for a candidate family.
+
+        Used by the κ-evolution loop in ``calibrate_weights.py`` to
+        articulate new discriminator families when the existing basis
+        plateaus.  ``family_tag`` is the generator's family name (e.g.
+        ``"name_bigram"``, ``"path_segment"``).
+
+        Returns the count of newly-registered discriminators.
+        """
+        count = 0
+        for key, weight in items:
+            if ((family_tag, key)) not in self._by_key:
+                self._register(family_tag, key, weight=weight)
+                count += 1
+        return count
+
+    def ids_by_family(self, family_tag: str) -> list[int]:
+        return [d.id for d in self._by_id if d.family == family_tag]
+
+    def drop_family(self, family_tag: str) -> None:
+        """Remove every discriminator in the given family.
+
+        Used by SVD-driven orthogonalization when a family is found to
+        be rank-deficient.  Compacts ids — so call ``recompute_bitmaps``
+        after.  In practice we leave the allocation but zero the weight;
+        that preserves bit IDs of the other families.
+        """
+        for d in list(self._by_id):
+            if d.family == family_tag:
+                # Replace with zero-weight marker so bitmap bit is still
+                # valid but contributes nothing to weighted_popcount.
+                self._by_id[d.id] = Discriminator(
+                    id=d.id, family=f"{family_tag}_DROPPED", key=d.key, weight=0.0
+                )
+                self._by_key.pop((family_tag, d.key), None)
+                self._by_key[(f"{family_tag}_DROPPED", d.key)] = d.id
+
     def size(self) -> int:
         return len(self._by_id)
 
@@ -189,6 +229,7 @@ class ParallelRegistry:
         decl,
         *,
         docstring: str = "",
+        extra_families: dict | None = None,
     ) -> int:
         """Return the integer bitmask of discriminators that fire on ``decl``.
 
@@ -244,6 +285,23 @@ class ParallelRegistry:
                     continue
                 if key in docstring:
                     bm |= 1 << bid
+
+        # --- extra_families: candidate families added via κ-evolution ---
+        if extra_families:
+            # ``extra_families`` maps family_tag → fire-check callable.
+            # We iterate registered discriminators once and invoke the
+            # matching fire-check for each.
+            for (fam, key), bid in self._by_key.items():
+                fire_fn = extra_families.get(fam)
+                if fire_fn is None:
+                    continue
+                try:
+                    if fire_fn(decl, key, docstring=docstring):
+                        bm |= 1 << bid
+                except TypeError:
+                    # Some fire functions don't accept docstring kwarg
+                    if fire_fn(decl, key):
+                        bm |= 1 << bid
 
         return bm
 
