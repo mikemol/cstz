@@ -1,0 +1,21 @@
+{
+  "family_scales": {
+    "kind": 1.0,
+    "edge": 1.0,
+    "source": 1.0
+  },
+  "registry_size": 626,
+  "registry_families": {
+    "kind": 137,
+    "edge": 398,
+    "source": 3,
+    "subtree_shape_p1_DROPPED": 44,
+    "subtree_shape_p2_DROPPED": 44
+  },
+  "oracle_size": 453,
+  "final_top1": 0.0,
+  "final_mean_rank": 0.0,
+  "lexical_mask": true,
+  "wedge_definitions": [],
+  "evolved_families": []
+}

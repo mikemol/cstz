@@ -1,0 +1,17 @@
+{
+  "agda:module": "role_0",
+  "paper:remark": "role_0",
+  "paper:definition": "role_0",
+  "paper:theorem": "role_0",
+  "paper:proposition": "role_0",
+  "paper:example": "role_0",
+  "paper:corollary": "role_0",
+  "python:module": "role_0",
+  "python:function": "role_0",
+  "python:class": "role_0",
+  "paper:openquestion": "role_0",
+  "paper:conjecture": "role_0",
+  "agda:record": "role_0",
+  "agda:function": "role_0",
+  "agda:data": "role_0"
+}
