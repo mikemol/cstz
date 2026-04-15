@@ -36,6 +36,11 @@ open import Relation.Binary.PropositionalEquality using (_≡_)
 -- The full proof requires relating our ∂ (defined via position
 -- removal) to the wedge product structure.
 
+-- Python cofibration (STUDY.md §8.2): postulates P5 (leibniz) and P6
+-- (exhaustive-filling) have no Python witness. `cstz.homotopy`
+-- provides `chain_complex_check` and `exhaustive_filling`, but those
+-- are structural sanity checks, not computational realizations of
+-- the graded Leibniz rule or of the filling constructor at arbitrary n.
 postulate
   -- Leibniz rule: ∂ distributes over ∧ (graded product rule)
   leibniz : ∀ {n} (a b : Exterior n) (t : Subset n)

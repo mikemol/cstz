@@ -12,6 +12,15 @@
 -- B(x,y) = eval(x)(y) a bilinear form over GF(2).
 --
 -- Axiom class: AEP.  6 formal objects depend on P+E together.
+--
+-- Python cofibration (STUDY.md §8.1, P2):
+--   * Per-call witness:  src/cstz/axioms.py :: check_eval_linearity
+--   * Proof-schema at n: src/cstz/verification.py ::
+--                        check_eval_linearity_exhaustive
+--   Uniform-vs-parameterized analog of P1; the bundled bilinearity
+--   check (src/cstz/axioms.py :: check_bilinearity) is a Python
+--   cofiber — Agda derives bilinearity from P1 ∧ P2 by composition
+--   without naming the conjunction.
 ------------------------------------------------------------------------
 
 module CSTZ.Axiom.EvalLinearity where

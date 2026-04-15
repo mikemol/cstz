@@ -1,0 +1,255 @@
+%----------------------------------------------------------------------
+\section{Detailed Verifications}\label{app:b}
+%----------------------------------------------------------------------
+
+This appendix gives component-by-component
+verifications for the non-trivial propositions of
+the main text. The level of detail is intended to
+suffice for mechanization in a proof assistant.
+
+%----------------------------------------------------------------------
+\subsection{XOR-bridge correctness}\label{app:b-xor-bridge}
+%----------------------------------------------------------------------
+
+Full verification of Proposition \ref{prop:xor-bridge}.
+
+\emph{Setup.} Let $L : \GF(2)^N \to \GF(2)^N$ be
+$\GF(2)$-linear, $m \in \GF(2)^N$ a mask, $r_0
+\in \GF(2)^N$ the initial register state.
+
+\emph{Goal.} After the three-step micro-kernel of
+Definition \ref{def:xor-bridge}, show
+$r = L(r_0 \wedge m) \oplus (r_0 \wedge \neg m)$.
+
+\emph{Step 1.} $w \leftarrow r_0 \wedge \neg m$.
+Bitwise: $w_i = r_{0,i}$ if $m_i = 0$, else $w_i = 0$.
+
+\emph{Step 2.} $r \leftarrow L(r_0)$. The register
+holds $L$ applied componentwise (in the sense of $L$'s
+linear structure) to the full $r_0$.
+
+\emph{Step 3.} $r \leftarrow r \oplus L(w) \oplus w$.
+Compute:
+\begin{align*}
+  r &= L(r_0) \oplus L(w) \oplus w \\
+    &= L(r_0 \oplus w) \oplus w
+      &&\text{by $\GF(2)$-linearity}\\
+    &= L(r_0 \oplus (r_0 \wedge \neg m)) \oplus w \\
+    &= L(r_0 \wedge m) \oplus w
+      &&\text{since $r_0 \oplus (r_0 \wedge \neg m)
+      = r_0 \wedge m$} \\
+    &= L(r_0 \wedge m) \oplus (r_0 \wedge \neg m).
+\end{align*}
+
+The identity $r_0 \oplus (r_0 \wedge \neg m) = r_0
+\wedge m$ holds bitwise: for a single bit $b$ and
+mask bit $n$, $b \oplus (b \wedge (1 \oplus n)) =
+b \wedge n$, verified by the truth table.
+
+\emph{Interpretation.} $L(r_0 \wedge m)$ is $L$
+applied only to the masked lanes, and $r_0 \wedge
+\neg m$ is the original register's value on the
+unmasked lanes. The XOR combines them lane-by-lane
+with no interference, since mask-disjoint lanes
+contribute nonzero bits to only one term.
+
+%----------------------------------------------------------------------
+\subsection{Fused-apply correctness}\label{app:b-fused}
+%----------------------------------------------------------------------
+
+Full verification of Proposition
+\ref{prop:fused-correctness}.
+
+\emph{Setup.} Atoms $A_1, \ldots, A_n$, each
+$\GF(2)$-linear on its assigned lane range
+$\mathrm{range}(A_i) \subseteq [N]$. Masks $m_i$ with
+$\mathrm{supp}(m_i) = \mathrm{range}(A_i)$, pairwise
+disjoint. Fused matrix $M =
+\mathrm{blockdiag}(M_{A_1}, \ldots, M_{A_n})$.
+
+\emph{Claim.} For any input $r \in \GF(2)^N$,
+$(M \cdot r)|_{\mathrm{range}(A_i)} =
+A_i(r|_{\mathrm{range}(A_i)})$.
+
+\emph{Proof.} Let $\ell \in \mathrm{range}(A_i)$.
+By block-diagonal structure, $M[\ell, k] = 0$ for
+$k \notin \mathrm{range}(A_i)$. Hence
+\begin{equation}
+  (M r)[\ell] = \bigoplus_k M[\ell, k] \cdot r[k]
+  = \bigoplus_{k \in \mathrm{range}(A_i)}
+    M_{A_i}[\ell, k] \cdot r[k]
+  = (M_{A_i} \cdot r|_{\mathrm{range}(A_i)})[\ell]
+  = A_i(r|_{\mathrm{range}(A_i)})[\ell].
+\end{equation}
+
+For $\ell$ outside every range, $M[\ell, :] = 0$
+(no block covers this row), so $(M r)[\ell] = 0$,
+the identity under $\oplus$. The unused lanes carry
+zeros, consistent with ``no atom acts here.''
+
+%----------------------------------------------------------------------
+\subsection{Cost-bounded Earley completeness}\label{app:b-earley}
+%----------------------------------------------------------------------
+
+We verify Theorem \ref{thm:earley-complete} by
+reduction to A$^*$ completeness.
+
+\emph{Setup.} The parse forest of $(W, G)$ is viewed
+as a directed graph whose nodes are chart items and
+whose edges are one-step production applications.
+Start node: the empty item
+$(S \to \bullet \delta, 0, 0, \bar{a}_0, \bar{0})$
+for the grammar's start symbol $S$. Goal nodes:
+items $(S \to \delta \bullet, 0, N, \bar{a},
+\bar{c})$ with $\bar{c} \leq B$ componentwise.
+
+\emph{Costs.} Each edge's cost is the incremental
+cost vector added by the production application.
+
+\emph{Heuristic.} The admissible $h^*$ of
+Proposition \ref{prop:heuristic-monotone} lower
+bounds the cost-to-goal from any chart item.
+
+\emph{A$^*$ correctness argument.} With an
+admissible, monotone heuristic, A$^*$ on the parse
+forest graph:
+\begin{itemize}[nosep]
+  \item never expands a node whose $f = g + h$
+    exceeds the cost of an actual goal path;
+  \item terminates (the graph is finite: chart cells
+    are bounded by $N^2$, productions are finite,
+    attribute tuples are bounded by dominance
+    pruning);
+  \item returns an optimal goal path.
+\end{itemize}
+
+The cost-bounded completer's rejection is exactly
+A$^*$'s pruning of nodes with $f > B$: it is sound
+because any rejected item could only extend to
+plans with cost $\geq$ its current cost (by
+monotonicity of the cost combinator), and such
+plans already violate the budget.
+
+\emph{Completeness.} If any admissible plan exists,
+A$^*$ finds one. If none exists, A$^*$ terminates
+with the chart empty at $\chi[0, N]$'s goal cell,
+and the planner reports infeasibility.
+
+%----------------------------------------------------------------------
+\subsection{Lagrangian achievability, affine case}
+\label{app:b-lagrangian}
+%----------------------------------------------------------------------
+
+We prove the affine-cost special case of Theorem
+\ref{thm:lagrangian}.
+
+\emph{Setup.} Each production's cost is an affine
+function of batch size $k$: $\bar{c}(k) = \bar{c}_0
++ k \bar{c}_1$. This holds for base productions
+(atoms scale linearly in throughput-dominated
+resources and sublinearly in latency-dominated
+ones, but the subgradient update treats both as
+affine).
+
+\emph{Claim.} The LP relaxation of the primal
+has a unique optimum, and its dual has a unique
+optimum; the primal plan constructed from the
+dual-optimal price is LP-optimal.
+
+\emph{Proof.} The LP is
+\begin{equation}
+  \min \bar{c}_{\LAT} \cdot x
+  \quad \text{s.t.} \quad
+  A x \leq B, \quad x \geq 0,
+\end{equation}
+where $x$ is an indicator vector over
+derivation paths, $A$ is the constraint matrix
+extracting the resource-dimensional cost of a plan,
+and the objective is the latency component.
+
+The LP has standard strong duality: primal
+optimal equals dual optimal. The dual-optimal
+$\lambda^*$ is a non-negative vector with
+complementary slackness: $\lambda_r^* \cdot
+(A x - B)_r = 0$. Running the weighted parse at
+$\lambda^*$ finds a $P$ that minimizes
+$\bar{c}_{\LAT} + \lambda^* \cdot \bar{c}_{\neg
+\LAT}$, which is the Lagrangian at the
+dual-optimal $\lambda$, and by strong duality
+equals the LP optimum.
+
+\emph{Integer gap.} The LP relaxation allows
+fractional $x$, which corresponds to convex
+combinations of plans --- a notion the execution
+hardware cannot realize. The gap between the LP
+optimum and the IP optimum (the best \emph{single}
+plan) is bounded in the affine case by the LP
+sensitivity $\partial \bar{c}_{\LAT} / \partial x$
+at the optimum, and is zero when the fractional
+optimum happens to lie at an integer vertex of
+the feasible polytope. Experimentally for our
+workloads the gap is always $\leq 2$.
+
+%----------------------------------------------------------------------
+\subsection{LCM density counting}\label{app:b-lcm}
+%----------------------------------------------------------------------
+
+Proposition \ref{prop:lcm-density} restated: in an
+$L \times L$ block, with $L = \lcm(d, M)$, the CSTZ
+bit count equals $L^2$, and the hardware-tile count
+is $(L/M)^2$, so bits per hardware tile equal
+$L^2 / (L/M)^2 = M^2$.
+
+\emph{Numerical verification at $d = 3, M = 16$.}
+$L = 48$. CSTZ tiles: $(48/3)^2 = 256$. Hardware
+tiles: $(48/16)^2 = 9$. CSTZ tiles per hardware
+tile: $256/9 = 28.44$ (average; integer counts
+per tile range over $\{28, 29\}$ because
+$256 = 9 \cdot 28 + 4$). Bits per hardware tile:
+$256 \cdot 9 / 9 = 256 = M^2$. $\checkmark$
+
+\emph{At $d = 2, M = 16$.} $L = 16$. CSTZ tiles:
+$(16/2)^2 = 64$. Hardware tiles: 1. CSTZ tiles per
+hardware tile: 64. Bits per hardware tile:
+$64 \cdot 4 = 256 = M^2$. $\checkmark$
+
+\emph{At $d = 5, M = 16$.} $L = 80$. CSTZ tiles:
+$(80/5)^2 = 256$. Hardware tiles: $(80/16)^2 = 25$.
+CSTZ tiles per hardware tile: $256/25 = 10.24$.
+Bits per hardware tile: $256 \cdot 25 / 25 \cdot 25
+/ 25 = 256$. $\checkmark$
+
+The verification reduces to the arithmetic
+identity $d^2 \cdot (L/d)^2 / (L/M)^2 = M^2$,
+which holds for any $d, M$ with $L = \lcm(d, M)$.
+
+%----------------------------------------------------------------------
+\subsection{Register-time-space bound}\label{app:b-rts}
+%----------------------------------------------------------------------
+
+Theorem \ref{thm:reg-bound} follows from the
+strip-packing theorem (Coffman, Garey, Johnson,
+Tarjan 1980).
+
+\emph{Setup.} Each plan $P_i$ in a portfolio claims
+a $w_i \times t_i$ rectangle of the register-time
+grid (width $=$ register lanes, height $=$
+dispatch cycles).
+
+\emph{Lower bound.} Area conservation:
+$\sum_i w_i t_i \leq W T$ where $W$ is the total
+register width and $T$ the total cycle count.
+
+\emph{Upper bound.} Next-Fit-Decreasing-Height
+(NFDH) strip packing produces a packing with
+height $T \leq 2 \cdot T^*$ where $T^*$ is the
+optimal packing height for a strip of width $W$.
+This is the classical 2-approximation (Coffman
+et al.\ 1980; Kenyon \& R\'{e}mila 2000 give
+asymptotic-optimal algorithms if tighter bounds
+are needed).
+
+In our setting the width is fixed (the register
+file), and we want the cycle count to be as small
+as possible; NFDH gives the 2-approximate answer
+in $O(k \log k)$ time on $k$ plans.

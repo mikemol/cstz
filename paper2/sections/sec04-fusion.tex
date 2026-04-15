@@ -1,0 +1,187 @@
+%----------------------------------------------------------------------
+\section{Spatial Fusion: MIMD via Block-Diagonal Masked Matrix}
+\label{sec:fusion}\footnote{Section-level Toulmin. \emph{Move}: introduce the first compound production, which packs heterogeneous atoms into one kernel by embedding them as blocks of a single matrix applied to a wide SIMT register. \emph{[DAF] comparison}: [DAF]'s wedge product is a bilinear operation on pairs of discriminators; the block-diagonal fusion here is the analogous construction on pairs of atoms at the scheduling level. \emph{Residue instance}: the fusion's residue is the difference between $n$ kernel launches' costs and one fused kernel's costs --- always non-negative under a monotone profile.}
+%----------------------------------------------------------------------
+
+\subsection{The block-diagonal fusion principle}
+
+Suppose atoms $A_1, \ldots, A_n$ act on disjoint lane
+ranges of a shared register. Over $\GF(2)$, their
+concurrent application is a single matrix-vector
+multiply:
+\begin{equation}\label{eq:block-diag}
+  \mathrm{reg}' = M \cdot \mathrm{reg},
+  \qquad
+  M = \mathrm{blockdiag}(M_{A_1}, M_{A_2}, \ldots,
+  M_{A_n})
+\end{equation}
+where each $M_{A_i}$ is the $\GF(2)$ matrix
+representation of $A_i$. The block-diagonal structure
+implies that no lane of output $A_i$ depends on any
+input lane outside $A_i$'s range --- they are
+independent subproblems stacked into one dispatch.
+
+\begin{definition}[\texttt{fused\_matrix\_apply} production]
+  \label{def:fused-apply}
+  The \emph{fused-matrix-apply} production combines
+  atoms $A_1, \ldots, A_n$ with lane-disjoint masks
+  $m_1, \ldots, m_n$ (where $m_i \wedge m_j = 0$ for
+  $i \neq j$ in $\GF(2)$) into a single plan whose
+  dispatch is one kernel applying
+  \eqref{eq:block-diag}. The production's attribute
+  rule is
+  \begin{align}
+    E &= \text{common output encoding of all } A_i \\
+    \VRAM &= \max_i \VRAM(A_i) + \VRAM_{\mathrm{I/O}} \\
+    \SMEM &= \sum_i \SMEM(A_i) + \SMEM_{\mathrm{mask}} \\
+    \REG  &= \sum_i \REG(A_i)  \\
+    \LAT  &= \max_i \LAT(A_i)
+  \end{align}
+  where $\VRAM_{\mathrm{I/O}}$ is the cost of loading
+  the packed input register and writing the packed
+  output, and $\SMEM_{\mathrm{mask}}$ is the storage
+  for the masks $m_i$.
+\end{definition}
+
+\begin{proposition}[Fused-apply correctness]
+  \label{prop:fused-correctness}
+  \footnote{Class \textsf{AHF}. Warrant: linearity and
+  block-diagonal decomposition. Qualifier: requires
+  all $A_i$ to be $\GF(2)$-linear on their respective
+  lane ranges; masks must be pairwise disjoint.
+  Finite-$\kappa$ valid. Novelty: the application to
+  compiled CSTZ kernels is new; block-diagonal
+  fusion in BLAS is classical.}
+  If $A_1, \ldots, A_n$ are $\GF(2)$-linear atoms
+  with pairwise disjoint masks, then the output of
+  \texttt{fused\_matrix\_apply}$[A_1, \ldots, A_n]$ on
+  a packed input $\mathrm{reg}$ agrees, on each lane
+  range, with the output of $A_i$ on the projection
+  of $\mathrm{reg}$ to that range.
+\end{proposition}
+
+\begin{proof}
+  By \eqref{eq:block-diag}, the output of lane $\ell$
+  depends only on $M[\ell, :]$ and $\mathrm{reg}$. For
+  $\ell$ in $A_i$'s range, $M[\ell, :]$ has support
+  only on $A_i$'s lane range (by block-diagonal
+  construction), so the output equals the output of
+  $A_i$ on $\mathrm{reg}|_{\text{range}(A_i)}$. For
+  $\ell$ outside any range, $M[\ell, :] = 0$ and the
+  output is 0 (the identity under $\oplus$).
+\end{proof}
+
+\subsection{The LCM packing strategy}
+
+Proposition \ref{prop:lcm-density} guaranteed that
+information density per hardware tile is constant
+under LCM packing. The \texttt{fused\_matrix\_apply}
+production is the mechanism by which the planner
+realizes that density in practice: given a workload
+with atoms of mixed natural tile sizes $d_1, d_2,
+\ldots$, the planner selects $L = \lcm(d_1, d_2,
+\ldots, M)$ as the kernel's block size and packs
+enough independent atom instances into the block to
+saturate every hardware tile.
+
+\begin{corollary}[Heterogeneous tile packing]
+  \label{cor:heterogeneous}
+  The \texttt{fused\_matrix\_apply} production admits
+  atoms of different natural tile sizes as children,
+  provided the LCM block size $L$ is a multiple of
+  each. Atoms of size $d$ occupy $d \times d$
+  sub-blocks of the LCM block, and the block-diagonal
+  structure ensures independence.
+\end{corollary}
+
+\subsection{Mask construction}
+
+For $n$ atoms sharing a register, the planner
+constructs the masks $m_1, \ldots, m_n$ as follows.
+Each $m_i$ is a $\GF(2)$-vector of length equal to the
+register width, with 1s in the lanes allocated to
+$A_i$ and 0s elsewhere.
+
+\begin{proposition}[Mask disjointness is sufficient]
+  \label{prop:mask-disjoint}
+  If $m_i \wedge m_j = 0$ (bitwise) for all $i \neq j$,
+  then the fused kernel of Proposition
+  \ref{prop:fused-correctness} is a correct
+  implementation of the parallel application of
+  $A_1, \ldots, A_n$.
+\end{proposition}
+
+\begin{proof}
+  Disjointness ensures no lane is claimed by two
+  atoms. The block-diagonal structure of $M$ is a
+  direct consequence: $M_{A_i}$ occupies the sub-matrix
+  indexed by the supports of $m_i$, and the rest of
+  $M$ is zero.
+\end{proof}
+
+\subsection{Cost vector combinator}
+
+The cost combinator for \texttt{fused\_matrix\_apply}
+has a distinctive shape:
+
+\begin{itemize}[nosep]
+  \item \textbf{VRAM} is maxed: all inputs and outputs
+    are loaded once and written once, not per-atom.
+  \item \textbf{SMEM} is summed: each atom may hold a
+    sub-matrix in shared memory; these sub-matrices
+    coexist in the fused kernel.
+  \item \textbf{REG} is summed: the packed register
+    holds all atoms' live values concurrently.
+  \item \textbf{LAT} is maxed: the fused kernel's
+    latency is the critical path, not the sum.
+\end{itemize}
+
+This is the exact complement of the cost combinator for
+time-sharing (Section \ref{sec:time-sharing}), where
+SMEM and REG are maxed while LAT is summed. The choice
+between the two productions is the planner's most
+consequential decision for register-bound workloads.
+
+\subsection{Practical limits}
+
+\begin{proposition}[Register-budget limit]
+  \label{prop:reg-budget}
+  For a hardware profile with per-thread register
+  budget $B_{\REG}$, the \texttt{fused\_matrix\_apply}
+  production is valid only if
+  $\sum_i \REG(A_i) \leq B_{\REG}$. When this bound
+  is violated, the planner must either partition the
+  atoms into smaller fused groups (each under the
+  budget) or substitute the \texttt{time\_share\_register}
+  production (Section \ref{sec:time-sharing}).
+\end{proposition}
+
+\begin{remark}
+  Exceeding $B_{\REG}$ on a real GPU triggers register
+  spill to local memory (a slice of L1), with a
+  concomitant latency hit on the order of 3--10$\times$
+  per spilled value per access. The cost model treats
+  this as an implicit edge in the cost vector's
+  \LAT\ component, rising sharply once the register
+  budget is saturated; in practice the planner's
+  Pareto dominance check eliminates plans that trigger
+  spill unless the alternatives are worse on some other
+  axis.
+\end{remark}
+
+\subsection{Interaction with encoding}
+
+Fusion respects encoding boundaries. The
+\texttt{fused\_matrix\_apply} production requires all
+children to share a common output encoding $E$; mixing
+$\Lambda$ and RM atoms in one fused kernel is permitted
+only if the planner has inserted encode/decode atoms to
+align them. This is a semantic constraint, not an
+efficiency one: mixing encodings would produce a
+block-diagonal matrix whose rows interpret different
+bases, which has no well-defined reference semantics.
+
+Section \ref{sec:parsing} shows how the chart parser
+enforces this by refusing to combine items with
+mismatched $E$ attributes under the
+\texttt{fused\_matrix\_apply} production rule.

@@ -6,6 +6,13 @@
 -- "The seven non-zero points of GF(2)³ form the Fano plane
 -- PG(2, GF(2)).  Each line is an instance of the triangle identity
 -- p₃ = p₁ + p₂."
+--
+-- Python cofibration (STUDY.md §8.1, aligned): the seven theorems
+-- `fano-line-1 .. fano-line-7` below correspond to the Python list
+-- `src/cstz/topos.py :: FANO_LINES` plus the predicate
+-- `src/cstz/topos.py :: verify_fano_line`. Because the Fano plane
+-- over GF(2) has exactly seven lines, the enumerative Agda form and
+-- the procedural Python form carry the same proof strength.
 ------------------------------------------------------------------------
 
 module CSTZ.Topos.Fano where

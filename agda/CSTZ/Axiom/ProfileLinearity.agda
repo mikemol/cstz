@@ -11,6 +11,14 @@
 -- underlies most of the framework.
 --
 -- Axiom class: AP.  9 formal objects depend on this.
+--
+-- Python cofibration (STUDY.md §8.1, P1):
+--   * Per-call witness:  src/cstz/axioms.py :: check_profile_linearity
+--   * Proof-schema at n: src/cstz/verification.py ::
+--                        check_profile_linearity_exhaustive
+--   Uniform-vs-parameterized: Agda proves once for all n; Python
+--   produces a complete proof at each caller-chosen n (finite
+--   population, every well-formed property is ≡-invariant).
 ------------------------------------------------------------------------
 
 module CSTZ.Axiom.ProfileLinearity where

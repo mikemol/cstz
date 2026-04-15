@@ -1,0 +1,231 @@
+%----------------------------------------------------------------------
+\section{Temporal Multiplexing: The XOR-Bridged Register}
+\label{sec:time-sharing}\footnote{Section-level Toulmin. \emph{Move}: introduce the second compound production, which reuses a single register across $\GF(2)$-linear atoms by bridging them with XOR save/restore. \emph{[DAF] comparison}: [DAF]'s read/write path asymmetry distinguishes the construction of types ($\kappa$-evolution) from their elimination (evaluation); this section's XOR-bridge is the scheduling-level read/write asymmetry that lets the same register carry multiple atomic computations in succession. \emph{Residue instance}: the XOR bridge itself is a residue --- a small scratch value that records which lanes were not touched by the atom and restores them after.}
+%----------------------------------------------------------------------
+
+\subsection{The XOR-bridge}
+
+Over $\GF(2)$, every operation is reversible because
+$x \oplus m \oplus m = x$ for any mask $m$. The
+\emph{XOR-bridge} exploits this reversibility to run
+an atom $L$ over part of a register, then undo $L$'s
+effect on the remaining lanes, leaving the register
+free for the next atom.
+
+\begin{definition}[XOR-bridge micro-kernel]
+  \label{def:xor-bridge}
+  For a $\GF(2)$-linear atom $L$ and a mask $m$
+  specifying the lanes on which $L$ is to act, the
+  \emph{XOR-bridge micro-kernel} executes:
+  \begin{enumerate}[nosep,label=(\arabic*)]
+    \item $w \leftarrow \mathrm{reg} \wedge \neg m$
+      (witness: the lanes outside $L$'s range);
+    \item $\mathrm{reg} \leftarrow L(\mathrm{reg})$
+      (apply $L$ everywhere, including to the
+      witness lanes, which will be corrected);
+    \item $\mathrm{reg} \leftarrow \mathrm{reg}
+      \oplus L(w) \oplus w$ (cancel $L$'s effect on
+      the witness lanes: by $\GF(2)$-linearity
+      $L(\mathrm{reg}) \oplus L(w) = L(\mathrm{reg}
+      \oplus w) = L(\mathrm{reg}|_m)$, and $\oplus w$
+      XORs the original witness values back in).
+  \end{enumerate}
+\end{definition}
+
+\begin{proposition}[XOR-bridge correctness]
+  \label{prop:xor-bridge}
+  \footnote{Class \textsf{AHR}. Warrant:
+  $\GF(2)$-linearity of $L$ and the fact that
+  characteristic 2 makes $x \oplus x = 0$.
+  Qualifier: $L$ must be strictly $\GF(2)$-linear on
+  its entire domain; semi-linear or affine atoms do
+  not qualify. Finite-$\kappa$ valid.}
+  Let $L$ be $\GF(2)$-linear, $m$ a mask. After the
+  three steps of Definition \ref{def:xor-bridge}, the
+  register equals $L(\mathrm{reg}|_m) \oplus
+  \mathrm{reg}|_{\neg m}$.
+\end{proposition}
+
+\begin{proof}
+  Let $r_0$ be the register before step (1). Step (1)
+  sets $w = r_0 \wedge \neg m = r_0|_{\neg m}$. Step
+  (2) sets $\mathrm{reg} = L(r_0)$. Step (3):
+  \begin{align*}
+    \mathrm{reg}
+    &= L(r_0) \oplus L(w) \oplus w \\
+    &= L(r_0 \oplus w) \oplus w
+      && \text{by $\GF(2)$-linearity of $L$} \\
+    &= L(r_0|_m) \oplus r_0|_{\neg m}
+  \end{align*}
+  which is exactly what was claimed: $L$ applied on
+  $m$, identity on $\neg m$.
+\end{proof}
+
+\begin{remark}[Free for linearity-preserving masks]
+  When $L$ is the identity on $\neg m$ (i.e.\ $L$
+  affects only $m$-lanes in the first place, as is
+  the case for every atom with a strict input tile),
+  step (3) collapses to $\mathrm{reg} \leftarrow
+  \mathrm{reg} \oplus w \oplus w = \mathrm{reg}$, so
+  the bridge is trivially a single XOR at the
+  boundary, not three operations. The cost model
+  credits this case via a production subclass
+  \texttt{time\_share\_register\_disjoint}.
+\end{remark}
+
+\subsection{The \texttt{time\_share\_register} production}
+
+\begin{definition}[\texttt{time\_share\_register}]
+  \label{def:time-share}
+  The \emph{time-share-register} production
+  $\texttt{time\_share\_register}[L_1, L_2, \ldots,
+  L_n]$ executes atoms $L_i$ sequentially on one
+  shared register, with an XOR-bridge
+  (Definition \ref{def:xor-bridge}) between each
+  consecutive pair. The attribute combination is
+  \begin{align}
+    \VRAM &= \max_i \VRAM(L_i) + \VRAM_{\mathrm{I/O}} \\
+    \SMEM &= \max_i \SMEM(L_i) + \SMEM_{\mathrm{masks}} \\
+    \REG  &= \max_i \REG(L_i)  + 1 \quad \text{(witness register)} \\
+    \LAT  &= \sum_i \LAT(L_i) + 2(n-1) \cdot \LAT_\oplus
+  \end{align}
+  where $\LAT_\oplus$ is the latency of one XOR
+  operation.
+\end{definition}
+
+The cost combinator maxes $\REG$ rather than summing
+it: at any given time only one $L_i$'s live set is in
+the register, plus a single-word witness. This is the
+exact opposite of the $\REG$-summing behavior of
+\texttt{fused\_matrix\_apply}; the planner chooses
+between them based on which resource is binding.
+
+\subsection{Commutativity under lane-disjoint masks}
+
+\begin{proposition}[Time-share commutativity]
+  \label{prop:ts-commute}
+  \footnote{Class \textsf{AHR}. Warrant: lane-disjoint
+  masks make each $L_i$ a linear map on its own
+  sub-register, independent of the others.
+  Qualifier: atoms with overlapping masks do not
+  commute. Finite-$\kappa$ valid.}
+  If the atoms $L_1, \ldots, L_n$ of a
+  \texttt{time\_share\_register} production have
+  pairwise disjoint masks (Proposition
+  \ref{prop:mask-disjoint}), then any permutation of
+  the atoms produces the same final register state.
+\end{proposition}
+
+\begin{proof}
+  Each $L_i$ acts on a sub-register determined by
+  $m_i$. Since $m_i \wedge m_j = 0$, the action of
+  $L_i$ does not modify the domain of $L_j$. Hence
+  $L_1 \circ L_2 = L_2 \circ L_1$ as operations on
+  the packed register, and by induction on permutation
+  length, any permutation yields the same result.
+\end{proof}
+
+\begin{remark}
+  Commutativity licenses the parser to collapse
+  permutation-equivalent time-share productions
+  during chart construction, mirroring
+  Proposition \ref{prop:xor-commute}. For $n$
+  lane-disjoint atoms, this shrinks the chart by a
+  factor of $n!$.
+\end{remark}
+
+\subsection{Non-disjoint masks}
+
+When masks overlap, the XOR-bridge still applies
+per-atom but commutativity is lost: successive atoms
+may act on overlapping lanes, and the order of their
+applications affects the final state.
+
+\begin{proposition}[Ordered time-share]\label{prop:ts-ordered}
+  For overlapping masks, the
+  \texttt{time\_share\_register} production is
+  ordered: the plan's semantics agrees with the
+  naive sequential execution of the atoms in the
+  stated order, using Proposition \ref{prop:xor-bridge}
+  at each step.
+\end{proposition}
+
+\begin{proof}
+  By induction on the number of atoms. Each XOR-bridge
+  step leaves the non-masked lanes untouched by
+  Proposition \ref{prop:xor-bridge}, so the next
+  atom sees the same register state it would in a
+  naive execution.
+\end{proof}
+
+\subsection{Non-linear atoms break the bridge}
+
+\begin{remark}[Non-linearity as a wall]
+  The XOR-bridge requires $L$ to be $\GF(2)$-linear.
+  Atoms like $\mathrm{pcnt}_2$, which reduce an
+  $n$-bit input to a single bit, are not linear in
+  the required sense. They cannot participate in a
+  \texttt{time\_share\_register} production; instead,
+  the planner inserts a \texttt{spill\_register}
+  boundary (Section \ref{sec:parsing}) that
+  materializes the register to shared memory before
+  the non-linear atom and re-loads afterwards. The
+  cost of spill is explicit in the attribute rule
+  and is subject to the usual budget enforcement.
+\end{remark}
+
+\begin{conjecture}[Semi-reversibility]
+  \label{conj:nonlinear}
+  Certain nominally non-linear atoms ($\mathrm{pcnt}_2$,
+  comparison, reduce-sum-mod-$p$) admit a
+  \emph{paired inverse atom} that undoes the
+  information loss in the context of a specific
+  surrounding workload. A formal characterization
+  of when such pairs exist, and how they compose
+  under an extended time-share production, is open
+  (\S\ref{sec:reading-guide}, X2).
+\end{conjecture}
+
+\subsection{Nested productions}
+
+A \texttt{time\_share\_register} production may have
+\texttt{fused\_matrix\_apply} nodes as its children, or
+vice versa. The nesting is unconstrained: the cost
+attribute rule for each parent is applied to its
+immediate children's aggregate cost, regardless of
+how those children were constructed.
+
+\begin{proposition}[Nested cost additivity]
+  \label{prop:nest-cost}
+  For a production $P$ with children $C_1, \ldots,
+  C_k$ whose cost vectors are $\bar{c}_i$ (each itself
+  the product of nested productions), the parent's
+  cost under the stated combinator is
+  $\mathrm{combinator}_P(\bar{c}_1, \ldots,
+  \bar{c}_k) + \bar{c}_{P_0}$, where $\bar{c}_{P_0}$
+  is the production's baseline.
+\end{proposition}
+
+This is a direct consequence of the attribute grammar
+being well-defined compositionally, but we state it
+explicitly because it is the property that makes the
+chart parser's dynamic programming valid: each chart
+item's cost is computable from its children's costs
+in one step.
+
+\subsection{Putting the two compound productions together}
+
+Section \ref{sec:fusion} introduced spatial fusion
+(atoms concurrent, $\REG$ summed); this section has
+introduced temporal multiplexing (atoms sequential,
+$\REG$ maxed). The planner has both in its toolkit
+and will choose between them (or nest them) based on
+which resource in the budget vector $B$ is binding.
+Under $\LAT$-binding budgets, \texttt{fused\_matrix\_apply}
+dominates; under $\REG$-binding,
+\texttt{time\_share\_register} dominates; the middle
+ground of moderate $\LAT$ and $\REG$ pressure is
+typically won by nested plans where several small
+fused blocks are chained via XOR-bridges into a
+single sequential kernel. The mechanics of that
+choice is the subject of Section \ref{sec:parsing}.

@@ -3,6 +3,16 @@
 Paper Appendix B: gap-closing proofs, exhaustive at n=3.
 
 Mirrors: agda/CSTZ/Verification/*.agda
+
+Cofibration (STUDY.md §8.1): the ``check_*_exhaustive(n)`` family is a
+*proof-schema parameterized by n*. At any fixed dimension ``n`` the
+population ``GF(2)^n`` is finite, and every well-formed property in this
+framework is ≡-invariant by construction (operationalist axiom P3).
+Therefore an exhaustive check over the finite population is a *proof*
+at that dimension, not weaker evidence. The asymmetry with Agda is
+uniform-vs-schema: Agda's postulate covers all n in a single statement;
+Python produces one proof for each caller-chosen n. See also
+:mod:`cstz.axioms` for the per-call witnesses.
 """
 
 from __future__ import annotations
@@ -20,7 +30,10 @@ from cstz.monoidal import cd_mul, swap_conjugation
 def check_boundary_squared(n: int) -> None:
     """B.18/Prop 5.5: ∂∘∂=0 on ALL basis elements of Λ(GF(2)^n).
 
-    This computationally fills the Agda postulate ∂∘∂≡0.
+    This computationally fills the Agda postulate ∂∘∂≡0
+    (``agda/CSTZ/Exterior/Boundary.agda:88``). Basis-only sweep;
+    :func:`check_boundary_squared_all` extends to every element of
+    Λ(GF(2)^n). STUDY.md §8.1, P4.
     """
     for mask in range(1 << n):
         f = ext_basis(n, mask)
@@ -40,7 +53,14 @@ def check_boundary_squared_all(n: int) -> None:
 
 
 def check_fano_lines() -> None:
-    """B.5/Thm 9.20: All 7 Fano lines satisfy a⊕b=c."""
+    """B.5/Thm 9.20: All 7 Fano lines satisfy a⊕b=c.
+
+    Cofibration (STUDY.md §8.1, aligned): Fano plane over GF(2) has
+    exactly 7 lines; Agda proves each individually as
+    ``fano-line-1 .. fano-line-7`` in ``agda/CSTZ/Topos/Fano.agda``.
+    Python's finite exhaustion is a complete proof (no uniform-vs-schema
+    asymmetry — the structure has a single fixed size).
+    """
     assert len(FANO_LINES) == 7
     for a, b, c in FANO_LINES:
         assert verify_fano_line(a, b, c)
@@ -91,7 +111,14 @@ def check_eval_linearity_exhaustive(n: int) -> None:
 
 
 def check_truth_tables() -> None:
-    """B.10: Belnap FDE truth tables on Ω."""
+    """B.10: Belnap FDE truth tables on Ω.
+
+    Cofibration (STUDY.md §8.1, aligned + §8.2): bundles the nine
+    named Agda theorems in ``agda/CSTZ/Examples/TruthTables.agda``
+    (``neg-gap``, ``neg-overlap``, ``dne-gap``, ``dne-overlap``,
+    ``conj-gap-any``, ``disj-gap-gap``, ``em-gap``, ``em-overlap``,
+    ``expl-overlap``) into a single sweep over the 4-element Ω.
+    """
     from cstz.topos import omega_neg, omega_conj, omega_disj
 
     # Double negation elimination

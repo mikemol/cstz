@@ -6,6 +6,13 @@
 -- S₃ symmetry of the triangle identity generates 6 adjunctions —
 -- 3 chirality pairs — by permuting {κ,σ,τ} over the adjunction
 -- stencil A ← B → C.
+--
+-- Python cofibration (STUDY.md §8.2): the `Adjunction` record and
+-- `Axis` data type below have no Python counterpart. Adjunction
+-- structure at runtime is implicit in how callers compose the
+-- witness and coefficient morphisms (see `src/cstz/category.py ::
+-- compose_witnesses` and `compose_coeff`) rather than being carried
+-- as a first-class algebraic object.
 ------------------------------------------------------------------------
 
 module CSTZ.Category.Adjunction where

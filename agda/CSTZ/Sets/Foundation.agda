@@ -69,6 +69,10 @@ self-membership-excluded eval eval-lin d =
 -- We state this as a postulate; the full proof requires
 -- reasoning about linear independence of link vectors.
 -- See Appendix B.34 for the detailed argument.
+--
+-- Python cofibration (STUDY.md §8.2): no Python witness for P7.
+-- `src/cstz/sets.py :: chain_depth_bound(n)` returns the bound value
+-- `n` but does not prove depth ≤ n. This is an Agda-only postulate.
 postulate
   chain-depth-bound :
     ∀ {n : ℕ} (depth : ℕ)

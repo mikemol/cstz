@@ -1,0 +1,353 @@
+%----------------------------------------------------------------------
+\section{Plan Portfolios and Ambiguous-Parse Packing}
+\label{sec:portfolios}\footnote{Section-level Toulmin. \emph{Move}: replace the single-plan output convention with a Pareto-portfolio output, and show how the ``waste'' lanes of LCM packing (Remark \ref{rem:coarseness}) are the natural home for multiple plans executed concurrently. \emph{[DAF] comparison}: [DAF]'s SPPF retains ambiguity as a first-class feature rather than forcing a deterministic choice; the plan portfolio is the scheduling-level analogue of the SPPF, retaining alternative derivations that are cost-indistinguishable under the stated hardware profile. \emph{Residue instance}: the gap between a plan's cost and the budget's slack is the residue that licenses additional packed plans in the remaining lanes.}
+%----------------------------------------------------------------------
+
+\subsection{Pareto frontier extraction}
+
+\begin{definition}[Pareto frontier of a workload]
+  \label{def:pareto}
+  The \emph{Pareto frontier} $\mathrm{PF}(W, G, B)$ is
+  defined by Proposition \ref{prop:frontier-char}: the
+  set of plans admissible under $B$ that are not
+  operationalist-dominated (Definition
+  \ref{def:op-dominance}) by any other plan. The
+  frontier is thus derived from the admissibility
+  discriminator family (Definition
+  \ref{def:admissibility-family}), not imposed as a
+  multi-objective-optimization convention; the witness
+  of dominance is a budget in the asymmetric
+  difference of admissibility sets.
+\end{definition}
+
+\begin{proposition}[Pareto extraction from the chart]
+  \label{prop:pareto}
+  \footnote{Class \textsf{AH}. Warrant: a chart-item
+  dominance check implements the partial order of
+  Definition \ref{def:op-dominance} on the partial
+  plans encoded as chart items. Qualifier: assumes
+  eager pruning preserves the frontier; equal-cost
+  items are both retained because neither dominates
+  the other (Remark in
+  Section \ref{def:admissibility-family} ff.).
+  Finite-$\kappa$ valid.}
+  The Pareto frontier $\mathrm{PF}(W, G, B)$ is the
+  set of items in the chart cell $\chi[0, N]$ whose
+  production is the workload's output nonterminal,
+  whose cost vector satisfies $\bar{c} \leq B$
+  (admissibility), and for which no other chart item
+  with the same output nonterminal has a strictly
+  smaller cost vector (non-dominance).
+\end{proposition}
+
+\begin{proof}
+  The cost-bounded completer of
+  Section \ref{sec:parsing} rejects chart items whose
+  cost vector exceeds $B$, so every surviving item is
+  admissible. Dominance pruning (applied eagerly on
+  insertion) retains an item iff no existing item
+  strictly dominates it in the sense of Definition
+  \ref{def:op-dominance}. Items with equal cost
+  vectors do not dominate each other, so are both
+  retained; their distinguishability, if any, comes
+  from the semantic attributes $(E, r, d)$ or the
+  underlying atom sequence. By Proposition
+  \ref{prop:frontier-char}, the surviving items at
+  $\chi[0, N]$ for the output production are exactly
+  $\mathrm{PF}(W, G, B)$.
+\end{proof}
+
+\subsection{Portfolio output}
+
+\begin{definition}[Plan portfolio]
+  \label{def:portfolio}
+  A \emph{plan portfolio} is a triple
+  $(\mathcal{P}, \mathcal{L}, \mathcal{E})$ where:
+  \begin{itemize}[nosep]
+    \item $\mathcal{P}$ is a set of plans drawn from
+      (a subset of) the Pareto frontier;
+    \item $\mathcal{L}$ is a lane partition of the
+      packed register, assigning disjoint lane
+      ranges to each plan in $\mathcal{P}$;
+    \item $\mathcal{E}$ is the extraction rule
+      (identity, XOR, majority vote) that maps the
+      final register state to a single answer.
+  \end{itemize}
+\end{definition}
+
+A portfolio with $|\mathcal{P}| = 1$ is a single
+plan with no packing; a portfolio with $|\mathcal{P}|
+> 1$ is a concurrent execution of multiple plans on
+disjoint lane ranges.
+
+\subsection{Packing constraint: shared atom sequences}
+
+A key constraint limits which plans can share a
+dispatch: in SIMT hardware, all lanes of a warp
+execute the same instruction stream. Plans can
+therefore pack only if their atom sequences
+\emph{at the kernel level} are identical --- where
+the lanes differ is in the \emph{data} they consume
+and the \emph{masks} they apply. We formulate this
+constraint in [DAF]'s $\kappa$-truncation language:
+atom-sequence identity is equivalence under a
+specific sub-regime of the full plan-discrimination
+regime $\Delta$.
+
+\begin{definition}[Atom-identity sub-regime]
+  \label{def:atom-id-regime}
+  Let $\Delta_\mathrm{atom}$ be the truncation
+  ([DAF] Remark after Theorem 4.33) of the plan
+  discrimination regime that retains only
+  \emph{atom-identity discriminators}: for each
+  position $i$ in a plan's linearized atom sequence
+  and each atom $a \in \mathcal{A}$, the predicate
+  ``position $i$ of this plan's atom sequence is
+  $a$'' is a $\GF(2)$-valued discriminator on plans.
+  $\Delta_\mathrm{atom}$ is the sub-regime consisting
+  precisely of these predicates (no encoding, tile,
+  mask, or cost discriminators are retained).
+\end{definition}
+
+\begin{definition}[$\Delta_\mathrm{atom}$-equivalence]
+  \label{def:atom-equiv}
+  Two plans $P_1$ and $P_2$ are
+  \emph{atom-sequence equivalent}, written $P_1
+  \equiv_\mathrm{atom} P_2$, iff they are
+  equivalent under $\Delta_\mathrm{atom}$: every
+  predicate in $\Delta_\mathrm{atom}$ agrees on
+  them.
+\end{definition}
+
+Definition \ref{def:atom-equiv} is a direct instance
+of [DAF]'s equivalence-under-truncated-regime
+construction: by projecting away encoding, tile,
+mask, and cost discriminators, we obtain a
+quotient-space of plans where two plans are
+identified iff their atom sequences coincide
+position-by-position. The underlying algebraic
+guarantees of [DAF]'s regime machinery transfer
+intact: the quotient is a set, the equivalence is
+transitive and symmetric by the operationalist
+axiom applied to $\Delta_\mathrm{atom}$, and the
+truncation residue $\Delta \setminus
+\Delta_\mathrm{atom}$ is exactly the information
+SIMT dispatch ignores (data, masks) or that
+further refinement (encoding, cost) would restore.
+
+\begin{proposition}[Atom-sequence equivalence preserves soundness]
+  \label{prop:atom-equiv-sound}
+  \footnote{Class \textsf{A}. Warrant: follows
+  from soundness of $\kappa$-truncation in [DAF]
+  ($\kappa$-equivalence in a truncated regime
+  is a coarser equivalence than in the full regime,
+  and Grammar Soundness (Thm \ref{thm:soundness})
+  is preserved under coarsening). Finite-$\kappa$
+  valid.}
+  If $P_1 \equiv_\mathrm{atom} P_2$ and both plans
+  are sound under Theorem \ref{thm:soundness}, then
+  their kernel-level instruction streams coincide
+  on every warp lane.
+\end{proposition}
+
+\begin{proof}
+  Soundness means each plan's dispatched
+  instruction sequence corresponds exactly to its
+  linearized atom sequence (by induction on the
+  grammar). $\Delta_\mathrm{atom}$-equivalence
+  means those linearized sequences are pointwise
+  equal. Therefore the dispatched instruction
+  streams coincide.
+\end{proof}
+
+\begin{theorem}[Parse-packing soundness]
+  \label{thm:parse-packing}
+  \footnote{Class \textsf{AHO}$_{\mathrm{exec}}$.
+  Warrant: mask-disjointness (as in
+  Propositions \ref{prop:fused-correctness},
+  \ref{prop:ts-commute}) plus the
+  execution-operationalist axiom
+  (Definition \ref{def:exec-operationalist})
+  licenses concurrent execution of plans whose
+  costs cannot be distinguished on the stated
+  hardware. Qualifier: requires atom-sequence
+  equivalence (Definition \ref{def:atom-equiv}).
+  Finite-$\kappa$ valid. Novelty: the application of
+  SIMT lane packing to alternative parse derivations
+  is to our knowledge new; warp-level lane
+  partitioning in standard GPU programming packs
+  different data through the same kernel, not
+  different plans for the same data.}
+  Let $\mathcal{P}$ be a set of atom-sequence
+  equivalent plans from the Pareto frontier, and
+  $\mathcal{L}$ a lane partition assigning disjoint
+  lane ranges to each. Then the concurrent
+  execution of all plans in $\mathcal{P}$ on the
+  partitioned register produces each plan's output
+  on its assigned lane range, and any one of those
+  outputs is a valid result for the workload.
+\end{theorem}
+
+\begin{proof}
+  By atom-sequence equivalence, all plans execute
+  the same instruction stream. By lane disjointness,
+  no plan's mask overlaps another's, so the
+  block-diagonal argument of Proposition
+  \ref{prop:fused-correctness} applies: each plan's
+  output on its lane range depends only on its own
+  data. By soundness (Theorem \ref{thm:soundness}),
+  each plan's output is a correct result for the
+  workload. Finally, since all plans satisfy the
+  budget, the execution-operationalist axiom
+  (Definition \ref{def:exec-operationalist}) makes
+  any of them an acceptable answer.
+\end{proof}
+
+\subsection{The three extraction modes}
+
+\begin{definition}[Extraction modes]\label{def:extract}
+  A portfolio's extraction rule $\mathcal{E}$ is
+  one of:
+  \begin{description}[nosep,leftmargin=1cm]
+    \item[\textsc{First}] Read the output of any
+      single plan from its assigned lane range. The
+      simplest mode; used when all plans are
+      cost-indistinguishable.
+    \item[\textsc{XOR}] For an odd number of plans,
+      XOR their outputs: over $\GF(2)$, the XOR of
+      $k$ agreeing values is the value itself when
+      $k$ is odd. Detects single-bit disagreements
+      (useful for fault detection when alternative
+      plans are cost-distinguishable but all
+      supposed to compute the same value).
+    \item[\textsc{Majority}] For 2 or more plans,
+      take the majority vote lane-by-lane.
+      Triple-modular-redundant (TMR) in the sense
+      used by reliability engineering. Tolerates
+      single-plan failure.
+  \end{description}
+\end{definition}
+
+\begin{remark}[Batch coarseness as a speculation budget]
+  Proposition \ref{prop:lcm-density} showed that
+  under LCM packing the hardware tile's
+  information density is constant at $M^2$ bits,
+  which forces a minimum batch size $(L/d)^2$. If
+  the workload's batch is smaller than this minimum,
+  the remaining lanes would otherwise be wasted
+  padding; portfolio packing uses them for
+  alternative plans at zero marginal cost.
+\end{remark}
+
+\subsection{Enumeration strategies}
+
+Three strategies for choosing which plans to pack:
+
+\begin{itemize}[nosep]
+  \item \textsc{Top-$k$}: pack the $k$ lowest-cost
+    plans from the Pareto frontier, weighted by
+    some scalar $\phi$. Maximizes the probability
+    that the realized-best plan is among the
+    packed.
+  \item \textsc{Corner-pick}: pack one plan that
+    minimizes each of the $d$ cost dimensions
+    separately (so $d$ plans total). Ensures that
+    whichever resource turns out to be binding in
+    practice has a dedicated plan optimized for it.
+  \item \textsc{Ambiguous-cluster}: group
+    atom-sequence-equivalent plans and pack the
+    entire cluster. Useful when the grammar admits
+    many plans that differ only in encoding or
+    tile assignment.
+\end{itemize}
+
+Each strategy is a wrapper around the Pareto
+frontier extraction of Proposition \ref{prop:pareto};
+all three produce valid portfolios under
+Theorem \ref{thm:parse-packing}.
+
+\subsection{Plan-equivalence transitivity}
+
+\begin{proposition}[Plan-equivalence transitivity]
+  \label{prop:plan-trans}
+  \footnote{Class \textsf{AO}$_{\mathrm{exec}}$.
+  Warrant: direct from
+  Definition \ref{def:exec-operationalist}.
+  Finite-$\kappa$ valid.}
+  Let $P_1, P_2, P_3$ be plans for the same
+  workload on the same hardware. If $P_1 \equiv
+  P_2$ and $P_2 \equiv P_3$ (execution-equivalent
+  per Definition \ref{def:exec-operationalist}),
+  then $P_1 \equiv P_3$.
+\end{proposition}
+
+\begin{proof}
+  Measurement indistinguishability is transitive:
+  if no observation separates $P_1$ from $P_2$ and
+  no observation separates $P_2$ from $P_3$, no
+  observation separates $P_1$ from $P_3$.
+\end{proof}
+
+This makes $\equiv$ a genuine equivalence relation
+on plans, and licenses the parser's portfolio
+output to be a single representative per equivalence
+class rather than an enumeration of duplicates.
+
+\subsection{Register-time-space allocation}
+
+\begin{theorem}[Register-time-space bound]
+  \label{thm:reg-bound}
+  \footnote{Class \textsf{AH}. Warrant: interval-graph
+  coloring argument on the lane $\times$ time
+  allocation. Qualifier: assumes register lanes and
+  dispatch cycles form a 2D grid with rectangular
+  claims. Finite-$\kappa$ valid.}
+  For a portfolio with $k$ plans, each requiring
+  register width $w_i$ and dispatch-cycle count
+  $t_i$, a valid packing requires register-time
+  area at least $\sum_i w_i \cdot t_i$; the greedy
+  strip-packing allocation attains area at most
+  $2 \sum_i w_i \cdot t_i$.
+\end{theorem}
+
+\begin{proof}
+  The lower bound is a straightforward counting
+  argument: total area $\geq$ sum of per-plan
+  areas. The greedy upper bound is the standard
+  strip-packing result (Coffman, Garey, Johnson,
+  Tarjan 1980), which is 2-approximate for
+  rectangular strip packing.
+\end{proof}
+
+\subsection{Summary of the planner's outputs}
+
+The planner, in its most general form, takes a
+workload $W$, a grammar $G$, a budget $B$, a
+hardware profile $\pi$, and an objective $\phi$,
+and returns:
+
+\begin{itemize}[nosep]
+  \item A plan portfolio
+    $(\mathcal{P}, \mathcal{L}, \mathcal{E})$
+    satisfying Theorem \ref{thm:parse-packing};
+  \item The dual prices $(\lambda_{\VRAM}^*,
+    \lambda_{\SMEM}^*, \lambda_{\REG}^*)$ from
+    the Lagrangian dual
+    (Section \ref{sec:lagrangian}), interpretable
+    as marginal per-resource shadow costs;
+  \item A diagnostic report on which resource
+    is binding, alternative plans within a stated
+    cost tolerance, and the estimated Pareto
+    frontier size.
+\end{itemize}
+
+This is a substantially richer output than the
+single-plan output of a traditional compiler. It
+enables the end user to reason about the tradeoff
+surface directly rather than about a pre-collapsed
+scalar answer. Sections \S1 S1--S2 of the reading
+guide note this as the central engineering
+investment required to make the planner
+operationally useful; the grammar and parser
+described in this paper are the infrastructure
+that makes such an investment pay off.

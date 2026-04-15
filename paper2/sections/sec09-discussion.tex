@@ -1,0 +1,459 @@
+%----------------------------------------------------------------------
+\section{Discussion}\label{sec:discussion}
+%----------------------------------------------------------------------
+
+\subsection{Summary of results}
+
+The following table summarizes the correspondence
+between [DAF]'s foundational machinery and the
+scheduling machinery developed here.
+
+\medskip
+\begin{center}
+\begin{tabular}{l|l|l}
+\textbf{[DAF] construct} & \textbf{This paper's analogue} & \textbf{Status} \\
+\hline
+Discriminator $d$ & Atom $a \in \mathcal{A}$ & Definition \\
+$\kappa$-evolution & Chart item insertion & Theorem \ref{thm:soundness} \\
+Membership profile $(\tau, \sigma)$ & Semantic attributes $(E, r)$ & Definition \\
+Four-cell structure & Encoding lattice $\mathcal{E}$ & Definition \ref{def:lambda}ff. \\
+Residue $R(S)$ & Cost-vector slack $B - \bar{c}$ & Definition \ref{def:cost-vector} \\
+Extensionality & Plan-equivalence (Definition \ref{def:exec-operationalist}) & Proposition \ref{prop:plan-trans} \\
+Operationalist & Execution-operationalist & Definition \ref{def:exec-operationalist} \\
+Gluing axiom & Cost-bounded completer & Definition \ref{def:cost-bounded} \\
+Sheafification & Chart closure & Theorem \ref{thm:earley-complete} \\
+SPPF & Plan portfolio & Definition \ref{def:portfolio} \\
+Fano closure & LCM density & Proposition \ref{prop:lcm-density} \\
+Yoneda embedding & Cost-signature equivalence & Proposition \ref{prop:plan-trans} \\
+Chain complex $\partial \circ \partial = 0$ & Grade-drop chain under $\partial$ in RM & Section \ref{sec:encoding} \\
+\end{tabular}
+\end{center}
+
+Each row is a functorial correspondence: the
+structural role [DAF] assigns to the left-hand
+concept is played, in this paper, by the right-hand
+concept. The parallel is close enough that both
+papers can be read as instances of a single
+underlying pattern: sheafification applied to the
+derivation DAG of an open-world computation, with
+the sheaf's sections being local plans or local
+set-membership claims, and the gluing axiom being
+satisfied by either cost-bounded parsing or
+$\GF(2)$-linear constraint solving.
+
+\subsection{Relationship to existing work}
+
+The components are drawn from well-established
+literatures. The novelty lies in the specific
+synthesis.
+
+\begin{itemize}[nosep]
+  \item \textbf{Earley parsing with attributes}.
+    Knuth (1968), Earley (1970), Aycock \& Horspool
+    (2002). The attribute-grammar extension of
+    Earley is classical; the specialization of its
+    attribute domain to a multi-dimensional cost
+    lattice is well-known in weighted CFG parsing
+    (Chiang et al., Huang, Lopez) for natural-language
+    translation applications.
+  \item \textbf{Lagrangian relaxation for CFG parsing}.
+    Chiang, Knight, Haghighi (2008) introduced
+    Lagrangian techniques for constrained
+    decoding; Huang (2008) extended them to
+    $k$-best parsing. Our contribution is to
+    multi-resource constraints, where the dual
+    variable is itself vector-valued.
+  \item \textbf{Pareto-A$^*$ search}. Mandow \&
+    P\'{e}rez-de-la-Cruz (2010) give the
+    general-purpose algorithm for multi-objective
+    shortest paths; we import their framework
+    essentially unchanged.
+  \item \textbf{Block-diagonal matrix fusion}.
+    Standard in BLAS implementations for
+    block-sparse problems; the scheduling
+    application to heterogeneous atoms sharing a
+    SIMT register is a specialization not found in
+    the BLAS literature.
+  \item \textbf{GF(2) matrix methods}. Valiant
+    (1975) reduces CFG parsing to matrix
+    multiplication; the converse, recognizing a
+    parse as a GF(2)-linear algebraic computation,
+    is implicit in our grammar but not exploited for
+    the parsing algorithm itself (we use Earley,
+    not matmul-based methods).
+  \item \textbf{Kernel fusion and software
+    pipelining}. The compiler-optimization
+    literature (Muchnick 1997; Allen \& Kennedy
+    2001) gives the algorithmic foundation for
+    kernel fusion; our \texttt{fused\_matrix\_apply}
+    is a specific instantiation of that idea for
+    $\GF(2)$-linear atoms over masked registers.
+\end{itemize}
+
+The novelty is the \emph{composition}: a grammar
+whose productions are GPU scheduling
+transformations, whose attributes are hardware
+resource vectors, whose parser is Earley with
+cost-bounded completion, whose output is a Pareto
+plan portfolio. Each piece is individually classical;
+their synthesis as an integrated compiler for the
+CSTZ algebra is new.
+
+\subsection{Practical limitations}
+
+\paragraph{Calibration burden.} The hardware profile
+$\pi$ is the locus of device-specific information.
+Calibrating $\pi$ from published SM specifications
+is plausible but non-trivial; calibrating from
+measured benchmarks on a specific device requires a
+benchmark sweep across the atom inventory. This is
+the principal engineering investment required to
+bring the planner from design to operation.
+(\S1 item S1, Appendix \ref{app:kernels} hints at
+the measurement protocol.)
+
+\paragraph{Grammar completeness.} The atom inventory
+of Section \ref{sec:atoms} covers the CSTZ algebra
+as developed in [DAF]'s Sections 3--9. Extensions to
+downstream frameworks --- adjoint functor lifting,
+higher-category morphism composition, sheaf
+restriction maps --- would add atoms. Each new
+atom requires a cost signature and a property test;
+the grammar structure accommodates arbitrary
+additions, but completeness against any particular
+downstream framework is the user's responsibility.
+
+\paragraph{Non-linear atoms.} The XOR-bridge and
+fused-matrix mechanics of Sections
+\ref{sec:fusion}--\ref{sec:time-sharing} apply only
+to $\GF(2)$-linear atoms. Popcount, comparison,
+and other reductions force register spills. Whether
+a broader class of atoms admits a ``semi-reversible''
+extension of the XOR-bridge is the subject of
+Conjecture \ref{conj:nonlinear}.
+
+\paragraph{Dynamic shapes.} The planner presupposes
+static $n$ (exterior dimension). Workloads that
+require runtime $n$-variability would need to be
+split into a family of plans, one per $n$, with
+dispatch to the correct plan selected at kernel
+invocation. This is expressible in the grammar but
+adds complexity to the parsing stage and is deferred.
+
+\paragraph{LP integrality gap.} The Lagrangian
+relaxation of Section \ref{sec:lagrangian} has a
+provably-zero gap in the affine-cost case, but the
+general worst-case gap is only empirically bounded.
+A tight theoretical bound is listed as open (X3).
+
+\subsection{Future directions}
+
+\paragraph{Grammar-level verification in Agda.}
+The predecessor [DAF] is mechanized in Agda
+(\texttt{agda/CSTZ/}); the planner grammar
+could similarly be formalized, with each
+production type-checked against an Agda
+specification of the underlying $\GF(2)$ atom
+semantics. This would give a mechanical proof
+of Theorem \ref{thm:soundness} at the grammar
+level.
+
+\paragraph{Streaming planner for ObservationState.}
+[DAF]'s classification subsystem emits an
+ObservationState that grows monotonically as
+new classifier observations are ingested.
+Proposition \ref{prop:incremental} lets the
+planner update in place; a streaming integration
+between the Python ObservationState
+(\texttt{src/cstz/observe.py}) and the planner's
+chart would give real-time plan updates as new
+observations arrive.
+
+\paragraph{Cost-profile calibration framework.}
+A benchmark suite that measures per-atom resource
+consumption on a target device, then fits a
+hardware profile $\pi$, would close item S1 of
+the reading guide. This is essentially the same
+shape as a BLAS autotuning loop.
+
+\paragraph{Multi-device scheduling.} The current
+budget vector is per-device. Extending the grammar
+to a multi-device cluster (data-parallel or
+model-parallel) would add a communication cost
+dimension and would require a production rule for
+cross-device atoms. This is a natural extension
+but not attempted here.
+
+\subsection{The operationalist through-line}
+
+Both [DAF] and this paper rest on an operationalist
+commitment: that a distinction which cannot be
+witnessed is not a valid distinction. [DAF]
+applies this to the metaphysics of discrimination
+(``if no discriminator separates $a$ and $b$ under
+any $\kappa$-evolution, then $a = b$''). We apply
+it to the metaphysics of execution (``if no
+measurement separates $P_1$ and $P_2$ on the
+target hardware, then $P_1$ and $P_2$ are
+execution-equivalent'').
+
+The commitment is philosophically the same. In
+both cases, identifying two entities that would
+otherwise be distinct is an engineering act, not a
+forced mathematical conclusion; in both cases, the
+engineering motivation is that the framework that
+admits un-witnessable distinctions cannot be
+implemented, tested, or falsified. The planner's
+portfolio output, which retains alternative plans
+whose costs are measurement-indistinguishable, is
+the execution-level manifestation of the same
+principle that licenses [DAF]'s sheafification to
+treat $\kappa$-equivalence as identity.
+
+\subsection{Governance as parity check}
+
+The verification map (Section \ref{sec:reading-guide})
+is not an editorial nicety: it is [DAF]'s XOR
+signature $\chi = \tau \oplus \sigma$ applied to the
+paper itself. Each claim is probed by two
+independent discriminators --- \textsf{proven} and
+\textsf{witnessed} --- whose XOR gives the claim's
+status:
+\begin{center}
+\begin{tabular}{c|c|c}
+\textsf{proven} & \textsf{witnessed} & mark \\
+\hline
+1 & 1 & \cmark\ (``verified'': argument complete AND
+    witness exists) \\
+1 & 0 & \gmark\ (``gap'': argument complete, specific
+    witness missing) \\
+0 & 1 & --- (inadmissible: a witnessed but
+    unproven claim is not a claim) \\
+0 & 0 & \omark\ (``open'': framework declines to
+    prove, not a defect)
+\end{tabular}
+\end{center}
+
+The \gmark\ mark is exactly the four-cell structure's
+\emph{residue}: a signature with $\chi = 0$ that
+signals a discrimination is available but not yet
+performed. [DAF]'s residue analysis prescribes what to
+do with such signatures: treat the residue as a
+discriminator-articulation request and $\kappa$-evolve
+the regime to resolve it.
+
+Applying this to the paper: each \gmark\ in the
+verification map is paired with a named gap item
+(G1--G6) that specifies \emph{exactly} which
+$\kappa$-evolution would convert the residue to a
+\cmark. The framework is not just self-diagnostic;
+it is \emph{self-prescriptive}. The following table
+records the parity check's output:
+
+\medskip
+\begin{center}
+\footnotesize
+\begin{tabular}{l|c|l|l}
+\textbf{Claim} & \textbf{Mark} & \textbf{Residue} & \textbf{Required $\kappa$-evolution} \\
+\hline
+Complexity (\ref{thm:complexity}) & \gmark &
+  $|\mathrm{Pareto}|$ unbounded WC & G3: measure frontier on real workloads \\
+Heuristic monotone (\ref{prop:heuristic-monotone}) & \gmark &
+  $h^*$ near-trivial & G6: measure pruning rate; strengthen if needed \\
+Parse-packing (\ref{thm:parse-packing}) & \gmark &
+  Def \ref{def:atom-equiv} underdet.\ & G4: algorithmic decidability of atom-seq.\ equiv.\ \\
+Reg-time-space (\ref{thm:reg-bound}) & \gmark &
+  Rectangular abstraction & G5: stepped-profile generalization \\
+Lagrangian (\ref{thm:lagrangian}) & \omark &
+  Integer gap bound & X3: prove tight bound (or accept open) \\
+All \textsf{H}-class \cmark & (conditional) &
+  Uncalibrated $\pi$ & G1: fit profile for ref.\ GPU \\
+$\alpha$ residue plateau (App F) & \cmark &
+  \verb|per_pair| form & G7 closed: script added $l_{\alpha,\mathrm{per\_pair}}\approx 29$ \\
+$\gamma$ overdetermination (App F) & \cmark &
+  rank-deficient blade ($\sigma_{\min}/\sigma_{\max} \approx 10^{-3}$) & G8 closed: script ran SVD, dropped redundant extra \\
+$\gamma$ library exhaustion (App F) & \gmark &
+  no candidate form fits post-drop residue & G9: enrich candidate-form library \\
+\multicolumn{2}{l}{--- operational validity} &
+  No parser binary & G2: implement Earley chart parser \\
+\end{tabular}
+\end{center}
+
+\medskip
+
+Pareto dominance (Section \ref{sec:encoding} onward)
+is itself an instance of the parity-check mechanism.
+For two plans $P, P'$, the \emph{admissibility
+XOR-signature} at budget $B$ is
+\begin{equation*}
+  \chi_B(P, P') = \delta_B(P) \oplus \delta_B(P').
+\end{equation*}
+$\chi_B = 0$ when both are equally admissible under
+$B$ (both fit or neither fits); $\chi_B = 1$ when
+the admissibility regime distinguishes them. Plan
+$P'$ operationalist-dominates $P$ iff $\chi_B = 0$
+for every $B \in A(P)$ (every budget that admits $P$
+also admits $P'$) and $\chi_B = 1$ for some
+$B \in A(P') \setminus A(P)$ (at least one budget
+admits $P'$ but not $P$). The witness-budgets in the
+asymmetric difference $A(P') \setminus A(P)$ are the
+residues; they index exactly the dimensions on which
+$c(P) - c(P') \geq 0$ has strict-positive support.
+This is the admissibility regime's XOR signature,
+applied reflexively to the paper's exclusion rule.
+
+The framework's self-regulation applied recursively:
+a reader uncomfortable with an \emph{un}derived
+exclusion rule (as was rightly the case in an
+earlier draft that imported Pareto dominance
+wholesale) has detected an operationalist-unwitnessed
+claim. The remedy (Propositions
+\ref{prop:op-equals-pareto} and
+\ref{prop:frontier-char}) supplies the witness that
+converts the $\gmark$ to $\cmark$ without moving any
+cost vector or phase boundary; only the
+\emph{derivation} changes, from imported MOO
+convention to algebraic consequence of
+exec-operationalism on the admissibility regime.
+
+\medskip
+
+Every residue has a named discriminator. A reader who
+feels the rigor-differential between [DAF]'s
+\textsf{A}-class claims (backed by mechanized Agda)
+and this paper's \textsf{H}-class claims (backed by
+``a suitable profile'') has correctly detected
+residues G1 and G2. The framework's response is not
+to explain away the discomfort but to act on it:
+close G1 and G2, and the proportion of \cmark\ marks
+on \textsf{H}-class claims equals the proportion on
+\textsf{A}-class claims automatically, without
+changing any definition or proof.
+
+\smallskip
+
+\noindent G1--G6 were identified by authorial analysis
+during paper writing. G7--G9 were \emph{discovered
+empirically} by running the feedback-loop script
+(Appendix \ref{app:feedback-loop}): G7 when a residue's
+monotone-but-decelerating trajectory signalled a
+parameter-space shortfall; G8 when the subsequent
+$\kappa$-evolution produced a blade whose SVD revealed
+rank deficiency; G9 when the post-orthogonalization
+residue exhausted the candidate-form library. G7 was
+closed in the same run (script added
+\verb|l_alpha_per_pair|); G8 was closed in the next
+iteration (script dropped the redundant extra after
+blade analysis); G9 is the current frontier.
+
+The progression G7 $\to$ G8 $\to$ G9 is itself
+[DAF]'s residue-dynamic operating at successively
+higher meta-levels: G7 lives in the per-plan parameter
+space; G8 lives in the grade-$k$ exterior algebra
+over that space; G9 lives in the library of candidate
+discriminator-shapes (the meta-space from which new
+parameters are drawn). Each higher level's residue
+is a discriminator on the level below. The framework
+finds its own gaps, and each gap's resolution either
+closes the immediate residue or names the next
+meta-level residue to articulate.
+
+\subsection{Cofibrative structure between [DAF] and this paper}
+
+The relationship between [DAF] and this paper is not
+``predecessor--successor'' in the sense of two independent
+works; it is a specific instance of [DAF]'s own fibered
+structure. [DAF]'s Theorem 9.6 (Fibered topos) constructs
+$\int \mathcal{C}$ over the poset of $\kappa$-states
+$\mathbf{K}$ with sub-regime inclusions as morphisms, and
+Corollary 9.7 identifies this with a pro-system of topoi
+connected by geometric morphisms. This paper sits as a
+specific object in that pro-system: the stratum over
+the plan-discrimination regime $\Delta$.
+
+The sub-regime inclusion $\Delta \hookrightarrow \Delta'$
+(where $\Delta'$ could be [DAF]'s full $\kappa$ or any
+larger discrimination context) is the morphism in [DAF]'s
+$\mathbf{K}$ that relates this paper's stratum to the
+predecessor's. Theorems about $\kappa$ in [DAF]
+transport along this inclusion by functoriality;
+Prop \ref{prop:op-equals-pareto} is the concrete
+realization of that transport. The reflexive governance
+--- applying [DAF]'s $\chi$-signature to the paper's
+own verification map --- is not decorative; it is
+[DAF]'s self-hosting theorem (Theorem 9.14) at work,
+with this paper as the internal construction that
+reconstructs [DAF]'s framework using [DAF]'s own
+substrate.
+
+In [DAF]'s site-of-regimes language (Definition 9.17):
+this paper contributes one new object to the site
+$\mathfrak{S}$ --- the regime $\Delta$ --- and one
+morphism from that object to each previously-existing
+object of $\mathbf{K}$ via the appropriate sub-regime
+inclusion. The claim of Prop \ref{prop:op-equals-pareto}
+is that $\Delta$'s Pareto-frontier structure is covered
+(in the Grothendieck-topology sense) by the image of
+[DAF]'s adjunction data through the inclusion. Future
+papers in the series will extend $\mathfrak{S}$ further,
+each contributing a regime and a cover; the pro-system
+grows monotonically, consistent with [DAF]'s
+$\kappa$-evolution semantics.
+
+This is why the reflexive governance is not ``building
+structure to defend our own rigor'': the structure
+being applied pre-exists in [DAF] and applies to
+every object in the pro-system. An author who notices
+the application is not inventing it; they are reporting
+a functorial fact about where their paper sits.
+
+In this sense, the paper is a properly-labeled
+intermediate state of a program that [DAF]
+initiated. The relationship between [DAF] and this
+paper is not ``predecessor--successor'' in the sense
+of two independent works; it is $\kappa_t$ and
+$\kappa_{t+1}$ in the same regime, where the
+evolution from one to the next is the articulation
+of the execution-operationalist axiom
+(Definition \ref{def:exec-operationalist}) and the
+corresponding \textsf{H} / \textsf{R} / \textsf{F}
+axiom classes. The next evolution, $\kappa_{t+2}$,
+is the paper that substitutes measured numbers for
+MODEL-4's symbolic parameters and promotes the
+\gmark\ marks in the table above to \cmark\ by
+witnessing.
+
+The governance does not ask the reader to suspend
+discomfort; it asks the reader to let discomfort
+drive the next $\kappa$-evolution.
+
+\subsection{Conclusion}
+
+We have extended the discrimination framework of
+[DAF] from mathematical foundations to execution
+engineering. A weighted attribute grammar captures
+the admissible schedules; an Earley chart parser
+with cost-bounded completion selects among them;
+Lagrangian duality over a four-dimensional resource
+vector gives the constraint-enforcement mechanism;
+Pareto portfolios retain non-dominated alternatives;
+ambiguous-parse packing exploits the batch coarseness
+that LCM tile alignment enforces to run alternatives
+concurrently at no extra dispatch cost. The two
+compound productions --- spatial MIMD fusion via
+block-diagonal masked matrix, and temporal
+multiplexing via XOR-bridged register sharing ---
+are opposite poles of the fusion-vs-sequencing
+tradeoff, and their nesting is what the planner's
+search is searching over.
+
+The one genuinely new foundational commitment is
+the execution-operationalist axiom
+(Definition \ref{def:exec-operationalist}), which
+declares plan-equivalence to be the coarsest
+relation consistent with observable cost behavior
+on stated hardware. Everything else is a lifting
+of [DAF]'s algebraic machinery into an execution
+model, an operation that---like sheafification over
+a site---produces a substantially richer output
+than any single derivation would admit.

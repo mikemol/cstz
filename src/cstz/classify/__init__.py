@@ -16,6 +16,15 @@ Key invariants:
 
 Mirrors: the Agda formalization at agda/CSTZ/Framework/ and the
 observation protocol at cstz.observe.
+
+Cofibration (STUDY.md §8.3, Python cofiber): classification is runtime
+only. The Agda formalization fixes the *algebra* of discriminators
+(``agda/CSTZ/Framework/Discriminator.agda``) but does not prescribe how
+to obtain discriminators from concrete syntax — that is this module's
+job. ``DiscriminatorRegistry``, ``Classified``, ``Walker``, and
+``Adapter`` have no Agda counterpart because they map bytes / AST
+nodes / tokens to bitmasks, which is an operational concern rather
+than a mathematical one.
 """
 
 from cstz.classify.registry import Discriminator, DiscriminatorRegistry

@@ -1,0 +1,195 @@
+%----------------------------------------------------------------------
+\section{Pallas Kernel Sketches}\label{app:kernels}
+%----------------------------------------------------------------------
+
+This appendix sketches the Pallas kernel body for
+each compound production of the main text. Each
+sketch is runnable in principle against a JAX +
+Pallas installation; we omit import and
+boilerplate for brevity.
+
+\subsection{Zeta butterfly (encode / decode)}
+
+The $n$-pass Yates butterfly for $\zeta = \zeta^{-1}$:
+
+\begin{lstlisting}
+def zeta_kernel(f_ref, out_ref, n: int):
+    size = 1 << n
+    for i in range(n):                # n passes
+        bit = 1 << i
+        idx = jnp.arange(size)
+        has_bit = (idx & bit).astype(bool)
+        without = idx & ~bit
+        # Gather f[without] for lanes where bit i is set
+        val = jnp.where(has_bit, f_ref[without], 0)
+        # XOR into those lanes
+        f_ref[idx] ^= val
+    out_ref[:] = f_ref[:]
+\end{lstlisting}
+
+One Pallas \texttt{pallas\_call} with a
+\texttt{grid=(size // BLOCK,)} decomposition per
+pass. Latency is $n$ passes of length
+$\mathrm{BLOCK}$ each; no intermediate storage.
+
+\subsection{Block-diagonal fused apply}
+
+For atoms $A_1, \ldots, A_n$ with disjoint masks
+$m_1, \ldots, m_n$:
+
+\begin{lstlisting}
+def fused_apply_kernel(reg_in, reg_out, masks, sub_matrices):
+    reg = reg_in
+    # Load all sub-matrices into SMEM at kernel entry
+    # (SMEM cost paid once, not per-atom)
+    out = jnp.zeros_like(reg)
+    for i in range(len(sub_matrices)):
+        # Apply M_i only to lanes where masks[i] = 1
+        masked = reg & masks[i]
+        out ^= (sub_matrices[i] @ masked) & masks[i]
+    reg_out[:] = out
+\end{lstlisting}
+
+The \texttt{@} operator here is a GF(2)-mod
+matrix-vector multiply; in actual JAX/Pallas code
+it would be implemented as an einsum followed by
+\texttt{\& 1} to reduce modulo 2.
+
+\subsection{XOR-bridged time-share}
+
+Three-step bridge per atom transition:
+
+\begin{lstlisting}
+def time_share_kernel(reg_in, reg_out, atoms, masks):
+    reg = reg_in
+    for atom, mask in zip(atoms, masks):
+        # Step 1: save witness outside this atom's lanes
+        witness = reg & (~mask)
+        # Step 2: apply atom to everything
+        reg = atom(reg)
+        # Step 3: cancel atom's effect on witness lanes
+        reg = reg ^ atom(witness) ^ witness
+    reg_out[:] = reg
+\end{lstlisting}
+
+Register budget is $\max_i \REG(A_i) + 1$ for the
+witness scratch. Latency is $\sum_i \LAT(A_i) +
+2(n-1) \LAT_\oplus$ for the bridges.
+
+\subsection{Perspective rotate at tile size 2}
+
+The $2 \times 2$ matrix-vector rotate from
+\texttt{cstz.higher} in Pallas:
+
+\begin{lstlisting}
+def rotate_kernel(persp_arr, p_arr, out_arr):
+    # persp_arr: (batch,) in {0, 1, 2}
+    # p_arr: (batch,) GF(2)^2 packed as 2-bit int
+    matrices = jnp.array([0b1001, 0b0111, 0b1110], dtype=jnp.uint8)
+    m = matrices[persp_arr]
+    tau = (p_arr >> 1) & 1
+    sigma = p_arr & 1
+    tau_out = ((m >> 3) & tau) ^ ((m >> 2) & sigma)
+    sigma_out = ((m >> 1) & tau) ^ (m & sigma)
+    out_arr[:] = (tau_out << 1) | sigma_out
+\end{lstlisting}
+
+Branchless; one AND--XOR chain per lane.
+
+\subsection{Ranked zeta wedge step}
+
+For the wedge product at grade-packed
+representation, where input and output are indexed
+by $(k, S)$ with $|S| = k$:
+
+\begin{lstlisting}
+def wedge_ranked_kernel(f_ref, g_ref, h_ref, n: int):
+    size = 1 << n
+    for T in range(size):
+        acc = 0
+        k = popcount(T)
+        # Sum over (A, B) with A | B = T, A & B = 0, |A| + |B| = k
+        A = 0
+        while True:
+            B = T ^ A
+            if A & B == 0:  # disjoint (guaranteed by construction)
+                acc ^= f_ref[A] & g_ref[B]
+            if A == T:
+                break
+            A = (A - T) & T  # next subset of T
+        h_ref[T] = acc
+\end{lstlisting}
+
+The subset enumeration loop visits $2^{|T|}$ values
+of $A$, summing contributions. For a Pallas
+realization, the inner loop is unrolled per fixed
+$T$ and the kernel is \texttt{vmap}-ed over $T$.
+
+\subsection{Syndrome apply at $n = 3$}
+
+Hamming $[7,4,3]$ syndrome check:
+
+\begin{lstlisting}
+H = jnp.array([
+    [1, 0, 0, 1, 1, 0, 1],
+    [0, 1, 0, 1, 0, 1, 1],
+    [0, 0, 1, 0, 1, 1, 1],
+], dtype=jnp.uint8)
+
+def syndrome_kernel(x_ref, s_ref):
+    # x_ref: (batch, 7) GF(2) values
+    # s_ref: (batch, 3) syndrome
+    s_ref[:] = (x_ref @ H.T) & 1
+\end{lstlisting}
+
+One GEMV per batch element, reduced mod 2. At
+$n = 3$ this is a $7 \to 3$ projection; at larger
+$n$ the matrix $H$ is replaced by the parity-check
+matrix of the corresponding Hamming or
+Reed--Muller code.
+
+\subsection{Spill register to SMEM}
+
+When a non-linear atom forces materialization:
+
+\begin{lstlisting}
+def spill_and_load(reg_in, smem_ref, reg_out):
+    # Spill
+    smem_ref[:] = reg_in[:]
+    # ... non-linear atom executes here, reading smem_ref ...
+    # Reload
+    reg_out[:] = smem_ref[:]
+\end{lstlisting}
+
+Latency cost: $2 \cdot \LAT_{\mathrm{spill}}$
+dominates this production. The SMEM budget must
+accommodate the spilled register's full width.
+
+\subsection{Calibration harness}
+
+A benchmark harness to measure per-atom cost on a
+specific device:
+
+\begin{lstlisting}
+def measure_atom(atom, batch_sizes, device):
+    results = {}
+    for k in batch_sizes:
+        inputs = prepare_random_inputs(atom, k)
+        t0 = time.perf_counter()
+        for _ in range(100):
+            _ = atom(*inputs).block_until_ready()
+        t1 = time.perf_counter()
+        # Also measure memory via device.memory_stats()
+        results[k] = {
+            'latency_us': (t1 - t0) * 1e4,  # avg over 100
+            'bytes_in': sum_input_bytes(inputs),
+            'bytes_out': sum_output_bytes(atom, inputs),
+            # register count estimated via JAX lowering inspection
+        }
+    return results
+\end{lstlisting}
+
+The output of this harness, one per atom in the
+inventory of Section \ref{sec:atoms}, is exactly
+the hardware profile $\pi$ of
+Definition \ref{def:profile}.

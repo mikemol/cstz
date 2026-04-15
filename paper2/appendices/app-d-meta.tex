@@ -1,0 +1,167 @@
+%----------------------------------------------------------------------
+\section{Meta-analysis: the technique matrix}\label{app:meta}
+%----------------------------------------------------------------------
+
+This appendix records the structure discovered by
+profiling the paper's 15 non-trivial formal objects
+against six closure techniques specific to
+scheduler verification. Following the convention
+of [DAF] Appendix D, the analysis is conducted
+\emph{after} the spine is complete; it reports
+what proof technology is actually load-bearing.
+
+\subsection{The six techniques}
+
+Every closure in the paper uses one or more of:
+
+\begin{description}[nosep,leftmargin=1.5cm]
+  \item[S1: $\GF(2)$ linearity] The
+    characteristic-2 algebra from [DAF]: $x \oplus
+    x = 0$, $-x = x$, linearity of $\oplus$ through
+    any linear operator. Used by the XOR-bridge and
+    the encoding commutation.
+  \item[S2: Block-diagonal decomposition] The matrix
+    identity that a block-diagonal matrix-vector
+    product computes each block independently. Used
+    by \texttt{fused\_matrix\_apply} and by the
+    mask-disjointness argument.
+  \item[S3: XOR reversibility] The double-XOR
+    identity $x \oplus m \oplus m = x$. Used by the
+    XOR-bridge's save-restore mechanism.
+  \item[S4: Pareto dominance] The partial-order
+    fact that if $c \leq c'$ componentwise and
+    $c \neq c'$, then $c'$ can be discarded. Used
+    by chart-item pruning, Pareto frontier
+    extraction, and portfolio construction.
+  \item[S5: A$^*$ admissibility] The AI-search fact
+    that admissible monotone heuristics make A$^*$
+    optimal and complete. Used by the cost-bounded
+    Earley completer.
+  \item[S6: LP relaxation \& duality] Strong duality
+    for linear programs, the envelope theorem for
+    sensitivity, and the integrality gap bound.
+    Used by the Lagrangian dual and the dual-price
+    diagnostic.
+\end{description}
+
+\subsection{The closure--technique matrix}
+
+\begin{center}
+\scriptsize
+\begin{tabular}{l|cccccc|c}
+ & S1 & S2 & S3 & S4 & S5 & S6 & Cat \\
+\hline
+Zeta involutivity (\ref{prop:zeta-involution}) &
+  $\bullet$ & & & & & & I \\
+Encoding commutation (\ref{prop:encoding-commute}) &
+  $\bullet$ & & & & & & I \\
+LCM density (\ref{prop:lcm-density}) &
+  & & & & & & C \\
+XOR-bridge correctness (\ref{prop:xor-bridge}) &
+  $\bullet$ & & $\bullet$ & & & & V \\
+Fused-apply correctness (\ref{prop:fused-correctness}) &
+  $\bullet$ & $\bullet$ & & & & & V \\
+Mask disjointness (\ref{prop:mask-disjoint}) &
+  & $\bullet$ & & & & & A \\
+Time-share commutativity (\ref{prop:ts-commute}) &
+  $\bullet$ & & $\bullet$ & & & & A \\
+Ordered time-share (\ref{prop:ts-ordered}) &
+  $\bullet$ & & $\bullet$ & & & & A \\
+Grammar soundness (\ref{thm:soundness}) &
+  $\bullet$ & $\bullet$ & $\bullet$ & & & & T \\
+Cost-bounded Earley (\ref{thm:earley-complete}) &
+  & & & $\bullet$ & $\bullet$ & & T \\
+Heuristic monotone (\ref{prop:heuristic-monotone}) &
+  & & & & $\bullet$ & & A \\
+Complexity (\ref{thm:complexity}) &
+  & & & $\bullet$ & & & T \\
+Incremental replan (\ref{prop:incremental}) &
+  & & & & $\bullet$ & & A \\
+Lagrangian (\ref{thm:lagrangian}) &
+  & & & & & $\bullet$ & T \\
+Pareto extraction (\ref{prop:pareto}) &
+  & & & $\bullet$ & & & A \\
+Parse-packing (\ref{thm:parse-packing}) &
+  $\bullet$ & $\bullet$ & & & & & T \\
+Plan transitivity (\ref{prop:plan-trans}) &
+  & & & & & & A \\
+Register bound (\ref{thm:reg-bound}) &
+  & & & & & & T \\
+\end{tabular}
+\end{center}
+
+Legend: I = identity, V = verification,
+A = auxiliary proposition, T = theorem, C = counting.
+Technique counts across 18 formal objects:
+S1 (GF(2) linearity) \emph{9 uses},
+S2 (block-diagonal) \emph{4},
+S3 (XOR reversibility) \emph{3},
+S4 (Pareto) \emph{3},
+S5 (A$^*$) \emph{3},
+S6 (LP duality) \emph{1}.
+
+\subsection{Equivalence classes}
+
+\emph{$\{S1\}$-only class}: zeta involution, encoding
+commutation. Pure $\GF(2)$ linearity; no
+scheduling-level structure. These are the results
+inherited most directly from [DAF]'s algebra.
+
+\emph{$\{S1, S3\}$ class}: XOR-bridge correctness,
+time-share commutativity, ordered time-share. The
+specifically \emph{reversible} uses of $\GF(2)$
+linearity.
+
+\emph{$\{S1, S2\}$ class}: fused-apply correctness,
+parse-packing. The specifically \emph{parallel}
+uses of $\GF(2)$ linearity.
+
+\emph{$\{S1, S2, S3\}$ class}: grammar soundness
+alone. The soundness theorem draws on all three
+\emph{linearity-adjacent} techniques because it
+must cover both spatial and temporal production
+families in one induction.
+
+\emph{$\{S4, S5\}$ class}: cost-bounded Earley
+completeness. The parser correctness argument is
+pure AI-search theory; no CSTZ-specific algebra is
+invoked.
+
+\emph{$\{S6\}$ class}: Lagrangian achievability
+alone. The LP-duality machinery sits entirely
+outside the $\GF(2)$ story.
+
+\subsection{Interpretation}
+
+Two observations fall out of the matrix:
+
+\begin{itemize}[nosep]
+  \item \textbf{S1 ($\GF(2)$ linearity) is the
+    paper's spine}: it appears in every
+    correctness claim about compound productions.
+    This reflects the design choice of building
+    every compound production on linear atoms; the
+    moment the grammar admits a non-linear
+    production (beyond the isolated
+    $\mathrm{pcnt}_2$), the spine would fracture.
+  \item \textbf{S6 (LP duality) is a leaf}: it is
+    invoked only by the Lagrangian theorem, which
+    stands alone in the technique graph. This
+    suggests the Lagrangian dual is a modular
+    addition: one could remove it and retain the
+    rest of the planner (with a fixed scalar
+    objective instead of a budget-constrained
+    formulation). Whether the planner would
+    then be operationally useful is a separate
+    question.
+\end{itemize}
+
+The matrix also exhibits a clean factorization
+into \emph{algebra} (S1, S2, S3) and
+\emph{combinatorial optimization} (S4, S5, S6),
+with no claim drawing from both. That is precisely
+the architectural separation between the grammar
+and the parser: the grammar is the algebra, the
+parser is the search. The paper's structural
+coherence derives from keeping these two
+halves independent.

@@ -12,6 +12,12 @@ The projection generates:
   - paths2: empty (coh computed on demand, not serialized)
 
 Conforms to: rhpf-pff-profiles/pff.schema.json v1.0
+
+Cofibration (STUDY.md §8.3, Python cofiber): no Agda counterpart —
+serialization is an interchange concern, not a mathematical one.
+``paths1`` entries invoke :func:`cstz.sets.kappa_equiv` to witness
+operationalist equivalence at runtime; ``paths2`` (coherence) is
+computed on demand rather than serialized.
 """
 
 from __future__ import annotations

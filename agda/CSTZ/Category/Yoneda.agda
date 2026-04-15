@@ -55,4 +55,11 @@ yoneda-faithful eval a b all-eq = a≡b
     -- so a + b = 0, hence a = b.
     -- The full proof requires the operationalist axiom or a finiteness
     -- argument.  We postulate for now.
+    --
+    -- Python cofibration (STUDY.md §8.2): P8 has no Python witness
+    -- for the Yoneda faithfulness step specifically. The operationalist
+    -- conclusion a ≡ b that closes this proof is, however, the same
+    -- relation that `src/cstz/sets.py :: kappa_equiv` computes at
+    -- runtime (see P3, STUDY.md §8.1); a Python analogue of this proof
+    -- would discharge `a≡b` via `kappa_equiv(eval, regime, a, b)`.
     postulate a≡b : a ≡ b

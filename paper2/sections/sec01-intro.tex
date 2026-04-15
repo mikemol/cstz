@@ -1,0 +1,486 @@
+%----------------------------------------------------------------------
+\section{Introduction}\label{sec:intro}
+%----------------------------------------------------------------------
+
+The companion manuscript \emph{Discrimination as Foundation}
+(henceforth \textbf{[DAF]}) establishes a constructive foundation
+for set theory in which the primitive notion is discrimination, valued
+in the exterior algebra $\bigwedge(\GF(2)^n)$, with a four-cell
+membership profile $(\tau, \sigma) \in \GF(2)^2$ and a monotonically
+growing regime $\kappa$. The framework reaches a definite resting
+point: set-theoretic consequences (extensionality, Russell exclusion,
+foundation), categorical consequences (adjunctions, Yoneda, topos
+structure), and homotopical consequences (chain complexes, univalence)
+are all derivable from the algebra plus three axioms (profile
+linearity \textsf{P}, evaluation linearity \textsf{E}, operationalist
+principle \textsf{O}).
+
+That resting point is mathematical, not operational. [DAF]
+establishes \emph{what is computed}; it is silent about
+\emph{how to compute it efficiently on modern hardware}. The present
+paper fills that gap. The concrete deliverable is a compiler
+(``planner'') that takes a DAG of CSTZ atomic operations and
+produces one or more executable plans, each a concrete schedule of
+dispatches to a heterogeneous computing substrate (multi-tier memory,
+SIMT/MIMD warps, register files of finite depth). The compiler is
+architecturally small but mathematically interesting: we argue that
+it is most naturally expressed as a weighted attribute grammar whose
+terminals are the CSTZ atoms, whose productions are the admissible
+scheduling transformations, and whose attributes are cost vectors
+over four resources. The compiler's inner loop is then not an
+ad hoc dispatch table but a chart parser.
+
+\subsection{The execution problem}
+
+Let $W$ be a workload: a finite DAG of atomic $\GF(2)$ operations
+over exterior elements. In [DAF], $W$ arises as the sequence of
+discriminator applications, residue computations, $\kappa$-evolutions,
+and sheafification steps that the inference engine executes on a
+bitstream. Each atom is mathematically trivial (a handful of XORs
+and ANDs); there are many of them, and they must share a small
+hardware substrate.
+
+Three structural observations drive what follows.
+
+\begin{enumerate}[label=(\roman*)]
+  \item \textbf{Encoding is a phase.} Every exterior element has at
+    least three equivalent representations: the coefficient basis
+    $\Lambda$, the Reed--Muller syndrome basis RM (related to
+    $\Lambda$ by the zeta transform $\zeta$, which is
+    self-inverse over $\GF(2)$), and a grade-truncated or
+    Hamming-compressed form for objects lying in a proper subcode.
+    Operators have different cost in different bases: $\partial$
+    collapses the RM grade budget monotonically, $\wedge$ is
+    pointwise multiply after ranked zeta, $\mathrm{kappa\_equiv}$
+    is a single syndrome check in the RM basis. The planner's
+    primary job is to \emph{assign encodings to subplans}.
+
+  \item \textbf{Waste is forced batch coarseness.} Hardware tile
+    sizes (e.g.\ 4, 8, 16 per axis on tensor-core pipelines) do not
+    in general divide the natural CSTZ tile sizes (2 for perspective
+    rotations, 3 for Fano syndromes, $n$ for general $\GF(2)^n$
+    operators). Under LCM packing, the utilization of a
+    single hardware block of size $M \times M$ by CSTZ tiles of
+    size $d \times d$ is 100\% regardless of $d$; what differs
+    between tile sizes is the minimum batch size $(L/d)^2$ (where
+    $L = \lcm(d,M)$) that saturates the block. The ``wasted'' lanes
+    under naive padding are in fact a budget for additional work:
+    either speculative execution of alternate plans, or
+    triple-modular-redundant execution of the same plan for fault
+    tolerance.
+
+  \item \textbf{Multi-resource optimization is multi-objective.}
+    Four budgets compete: VRAM (device-global memory), shared
+    memory (per-SM staging), register file (per-thread live values),
+    and wall-clock latency. Fusion trades VRAM bandwidth against
+    SMEM and register pressure; time-sharing trades latency against
+    register pressure. The planner cannot collapse these four into
+    a single scalar cost without loss of information, but it can
+    enforce them jointly via Lagrangian duality over the resource
+    vector. The dual prices give a direct diagnostic of which
+    resource is currently binding, architecture-by-architecture.
+\end{enumerate}
+
+These observations converge on a design: a weighted attribute
+grammar whose chart parser is an Earley variant with cost-bounded
+completion. The grammar's productions are scheduling transformations
+(fuse linear operators, time-share a register, re-encode a subplan);
+the attributes are cost vectors; the parser's completer rejects
+chart items whose aggregate cost would exceed the budget. Optimality
+under hard budgets is the Lagrangian dual of chart parsing; the
+output portfolio is the Pareto-nondominated frontier of that parse.
+
+\subsection{The operationalist axiom at the execution stratum}
+
+[DAF]'s operationalist axiom states that a distinction that cannot
+be witnessed by any discriminator under any $\kappa$-evolution is
+not a valid distinction. This paper does not add a \emph{new}
+foundational commitment; it continues the same commitment at a
+different stratum. The plan-discrimination regime
+$\Delta = \{\delta_B : B \in \mathbb{N}^4\}$
+(Definition \ref{def:admissibility-family} below) is a $\kappa$ in
+[DAF]'s sense, whose elements are the admissibility discriminators;
+what [DAF] proves about $\kappa$ on the set-theoretic stratum
+transports to $\Delta$ on the execution stratum without weakening
+or reinterpretation. We label the restatement
+\textsf{O}$_{\mathrm{exec}}$ only to track the stratum, not to
+suggest an independent commitment:
+
+\begin{definition}[Execution-operationalist axiom]
+  \label{def:exec-operationalist}
+  Let $P_1$ and $P_2$ be two plans for the same workload $W$, both
+  valid under the planner grammar, and let $c(P_i) \in
+  \mathbb{N}^4$ denote the cost vector of $P_i$
+  under a stated hardware profile. If for every resource $r$ in the
+  budget vector $B$ we have $c(P_1)_r \leq B_r$ and $c(P_2)_r \leq
+  B_r$, and if no discriminator in $\Delta$ separates them, then
+  $P_1$ and $P_2$ are \emph{execution-equivalent} on that hardware.
+  The planner is free to emit either, or a lane-packed mixture of
+  both.
+\end{definition}
+
+Definition \ref{def:exec-operationalist} is [DAF]'s operationalist
+axiom (Def 1.1 of [DAF]) with plans substituted for elements and
+$\Delta$ substituted for $\kappa$; it is not an independent
+commitment. Its new work is to license the portfolio output and
+the ambiguous-parse packing of Section \ref{sec:portfolios} by
+certifying that [DAF]'s operationalism transfers across strata.
+The framework's reflexive self-hosting property (Theorem 9.14 of
+[DAF]: the framework reconstructs its own substrate) predicts
+exactly this: $\Delta$ is a self-hosted $\kappa$ in [DAF]'s
+sense, and every [DAF] theorem about $\kappa$-regimes applies.
+
+\subsection{Reading guide: how to verify this paper's claims}
+\label{sec:reading-guide}
+
+The paper contains 42 formal objects across nine sections.
+Before encountering them, the reader should know three
+things: where each claim is verified, what is not claimed,
+and how much of the paper depends on which axioms.
+
+\medskip
+\noindent\textbf{Axiom-class distribution.}
+The paper rests on commitments of three kinds. The first
+two are inherited from [DAF] and appear with the same
+labels: \textsf{A} (algebra of $\GF(2)$ and $\bigwedge V$),
+\textsf{P} (profile linearity), \textsf{E} (evaluation
+linearity), \textsf{O} (operationalist). The third is
+new to this paper, reflecting its hardware-grounding:
+
+\begin{description}[nosep,leftmargin=1.5cm]
+  \item[\textsf{H}] \emph{Hardware profile}: the claim
+    depends on a stated cost model assigning $(\VRAM,
+    \SMEM, \REG, \LAT)$ values to each production. The
+    profile is a per-architecture calibration; the claim
+    is valid relative to any profile that satisfies the
+    model's monotonicity axioms (Section \ref{sec:resource-vector}).
+  \item[\textsf{R}] \emph{Reversibility}: the claim
+    depends on GF(2)-linearity of specific atoms for the
+    XOR-bridge mechanic to apply. Non-linear atoms
+    (popcount-reduce, comparison) break \textsf{R} and
+    require an explicit register materialization.
+  \item[\textsf{F}] \emph{Fusion safety}: the claim
+    depends on lane-disjointness of the masks assigned
+    to fused atoms. Non-disjoint masks invalidate the
+    block-diagonal decomposition.
+  \item[\textsf{O}$_{\mathrm{exec}}$] The
+    execution-operationalist axiom
+    (Definition \ref{def:exec-operationalist}).
+    A plan-equivalence relation rather than a
+    set-equivalence relation.
+\end{description}
+
+Of the 42 formal objects: 17 (40\%) depend only on
+\textsf{A}. 14 additionally require \textsf{H}. 6 require
+\textsf{AHR} (reversibility). 3 require \textsf{AHF} (fusion
+safety). 2 require \textsf{AHO}$_{\mathrm{exec}}$ (the new
+axiom, touching only portfolio extraction and Pareto
+packing).
+
+\medskip
+\noindent\textbf{Verification map.}
+Each claim's proof lives in the spine (\S\S3--8); concrete
+hardware-grounded witnesses live in Appendix \ref{app:kernels}
+(Pallas kernel sketches) and Appendix \ref{app:examples}
+(worked examples). Each theorem carries a footnote stating:
+axiom class, dependency depth, verification pointer, warrant,
+qualifier, finite-resource validity, and novelty status.
+
+\begin{center}
+\scriptsize
+\begin{tabular}{l|c|c|l}
+\textbf{Claim} & \textbf{Class} & \textbf{Status} &
+  \textbf{Verification} \\
+\hline
+Zeta involutivity (\ref{prop:zeta-involution}) & \textsf{A} & \cmark &
+  Double-sum, $1+1=0$ \\
+Encoding commutation (\ref{prop:encoding-commute}) & \textsf{A} & \cmark &
+  $\zeta$ $\GF(2)$-linear; commutes with $\oplus$ \\
+LCM density (\ref{prop:lcm-density}) & \textsf{AH} & \cmark &
+  Counting; $(M/d)^2 d^2 = M^2$ \\
+Op.\ dominance $=$ Pareto (\ref{prop:op-equals-pareto}) & \textsf{A} & \cmark &
+  Principal filter containment \\
+Frontier characterization (\ref{prop:frontier-char}) & \textsf{A} & \cmark &
+  Admissible $+$ non-dominated \\
+XOR-bridge correctness (\ref{prop:xor-bridge}) & \textsf{AHR} & \cmark &
+  App.\ \ref{app:b}; linearity of $L$ \\
+Fused-apply correctness (\ref{prop:fused-correctness}) & \textsf{AHF} & \cmark &
+  App.\ \ref{app:b}; block-diagonal decomposition \\
+Time-share commutativity (\ref{prop:ts-commute}) & \textsf{AHR} & \cmark &
+  Lane-disjoint masks + linearity \\
+Grammar soundness (\ref{thm:soundness}) & \textsf{A} & \cmark &
+  Induction on derivations \\
+Cost-bounded Earley completeness (\ref{thm:earley-complete}) & \textsf{AH} & \cmark &
+  Admissible heuristic; App.\ \ref{app:b} \\
+Planner complexity (\ref{thm:complexity}) & \textsf{AH} & \gmark &
+  $O(N^3 \cdot |\mathrm{Pareto}|)$; |Pareto|=1 at App F instances (existence);
+  WC bound open (G3) \\
+Lagrangian achievability (\ref{thm:lagrangian}) & \textsf{AH} & \omark &
+  LP relaxation; integrality gap bounded (X3) \\
+Pareto portfolio extraction (\ref{prop:pareto}) & \textsf{AH} & \cmark &
+  Dominance check on chart \\
+Parse-packing soundness (\ref{thm:parse-packing}) & \textsf{AHO}$_{\mathrm{exec}}$ & \gmark &
+  Atom-seq.\ equiv.\ (Def \ref{def:atom-equiv}) semantically underdet.\ (G4) \\
+Plan-equivalence transitivity (\ref{prop:plan-trans}) & \textsf{AO}$_{\mathrm{exec}}$ & \cmark &
+  Direct from Definition \ref{def:exec-operationalist} \\
+Register-time-space bound (\ref{thm:reg-bound}) & \textsf{AH} & \gmark &
+  Strip-packing; rectangular-plan abstraction unverified (G5) \\
+Incremental replanning (\ref{prop:incremental}) & \textsf{AH} & \cmark &
+  Earley chart locality \\
+Heuristic monotonicity (\ref{prop:heuristic-monotone}) & \textsf{AH} & \gmark &
+  Admissible; 9/9 winner-agreement at App F instances; WC pruning open (G6) \\
+\end{tabular}
+\end{center}
+
+\noindent Legend: \cmark\ = verified,
+\gmark\ = gap (specific issue identified),
+\omark\ = open-acknowledged.
+
+\medskip
+\noindent\textbf{What is not claimed (open questions).}
+
+\begin{description}[nosep,leftmargin=0.8cm]
+  \item[X1] \emph{Optimal calibration from first principles.}
+    The cost model presupposes a hardware profile; we do
+    not derive those numbers analytically. A principled
+    calibration from published SM specifications is
+    plausible but not attempted. \textbf{Open.}
+  \item[X2] \emph{Non-linear atom fusion.}
+    The XOR-bridge mechanic requires GF(2)-linearity.
+    We conjecture (Conjecture \ref{conj:nonlinear}) that
+    certain non-linear atoms (popcount, comparison)
+    admit a weaker ``semi-reversibility'' via a paired
+    inverse atom, but we do not prove it.
+  \item[X3] \emph{Integrality gap for Lagrangian LP.}
+    We show an LP relaxation is tractable, but the
+    gap between LP-optimal and IP-optimal plan cost
+    is bounded only empirically. A tight worst-case
+    bound is \textbf{open-acknowledged}.
+  \item[X4] \emph{Dynamic shapes under JIT.}
+    The cost model presupposes static $n$ (exterior
+    dimension). Dynamic $n$ is expressible as a
+    family of plans indexed by $n$, but the family's
+    joint optimization is outside this paper's scope.
+  \item[X5] \emph{Proof gap vs.\ implementation gap.}
+    [DAF]'s verification framework classifies gaps
+    into ``proof gap'' (need to complete an argument)
+    and ``open-acknowledged'' (choice not to prove).
+    This paper introduces a third category:
+    \emph{implementation gap} (need to build and
+    measure). Items G1 and G2 of the gap priorities
+    are implementation gaps, not proof gaps. We rely
+    on [DAF]'s meta-governance to make the
+    distinction visible: the \gmark\ mark on \textsf{H}-class
+    claims does not mean the \emph{proof} is incomplete
+    --- it means the \emph{witnessing measurement}
+    does not exist yet.
+\end{description}
+
+\medskip
+\noindent\textbf{Gap priorities} (from downstream
+impact on the DAF$\to$planner$\to$kernel pipeline).
+Numbered G1--G6 in the [DAF] convention; $^d$ = downstream
+claim count.
+
+\emph{Tier 1 --- load-bearing}
+(closing these unblocks the most downstream results):
+
+\begin{description}[nosep,leftmargin=0.8cm]
+  \item[G1] \emph{Calibration profile for a reference GPU}
+    (A100 or H100). \textbf{Open (implementation).}$^{d=14}$
+    Unblocks all \textsf{H}-class claims with concrete
+    numerics; downgrades every \textsf{H}-class \gmark\
+    except G3 to \cmark\ once a profile is fit.
+  \item[G2] \emph{Earley chart parser implementation}
+    against the atom inventory of Section \ref{sec:grammar}.
+    \textbf{Open (implementation).}$^{d=11}$
+    Unblocks integration with the existing Pallas kernel
+    layer. A reference implementation would also close
+    G4 and G5 by direct measurement.
+  \item[G3] \emph{Pareto-frontier size characterization.}
+    The factor $|\mathrm{Pareto}|$ in Theorem
+    \ref{thm:complexity} is worst-case exponential in
+    the number of resource dimensions. Empirical
+    bounds on realistic workloads are needed to
+    promote \ref{thm:complexity} from \gmark\ to
+    \cmark. \textbf{Open (measurement).}$^{d=3}$
+\end{description}
+
+\emph{Tier 2 --- structural}:
+
+\begin{description}[nosep,leftmargin=0.8cm]
+  \item[G4] \emph{Atom-sequence equivalence decidability.}
+    Definition \ref{def:atom-equiv} is syntactic; the
+    soundness of Theorem \ref{thm:parse-packing} relies
+    on a reading of equivalence that treats encoding
+    tags and mask indices as non-semantic. A precise
+    algorithmic characterization of when two plans
+    share an instruction stream is needed.
+    \textbf{Partial (definitional).}$^{d=2}$
+  \item[G5] \emph{Rectangular-plan abstraction.}
+    Theorem \ref{thm:reg-bound} models each plan as a
+    rectangle in the register-time grid. Plans with
+    variable-width phases (e.g.\ a fused prefix
+    followed by a time-shared suffix) do not fit this
+    abstraction cleanly. A tighter bound for stepped
+    profiles is open.
+    \textbf{Open (analysis).}$^{d=1}$
+  \item[G6] \emph{Heuristic effectiveness.}
+    Proposition \ref{prop:heuristic-monotone} proves
+    $h^*$ admissible, but $h^*$ is essentially a
+    constant lower bound (per-atom minimum across
+    remaining workload). Effective pruning requires a
+    tighter heuristic. Measurement of pruning rate on
+    realistic workloads --- and replacement of $h^*$
+    with a better heuristic if needed --- is open.
+    \textbf{Open (measurement).}$^{d=2}$
+  \item[G7] \emph{Parameter-space enrichment for
+    non-vectorized plans.} Discovered by the
+    feedback-loop trace of Appendix
+    \ref{app:feedback-loop}. $\alpha$'s residue
+    plateau at $+460\%$ triggered the script's
+    \texttt{suggest\_kappa\_evolution} routine, which
+    fit the residue against a candidate form library
+    and selected \verb|per_pair| with coefficient
+    $38.1$ cycles. \textbf{Witnessed by script; loop
+    closed from $+460\%$ to $-13\%$ in one iteration.}$^{d=1}$
+  \item[G8] \emph{Overdetermination residue and
+    blade-orthogonalization.} Discovered and
+    \emph{closed} by the feedback-loop trace (Appendix
+    \ref{app:feedback-loop} Phase C): $\gamma$'s
+    $\kappa$-evolution produced
+    \verb|l_gamma_per_pair_per_M|; the script's
+    \verb|detect_overdetermination| tripped on the
+    four-cell $(1,1)$ signature;
+    \verb|orthogonalize_blade| ran SVD on the
+    instance-contribution matrix ($\sigma$-spectrum
+    $[11111, 209, 12]$, $\sigma_{\min}/\sigma_{\max}
+    \approx 10^{-3}$); the degenerate extra was
+    dropped and its form added to the forbidden set.
+    \textbf{Witnessed by script; SVD orthogonalization
+    closes the overdetermination signature in one
+    iteration.}$^{d=1}$
+  \item[G9] \emph{Candidate-form library
+    insufficiency.} Also discovered by the
+    feedback-loop trace (Phase D): after dropping
+    \verb|per_pair_per_M|, $\gamma$'s residue
+    persists at $\sim -50\%$, and no form in the
+    remaining six-entry candidate library fits the
+    residue with coefficient of variation below $0.5$.
+    The loop correctly reports exhaustion and
+    terminates. The remedy is enrichment of
+    \verb|CANDIDATE_FORMS| --- higher-grade wedges,
+    linear combinations of existing forms, or
+    domain-specific forms like $K^2 \cdot f(M)$ ---
+    which is itself a $\kappa$-evolution at the
+    meta-level (the library $V$ of candidate
+    discriminator-shapes, rather than the
+    per-plan parameter space). \textbf{Open (library
+    exhaustion witnessed; enrichment is a library-level
+    $\kappa$-evolution).}$^{d=1}$
+\end{description}
+
+\emph{Meta-governance note.} Tracking these as G1--G8
+(with \gmark\ on the affected claims) rather than
+leaving them as implicit \cmark\ is the application of
+[DAF]'s verification framework to this paper. The
+framework is self-regulating: a claim whose
+\emph{warrant} is load-bearing cost-model arithmetic
+but whose \emph{backing} is an uncalibrated profile is
+exactly what \gmark\ is designed to record. A reader who
+feels uncomfortable about the rigor differential
+between [DAF] (whose \textsf{A}-class claims are backed
+by mechanized Agda) and this paper (whose \textsf{H}-class
+claims are backed by ``a suitable profile''
+would be correct; the framework's response to that
+discomfort is this subsection, not a hidden footnote.
+
+\subsection{What changes from [DAF], and what transfers}
+
+This paper introduces no new foundational axiom. The
+execution-operationalist axiom
+(Definition \ref{def:exec-operationalist}) is [DAF]'s
+operationalist axiom at the execution stratum: same commitment,
+different substrate. The paper's structural moves are
+instances of DAF's constructions rather than new constructions:
+
+\begin{itemize}[nosep]
+  \item [DAF]'s four-cell structure becomes the atom encoding
+    tag (coefficient/syndrome/Hamming/truncated).
+  \item [DAF]'s $\kappa$-evolution becomes the chart parser's
+    forward pass: each atom in the workload DAG extends the
+    chart monotonically, in strict analogy to how each
+    $\kappa$-evolution extends the regime.
+  \item [DAF]'s Yoneda-style identification of objects by
+    morphism profiles becomes the equivalence relation on
+    plans under the admissibility regime
+    (Definition \ref{def:admissibility-family}), with cost
+    vectors as morphism profiles.
+  \item [DAF]'s $\kappa$-truncation (the projection to a
+    sub-regime that retains only a subset of discriminators)
+    underwrites atom-sequence equivalence
+    (Section \ref{sec:portfolios}, Definition
+    \ref{def:atom-equiv}): two plans share an atom sequence
+    iff they are equivalent under the $\kappa$-truncation that
+    projects away all discriminators except atom identity.
+  \item [DAF]'s fibered-topos construction (Theorem 9.6 of [DAF])
+    prefigures the plan chart: $\Delta$ is a discrete analog of
+    [DAF]'s site of regimes $\mathfrak{S}$, with budgets
+    playing the role of $\kappa$-stages and dominance
+    $\succ$ playing the role of sub-regime inclusion.
+  \item [DAF]'s Fano-plane and Reed--Muller structure at
+    Section 9 appears here as the native tile size for
+    Hamming-compressed syndrome operations
+    (Proposition \ref{prop:lcm-density}).
+\end{itemize}
+
+The paper's genuine novelty is located precisely: this is the
+\emph{first operationalization of [DAF]'s discrimination-regime
+machinery outside [DAF]'s home domain}. Proposition
+\ref{prop:op-equals-pareto} (Pareto dominance from admissibility)
+and Proposition \ref{prop:frontier-char} (frontier as
+admissible-and-non-dominated) are individually short proofs, but
+their status is distinctive: they witness that [DAF]'s
+regime/quotient/residue vocabulary lands on a computer-engineering
+object (multi-objective plan selection) and produces a
+non-vacuous derivation. Everything else in this paper is
+engineering; these two propositions are the transfer theorem.
+
+[DAF]'s self-hosting claim (Theorem 9.14: the framework
+reconstructs its own substrate) predicts that such transfer
+theorems exist for every domain where one can specify a
+discrimination regime; this paper is the first observation of
+one. Future strata (networked execution, energy-budget
+scheduling, multi-device coordination) will presumably support
+their own transfer theorems; their existence is licensed by the
+self-hosting property rather than re-proven.
+
+\subsection{Roadmap}
+
+Section \ref{sec:prelim} fixes notation, the encoding lattice,
+the resource vector, and the terminology concordance with
+standard compiler and parser theory. Section \ref{sec:grammar}
+presents the atom inventory and base productions. Sections
+\ref{sec:fusion} and \ref{sec:time-sharing} develop the two
+compound productions---spatial (MIMD lane fusion) and
+temporal (XOR-bridge register time-sharing)---and prove
+their correctness. Section \ref{sec:parsing} specifies the
+Earley chart parser with cost-bounded completion and gives
+the complexity bound. Section \ref{sec:lagrangian} derives
+the dual formulation and the dual-price diagnostic.
+Section \ref{sec:portfolios} extracts the Pareto frontier
+and proves soundness of ambiguous-parse packing. Section
+\ref{sec:discussion} summarizes, relates to [DAF], and
+enumerates limitations. Appendix \ref{app:analogies}
+collects structural analogies to classical compiler and
+parser theory; Appendix \ref{app:b} gives detailed proofs;
+Appendix \ref{app:kernels} sketches Pallas kernels;
+Appendix \ref{app:meta} presents the closure-technique
+matrix for this paper's proofs; Appendix \ref{app:examples}
+works through a small worked example end-to-end on a
+hypothetical platform (MODEL-4); Appendix
+\ref{app:feedback-loop} works a non-trivial algorithm
+(batched $\kappa$-equivalence) across three workload
+instances and articulates the feedback-loop value
+proposition that the framework supports as a successor to
+[DAF]'s self-hosting dynamic.
