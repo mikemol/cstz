@@ -1,0 +1,508 @@
+%----------------------------------------------------------------------
+\section{Directed Higher Categories}\label{sec:directed-higher}
+%----------------------------------------------------------------------
+
+Section \ref{sec:homotopy} constructed a symmetric $n$-groupoid
+from the exterior algebra. Section \ref{sec:cattheory} constructed
+directed 1-categories by layering $\tau/\sigma$ asymmetry on top.
+We now show how these combine: the framework produces
+$(n,1)$-categories, and obtaining higher directed structure
+requires explicit meta-discrimination.
+
+\subsection{Why direction is confined to grade 1}
+
+\begin{theorem}[Natural $(n,1)$-structure]\label{thm:n1cat}
+The category $\mathcal{C}(S,\kappa)$ with the
+discrimination complex $\bigwedge(\GF(2)^n)$ is an
+$(n,1)$-category: 1-morphisms are directed (potentially
+non-invertible), and $k$-morphisms for $k \geq 2$ are
+symmetric and invertible.
+\end{theorem}
+
+\begin{proof}
+The argument turns on where $\tau/\sigma$ labeling applies.
+
+\emph{Grade 1: directed.} A discriminator $d \in \bigwedge^1 V$
+acts directly on the population $S$, producing assignments
+$\tau_d(a), \sigma_d(a) \in \GF(2)$ for each $a \in S$.
+The labels $\tau$ and $\sigma$ are structurally distinct
+(Definition \ref{def:discriminator}), so $d$ induces a
+directed morphism $a \to b$ when $\tau_d(a) = 1$ and
+$\sigma_d(b) = 1$ (Definition \ref{def:directed-morphism}).
+The reverse morphism requires a separate discriminator
+(Proposition \ref{prop:noninvert}). Therefore 1-morphisms
+are not automatically invertible.
+
+\emph{Grade 2 and above: symmetric.}
+A $k$-cell $\omega = d_{i_1} \wedge \cdots \wedge d_{i_k}
+\in \bigwedge^k V$ for $k \geq 2$ does not act directly
+on the population. It relates $k$ discriminators. The
+$\tau/\sigma$ labeling is a property of the interface
+between a discriminator and a population; since $\omega$
+does not interface with $S$ directly, no $\tau/\sigma$
+assignment applies to $\omega$. The $k$-cell inherits
+only the algebraic properties of $\bigwedge(\GF(2)^n)$:
+\begin{itemize}[nosep]
+  \item $\omega \wedge \omega = 0$ (self-inverse),
+  \item $\omega_1 \wedge \omega_2 = \omega_2 \wedge \omega_1$
+    (symmetric),
+\end{itemize}
+so every $k$-morphism for $k \geq 2$ is invertible (its
+own inverse) and composition is symmetric. These are exactly
+the conditions for the $k$-morphisms to form a groupoid at
+each level $k \geq 2$.
+
+Combining: directed 1-morphisms with symmetric, invertible
+$k$-morphisms for $k \geq 2$ is the definition of an
+$(n,1)$-category (truncated at grade $n$).
+\end{proof}
+
+\begin{remark}
+The $(n,1)$-structure is not a design choice. It follows from
+the architecture: $\tau/\sigma$ labels the population;
+grade 1 elements contact the population; grade $\geq 2$
+elements do not. Direction exists exactly where the algebra
+meets the world.
+\end{remark}
+
+\subsection{2-morphisms as homotopies between directed paths}
+
+\begin{definition}[Directed homotopy]\label{def:directed-homotopy}
+Let $f, g: A \to B$ be two directed morphisms witnessed by
+discriminators $d_f$ and $d_g$ respectively. A
+\emph{2-morphism} $\alpha: f \Rightarrow g$ is the 2-cell
+$d_f \wedge d_g \in \bigwedge^2 V$. This 2-cell is:
+\begin{itemize}[nosep]
+  \item symmetric: $d_f \wedge d_g = d_g \wedge d_f$, so
+    $\alpha: f \Rightarrow g$ and $\alpha: g \Rightarrow f$
+    are the same 2-cell;
+  \item self-inverse: $(d_f \wedge d_g) \wedge (d_f \wedge d_g) = 0$;
+  \item well-bounded: $\partial(d_f \wedge d_g) = \{d_f, d_g\}$
+    (Definition \ref{def:boundary}).
+\end{itemize}
+\end{definition}
+
+\begin{proposition}[2-morphisms witness
+  indiscernibility of paths]\label{prop:2morph}
+The 2-cell $d_f \wedge d_g$ exists (is non-zero) if and
+only if $d_f \neq d_g$ (the two discriminators are
+linearly independent). When it exists, it witnesses that
+$f$ and $g$ are two \emph{distinct} directed paths from
+$A$ to $B$, and provides a symmetric, invertible
+identification between them.
+
+When $d_f = d_g$, the 2-cell is $d_f \wedge d_f = 0$:
+the degenerate case. Identical morphisms are connected
+by the trivial 2-morphism. This is the identity 2-cell.
+\end{proposition}
+
+\begin{proof}
+Linear independence of $d_f$ and $d_g$ is equivalent to
+$d_f \wedge d_g \neq 0$ in $\bigwedge^2(\GF(2)^n)$.
+If $d_f = d_g$, then $d_f \wedge d_g = d_f \wedge d_f = 0$.
+The boundary $\partial(d_f \wedge d_g) = \{d_f, d_g\}$
+confirms that the 2-cell connects exactly the two
+1-cells that constitute its factors.
+\end{proof}
+
+\begin{remark}
+The symmetry of the 2-cell means there is no preferred
+direction of the homotopy between $f$ and $g$. The
+two directed paths are identified without one being
+``before'' or ``after'' the other. This is the correct
+behavior for an $(n,1)$-category: 2-morphisms are
+equivalences, not directed transformations.
+\end{remark}
+
+\begin{example}[Directed 2-morphism: two classification schemes]
+\label{ex:2morph}
+Consider a population $S$ of animals. Two discriminators
+$d_1$ and $d_2$ both classify animals as ``dangerous''
+($\tau$) or ``safe'' ($\sigma$):
+\begin{itemize}[nosep]
+  \item $d_1$: ``has venom'' (a biochemical discriminator).
+    Snake $\to \tau$, rabbit $\to \sigma$.
+  \item $d_2$: ``is a predator'' (an ecological discriminator).
+    Snake $\to \tau$, rabbit $\to \sigma$.
+\end{itemize}
+
+Both $d_1$ and $d_2$ are directed 1-morphisms: they send
+``snake'' from $\sigma$ to $\tau$ (classifying it as
+dangerous). They agree on the snake and the rabbit. But
+they are distinct discriminators (linearly independent in
+$\kappa$), so the 2-cell $d_1 \wedge d_2 \neq 0$.
+
+This 2-cell is the directed 2-morphism witnessing that
+``venomous'' and ``predatory'' are two \emph{distinct}
+paths from ``unclassified animal'' to ``dangerous.'' The
+2-cell does not prefer one path over the other (it is
+symmetric: $d_1 \wedge d_2 = d_2 \wedge d_1$). It
+records that two independent criteria happen to agree on
+this population --- and that they \emph{could} disagree
+on a different population (e.g.\ a bear: predatory but
+not venomous). The 2-cell's existence anticipates the
+residue that a richer population would produce.
+
+Under the $\sigma$-perspective, the 2-cell becomes a
+\emph{directed} 2-morphism: a discrimination between the
+two classification schemes themselves. The
+$\sigma$-discriminator asks: ``does this element's
+classification change when we switch from biochemical to
+ecological criteria?'' For the snake: no. For the bear:
+yes. The directed 2-morphism is the structural record of
+this inter-scheme comparison.
+\end{example}
+
+\subsection{Higher cells and the homotopy tower}
+
+\begin{proposition}[Structure of $k$-morphisms]\label{prop:k-morph}
+For $k \geq 2$, a $k$-cell
+$\omega = d_1 \wedge \cdots \wedge d_k$ witnesses the
+joint relationship among $k$ directed 1-morphisms. Its
+boundary $\partial \omega$ consists of $k$ distinct
+$(k-1)$-cells (Proposition \ref{prop:boundary}), each
+obtained by omitting one factor. The $k$-cell asserts
+that these $(k-1)$-cells are coherently related.
+
+The tower of $k$-morphisms for $k \geq 2$ forms a
+symmetric groupoid at each level (Theorem \ref{thm:groupoid}).
+The entire tower is the homotopy type of the space of
+directed paths between two objects, computed over $\GF(2)$.
+\end{proposition}
+
+\begin{remark}[Truncation level as complexity measure]
+In the $(n,1)$-category $\mathcal{C}(S,\kappa)$ with
+$\dim(\kappa) = n$, the highest non-trivial $k$-morphism
+is at grade $n$. This is the \emph{top cell}
+$d_1 \wedge d_2 \wedge \cdots \wedge d_n \in \bigwedge^n V$,
+the unique (up to scalar) element of maximum grade. It
+witnesses the coherence of \emph{all} discriminators
+simultaneously --- the total relationship among every
+discrimination that has been performed. As $\kappa$ evolves,
+the truncation level rises, and deeper coherence relations
+become expressible.
+\end{remark}
+
+\subsection{The triangle identity and free meta-discrimination}
+\label{sec:meta}
+
+The $(n,1)$-structure of Theorem \ref{thm:n1cat} assumed
+that $\tau/\sigma$ labeling exists only at the interface
+between discriminators and population. We now show that
+meta-discrimination --- labeling of discriminators
+themselves --- is already present in the algebraic
+structure, requiring no additional construction.
+
+\begin{definition}[Triangle identity]\label{def:triangle}
+The discrimination regime $\kappa$, together with its
+membership masks $\sigma$ and $\tau$, satisfies the
+\emph{triangle identity}:
+\begin{equation}\label{eq:triangle}
+  \kappa = \sigma \otimes \tau.
+\end{equation}
+Over $\GF(2)$, this identity has a triadic symmetry.
+Since $\kappa = \sigma + \tau$ (in $\GF(2)$, where
+$\otimes$ reduces to XOR), we also have:
+\begin{align}
+  \sigma &= \kappa + \tau, \label{eq:tri-sigma}\\
+  \tau   &= \kappa + \sigma. \label{eq:tri-tau}
+\end{align}
+Each of the three elements is the XOR of the other two.
+No element is privileged. Any of $\kappa$, $\sigma$, $\tau$
+can serve as the discrimination regime, with the remaining
+two as membership masks.
+\end{definition}
+
+\begin{remark}[Grounding the identification]
+\label{rem:triangle-grounding}
+The triangle identity identifies three objects that
+appear to be different kinds of things: $\kappa$ is a
+regime (an ordered sequence of discriminators with
+monotonic growth, a write path, and a read path), while
+$\sigma$ and $\tau$ are masks (functions from elements
+to $\GF(2)$). The identification proceeds as follows.
+
+Each discriminator $d \in \kappa$ produces a pair
+$(\tau_d, \sigma_d)$ of functions $S \to \GF(2)$. The
+XOR signature $\chi_d = \tau_d + \sigma_d$ is a single
+function $S \to \GF(2)$. The regime $\kappa$ is thus
+associated with a family of $\GF(2)$-valued functions
+$\{\chi_{d_1}, \ldots, \chi_{d_n}\}$. Each $\chi_{d_i}$
+is an element of $\GF(2)^S$ (the vector space of
+functions $S \to \GF(2)$).
+
+The masks $\sigma$ and $\tau$ are also elements of
+$\GF(2)^S$ (via $\tau_d: S \to \GF(2)$ and
+$\sigma_d: S \to \GF(2)$). The identity
+$\chi_d = \tau_d + \sigma_d$ is an equation in
+$\GF(2)^S$: it holds pointwise, for every element
+of $S$.
+
+The $S_3$ symmetry acts on this equation by permuting
+which function plays which role: the XOR signature (which
+records whether exactly one predicate fires), the
+$\tau$-comprehension (which records whether $\tau$ fires),
+and the $\sigma$-comprehension (which records whether
+$\sigma$ fires). All three are elements of the
+same vector space $\GF(2)^S$. The structural properties
+attached to $\kappa$ --- monotonic growth, the write path,
+the read path --- transfer under permutation because they
+are consequences of the $\GF(2)$ algebra, not of the
+label (Proposition \ref{prop:dynamics-transfer}).
+\end{remark}
+
+\begin{proposition}[Three perspectives]\label{prop:perspectives}
+The triangle identity yields three equally valid, equally
+lossless perspectives on the same discrimination structure:
+\begin{enumerate}[label=(\roman*),nosep]
+  \item \textbf{$\kappa$-perspective}: $\kappa$ is the
+    regime, $\sigma$ and $\tau$ are masks.
+    Discriminators act on the population. This is the
+    standard framework (Section \ref{sec:framework}),
+    giving directed 1-morphisms.
+  \item \textbf{$\sigma$-perspective}: $\sigma$ is the
+    regime, $\kappa$ and $\tau$ are masks.
+    Discriminators of the $\sigma$-regime act on the
+    discriminators of $\kappa$ (treated as a population).
+    This gives directed 2-morphisms: directed
+    relationships between 1-morphisms.
+  \item \textbf{$\tau$-perspective}: $\tau$ is the regime,
+    $\kappa$ and $\sigma$ are masks.
+    This provides a third directed perspective,
+    independently classifying at yet another level.
+\end{enumerate}
+Each perspective is an equally lossless view of the
+underlying structure. No information is created or
+destroyed by changing perspectives.
+\end{proposition}
+
+\begin{proof}
+The triangle identity (\ref{eq:triangle})--(\ref{eq:tri-tau})
+is symmetric under any permutation of $\{\kappa, \sigma, \tau\}$.
+Given any two of the three, the third is determined (their
+XOR). Therefore each perspective contains exactly the same
+information as the others. The map between perspectives is
+its own inverse (XOR is involutive), so no perspective is
+lossy.
+\end{proof}
+
+\begin{proposition}[Dynamics transfer under permutation]
+\label{prop:dynamics-transfer}
+The structural properties of the $\kappa$-perspective ---
+monotonic growth (Proposition \ref{prop:monotone}), the
+linear write path (Definition \ref{def:evolution}), and
+the monoidal read path (Proposition \ref{prop:monoidal})
+--- transfer to the $\sigma$- and $\tau$-perspectives
+under $S_3$ permutation.
+\end{proposition}
+
+\begin{proof}
+These properties are consequences of the $\GF(2)$
+algebra, not of the label ``$\kappa$.''
+
+\emph{Monotonicity.} $\kappa$-evolution is monotonic
+because each evolution adds a linearly independent basis
+vector to $V = \GF(2)^n$, increasing $n$ by one
+(Proposition \ref{prop:monotone}). Under the
+$\sigma$-perspective, $\sigma$ is the regime and its
+``discriminators'' are the $\sigma$-masks viewed as a
+population. Evolution in the $\sigma$-perspective adds a
+new element to this population --- equivalently, a new
+dimension in $\GF(2)^n$ (since $\sigma = \kappa + \tau$,
+a new $\kappa$-dimension produces a new $\sigma$-dimension
+by the triangle identity). The growth is monotonic for the
+same algebraic reason: dimensions of a vector space over
+$\GF(2)$ grow monotonically under basis extension.
+
+\emph{Write/read.} The write path's linearity (each
+residue consumed once) is a property of the exterior
+algebra's nilpotency: $d \wedge d = 0$ prevents a
+discriminator from being consumed twice. This holds for
+any element of $\bigwedge V$, regardless of whether it is
+labeled $\kappa$, $\sigma$, or $\tau$. The read path's
+monoidal property (order-independence of filtration) is
+Proposition \ref{prop:monoidal}, which depends on the
+independence of discriminators' profiles --- again an
+algebraic property that holds regardless of labeling.
+
+Therefore: when $\sigma$ plays the role of regime, it
+inherits monotonic growth, a linear write path, and a
+monoidal read path. The same holds for $\tau$. The
+dynamics are properties of the algebra, not of the label.
+\end{proof}
+
+\begin{remark}[Semantic asymmetry across perspectives]
+Proposition \ref{prop:perspectives} proves that algebraic
+properties (monotonicity, nilpotency, order-independence)
+transfer under $S_3$ rotation. But when $\sigma$ plays
+the role of regime, the ``population'' being discriminated
+is the set of discriminators of $\kappa$, which carry
+rich internal structure (the vector space structure of $V$,
+profile linearity (Definition \ref{def:profile-linear}), evaluation linearity (Definition \ref{def:eval-linear})). The rotation is
+algebraically valid, but the semantic content at different
+levels may differ: discriminators-as-data are not generic
+data. The paper treats the rotation as formal; a fuller
+treatment would verify that the additional structure of
+discriminators-as-data does not invalidate the algebraic
+transfer.
+\end{remark}
+
+\begin{definition}[$\GF(2)$ toroid]\label{def:toroid}
+The three elements $\kappa, \sigma, \tau$ are the three
+non-zero points of $\GF(2)^2$:
+\[
+  \kappa \leftrightarrow (1,1), \qquad
+  \sigma \leftrightarrow (0,1), \qquad
+  \tau   \leftrightarrow (1,0).
+\]
+(Any assignment satisfying the pairwise-XOR condition is
+valid.) The space $\GF(2)^2$ is a \emph{discrete torus}
+$\mathbb{Z}/2\mathbb{Z} \times \mathbb{Z}/2\mathbb{Z}$,
+and the three non-zero points form a triangle within it.
+The symmetry group of this triangle is $S_3$, the
+symmetric group on three elements, acting by permutation
+of $\{\kappa, \sigma, \tau\}$.
+
+Note: $\GF(2)^2 = \GF(2) \times \GF(2)$ is the Klein
+four-group. The product structure is the paper's
+central operation: composing two $\GF(2)$-valued
+discriminator evaluations into a $\GF(2)^2$-valued
+membership profile. Conversely, $\GF(2)$ is the
+quotient $\GF(2)^2 / \GF(2)$: the XOR signature
+$\chi = \tau + \sigma$ is the quotient map, and the
+residue $R = \{a : \chi(a) = 0\}$ is the kernel.
+The framework systematically traverses this
+product-and-quotient structure: upward from $\GF(2)$
+to $\GF(2)^2$ when composing discriminator pairs,
+downward from $\GF(2)^2$ to $\GF(2)$ when computing
+the XOR signature. The ``toroid'' names this
+bidirectional traversal, not merely the group.
+\end{definition}
+
+\begin{theorem}[Free $(n,k)$-structure]\label{thm:nk-free}
+The $S_3$ symmetry of the triangle identity provides
+directed structure at multiple levels without constructing
+meta-regimes. Each element of $S_3$ yields a perspective
+in which a different component plays the role of
+discrimination regime, providing direction at the
+corresponding categorical level. Specifically:
+\begin{itemize}[nosep]
+  \item The three transpositions (swaps of two elements)
+    each exchange which component is ``regime'' vs.\
+    ``mask,'' providing directed structure at a
+    different level.
+  \item The two 3-cycles rotate all three roles, providing
+    composite perspectives that chain through all levels.
+  \item The identity preserves the standard $\kappa$-perspective.
+\end{itemize}
+The resulting structure is an $(n,k)$-category where the
+number of directed levels $k$ is determined by the
+subgroup of $S_3$ that is actively employed.
+\end{theorem}
+
+\begin{proof}
+Each perspective (Proposition \ref{prop:perspectives})
+provides $\tau/\sigma$ labeling at one categorical level:
+the level at which the ``population'' of that perspective
+lives. The $\kappa$-perspective labels elements of $S$
+(level 0 entities), giving directed 1-morphisms. The
+$\sigma$-perspective labels discriminators of $\kappa$
+(level 1 entities), giving directed 2-morphisms. The
+$\tau$-perspective labels discriminators of $\sigma$
+(level 2 entities), giving directed 3-morphisms.
+
+Since each perspective is equally lossless (Proposition
+\ref{prop:perspectives}), the directed structure at each
+level is as legitimate as at level 1. No additional
+structure is constructed; the direction was always present
+in the triadic symmetry and merely becomes visible upon
+rotating the perspective.
+
+For $k$ levels of direction, apply $k$ of the three
+available perspectives. The maximum from the triangle
+identity alone is $k = 3$ (all three perspectives active
+simultaneously). For $k > 3$, iterate: apply the triangle
+identity to the meta-regime itself, obtaining a tower of
+nested triangles. Each iteration provides three additional
+levels of direction.
+\end{proof}
+
+\begin{corollary}[Direction requires no additional axiom]\label{cor:free-direction}
+Meta-discrimination does not cost additional structure.
+It is a rotation of the existing $\GF(2)$ toroid. The
+apparent ``cost'' of direction at higher levels was an
+artefact of fixing the $\kappa$-perspective and treating
+the other perspectives as external constructions. Under
+the toroidal symmetry, all perspectives are internal.
+\end{corollary}
+
+\begin{remark}[Geometric content of the toroid]
+The $\GF(2)$ toroid $\mathbb{Z}/2\mathbb{Z} \times
+\mathbb{Z}/2\mathbb{Z}$ is the simplest non-trivial
+compact surface over a finite field. The three non-zero
+points form an equilateral structure (all pairwise
+distances are equal under the Hamming metric). The
+$S_3$ symmetry is the full symmetry group of this
+configuration. Geometric manipulations of the toroid ---
+rotations, reflections, translations --- correspond to
+changes of categorical perspective.
+
+This gives the discrimination framework a geometric
+foundation: the space of all possible categorical
+perspectives on a given discrimination structure is
+the $\GF(2)$ toroid, and navigating between perspectives
+is geometric manipulation of this space.
+\end{remark}
+
+\begin{remark}[Why $(\infty,1)$-categories appear natural]
+The $(\infty,1)$-category remains the structure most
+commonly encountered in mathematical practice, despite
+higher directed structure being freely available. This
+is because the $\kappa$-perspective --- discriminating
+elements of a population --- is the perspective most
+naturally adopted when reasoning about mathematical
+objects. The $\sigma$- and $\tau$-perspectives
+(discriminating discriminations) are available but less
+frequently invoked. The prevalence of $(\infty,1)$-categories
+reflects a conventional choice of perspective, not a
+structural limitation.
+
+When mathematical practice does invoke directed
+2-morphisms (in 2-category theory, double categories,
+bicategories, or enriched category theory), the framework
+predicts that a rotation to the $\sigma$-perspective has
+been implicitly performed. This rotation requires no
+additional axioms and preserves algebraic properties
+(Proposition \ref{prop:perspectives}), though the
+semantic content at different levels may differ
+(Remark above).
+\end{remark}
+
+\begin{remark}[The $(\infty,\infty)$-category]
+By iterating the triangle identity (applying it to
+meta-regimes, then meta-meta-regimes, and so on),
+direction is available at every level without bound.
+As $\dim(\kappa) \to \infty$ and the tower of
+iterated triangle identities extends without bound,
+the resulting structure is an $(\infty,\infty)$-category:
+directed at every level, with no truncation on either
+homotopical complexity or directed depth. By the
+indistinguishability principle (Proposition
+\ref{prop:infinity}), this is operationally identical
+to a completed $(\infty,\infty)$-category --- the
+most general categorical structure in the standard
+hierarchy.
+\end{remark}
+
+%----------------------------------------------------------------------
+\section{Monoidal Closed Structure and the Periodic Table}
+\label{sec:monoidal}
+%----------------------------------------------------------------------
+
+We now show that the $n$-categorical structure of the
+discrimination framework and monoidal structure are the
+same thing viewed from different vertices of the $\GF(2)$
+toroid. The rotation that turns $n$-categories into monoidal
+$(n-1)$-categories is delooping, and it is a free geometric
+operation on the toroid. Closure (internal hom) falls out of
+the triangle identity.

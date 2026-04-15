@@ -1,0 +1,441 @@
+%----------------------------------------------------------------------
+\section{Homotopical and Categorical Structure}\label{sec:homotopy}
+%----------------------------------------------------------------------
+
+The grading of the exterior algebra provides a direct\footnote{Section-level Toulmin. \emph{Move}: the grade structure of $\bigwedge V$ yields chain complexes and groupoids. \emph{ZFC comparison}: ZFC has no native homotopical structure; it must be imported via simplicial sets or CW-complexes. Here, $\partial \circ \partial = 0$ is a theorem of $\GF(2)$ arithmetic. \emph{Residue instance}: homological gaps ($H_k \neq 0$) are the homotopy-level manifestation of the same residue mechanism that produces gaps/overlaps at the set-theoretic level. The mechanism is uniform: residue = $\chi = 0$ at every grade.}
+correspondence with homotopy theory. The key observation
+is that the framework has exactly one primitive --- the
+wedge product over $\GF(2)$ --- and all categorical
+structure (objects, morphisms, higher morphisms, identity,
+composition, boundaries) is this single operation applied
+to different inputs.
+
+\subsection{The single-primitive principle}
+
+\begin{definition}[Degeneracy as identity]\label{def:degeneracy}
+A \emph{0-cell} is not a primitive distinct from morphisms.
+A 0-cell is a 1-cell (discriminator) whose source and target
+coincide --- that is, a discriminator applied to itself:
+\begin{equation}\label{eq:object-as-loop}
+  d \wedge d = 0.
+\end{equation}
+The ``object'' associated with discriminator $d$ is the
+degenerate self-discrimination of $d$. Grade 0 is not
+``scalars, interpreted as objects.'' Grade 0 is \emph{what
+results when a discrimination collapses}.
+\end{definition}
+
+\begin{remark}
+This subsumes the last remaining ontological primitive.
+The framework does not say ``there are objects and there are
+morphisms.'' It says: \emph{there is only discrimination.}
+The grade of an element measures its degree of
+non-degeneracy. Grade 0 is fully degenerate
+(self-referential, annihilated). Grade 1 is a single
+non-degenerate discrimination. Grade $k$ is $k$ independent
+non-degenerate discriminations composed. Objects are the
+fixed points of the self-discrimination operation.
+\end{remark}
+
+\begin{definition}[Discrimination complex]\label{def:complex}
+The \emph{discrimination complex} of a regime $\kappa$ with
+$\dim(\kappa) = n$ is the exterior algebra
+$\bigwedge(\GF(2)^n) = \bigoplus_{k=0}^{n} \bigwedge^k(\GF(2)^n)$,
+with the grading interpreted as:
+\begin{itemize}[nosep]
+  \item \textbf{Grade 0}: degenerate (self-)discriminations;
+    equivalently, $\kappa$-equivalence classes of elements.
+  \item \textbf{Grade $k$} (for $1 \leq k \leq n$):
+    $k$-fold non-degenerate compound discriminations, i.e.\
+    $k$-morphisms.
+\end{itemize}
+The complex is truncated at grade $n$, since
+$\bigwedge^k(\GF(2)^n) = 0$ for $k > n$. An $n$-dimensional
+$\kappa$ yields an $n$-groupoid.
+\end{definition}
+
+\subsection{Boundary maps}\label{sec:boundary}
+
+The identification of 0-cells with degenerate 1-cells gives
+a natural definition of boundary: the boundary of a $k$-cell
+is obtained by contracting one factor, reducing the grade by
+one.
+
+\begin{definition}[Boundary operator]\label{def:boundary}
+The \emph{boundary operator}
+$\partial_k: \bigwedge^k V \to \bigwedge^{k-1} V$ is the
+linear map defined on basis elements by
+\begin{equation}\label{eq:boundary}
+  \partial(e_{i_1} \wedge \cdots \wedge e_{i_k})
+  = \sum_{j=1}^{k}
+    e_{i_1} \wedge \cdots \wedge \widehat{e_{i_j}} \wedge
+    \cdots \wedge e_{i_k}
+\end{equation}
+where $\widehat{e_{i_j}}$ denotes omission and the sum
+is in $\bigwedge^{k-1} V$ (a formal sum over $\GF(2)$,
+not a set). The map is extended to all of $\bigwedge^k V$
+by $\GF(2)$-linearity. For a 1-cell $e_i$,
+$\partial(e_i) = 1 \in \bigwedge^0 V = \GF(2)$ (the
+unit). For a 0-cell, $\partial = 0$.
+\end{definition}
+
+\begin{proposition}[Chain complex]\label{prop:boundary}
+The boundary operator satisfies:
+\begin{enumerate}[label=(\roman*),nosep]
+  \item $\partial_k$ is a $\GF(2)$-linear map
+    $\bigwedge^k V \to \bigwedge^{k-1} V$.
+  \item The boundary of a 2-cell $e_1 \wedge e_2$ is
+    $e_2 + e_1 = e_1 + e_2$: the formal sum (over $\GF(2)$)
+    of its two constituent 1-cells.
+  \item $\partial_{k-1} \circ \partial_k = 0$ for all $k$.
+    The graded sequence
+    $\cdots \xrightarrow{\partial_3} \bigwedge^2 V
+    \xrightarrow{\partial_2} \bigwedge^1 V
+    \xrightarrow{\partial_1} \GF(2) \to 0$
+    is a chain complex over $\GF(2)$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) is by construction: $\partial$ is defined on basis
+elements and extended by linearity.
+
+(ii): $\partial(e_1 \wedge e_2) = e_2 + e_1$ by
+equation (\ref{eq:boundary}).
+
+(iii): Apply $\partial$ twice to a basis $k$-cell
+$\omega = e_{i_1} \wedge \cdots \wedge e_{i_k}$:
+\[
+  \partial(\partial(\omega))
+  = \partial\!\left(\sum_{j=1}^{k}
+    e_{i_1} \wedge \cdots \wedge
+    \widehat{e_{i_j}} \wedge \cdots \wedge e_{i_k}\right)
+  = \sum_{j=1}^{k} \sum_{\ell \neq j}
+    e_{i_1} \wedge \cdots \wedge \widehat{e_{i_j}}
+    \wedge \cdots \wedge \widehat{e_{i_\ell}}
+    \wedge \cdots \wedge e_{i_k}.
+\]
+Each $(k{-}2)$-cell (obtained by omitting $e_{i_j}$ and
+$e_{i_\ell}$) appears exactly twice in this double sum:
+once from omitting $j$ first then $\ell$, once from
+omitting $\ell$ first then $j$. Over $\GF(2)$,
+$1 + 1 = 0$, so every term cancels.
+$\partial \circ \partial = 0$.
+\end{proof}
+
+\begin{remark}
+The identity $\partial \circ \partial = 0$ is the defining
+property of a chain complex. The discrimination complex is
+therefore a \emph{chain complex over $\GF(2)$}, and its
+homology groups $H_k = \ker \partial_k / \operatorname{im}
+\partial_{k+1}$ are well-defined. These homology groups
+classify the ``holes'' in the discrimination regime --- the
+residues that have not yet been consumed. This connects the
+algebraic residue concept (Definition \ref{def:residue})
+to the topological notion of homological holes.
+\end{remark}
+
+\begin{theorem}[Exhaustivity is operational]\label{thm:exhaustive}\footnote{Axiom class \textsf{A} $\cdot$ depth 3 $\cdot$ \S\ref{app:exhaustivity-full}.  \emph{Warrant}: $\partial \circ \partial = 0$ (double-counting over $\GF(2)$). The residue is fully characterized at detection. Finite-$\kappa$: yes. Novel (residue = homological gap, operationalized).}
+The identity $\partial \circ \partial = 0$ entails that every
+residue fully specifies its own shape. That is: the homology
+class of a residue constitutes a complete description of the
+discriminator required to consume it.
+\end{theorem}
+
+\begin{proof}
+A residue $R_d(S)$ (Definition \ref{def:residue}) consists of
+elements in $\ker \chi_d$ --- those invisible to discriminator
+$d$. In the chain complex, these elements occupy a cycle in
+$\ker \partial_k$ that is not in $\operatorname{im} \partial_{k+1}$:
+they are detected as a non-trivial homology class $[R] \in H_k$.
+
+The identity $\partial \circ \partial = 0$ means that the
+boundary of a boundary is empty. In discrimination terms:
+\emph{the residue of a residue is always zero.} If the
+discrimination process has identified a gap, there is no
+further gap-ness to discover about that identification. The
+gap is fully characterized at the moment of detection.
+
+Concretely, the homology class $[R]$ specifies:
+\begin{enumerate}[label=(\roman*),nosep]
+  \item the grade $k$ at which the gap exists (the level of
+    the homotopy tower where discrimination is incomplete),
+  \item the specific $(k-1)$-cells on the boundary of the
+    missing $k$-cell (the existing discriminations that
+    bound the gap), and
+  \item the precise shape of the $k$-cell required to fill
+    the gap, if such a cell exists. When $H_k(\kappa) = 0$
+    under the full regime (all cycles are boundaries),
+    the filling is unique. When $H_k(\kappa) \neq 0$,
+    the residue specifies a homology class but not a
+    unique filling. The claim that the filling is unique
+    under the full $\kappa$ is equivalent to the claim
+    that $H_k(\kappa) = 0$ for the relevant $k$, which
+    is a structural property of the specific regime,
+    not a general theorem.
+\end{enumerate}
+
+Therefore $\kappa$-evolution is not a search process. Each
+residue arrives with the specification of the discriminator
+needed to consume it. The homology class \emph{is} the
+blueprint for the cleavage. (Full argument: \S\ref{app:exhaustivity-full}.)
+\end{proof}
+
+\begin{corollary}[Non-uniqueness under truncation]
+\label{cor:truncation-ambiguity}
+Under a truncated (projected) $\kappa$-regime $\kappa'$,
+a cycle may admit multiple distinct fillings. The
+multiplicity of fillings is not a diagnostic \emph{about}
+a residue --- it \emph{is} the residue. Specifically, the
+wedge product of the candidate filling cells under the
+truncated regime produces a non-zero element: this element
+is the residue of the truncation, and its detection is
+itself a $\kappa$-evolution trigger.
+\end{corollary}
+
+\begin{proof}
+Let $\kappa' \subset \kappa$ be a sub-regime obtained by
+omitting dimensions. The chain complex of $\kappa'$ is a
+quotient of the chain complex of $\kappa$: some boundary
+relations are forgotten. A cycle $[R]$ that admits a unique
+filling in $H_k(\kappa)$ may, upon projection, map to a
+class in $H_k(\kappa')$ that is compatible with multiple
+fillings $c_1, \ldots, c_m$, since the forgotten dimensions
+carried the constraints that distinguished them.
+
+The candidate fillings $c_1, \ldots, c_m$ are distinct cells
+that agree on their boundary in $\kappa'$ but differ in
+the omitted dimensions. The wedge product $c_i \wedge c_j$
+for $i \neq j$ is therefore non-zero in the full exterior
+algebra: it detects a discrimination that exists in $\kappa$
+but is invisible in $\kappa'$. This non-zero wedge product
+is a residue (Definition \ref{def:residue}) --- an element
+in the kernel of the XOR signature under the truncated
+regime.
+
+Crucially, computing the wedge product of the candidate
+fillings to detect their non-uniqueness \emph{is itself a
+discrimination}. The act of observing the ambiguity is a
+wedge product that produces the residue that triggers the
+$\kappa$-evolution needed to resolve it. The observer is
+not independent of the system: detecting that a projection
+is too coarse is the same act as beginning to refine it.
+\end{proof}
+
+\begin{remark}
+This is a stronger claim than ``homology detects holes.''
+The standard topological statement is descriptive: homology
+classifies gaps passively. The discrimination framework
+makes exhaustivity \emph{operational}: because every
+discrimination either cleanly partitions (producing no
+residue) or produces a residue whose shape is fully
+determined by $\partial \circ \partial = 0$, the system
+always knows the exact structure of what it cannot yet
+discriminate. Gaps are not merely detected but
+\emph{self-specifying}.
+\end{remark}
+
+\subsection{Groupoid structure from $\GF(2)$}
+
+\begin{theorem}[Intrinsic groupoid structure]\label{thm:groupoid}\footnote{Axiom class \textsf{A} $\cdot$ depth 3 $\cdot$ \S\ref{app:groupoid-full}.  \emph{Warrant}: commutativity of $\wedge$ over $\GF(2)$ ($-1 = 1$). Every 2-cell is its own inverse. Finite-$\kappa$: yes. Standard (chain complexes yield groupoids). Model: $\wedge$ verified in \S\ref{sec:concrete-model}.}
+The discrimination complex $\bigwedge(\GF(2)^n)$ is a
+symmetric $n$-groupoid in which every $k$-morphism is its own
+inverse, objects are degenerate morphisms, and boundaries are
+computed by contraction.
+\end{theorem}
+
+\begin{proof}
+We verify the groupoid axioms, noting that all structure
+derives from the wedge product.
+
+\emph{Objects.} 0-cells are elements of $\bigwedge^0 V \cong
+\GF(2)$. By Definition \ref{def:degeneracy}, these are
+degenerate 1-cells: $d \wedge d = 0$ for any discriminator $d$.
+Objects are not a separate primitive.
+
+\emph{Self-inverse property.} Over $\GF(2)$, every element $x$
+satisfies $-x = x$, since $\operatorname{char}(\GF(2)) = 2$.
+Therefore every $k$-morphism is its own additive inverse.
+Traversing a discrimination and reversing it are the same
+operation.
+
+\emph{Contraction.} For any grade-1 element $d$,
+$d \wedge d = 0$ (equation \ref{eq:self-wedge}). A path
+composed with itself is contractible --- homotopically trivial.
+This extends to higher grades: for any $\omega \in \bigwedge^k V$,
+the component of $\omega \wedge \omega$ in $\bigwedge^{2k} V$
+vanishes when expanded in a basis, since every term contains
+a repeated factor.
+
+\emph{Composition.} The wedge product provides composition at
+every level. For grade-1 elements $d_1, d_2$, the composite
+$d_1 \wedge d_2 \in \bigwedge^2 V$ is the 2-morphism
+connecting $d_1$ and $d_2$ (Proposition \ref{prop:boundary},
+claim (ii)). Associativity is inherited from the exterior
+algebra:
+$(d_1 \wedge d_2) \wedge d_3 = d_1 \wedge (d_2 \wedge d_3)$.
+
+\emph{Boundaries.} The contraction boundary
+(Definition \ref{def:boundary}) provides source and target maps,
+with $\partial \circ \partial = 0$
+(Proposition \ref{prop:boundary}).
+
+\emph{Symmetry.} Over $\GF(2)$, for $\alpha \in \bigwedge^j V$
+and $\beta \in \bigwedge^k V$,
+$\alpha \wedge \beta = (-1)^{jk} \beta \wedge \alpha
+= \beta \wedge \alpha$ since $-1 = 1$ in $\GF(2)$. The
+groupoid is symmetric at every level.
+
+These properties --- degenerate objects, self-inverse
+morphisms, contractible self-composition, associative and
+symmetric composition, and well-defined boundaries ---
+constitute a symmetric $n$-groupoid $\bigwedge(\GF(2)^n)$. (Axiom-by-axiom check: \S\ref{app:groupoid-full}.) Derived entirely from
+$\bigwedge(\GF(2)^n)$.
+\end{proof}
+
+\begin{remark}
+The symmetry deserves emphasis. The order of discrimination
+does not matter at any level of the homotopy tower. This is
+the homotopical expression of the order-independence result
+(Proposition \ref{prop:monoidal}).
+\end{remark}
+
+\subsection{Relationship to homotopy type theory}
+
+The discrimination complex admits a natural reading in the
+language of homotopy type theory (HoTT).
+
+\begin{proposition}[Univalence as extensionality]\label{prop:univalence}
+The univalence axiom of HoTT --- that equivalent types are
+equal --- corresponds to Theorem \ref{thm:ext}
+($\kappa$-extensionality). Two $\kappa$-equivalence classes
+that cannot be distinguished by any discriminator in $\kappa$
+are \emph{equal as types}. The equivalence is not merely
+logical but homotopical: the path space between them (the
+set of discriminators that could separate them) is
+contractible (empty, hence trivially contractible).
+\end{proposition}
+
+\begin{remark}[The operationalist axiom as native univalence]
+\label{rem:native-univalence}
+In HoTT, univalence is an axiom: the canonical map from
+identity to equivalence is an equivalence. In the
+discrimination framework, the operationalist axiom
+(Definition \ref{def:operationalist}) plays this role:
+$\kappa$-indistinguishable $=$ identical. The structural
+content is the same --- operational equivalence implies
+identity --- but the mechanism differs. HoTT requires
+constructing an equivalence (a map with contractible
+fibers). The framework requires the \emph{absence} of a
+separating discriminator, which is a negative condition.
+The path space is contractible not because a contraction
+was constructed but because there is no structure to hold
+it open (Remark \ref{rem:hyper-recursive}).
+
+The precise statement (Appendix B.36): the path space
+between $a$ and $b$ is $\{a + b\} \cap \kappa^\perp$.
+The operationalist axiom says $\bigcup \kappa = V$,
+so $\bigcap \kappa^\perp = V^\perp = \{0\}$.
+Persistent equivalence forces $a + b = 0$, hence
+$a = b$. The ua map (equivalence $\to$ identity) and
+idtoeqv (identity $\to$ equivalence) are inverses.
+The path space is contractible. Univalence is
+Galois-group exhaustion: the only persistent orbit
+is the trivial orbit.
+\end{remark}
+
+\begin{remark}[Write path as type construction, read path
+  as type elimination]\label{rem:hott-paths}
+The write/read distinction (Section \ref{sec:write-read})
+maps onto the introduction/elimination distinction in type
+theory:
+\begin{itemize}[nosep]
+  \item The \emph{write path} (linear, residue-consuming)
+    is \emph{type introduction}: constructing new types by
+    attaching cells to the discrimination complex.
+  \item The \emph{read path} (monoidal, freely iterable)
+    is \emph{type elimination}: computing with existing
+    types by querying the $\tau/\sigma$ structure.
+\end{itemize}
+That the write path is linear (each residue consumed once)
+while the read path admits the exponential modality
+(unlimited re-use) reflects the standard linear-logic
+decomposition underlying type-theoretic computation.
+\end{remark}
+
+\begin{remark}[Transport as reclassification]
+In HoTT, transport along a path moves inhabitants of one
+type to another. In the discrimination framework, transport
+along a grade-1 morphism (discriminator $d$) is the
+reclassification of elements: an element classified under
+$\tau_d$ is ``transported'' to the $\tau$-side of the
+partition; an element classified under $\sigma_d$ to the
+$\sigma$-side. The four-cell structure
+(Definition \ref{def:discriminator}) generalizes transport
+by allowing partial transport (gap) and over-determined
+transport (overlap).
+\end{remark}
+
+\subsection{The constructed groupoid}
+
+Combining the set-theoretic and homotopical structure, we
+can now state the categorical content of the framework
+more precisely than a 1-categorical account would allow.
+
+\begin{definition}[Emergent $n$-groupoid]\label{def:n-groupoid}
+Under a fixed regime $\kappa$ of dimension $n$, the
+\emph{$n$-groupoid} $\mathcal{G}_\kappa$ is the
+symmetric $n$-groupoid whose:
+\begin{itemize}[nosep]
+  \item 0-cells are $\kappa$-equivalence classes,
+  \item $k$-cells (for $1 \leq k \leq n$) are non-zero
+    elements of $\bigwedge^k(\GF(2)^n)$,
+  \item composition at all levels is the wedge product,
+  \item identity at all levels is witnessed by
+    $\omega \wedge \omega = 0$.
+\end{itemize}
+This structure is constructed, not postulated: it is
+a groupoid compatible with $\bigwedge(\GF(2)^n)$.
+(Uniqueness of the symmetric groupoid: all groupoid
+over the same algebra may exist.)
+\end{definition}
+
+\begin{proposition}[Growth of homotopical complexity]\label{prop:growth}
+If $\kappa \to \kappa'$ by evolution (Definition
+\ref{def:evolution}), then $\mathcal{G}_{\kappa'}$ is an
+$(n+1)$-groupoid extending $\mathcal{G}_\kappa$. The
+inclusion $\mathcal{G}_\kappa \hookrightarrow
+\mathcal{G}_{\kappa'}$ preserves all existing cells and
+adds new cells at every grade $k \leq n+1$ (those involving
+the new discriminator $d_{n+1}$).
+\end{proposition}
+
+\begin{proof}
+$\kappa'$ has dimension $n+1$, so
+$\bigwedge(\GF(2)^{n+1})$ has non-trivial components through
+grade $n+1$. The natural inclusion
+$\GF(2)^n \hookrightarrow \GF(2)^{n+1}$ (appending a zero
+in the $(n+1)$-th coordinate) induces an inclusion of
+exterior algebras
+$\bigwedge(\GF(2)^n) \hookrightarrow \bigwedge(\GF(2)^{n+1})$
+that preserves the wedge product and hence all groupoid
+structure. The new cells are precisely those involving the
+basis vector $e_{n+1}$ corresponding to discriminator
+$d_{n+1}$.
+\end{proof}
+
+\begin{openquestion}[Adjunctions from $\kappa$-deformation]
+A $\kappa$-deformation that projects from a finer regime to
+a coarser one induces a functor
+$\mathcal{G}_\kappa \to \mathcal{G}_{\kappa'}$ (a forgetful
+functor, forgetting discrimination dimensions). A
+$\kappa$-deformation that embeds a coarser regime into a
+finer one induces a functor in the opposite direction (a
+free functor, freely adding undetermined cells). Under what
+conditions do these form an adjoint pair? If they do, the
+free-forgetful adjunction --- the fundamental construction
+of applied category theory --- arises from the direct
+summand structure that discrimination over $\GF(2)$
+provides.
+\end{openquestion}
+

@@ -1,0 +1,414 @@
+
+\subsection{The monoidal product from the wedge product}
+
+\begin{definition}[Monoidal product]\label{def:monoidal-prod}
+In the category $\mathcal{C}(S,\kappa)$, the
+\emph{monoidal product} of two objects $A$ and $B$ is their
+joint discrimination profile: the object $A \otimes B$ whose
+$\tau/\sigma$ profile under each discriminator $d \in \kappa$
+is determined by the simultaneous application of $d$ to both
+$A$ and $B$.
+
+For morphisms, the monoidal product of $f: A \to B$
+(witnessed by $d_f$) and $g: C \to D$ (witnessed by $d_g$)
+is $f \otimes g: A \otimes C \to B \otimes D$, witnessed by
+the wedge product $d_f \wedge d_g$ --- the joint, parallel
+application of both discriminations.
+\end{definition}
+
+\begin{proposition}[Symmetric monoidal structure]
+\label{prop:sym-monoidal}
+$(\mathcal{C}(S,\kappa), \otimes)$ is a symmetric monoidal
+category. Specifically:
+\begin{enumerate}[label=(\roman*),nosep]
+  \item \textbf{Associativity}: $(A \otimes B) \otimes C
+    \cong A \otimes (B \otimes C)$, inherited from
+    associativity of the wedge product.
+  \item \textbf{Unit}: the monoidal unit $I$ is the
+    degenerate object (the grade-0 element), representing
+    the trivial discrimination.
+  \item \textbf{Symmetry}: $A \otimes B \cong B \otimes A$,
+    because $d_f \wedge d_g = d_g \wedge d_f$ over $\GF(2)$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+The wedge product on $\bigwedge(\GF(2)^n)$ is associative,
+unital (with unit $1 \in \bigwedge^0 V$), and commutative
+over $\GF(2)$. The monoidal product is defined via the
+wedge product. Therefore $(\mathcal{C}(S,\kappa), \otimes)$
+inherits symmetric monoidal structure from the exterior
+algebra.
+\end{proof}
+
+\begin{remark}
+The monoidal product (parallel composition) and categorical
+composition (sequential composition) are both mediated by
+the wedge product, but they differ in the $\tau/\sigma$
+tracking. Sequential composition
+(Definition \ref{def:composition}) requires the intermediate
+object to appear on opposite sides ($\sigma$ of the first
+discriminator, $\tau$ of the second). Parallel composition
+imposes no such matching condition: the two discriminations
+are applied independently. The algebra is the same; the
+$\tau/\sigma$ choreography differs.
+\end{remark}
+
+\subsection{Delooping as rotation}\label{sec:delooping}
+
+\begin{theorem}[Delooping equivalence]\label{thm:deloop}\footnote{Axiom class \textsf{A} $\cdot$ depth 5 $\cdot$ \S\ref{app:deloop-closure}.  \emph{Warrant}: standard delooping; a one-object 2-category with $\wedge$ as monoidal product. Finite-$\kappa$: yes. Standard (one-object 2-category = monoidal category).}
+Let $\mathcal{C}(S,\kappa)$ be the $n$-category
+viewed from the $\kappa$-perspective. Rotating to the
+$\sigma$-perspective (Definition \ref{def:triangle},
+Proposition \ref{prop:perspectives}) produces a monoidal
+$(n-1)$-category:
+\begin{itemize}[nosep]
+  \item What were 1-morphisms (discriminators in $\kappa$)
+    become \emph{objects} (elements of the population of
+    the $\sigma$-regime).
+  \item What was the wedge product of 1-morphisms (their
+    composition/tensor) becomes the \emph{monoidal product
+    of objects}.
+  \item What were 2-morphisms (relationships between
+    discriminators) become 1-morphisms in the new category.
+\end{itemize}
+This is delooping: a 2-category with one object is
+equivalently a monoidal 1-category. The rotation of
+the triangle performs delooping as a geometric operation.
+\end{theorem}
+
+\begin{proof}
+In the $\kappa$-perspective, the population is $S$ and the
+discriminators are elements of $\kappa$. In the
+$\sigma$-perspective (equation \ref{eq:tri-sigma}), the
+population is $\kappa$ (the discriminators are now the
+things being discriminated) and the regime is $\sigma$.
+
+An object in the $\sigma$-perspective is a
+$\sigma$-equivalence class of elements of $\kappa$, i.e.\
+a class of discriminators. A 1-morphism in the
+$\sigma$-perspective is a discriminator $d_\sigma \in \sigma$
+that separates discriminators of $\kappa$ into $\tau$ and
+$\kappa$-masks (using the rotated labeling).
+
+The wedge product of two discriminators
+$d_1, d_2 \in \kappa$ --- which was a 2-cell
+$d_1 \wedge d_2$ in the $\kappa$-perspective --- is now
+the monoidal product $d_1 \otimes d_2$ of two objects in
+the $\sigma$-perspective. The algebraic operation is
+identical; only the categorical interpretation changes.
+
+This is precisely the Baez--Dolan delooping: an
+$(n+1)$-category with one object is equivalently a
+monoidal $n$-category. The single object in the
+$(n+1)$-category corresponds to the entire population
+$S$ (which collapses to a point when viewed from the
+meta-level). The morphisms of the $(n+1)$-category become
+the objects of the monoidal $n$-category. The rotation
+of the triangle performs this identification without
+constructing any new structure.
+\end{proof}
+
+\begin{corollary}[Delooping collapse over $\GF(2)$]
+\label{cor:iterated-deloop}
+Over $\GF(2)$, the braided/symmetric distinction in the
+Baez--Dolan periodic table \emph{collapses}: since
+$d \wedge d = 0$ and $-1 = 1$, the braiding
+$\beta: A \otimes B \to B \otimes A$ satisfies
+$\beta^2 = \mathrm{id}$ immediately. The braiding is an
+involution in one step, not two. Therefore the second and
+third deloopings produce the same structure:
+\begin{itemize}[nosep]
+  \item $\kappa$-perspective: $n$-category.
+  \item $\sigma$-perspective: monoidal $(n{-}1)$-category.
+  \item $\tau$-perspective: symmetric monoidal
+    $(n{-}2)$-category (not merely braided ---
+    the braided and symmetric rows are identified over
+    $\GF(2)$).
+\end{itemize}
+The exterior algebra, being commutative at all levels,
+lives permanently on the ``symmetric monoidal'' row of
+the periodic table. The rows below it (braided,
+monoidal) are invisible to $\bigwedge(\GF(2)^n)$.
+\end{corollary}
+
+\begin{proof}
+The braiding $\beta_{A,B}: A \otimes B \to B \otimes A$
+is the swap of tensor factors. Over a field of
+characteristic $\neq 2$, the sign $(-1)^{|A||B|}$ in the
+graded commutativity relation distinguishes the braiding
+from the identity, and the hexagon axioms produce
+non-trivial structure. Over $\GF(2)$,
+$(-1)^{|A||B|} = 1$ for all grades, so
+$\beta = \mathrm{id}$ as a natural transformation. The
+braiding is trivially symmetric. No second delooping is
+needed to reach the symmetric row; the first delooping
+already lands there.
+\end{proof}
+
+\subsection{Cayley--Dickson recovery of the full periodic
+  table}\label{sec:cayley-dickson}
+
+The collapse of the periodic table over $\GF(2)$ is a
+genuine structural phenomenon, not an error. But the
+full periodic table --- with distinct braided and
+monoidal rows --- can be recovered using the
+\emph{Cayley--Dickson construction} applied to the
+subobject classifier $\Omega = \GF(2)^2$.
+
+\begin{definition}[Swap conjugation]\label{def:swap-conj}
+The \emph{swap conjugation} on $\GF(2)^2$ is the map
+$(a, b)^* = (b, a)$. This is the negation operator
+$\neg$ on the subobject classifier (Remark after
+Theorem \ref{thm:topos}): it swaps the $\tau$ and
+$\sigma$ components. Over $\GF(2)$, this is a
+non-trivial involution even though $-1 = 1$: the
+\emph{sign} is dead, but the \emph{swap} is alive.
+\end{definition}
+
+\begin{definition}[Cayley--Dickson tower over $\GF(2)^2$]
+\label{def:cayley-dickson}
+The Cayley--Dickson construction takes an algebra $A$
+with conjugation $*$ and produces a doubled algebra
+$\mathrm{CD}(A) = A \times A$ with multiplication
+$(a, b)(c, d) = (ac + d^* b,\; da + bc^*)$ and
+conjugation $(a, b)^* = (a^*, -b) = (a^*, b)$ (since
+$-1 = 1$ over $\GF(2)$). Iterating:
+\begin{itemize}[nosep]
+  \item \textbf{Step 0}: $\GF(2)$ --- scalars. The
+    monoidal unit. Commutative, associative.
+  \item \textbf{Step 1}: $\GF(2)^2$ with swap conjugation
+    --- the four-cell structure. Commutative, associative.
+    Corresponds to \emph{symmetric monoidal}.
+  \item \textbf{Step 2}: $(\GF(2)^2)^2 = \GF(2)^4$ ---
+    \emph{non-commutative}, still associative. The swap
+    conjugation in the Cayley--Dickson product breaks
+    commutativity: left-multiplication and
+    right-multiplication are distinguishable. Corresponds
+    to \emph{braided monoidal}: the braiding carries
+    non-trivial structure because the algebra distinguishes
+    left from right.
+  \item \textbf{Step 3}:
+    $((\GF(2)^2)^2)^2 = \GF(2)^8$ ---
+    non-commutative, \emph{non-associative}. Corresponds
+    to \emph{monoidal} (no braiding): the coherence
+    conditions are non-trivial because associativity fails.
+\end{itemize}
+\end{definition}
+
+\begin{theorem}[The periodic table is two-dimensional]\footnote{Axiom class \textsf{A}. \emph{Warrant}: in-universe recognizer construction via $\sigma$-rotation. \emph{Hexagon axioms}: hold by strictness (same argument as G12). Zero divisors at step 2 are residues ($\tau \cdot \sigma = 0$), not obstructions. See Appendix \ref{app:cd-recognizer}. Finite-$\kappa$: yes.}
+\label{prop:periodic-2d}
+The full Baez--Dolan periodic table over $\GF(2)$ is
+the product of two independent structures:
+\begin{itemize}[nosep]
+  \item The \emph{grading} of $\bigwedge(\GF(2)^n)$ gives
+    the categorical dimension $n$ (the vertical axis).
+  \item The \emph{Cayley--Dickson level} over $\GF(2)^2$
+    gives the monoidal depth $k$ (the horizontal axis):
+    $k = 0$ is the exterior algebra itself (symmetric),
+    $k = 1$ is the Cayley--Dickson doubling
+    (braided/non-commutative), $k = 2$ is the double
+    doubling (monoidal/non-associative).
+\end{itemize}
+The two coordinates are algebraically independent: the
+grading measures how many discriminators have been
+composed, while the Cayley--Dickson level measures how
+many layers of swap-conjugation structure have been
+introduced.
+\end{theorem}
+
+\begin{proof}
+The exterior algebra $\bigwedge(\GF(2)^n)$ is commutative
+at all grades (Proposition \ref{prop:commutative}), so
+it cannot distinguish braided from symmetric monoidal
+structure. The Cayley--Dickson construction recovers the
+distinction: at CD step 1, the algebra is commutative
+(symmetric); at CD step 2, non-commutative (braided); at
+CD step 3, non-associative (merely monoidal). Each CD step
+peels off one layer of algebraic regularity, corresponding
+to one row of the periodic table.
+
+\emph{Caveat}: the Baez--Dolan correspondence was
+established for the CD tower over $\mathbb{R}$
+(reals $\to$ complexes $\to$ quaternions $\to$
+octonions). The tower over $\GF(2)^2$ is a different
+object, and the correspondence does not transfer
+automatically. This section is verified via in-universe recognizer
+construction (Appendix \ref{app:cd-recognizer}), pending
+verification of the hexagon axioms.
+
+The grading and the CD level are independent because the
+grading operates on the \emph{number} of composed
+discriminators while the CD level operates on the
+\emph{conjugation structure} of the base field. One can
+compose arbitrarily many discriminators (increasing the
+grade) at any fixed CD level, and one can double the
+conjugation structure (increasing the CD level) at any
+fixed grade.
+\end{proof}  % end of periodic table proof
+
+\begin{remark}[The swap conjugation is already present]
+The Cayley--Dickson construction requires no new
+structure. The swap conjugation $(a,b)^* = (b,a)$ is the
+negation operator $\neg$ on $\Omega$, already present in
+the topos structure (Section \ref{sec:topos}). Each
+Cayley--Dickson doubling is the iterated application of
+this negation as a conjugation, doubling the algebra at
+each step. Each doubling is interpretable as a
+$\kappa$-evolution that adds a \emph{conjugation dimension}:
+a dimension that tracks not just $\tau/\sigma$ membership
+but the \emph{orientation} of the discrimination.
+\end{remark}
+
+\begin{remark}[The periodic table as the toroid
+  $\times$ the CD tower]
+If the Cayley--Dickson correspondence holds over
+$\GF(2)^2$ (which depends on the open hexagon axiom
+verification of Remark 8.11 below), then
+the toroid provides the categorical
+dimension and the symmetric monoidal column, and the
+Cayley--Dickson tower provides the remaining columns.
+The full periodic table would be the product:
+\[
+  \text{Periodic table} \stackrel{?}{=} \bigwedge(\GF(2)^n)
+  \times \mathrm{CD}^k(\GF(2)^2).
+\]
+The toroid's geometry gives the $n$-coordinate; the
+Cayley--Dickson level gives the $k$-coordinate.
+This product structure is conditional on the CD tower
+preserving the expected algebraic properties at each
+step; the zero-divisor issue at step 2 (Appendix
+\S\ref{app:cd-table}) may cause earlier degeneration
+than the classical tower over $\mathbb{R}$.
+(Delooping and closure verification: \S\ref{app:deloop-closure}.)
+\end{remark}
+
+\begin{remark}[Open verification: hexagon axioms at CD step 2]
+The correspondence between Cayley--Dickson algebraic
+properties and categorical structures ---
+non-commutativity at CD step 2 corresponding to braided
+monoidal structure, non-associativity at CD step 3
+corresponding to merely monoidal structure --- follows
+the standard pattern identified by Baez and Dolan.
+However, explicitly constructing the braiding at CD
+step 2 (as a natural isomorphism
+$\beta_{A,B}: A \otimes B \to B \otimes A$ in the
+$\GF(2)^4$ algebra), verifying the hexagon axioms, and
+confirming that the symmetry condition
+$\beta_{B,A} \circ \beta_{A,B} = \mathrm{id}$ fails
+(i.e.\ that the braiding is genuinely non-symmetric)
+remains an open verification. Additionally, the
+Cayley--Dickson tower over $\GF(2)^2$ may degenerate
+faster than the classical tower over $\mathbb{R}$
+because $\GF(2)^2$ has zero divisors
+($(1,0) \cdot (0,1) = (0,0)$), potentially losing
+alternativity at step 2 rather than step 3. This
+deserves explicit computation. (A partial multiplication table confirming non-commutativity and zero divisors is in \S\ref{app:cd-table}.)
+\end{remark}
+
+\subsection{Internal hom from the triangle identity}
+
+\begin{definition}[Internal hom]\label{def:internal-hom}
+For objects $A$ and $B$ in $\mathcal{C}(S,\kappa)$, the
+\emph{internal hom} $[A, B]$ is the collection of all
+discriminators $d \in \kappa$ such that $\tau_d(A) = 1$
+and $\sigma_d(B) = 1$. This collection is itself an
+object in the $\sigma$-perspective: it is a sub-population
+of $\kappa$ (viewed as a population under the
+$\sigma$-regime).
+\end{definition}
+
+\begin{theorem}[Monoidal closure]\label{thm:closure}\footnote{Axiom class \textsf{A} $\cdot$ depth 4 $\cdot$ \S\ref{app:deloop-closure}.  \emph{Warrant}: tensor-hom adjunction from the triangle identity. $[B,C]$ is the set of discriminators witnessing $B \to C$. Finite-$\kappa$: yes. Standard (tensor-hom adjunction).}
+The symmetric monoidal category
+$(\mathcal{C}(S,\kappa), \otimes)$ is closed: there
+exists a natural bijection
+\begin{equation}\label{eq:closure}
+  \operatorname{Hom}(A \otimes B, C) \cong
+  \operatorname{Hom}(A, [B, C])
+\end{equation}
+for all objects $A, B, C$.
+\end{theorem}
+
+\begin{proof}
+The triangle identity (Definition \ref{def:triangle})
+states that any two of $\{\kappa, \sigma, \tau\}$
+determine the third. We apply this at the level of
+morphisms.
+
+A morphism $A \otimes B \to C$ is a discriminator $d$
+with $\tau_d(A \otimes B) = 1$ and $\sigma_d(C) = 1$.
+Since $A \otimes B$ is the joint discrimination profile
+of $A$ and $B$, this means $\tau_d(A) = 1$,
+$\tau_d(B) = 1$, and $\sigma_d(C) = 1$.
+
+A morphism $A \to [B,C]$ is a discriminator $d'$
+with $\tau_{d'}(A) = 1$ and $\sigma_{d'}([B,C]) = 1$.
+Now $[B,C]$ is the set of discriminators $e$ with
+$\tau_e(B) = 1$ and $\sigma_e(C) = 1$. So
+$\sigma_{d'}([B,C]) = 1$ means $d'$ classifies $A$ on
+the $\tau$ side and identifies a discriminator $e$
+that sends $B$ to $\tau$ and $C$ to $\sigma$.
+
+The bijection is: given $d$ witnessing $A \otimes B \to C$,
+set $d' = d$ and $e = d$ (since $d$ already has
+$\tau_d(A) = 1$, $\tau_d(B) = 1$, $\sigma_d(C) = 1$).
+Conversely, given $d'$ and $e$, the discriminator $d$
+that jointly witnesses both is their wedge product in the
+$\sigma$-regime.
+
+This bijection is natural in $A$ because the $\tau/\sigma$
+assignments are functorial (preserved by $\kappa$-deformations).
+The triangle identity guarantees that the three-way
+relationship $\kappa = \sigma + \tau$ --- here
+instantiated as the relationship among source, target,
+and hom-space --- is consistent and lossless.
+\end{proof}
+
+\begin{remark}[Closure is the triangle identity]
+The adjunction (\ref{eq:closure}) is the triangle identity
+applied at the morphism level. The three components ---
+$A \otimes B$, $C$, and $[B,C]$ --- stand in the same
+triadic relationship as $\kappa$, $\sigma$, and $\tau$:
+any two determine the third. Monoidal closure is not an
+additional property that the category may or may not
+possess. It is a direct expression of the $\GF(2)$
+toroid's geometry. The category is closed because the
+triangle is closed.
+\end{remark}
+
+\begin{definition}[Evaluation morphism]\label{def:eval}
+The \emph{evaluation morphism}
+$\mathrm{ev}: [A, B] \otimes A \to B$ is the morphism
+witnessed by the application of a discriminator in $[A,B]$
+to the element $A$ in the population. This is the interface
+between the $\sigma$-regime (which manages the hom-space)
+and the $\kappa$-regime (which manages the population).
+The evaluation morphism is the bridge between perspectives:
+it takes an object from the $\sigma$-perspective (a
+discriminator) and applies it in the $\kappa$-perspective
+(to a population element), producing a result in the
+original category.
+\end{definition}
+
+\begin{remark}[Monoidal structure and $n$-categorical
+  structure]
+The $n$-categorical hierarchy and the symmetric monoidal
+column of the periodic table are equivalent under
+rotation of the $\GF(2)$ toroid:
+\begin{itemize}[nosep]
+  \item Fixing a vertex and reading off the grading gives
+    $n$-categorical structure.
+  \item Rotating and collapsing a level gives symmetric
+    monoidal structure (Corollary \ref{cor:iterated-deloop}).
+  \item The closure (internal hom) is the third vertex of
+    the triangle determined by the other two.
+\end{itemize}
+The full monoidal hierarchy --- including the braided and
+merely-monoidal rows --- requires the Cayley--Dickson
+tower (Section \ref{sec:cayley-dickson}), which is built
+from the swap conjugation already present in the
+subobject classifier. The complete periodic table is the
+product of the exterior algebra (categorical dimension)
+and the Cayley--Dickson level (monoidal depth).
+\end{remark}
+

@@ -1,0 +1,2189 @@
+%----------------------------------------------------------------------
+\section{Detailed Verifications}\label{app:verifications}
+%----------------------------------------------------------------------
+
+This appendix collects component-by-component verifications
+that support the main text's structural arguments. The main
+text identifies \emph{why} each result holds; this appendix
+verifies \emph{that} each component checks out.
+
+%----------------------------------------------------------------------
+\subsection{Triadic adjunction: full verification}
+\label{app:adjunction-full}
+%----------------------------------------------------------------------
+
+We verify the $\sigma$-axis adjunction
+$\kappa \leftarrow \sigma \to \tau$ in full detail.
+The main text (Theorem \ref{thm:adjunction}) gives
+the structural argument; here we check each component.
+
+\emph{Functors on morphisms.}
+The left adjoint $F: \mathcal{C}(S,\kappa') \to
+\mathcal{C}(S,\kappa)$ acts on objects by inclusion
+$\iota$ and on morphisms by
+$F(d) = \iota(d)$. Composition preservation:
+$F(d_2 \wedge d_1) = \iota(d_2 \wedge d_1) =
+\iota(d_2) \wedge \iota(d_1) = F(d_2) \wedge F(d_1)$,
+since $\iota$ is a ring homomorphism.
+
+The right adjoint $U: \mathcal{C}(S,\kappa) \to
+\mathcal{C}(S,\kappa')$ acts by projection $\pi$.
+Composition preservation:
+$U(d_2 \wedge d_1) = \pi(d_2) \wedge \pi(d_1) =
+U(d_2) \wedge U(d_1)$.
+
+\emph{Naturality (first variable).}
+For $f: \kappa_1 \to \kappa_2$ witnessed by $d_f$:
+\[
+\begin{array}{ccc}
+  \operatorname{Hom}_\sigma(\kappa_2, \tau)
+  & \xrightarrow{\;\Phi_{\kappa_2}\;} & \sigma \\[6pt]
+  {\scriptstyle{- \circ F(d_f)}}\downarrow\phantom{x} & &
+  \phantom{x}\downarrow{\scriptstyle{\sigma(f)}} \\[6pt]
+  \operatorname{Hom}_\sigma(\kappa_1, \tau)
+  & \xrightarrow{\;\Phi_{\kappa_1}\;} & \sigma
+\end{array}
+\]
+Top-right: $d_\sigma \xmapsto{\Phi} s \xmapsto{\sigma(f)}
+s \wedge \pi_\sigma(d_f)$.
+Left-bottom: $d_\sigma \xmapsto{- \circ F(d_f)}
+d_\sigma \wedge \iota(\pi_\sigma(d_f)) \xmapsto{\Phi}
+s \wedge \pi_\sigma(d_f)$.
+Both yield $s \wedge \pi_\sigma(d_f)$. $\checkmark$
+
+\emph{Naturality (second variable).}
+For $g: \tau_1 \to \tau_2$ witnessed by $d_g$:
+\[
+\begin{array}{ccc}
+  \operatorname{Hom}_\sigma(\kappa, \tau_1)
+  & \xrightarrow{\;\Phi\;} & \sigma \\[6pt]
+  {\scriptstyle{U(d_g) \circ -}}\downarrow\phantom{x} & &
+  \phantom{x}\downarrow{\scriptstyle{\sigma(g)}} \\[6pt]
+  \operatorname{Hom}_\sigma(\kappa, \tau_2)
+  & \xrightarrow{\;\Phi\;} & \sigma
+\end{array}
+\]
+Top-right: $d_\sigma \xmapsto{\Phi} s
+\xmapsto{\sigma(g)} s \wedge \pi_\sigma(\pi_\tau(d_g))$.
+Left-bottom: $d_\sigma \xmapsto{U(d_g) \circ -}
+\pi_\tau(d_g) \wedge d_\sigma \xmapsto{\Phi}
+s \wedge \pi_\sigma(\pi_\tau(d_g))$.
+Both agree. $\checkmark$
+
+\emph{Unit $\eta$:}
+$\eta_A: A \to UF(A) = \pi(\iota(A))$.
+$\kappa'$ is a direct summand of $\kappa$:
+$V = \kappa' \oplus W$. Therefore
+$\pi \circ \iota = \mathrm{id}_{\kappa'}$, and
+$\eta_A = \mathrm{id}_A$.
+
+\emph{Counit $\varepsilon$:}
+$\varepsilon_B: FU(B) = \iota(\pi(B)) \to B$.
+On the image of $\iota$, $\varepsilon$ acts as
+the identity.
+
+\emph{Zig-zag (i):}
+$FUF(A) = \iota(\pi(\iota(A))) = \iota(A) = F(A)$.
+$\varepsilon_{F(A)} = \mathrm{id}$.
+$(\varepsilon F) \circ (F \eta) = \mathrm{id} \circ
+\mathrm{id} = \mathrm{id}_F$. $\checkmark$
+
+\emph{Zig-zag (ii):}
+$UFU(B) = \pi(\iota(\pi(B))) = \pi(B) = U(B)$.
+$U\varepsilon_B = \mathrm{id}$.
+$(U\varepsilon) \circ (\eta U) = \mathrm{id} \circ
+\mathrm{id} = \mathrm{id}_U$. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Russell dissolution: bilinear form detail}
+\label{app:russell-detail}
+%----------------------------------------------------------------------
+
+\emph{The profile pairing.}
+$B(x, y) = \tau_x(y)$ for $x, y \in V$. Profile
+linearity gives linearity in the first argument.
+Evaluation linearity (Definition \ref{def:eval-linear})
+gives linearity in the second. Therefore $B$ is bilinear.
+
+\emph{Antisymmetrization.}
+$\widetilde{B}(x, y) = B(x,y) + B(y,x) = \tau_x(y) +
+\tau_y(x)$. On the diagonal:
+$\widetilde{B}(x, x) = \tau_x(x) + \tau_x(x) = 0$.
+This is the algebraic content of $x \wedge x = 0$.
+
+\emph{Diagonal linearity.}
+$Q(x) = B(x, x)$.
+$Q(x + y) = B(x+y, x+y) = Q(x) + \widetilde{B}(x,y) +
+Q(y)$. Over $\GF(2)$, the Frobenius map $x \mapsto x^2$
+is the identity. If $\widetilde{B} = 0$ (symmetric $B$),
+then $Q(x+y) = Q(x) + Q(y)$: the diagonal is linear.
+
+\emph{Affine offset.}
+$\tau_{d_P}(x) = 1 + Q(x)$.
+$\tau_{d_P}(0) = 1 + Q(0) = 1 + 0 = 1 \neq 0$.
+Linear maps send $0 \mapsto 0$. Therefore $\tau_{d_P}$
+is affine, not linear, and violates profile linearity.
+$\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Composition as a 2-cell}
+\label{app:composition-2cell}
+%----------------------------------------------------------------------
+
+Composition of 1-morphisms $f: A \to B$ (by $d_1$) and
+$g: B \to C$ (by $d_2$) produces
+$d_1 \wedge d_2 \in \bigwedge^2 V$: a 2-cell.
+
+\emph{Horizontal associativity.}
+$(d_1 \wedge d_2) \wedge d_3 = d_1 \wedge (d_2 \wedge d_3)$
+by associativity of $\wedge$. $\checkmark$
+
+\emph{Vertical composition.}
+2-cells $\alpha: f \Rightarrow f'$ and
+$\beta: f' \Rightarrow f''$: $\alpha = d_f \wedge d_{f'}$,
+$\beta = d_{f'} \wedge d_{f''}$. Vertical composite
+involves $d_{f'} \wedge d_{f'} = 0$, producing
+$d_f \wedge d_{f''}$. The intermediate morphism cancels.
+$\checkmark$
+
+\emph{1-categorical shadow.}
+Identify parallel 1-morphisms connected by an invertible
+2-cell. Over $\GF(2)$, all 2-cells are symmetric
+(Theorem \ref{thm:groupoid}), hence invertible. The
+quotient is a 1-category.
+
+%----------------------------------------------------------------------
+\subsection{Power object universal property}
+\label{app:power-object}
+%----------------------------------------------------------------------
+
+$\mathcal{P}(B) = \Omega^B = [B, \Omega]$ (by Theorem
+\ref{thm:closure}). Membership:
+${\in_B}: B \times \Omega^B \to \Omega$,
+$(b, \phi) \mapsto \phi(b)$.
+
+Given $R \hookrightarrow A \times B$, define
+$\chi_R(a)(b) = (\tau_{d_R}(a,b), \sigma_{d_R}(a,b))$.
+
+\emph{Existence:} well-defined by $d_R$'s profile.
+
+\emph{Pullback:}
+$(\mathrm{id}_B \times \chi_R)^*(\in_B)(b,a)
+= \chi_R(a)(b) = (\tau_{d_R}(a,b), \sigma_{d_R}(a,b))$.
+This recovers the full four-valued relation $R$.
+$\checkmark$
+
+\emph{Uniqueness:}
+Any $\chi'$ pulling back $\in_B$ to $R$ must satisfy
+$\chi'(a)(b) = (\tau_{d_R}(a,b), \sigma_{d_R}(a,b))$
+for all $(a,b)$. Therefore $\chi' = \chi_R$. $\checkmark$
+
+\emph{Scope limitation:}
+The universal property is verified for subobjects defined
+by a single discriminator. A full power object must
+classify all subobjects, including those defined by
+Boolean combinations of discriminators. Extending the
+verification to composite subobjects requires showing
+that $\chi_R$ is well-defined when $R$ is a
+$\kappa$-deformation (not just a single-discriminator
+restriction). This follows if $\Omega^B$ contains all
+$\GF(2)^2$-valued functions on $B$ (not just those
+arising from single discriminators), which holds when
+$\kappa$ is sufficiently evolved. The gap: for a fixed
+finite $\kappa$, the power object may not classify all
+subobjects --- only those witnessable within $\kappa$.
+The fibered topos construction resolves this by
+computing power objects at the join of the relevant
+stages.
+
+\emph{Representability:}
+$\Omega^B$ is an object of $\mathcal{C}(S,\kappa)$
+because the internal hom $[B, \Omega]$ exists by monoidal
+closure. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Fano gluing mechanics}
+\label{app:fano-gluing}
+%----------------------------------------------------------------------
+
+The seven lines of $PG(2, \GF(2))$:
+\begin{center}
+\small
+\begin{tabular}{l|l}
+Line & Identity \\
+\hline
+$\{(1,0,0), (0,1,0), (1,1,0)\}$ &
+  $\kappa = \sigma + \tau$ \\
+$\{(1,0,0), (0,0,1), (1,0,1)\}$ &
+  $\tau$-coverage \\
+$\{(0,1,0), (0,0,1), (0,1,1)\}$ &
+  $\sigma$-coverage \\
+$\{(1,1,0), (0,0,1), (1,1,1)\}$ &
+  $\kappa$-coverage \\
+$\{(1,0,1), (0,1,0), (1,1,1)\}$ &
+  mixed \\
+$\{(0,1,1), (1,0,0), (1,1,1)\}$ &
+  mixed \\
+$\{(1,0,1), (0,1,1), (1,1,0)\}$ &
+  mixed
+\end{tabular}
+\end{center}
+
+Inference: if two points on a line have $\gamma = 1$,
+the third is determined by $p_3 = p_1 + p_2$.
+After three linearly independent interrogations, all
+seven points are covered. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Banach--Tarski: group-theoretic analysis}
+\label{app:banach-tarski}
+%----------------------------------------------------------------------
+
+$SO(3)$ contains a free subgroup $F_2$ on two generators
+$a, b$ (rotations with algebraically independent axes).
+$F_2$ acts on $S^2$ with orbits that partition the sphere.
+
+Discrimination analysis:
+\begin{itemize}[nosep]
+  \item \textbf{Group dimension $d_G$}: classifies by
+    $F_2$-orbit. Boolean (each point in exactly one orbit).
+  \item \textbf{Measure dimension $d_\mu$}: classifies by
+    Lebesgue measure. Boolean for measurable sets but
+    \emph{undefined} ($\gamma = 0$) for the non-measurable
+    pieces from the $F_2$ decomposition.
+\end{itemize}
+
+The decomposition is valid on $d_G$ (Boolean, Choice
+applies). The ``two spheres of the same volume'' claim
+requires $d_\mu$, where Booleanness has not been earned
+on the decomposition pieces. The paradox is a type error:
+measure-dimension conclusion from group-dimension
+construction. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Cayley--Dickson step 2: multiplication table}
+\label{app:cd-table}
+%----------------------------------------------------------------------
+
+$\GF(2)^4 = (\GF(2)^2)^2$ with CD multiplication
+$(a,b)(c,d) = (ac + d^*b, da + bc^*)$,
+conjugation $(x,y)^* = (y,x)$.
+
+Basis: $e_1 = ((1,0),(0,0))$, $e_2 = ((0,1),(0,0))$,
+$e_3 = ((0,0),(1,0))$, $e_4 = ((0,0),(0,1))$.
+
+Sample computation showing non-commutativity:
+
+$e_1 \cdot e_3$: $a=(1,0), b=(0,0), c=(0,0), d=(1,0)$.
+$ac + d^*b = (0,0) + (0,1)(0,0) = (0,0)$.
+$da + bc^* = (1,0)(1,0) + (0,0) = (1,0)$.
+Result: $((0,0),(1,0)) = e_3$.
+
+$e_3 \cdot e_1$: $a=(0,0), b=(1,0), c=(1,0), d=(0,0)$.
+$ac + d^*b = (0,0) + (0,0) = (0,0)$.
+$da + bc^* = (0,0) + (1,0)(0,1) = (0,0)$.
+Result: $0$.
+
+$e_1 \cdot e_3 = e_3 \neq 0 = e_3 \cdot e_1$.
+Non-commutativity confirmed. Zero divisors present.
+$\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Self-enrichment: full verification}
+\label{app:self-enrichment-full}
+%----------------------------------------------------------------------
+
+\emph{Hom-objects.}
+$[A,B] = \{d \in \kappa : \tau_d(A) = 1,\,\sigma_d(B) = 1\}$
+(Definition \ref{def:internal-hom}). Under the
+$\sigma$-perspective, this set is a sub-population of
+$\kappa$, hence a legitimate object.
+
+\emph{Composition.}
+Given $d_1 \in [A,B]$ and $d_2 \in [B,C]$, sequential
+filtration produces $d_2 \circ d_1 \in [A,C]$
+(Definition \ref{def:composition}). The map
+$(d_2, d_1) \mapsto d_2 \circ d_1$ is a $\tau$-discriminator
+separating compatible from incompatible pairs.
+
+\emph{Identity.}
+$j_A: I \to [A,A]$ sends the grade-0 unit to
+$\mathrm{id}_A = 0 \in [A,A]$.
+
+\emph{Associativity}: $(d_3 \circ d_2) \circ d_1 =
+d_3 \circ (d_2 \circ d_1)$ by associativity of $\wedge$.
+\emph{Unitality}: composing with the degenerate
+discriminator leaves any discriminator unchanged.
+$\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Subobject classifier: full verification}
+\label{app:subobj-full}
+%----------------------------------------------------------------------
+
+The ``true'' morphism selects $(1,0) \in \Omega$.
+Given $S' \hookrightarrow A$ defined by discriminator $d$
+with $S' = \{a : \tau_d(a) = 1,\, \sigma_d(a) = 0\}$:
+
+\emph{Existence}: $\chi_m(a) = (\tau_d(a), \sigma_d(a))$.
+
+\emph{Uniqueness}: any $\chi$ pulling back $\top$ to $S'$
+must send $S'$-elements to $(1,0)$ and non-$S'$-elements
+to other values. The values are determined by $d$'s profile.
+
+\emph{Pullback}: $S' = \chi_m^{-1}(\{(1,0)\})$. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Proof theory: full specification}
+\label{app:proof-theory-full}
+%----------------------------------------------------------------------
+
+\emph{Connectives on $\Omega = \GF(2)^2$.}
+\begin{itemize}[nosep]
+  \item Conjunction $\wedge$: componentwise multiplication.
+    $(1,0) \wedge (0,1) = (0,0)$: true $\wedge$ false = gap.
+  \item Disjunction $\vee$: componentwise maximum.
+    $(1,0) \vee (0,1) = (1,1)$: true $\vee$ false = overlap.
+  \item Negation $\neg(\tau,\sigma) = (\sigma,\tau)$. Swap.
+    $\neg(1,0) = (0,1)$: $\neg$true = false. $\neg(0,0) = (0,0)$:
+    $\neg$gap = gap. $\neg(1,1) = (1,1)$: $\neg$overlap = overlap.
+  \item Implication $\Rightarrow$: determined by the closure
+    adjunction (Theorem \ref{thm:closure}).
+\end{itemize}
+
+\emph{Key failures.}
+Excluded middle: $p \vee \neg p = (\tau,\sigma) \vee
+(\sigma,\tau) = (\max(\tau,\sigma), \max(\sigma,\tau))$.
+For $(0,0)$: $(0,0) \vee (0,0) = (0,0) \neq (1,0)$.
+Excluded middle fails at the gap.
+
+Explosion: $p \wedge \neg p = (\tau \cdot \sigma,
+\sigma \cdot \tau)$. For $(1,1)$:
+$(1,1) \wedge (1,1) = (1,1)$, not $(1,0)$. The overlap
+does not entail arbitrary conclusions.
+
+\emph{Relationship to logical traditions.}
+Classical logic: the Boolean restriction to
+$\{(1,0), (0,1)\}$. Excluded middle holds. Local
+achievement.
+
+Intuitionistic logic: shares failure of excluded middle
+but for a different reason. Intuitionistically,
+$p \vee \neg p$ fails because disjunction requires a
+witness. Here it fails because neither predicate fires
+(epistemic, not constructive).
+
+Paraconsistent logic: the overlap $(1,1)$ tolerates
+contradiction without explosion. The logic is
+paraconsistent at the overlap.
+
+\emph{Dynamic layer.}
+$\kappa$-evolution resolves residues: elements at
+$(0,0)$ or $(1,1)$ are moved toward $\{(1,0), (0,1)\}$
+by introducing finer discriminators. Each step
+monotonically increases information (Proposition
+\ref{prop:monotone}).
+
+%----------------------------------------------------------------------
+\subsection{Self-hosting: full proof}
+\label{app:self-hosting-full}
+%----------------------------------------------------------------------
+
+The Boolean dependent type restricts $\Omega$ to
+$\{(1,0), (0,1)\}$. Within this restriction:
+\begin{itemize}[nosep]
+  \item Two elements: $(1,0)$ and $(0,1)$. Identify
+    $(1,0) \leftrightarrow 1$ and $(0,1) \leftrightarrow 0$.
+  \item Addition: $(1,0) + (0,1) = (1,1)$, but within the
+    Boolean restriction, $(1,1)$ is the overlap --- not a
+    Boolean state. The XOR: $1 + 1 = 0$ (mapping back to
+    the Boolean restriction). This gives $\GF(2)$ addition.
+  \item Multiplication: componentwise multiplication.
+    $(1,0) \cdot (1,0) = (1,0)$: $1 \cdot 1 = 1$.
+    $(1,0) \cdot (0,1) = (0,0) \to 0$: $1 \cdot 0 = 0$.
+\end{itemize}
+
+The internally constructed $\GF(2)$ has the same algebraic
+properties as the external one: characteristic 2,
+$1 + 1 = 0$, $-x = x$. The construction proceeds:
+$\GF(2)_{\mathrm{ext}} \to$ four-valued logic $\to$
+Boolean type $\to \GF(2)_{\mathrm{int}} \to \cdots$.
+The self-reference is non-pathological:
+$\GF(2)_{\mathrm{int}}$ is algebraically identical to
+$\GF(2)_{\mathrm{ext}}$, and $x \wedge x = 0$ prevents
+contradictory fixpoints. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Fixed-point theorem: full proof}
+\label{app:fixed-point-full}
+%----------------------------------------------------------------------
+
+Three structures on the $\GF(2)$ toroid:
+
+(i) \emph{The adjunction}: the free-forgetful adjunction
+(Theorem \ref{thm:adjunction}). A predicate is this
+adjunction --- a geometric projection. ``Observation'' is
+functor traversal; ``firing'' is profile retention under
+projection.
+
+(ii) \emph{$\GF(2)$}: the target of the projections. Over
+$\GF(2)$, projection and inclusion are related by
+$\pi \circ \iota = \mathrm{id}$ (direct summand), making
+the adjunction a retract.
+
+(iii) \emph{Belnap logic}: the $\GF(2) \times \GF(2)$
+classifier. This is the product of two copies of the
+adjunction's target, giving four-valued truth.
+
+The three are the non-zero points of $\GF(2)^2$. The
+2-cell filling their triangle is the operation mediating
+between them: the wedge product that composes projections
+into a coherent discrimination. This is discrimination.
+
+The three coexist (each pair determines the third via the
+triangle identity), none requires an external observer,
+and the 2-cell is the unique stable completion of the
+toroid's geometry. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Irremovability: full proof}
+\label{app:irremovable-full}
+%----------------------------------------------------------------------
+
+Assume the 2-cell (discrimination) is absent. Four
+consequences:
+
+\emph{1. Sheaf failure.} Without the 2-cell, covering
+morphisms (the six adjunctions) don't exist. Local data
+on $\kappa, \sigma, \tau$ can't be assembled into global
+sections. The site $\mathfrak{S}$ loses its Grothendieck
+topology. The topos degrades to three disconnected
+presheaves.
+
+\emph{2. Manifold failure.} The toroid's atlas consists of
+charts related by the six adjunctions as transition maps.
+Without the 2-cell, the transition maps vanish. Three
+isolated points, no manifold.
+
+\emph{3. Bimodule failure.} $\sigma$ as a bimodule between
+$\kappa$ and $\tau$ loses its mediating structure.
+$\kappa$ and $\tau$ become algebraically isolated.
+
+\emph{4. Self-resolution.} The unfilled 2-cell is a
+homological gap (non-trivial $H_1$ class). By
+exhaustivity (Theorem \ref{thm:exhaustive}), the gap
+specifies its own filling. The specified filling has
+boundary $\{$adjunction, $\GF(2)$, Belnap$\}$. That
+filling is discrimination. Removal triggers reinstatement.
+
+This is internal necessity: within the framework's
+machinery, discrimination cannot be absent because
+the absence is a gap whose filling is discrimination.
+A reader who has not accepted the operationalist axiom
+may reject the framework's gap-filling machinery, in
+which case the argument has no external force.
+$\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Sheaf topos: full proof}
+\label{app:sheaf-full}
+%----------------------------------------------------------------------
+
+The site $\mathfrak{S}$ has $\kappa$-states as objects and
+sub-regime inclusions as morphisms. The Grothendieck
+topology: a family $\{\kappa_i \hookrightarrow \kappa\}$
+covers $\kappa$ if the $\kappa_i$ jointly contain all
+discriminators of $\kappa$.
+
+The six triadic adjunctions provide covering data: the
+three axes ($\kappa$, $\sigma$, $\tau$) with two chiralities
+each give six perspectives, any three linearly independent
+ones covering the full regime (Theorem \ref{thm:convergence}).
+
+Sheaf condition: a presheaf $F$ on $\mathfrak{S}$ is a
+sheaf iff for every covering family, compatible local
+sections glue to a unique global section. Compatibility
+is order-independence (Proposition \ref{prop:monoidal}):
+the $\tau/\sigma$ profile doesn't depend on which covering
+morphism was applied. Gluing is the assembly of local
+profiles into a global profile.
+
+The presheaf-to-sheaf transition is $\kappa$-evolution:
+a presheaf that fails the gluing condition has a residue
+(the incompatibility), which triggers evolution adding the
+discriminator needed to resolve it. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{FOL derivation: full construction}
+\label{app:fol}
+%----------------------------------------------------------------------
+
+\emph{Universal quantifier.}
+$\forall_f: \Omega^A \to \Omega^B$ (right adjoint to
+pullback $f^*$): $(\forall_f P)(b) = \bigwedge_{a \in
+f^{-1}(b)} P(a)$, where $\bigwedge$ is componentwise
+multiplication in $\GF(2)^2$. The adjunction
+$f^* \dashv \forall_f$ holds because $f^*(Q) \leq P$ iff
+$Q \leq \forall_f P$.
+
+\emph{Existential quantifier.}
+$\exists_f: \Omega^A \to \Omega^B$ (left adjoint to $f^*$):
+$(\exists_f P)(b) = \bigvee_{a \in f^{-1}(b)} P(a)$,
+componentwise maximum.
+
+\emph{Modus ponens.} Evaluation morphism
+$\mathrm{ev}: [\Omega, \Omega] \times \Omega \to \Omega$:
+$(h, p) \mapsto h(p)$. A morphism in the topos.
+
+\emph{Universal instantiation.} Counit of
+$\forall_f \dashv f^*$: maps $(\forall_f P)(f(a))$ to
+$P(a)$.
+
+\emph{Existential generalization.} Unit of
+$f^* \dashv \exists_f$: maps $P(a)$ to
+$(\exists_f P)(f(a)) \geq P(a)$.
+
+Terms = morphisms. Variables = elements. Substitution =
+composition. All internal. $\checkmark$
+
+%----------------------------------------------------------------------
+% Missing labels referenced from other sections
+%----------------------------------------------------------------------
+
+% prop:presheaf-sheaf is referenced from sec04
+% We provide it as a cross-reference target
+\begin{proposition}[Presheaf-to-sheaf transition]
+\label{prop:presheaf-sheaf}
+A presheaf on the site $\mathfrak{S}$ that fails the
+gluing condition has a residue (the incompatible local
+sections). This residue triggers $\kappa$-evolution,
+adding the discriminator needed to resolve the
+incompatibility. The presheaf becomes a sheaf after
+finitely many evolutions (bounded by $3$ per dimension,
+Theorem \ref{thm:convergence}).
+\end{proposition}
+
+% prop:commutative is referenced from sec08
+\begin{proposition}[Commutativity of $\wedge$ over $\GF(2)$]
+\label{prop:commutative}
+The wedge product over $\GF(2)$ is commutative:
+$a \wedge b = b \wedge a$. This follows from
+$a \wedge b = -b \wedge a$ (antisymmetry) and $-1 = 1$
+in $\GF(2)$.
+\end{proposition}
+
+%----------------------------------------------------------------------
+\subsection{Foundation: the partial result}
+\label{app:foundation-full}
+%----------------------------------------------------------------------
+
+Self-membership ($a \in a$) is excluded by profile
+linearity (Theorem \ref{thm:russell}): the self-membership
+profile is affine, not linear.
+
+Cycles of length $\geq 2$ are algebraically permitted.
+A cycle $a \in b \in a$ is witnessed by independent
+$d_1, d_2$ with $\tau_{d_1}(a) = 1, \sigma_{d_1}(b) = 1,
+\tau_{d_2}(b) = 1, \sigma_{d_2}(a) = 1$. No algebraic
+obstruction: $d_1 \wedge d_2 \neq 0$, no linearity
+violation.
+
+Infinite chains are prevented by finiteness of $\kappa$:
+with $\dim(\kappa) = n$, at most $2^n - 1$ non-zero
+discriminators exist, bounding the number of witnessable
+links. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Choice: finite and infinite cases}
+\label{app:choice-full}
+%----------------------------------------------------------------------
+
+\emph{Finite case.} Constructive: each $S_i$ contains
+finitely many $\kappa$-equivalence classes. Selection
+failure produces a residue (Theorem \ref{thm:exhaustive})
+specifying the needed discriminator. Iteration terminates
+in $\leq 3$ evolutions per dimension. $\checkmark$
+
+\emph{Infinite case.} Application of the operationalist
+axiom (Definition \ref{def:operationalist}): no
+discriminator separates ``completed selection function''
+from ``constructively obtainable for every finite
+sub-family.'' This is an axiom application, not an
+algebraic derivation. A Platonist may reject the
+axiom. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Exhaustivity: the $\partial \circ \partial = 0$
+  argument}
+\label{app:exhaustivity-full}
+%----------------------------------------------------------------------
+
+A residue $R_d(S)$ occupies a cycle in $\ker \partial_k$
+not in $\operatorname{im} \partial_{k+1}$: a non-trivial
+homology class $[R] \in H_k$.
+
+$\partial \circ \partial = 0$ means the boundary of
+a boundary is empty: the residue of a residue is zero.
+The gap is fully characterized at detection.
+
+The class $[R]$ specifies: the grade $k$, the boundary
+$(k{-}1)$-cells, and (when $H_k(\kappa) = 0$) a unique
+filling.
+
+\emph{Constructive filling procedure.}
+Let $R \in \ker \partial_k$ be a $k$-cycle (a residue).
+Introduce a new basis discriminator $e_{n+1}$ independent
+of $\kappa$ (a $\kappa$-evolution). Form the $(k{+}1)$-chain
+$C = R \wedge e_{n+1}$.
+
+By the Leibniz rule over $\GF(2)$
+($\partial(a \wedge b) = \partial a \wedge b + a \wedge
+\partial b$, with $(-1)^{|a|} = 1$ since $-1 = 1$):
+\[
+  \partial(R \wedge e_{n+1}) = \partial R \wedge e_{n+1}
+  + R \wedge \partial(e_{n+1}) = 0 \cdot e_{n+1}
+  + R \cdot 1 = R.
+\]
+Here $\partial R = 0$ because $R$ is a cycle, and
+$\partial(e_{n+1}) = 1$ (the grade-1 boundary is the
+augmentation: removing the single factor yields the
+grade-0 unit).
+
+Therefore $\partial C = R$: the residue becomes a boundary
+in the extended complex $\bigwedge(\kappa \cup \{e_{n+1}\})$.
+After $\kappa$-evolution, $[R] = 0$ in $H_k(\kappa')$.
+
+The procedure is: \emph{$\kappa$-evolution itself is the
+filling}. Any independent discriminator works. The residue
+$R$ specifies \emph{that} a filling exists (by its shape
+as a cycle) and \emph{what} the filling looks like (wedge
+with any independent direction). From the inner system's
+perspective, the filling doesn't exist (it requires a
+discriminator not in $\kappa$). From the outer system's
+perspective, it is trivially constructible. The gap
+between inner and outer is exactly one discriminator.
+$\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Groupoid structure}
+\label{app:groupoid-full}
+%----------------------------------------------------------------------
+
+Over $\GF(2)$, $d \wedge d' = d' \wedge d$ (commutativity,
+Proposition \ref{prop:commutative}). Every 2-cell
+$d_1 \wedge d_2$ equals $d_2 \wedge d_1$: the homotopy
+from $d_1$ to $d_2$ is the same as the homotopy from
+$d_2$ to $d_1$. Every 2-morphism is its own inverse.
+The 2-morphisms form a symmetric groupoid. By induction,
+$k$-morphisms for $k \geq 2$ are all invertible:
+the homotopy tower is a groupoid at every level above
+grade 1. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{2-category axioms: full check}
+\label{app:2cat-full}
+%----------------------------------------------------------------------
+
+\emph{Horizontal associativity}: $(d_1 \wedge d_2) \wedge
+d_3 = d_1 \wedge (d_2 \wedge d_3)$ by $\wedge$.
+
+\emph{Vertical composition}: 2-cells
+$\alpha = d_f \wedge d_{f'}$, $\beta = d_{f'} \wedge d_{f''}$.
+Vertical composite: $(d_{f'} \wedge d_{f''}) \wedge
+(d_f \wedge d_{f'})$ contains $d_{f'} \wedge d_{f'} = 0$,
+producing $d_f \wedge d_{f''}$. Intermediate cancels.
+
+\emph{Identity 2-cell}: $\mathrm{id}_f = d_f \wedge d_f = 0$
+(the degenerate 2-cell).
+
+\emph{Interchange law.}
+The verification works in the $\GF(2)^2$ profile space,
+not in $\bigwedge^4 V$. Each morphism $d$ has profile
+$p(d)(a) = (\tau_d(a), \sigma_d(a)) \in \GF(2)^2$.
+Each 2-cell $\alpha: f \Rightarrow f'$ has profile
+$p(\alpha) = p(f) + p(f')$. Composition is componentwise
+multiplication in $\GF(2)^2$.
+
+\emph{Path 1}: $(\beta * f') \circ (g * \alpha)$.
+$g * \alpha = p(g) \cdot (p(f) + p(f')) = g \cdot f +
+g \cdot f'$. $\beta * f' = (p(g) + p(g')) \cdot p(f') =
+g \cdot f' + g' \cdot f'$. Vertical composite:
+$(g \cdot f + g \cdot f') + (g \cdot f' + g' \cdot f')
+= g \cdot f + 2 \cdot g \cdot f' + g' \cdot f'$. Over
+$\GF(2)$: $2 = 0$, so $= g \cdot f + g' \cdot f'$.
+
+\emph{Path 2}: $(g' * \alpha) \circ (\beta * f)$.
+$\beta * f = (p(g) + p(g')) \cdot p(f) =
+g \cdot f + g' \cdot f$. $g' * \alpha =
+p(g') \cdot (p(f) + p(f')) = g' \cdot f + g' \cdot f'$.
+Vertical composite:
+$(g \cdot f + g' \cdot f) + (g' \cdot f + g' \cdot f')
+= g \cdot f + 2 \cdot g' \cdot f + g' \cdot f'$. Over
+$\GF(2)$: $= g \cdot f + g' \cdot f'$.
+
+Both paths yield $p(g \circ f) + p(g' \circ f')
+\in \GF(2)^2$. The cross terms cancel because
+$1 + 1 = 0$ in $\GF(2)$. The result is grade 2 in
+the profile space (a $\GF(2)^2$ element), not grade 4:
+the Klein four-group's characteristic 2 collapses the
+interchange square from $\bigwedge^4$ to $\GF(2)^2$.
+
+This is the same $1 + 1 = 0$ that excludes
+self-reference ($v \wedge v = 0$), kills the Russell
+predicate's affine offset, and makes the halting
+tower level-invariant. The interchange law holds for
+the same reason everything else in the framework
+holds: characteristic 2. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Yoneda}
+\label{app:yoneda-full}
+%----------------------------------------------------------------------
+
+The representable presheaf $h_A: \mathcal{C}^{op} \to
+\mathbf{Set}$ sends $B \mapsto \operatorname{Hom}(B, A) =
+\{d \in \kappa : \tau_d(B) = 1, \sigma_d(A) = 1\}$.
+
+Yoneda: $\operatorname{Nat}(h_A, F) \cong F(A)$ for any
+presheaf $F$. Proof: a natural transformation
+$\alpha: h_A \Rightarrow F$ is determined by
+$\alpha_A(\mathrm{id}_A) \in F(A)$ (the image of the
+identity). Naturality forces all other components:
+$\alpha_B(f) = F(f)(\alpha_A(\mathrm{id}_A))$. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Delooping and monoidal closure}
+\label{app:deloop-closure}
+%----------------------------------------------------------------------
+
+\emph{Symmetric monoidal strictness.}
+The monoidal product $\otimes = \wedge$ is \emph{strictly}
+associative: $(a \wedge b) \wedge c = a \wedge (b \wedge c)$
+as elements of $\bigwedge V$, not merely up to isomorphism.
+The associator $\alpha_{A,B,C}$ is the identity. The unit
+$I$ is the grade-0 element, with $d \wedge 1 = d = 1 \wedge d$
+strictly. The left and right unitors $\lambda, \rho$ are
+identities. The symmetry $\beta_{A,B}: a \wedge b = b \wedge a$
+is the identity over $\GF(2)$ (since $-1 = 1$).
+
+For a strict symmetric monoidal category, the pentagon,
+triangle, and hexagon diagrams commute trivially: every
+path is the identity, so all paths agree. No coherence
+diagrams need explicit verification.
+
+At the fiber level: the join $\kappa_1 \vee \kappa_2$ is
+strictly associative, commutative, and unital ($\kappa \vee
+\varnothing = \kappa$). The Galois group reduces under
+joins: $\mathrm{Gal}(V/(\kappa_1 \vee \kappa_2)) \subseteq
+\mathrm{Gal}(V/\kappa_1) \cap \mathrm{Gal}(V/\kappa_2)$.
+Intersection of subgroups is associative and commutative,
+mirroring the strict monoidal structure at the object level.
+$\checkmark$
+
+\emph{Delooping}: The $\sigma$-perspective views
+discriminators as a population. A monoidal $(n{-}1)$-category
+with one object (the entire $\sigma$-population) whose
+morphisms are $\kappa$-discriminators and monoidal product
+is $\wedge$. This is the standard delooping: a 2-category
+with one object is a monoidal 1-category.
+
+\emph{Monoidal closure}: $\operatorname{Hom}(A \otimes B, C)
+\cong \operatorname{Hom}(A, [B, C])$ where
+$[B, C] = \{d \in \kappa : \tau_d(B) = 1, \sigma_d(C) = 1\}$.
+The bijection: a morphism $A \otimes B \to C$ witnessed by
+$d$ with $\tau_d(A \otimes B) = 1, \sigma_d(C) = 1$
+decomposes (by the monoidal product structure) into a
+morphism $A \to [B, C]$ witnessed by the same $d$ restricted
+to the $A$-component. Naturality in $A$: for $h: A' \to A$ witnessed by $d_h$,
+precomposition with $h \otimes \mathrm{id}_B = d_h \wedge 1$
+on the left of the bijection corresponds to precomposition
+with $d_h$ on the right. Since $d_h \wedge 1 = d_h$
+(strict unit), the naturality square commutes:
+restricting $d_h \wedge 1$ to the $A$-component yields
+$d_h$. At the fiber level, this is functoriality of the
+restriction map along $\kappa$-inclusions, equivariant
+under Galois group reduction. $\checkmark$
+
+Naturality also follows from $\pi$ being
+a ring homomorphism. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Boolean dependent type and convergence rate}
+\label{app:bool-convergence}
+%----------------------------------------------------------------------
+
+\emph{Boolean type}: $\chi_d(a) = \tau_d(a) + \sigma_d(a)
+= 1$ for all $a \in S$ is a predicate on $d$ (not on
+elements). It depends on the specific discriminator and
+population. Classical logic holds iff this predicate is
+satisfied. The type is dependent: its validity is a
+function of the dimension, not a global property.
+
+\emph{Convergence rate}: the Fano plane has 7 points and 7
+lines, each line through 3 points. Three non-collinear
+points determine all 7 via Fano inference ($p_3 = p_1 +
+p_2$ on each line). Three linearly independent
+interrogations are non-collinear (if they were collinear,
+one would be the sum of the other two, contradicting
+independence). Therefore 3 suffices. $\checkmark$
+
+%----------------------------------------------------------------------
+\subsection{Discriminator semantics: single predicate,
+  composed pairs, dependent types}
+\label{app:discriminator-semantics}
+%----------------------------------------------------------------------
+
+The foundational definitions (\S\ref{sec:framework})
+rest on three distinctions that must not be conflated:
+
+\emph{1. A discriminator is a single predicate.}
+A discriminator $d \in \bigwedge^1 V$ provides one map
+$d: S \to \GF(2)$: fires or silent. It does not produce
+a pair. It tests for one property.
+
+\emph{2. $\tau$ and $\sigma$ are datum properties, not
+discriminator outputs.}
+A datum $a$ may carry the $\tau$ label, the $\sigma$
+label, both, or neither. These are attributes of the
+data. A $\tau$-keyed discriminator $d_\tau$ checks
+whether $\tau$ is active: $d_\tau(a) = 1$ means $\tau$
+is active for $a$. A $\sigma$-keyed discriminator
+$d_\sigma$ checks $\sigma$ independently.
+
+\emph{3. The membership profile is a composed
+discriminator.}
+The pair $(\tau(a), \sigma(a))$ is the result of
+composing two base discriminators: $d_\tau$ and
+$d_\sigma$. This composition corresponds to the
+grade-2 element $d_\tau \wedge d_\sigma \in
+\bigwedge^2 V$. The wedge product is not a formal
+algebraic operation applied after the fact --- it
+\emph{is} the comparison of two discriminator results.
+The grade-2 element records the joint outcome.
+
+If $d_\tau = d_\sigma$ (the same discriminator used
+for both properties), then
+$d_\tau \wedge d_\sigma = d \wedge d = 0$: self-comparison
+is degenerate. A non-trivial profile requires two
+\emph{independent} discriminators.
+
+\emph{4. Higher-level discriminators are dependent types.}
+A discriminator that tests a composite property ---
+such as the XOR signature $\chi(a) = \tau(a) + \sigma(a)$,
+which tests whether exactly one base property is
+active --- depends on the results of the base
+discriminators. Its type is dependent: it presupposes
+that $d_\tau$ and $d_\sigma$ have been applied.
+
+The Boolean dimension $\chi(a) = 1$ for all $a$ is the
+principal dependent type: it asserts that every datum
+carries exactly one of $\tau$ or $\sigma$, which requires
+both base discriminators to have been evaluated on every
+element.
+
+\emph{5. $S_3$ rotations act on compositions.}
+The triangle identity $\kappa = \sigma + \tau$ relates
+three elements of $\GF(2)^2$. Under $S_3$ permutation,
+the roles change: which discriminator is keyed to which
+property, and therefore which composition is being formed.
+The six adjunctions of Theorem \ref{thm:adjunction} are
+six ways of pairing base discriminators --- six
+compositions $d_A \wedge d_B$ where $A, B$ range over
+$\{\kappa, \sigma, \tau\}$. Rotating the triangle changes
+the composition, not the data. $\checkmark$
+
+
+%----------------------------------------------------------------------
+\subsection{Symmetric monoidal coherence: exhaustive
+  enumeration}
+\label{app:monoidal-coherence}
+%----------------------------------------------------------------------
+
+The monoidal product $\otimes = \wedge$ on
+$\mathcal{C}(S,\kappa)$ is strict. We enumerate every
+coherence condition and verify each is the identity.
+
+\emph{1. Associator.}
+$\alpha_{A,B,C}: (A \otimes B) \otimes C \to A \otimes
+(B \otimes C)$.
+Computation: $(d_A \wedge d_B) \wedge d_C = d_A \wedge
+(d_B \wedge d_C)$ by associativity of $\wedge$ in
+$\bigwedge V$. Both sides are the same element of
+$\bigwedge^3 V$. $\alpha_{A,B,C} = \mathrm{id}$.
+$\checkmark$
+
+\emph{2. Left unitor.}
+$\lambda_A: I \otimes A \to A$ where $I = 1 \in
+\bigwedge^0 V \cong \GF(2)$.
+Computation: $1 \wedge d_A = d_A$ (the grade-0 unit acts
+as the identity for $\wedge$). $\lambda_A = \mathrm{id}$.
+$\checkmark$
+
+\emph{3. Right unitor.}
+$\rho_A: A \otimes I \to A$.
+Computation: $d_A \wedge 1 = d_A$. $\rho_A = \mathrm{id}$.
+$\checkmark$
+
+\emph{4. Braiding.}
+$\beta_{A,B}: A \otimes B \to B \otimes A$.
+Computation: $d_A \wedge d_B = (-1)^{|d_A||d_B|}
+d_B \wedge d_A = d_B \wedge d_A$ (since $-1 = 1$ in
+$\GF(2)$). For grade-1 elements:
+$d_A \wedge d_B = d_B \wedge d_A$ literally.
+$\beta_{A,B} = \mathrm{id}$. $\checkmark$
+
+\emph{5. Inverse braiding.}
+$\beta_{A,B}^{-1} = \beta_{B,A}$. Since
+$\beta_{A,B} = \mathrm{id}$, also
+$\beta_{A,B}^{-1} = \mathrm{id}$. $\checkmark$
+
+\emph{6. Pentagon diagram.}
+The five edges of the pentagon are:
+\begin{align*}
+  &((A \otimes B) \otimes C) \otimes D
+    \xrightarrow{\alpha_{A \otimes B, C, D}}
+  (A \otimes B) \otimes (C \otimes D)
+    \xrightarrow{\alpha_{A, B, C \otimes D}}
+  A \otimes (B \otimes (C \otimes D)) \\
+  &((A \otimes B) \otimes C) \otimes D
+    \xrightarrow{\alpha_{A,B,C} \otimes \mathrm{id}_D}
+  (A \otimes (B \otimes C)) \otimes D
+    \xrightarrow{\alpha_{A, B \otimes C, D}}
+  A \otimes ((B \otimes C) \otimes D) \\
+  &\qquad\qquad\qquad\qquad\qquad
+    \xrightarrow{\mathrm{id}_A \otimes \alpha_{B,C,D}}
+  A \otimes (B \otimes (C \otimes D))
+\end{align*}
+Every $\alpha = \mathrm{id}$. Top path:
+$\mathrm{id} \circ \mathrm{id} = \mathrm{id}$.
+Bottom path:
+$\mathrm{id} \circ \mathrm{id} \circ \mathrm{id}
+= \mathrm{id}$. Both paths = id. $\checkmark$
+
+\emph{7. Triangle diagram.}
+$(A \otimes I) \otimes B
+\xrightarrow{\alpha_{A,I,B}}
+A \otimes (I \otimes B)
+\xrightarrow{\mathrm{id}_A \otimes \lambda_B}
+A \otimes B$
+versus
+$(A \otimes I) \otimes B
+\xrightarrow{\rho_A \otimes \mathrm{id}_B}
+A \otimes B$.
+
+Top path: $(\mathrm{id}_A \otimes \lambda_B) \circ
+\alpha_{A,I,B} = \mathrm{id} \circ \mathrm{id}
+= \mathrm{id}$.
+Bottom path: $\rho_A \otimes \mathrm{id}_B = \mathrm{id}
+\otimes \mathrm{id} = \mathrm{id}$.
+Both = id. $\checkmark$
+
+\emph{8. First hexagon diagram.}
+$A \otimes (B \otimes C)
+\xrightarrow{\beta_{A, B \otimes C}}
+(B \otimes C) \otimes A
+\xrightarrow{\alpha_{B,C,A}}
+B \otimes (C \otimes A)$
+versus
+$A \otimes (B \otimes C)
+\xrightarrow{\alpha_{A,B,C}^{-1}}
+(A \otimes B) \otimes C
+\xrightarrow{\beta_{A,B} \otimes \mathrm{id}_C}
+(B \otimes A) \otimes C
+\xrightarrow{\alpha_{B,A,C}}
+B \otimes (A \otimes C)
+\xrightarrow{\mathrm{id}_B \otimes \beta_{A,C}}
+B \otimes (C \otimes A)$.
+
+Every morphism is id. Top: $\mathrm{id}^3 = \mathrm{id}$.
+Bottom: $\mathrm{id}^5 = \mathrm{id}$. $\checkmark$
+
+\emph{9. Second hexagon diagram.}
+Identical analysis with $\beta^{-1}$ replacing $\beta$.
+Since $\beta = \beta^{-1} = \mathrm{id}$, the diagram
+is identical to the first. $\checkmark$
+
+\emph{10. Symmetry condition.}
+$\beta_{B,A} \circ \beta_{A,B} = \mathrm{id}_{A \otimes B}$.
+$\mathrm{id} \circ \mathrm{id} = \mathrm{id}$. $\checkmark$
+
+\medskip
+All ten coherence conditions are verified by the same
+mechanism: the monoidal structure on
+$\mathcal{C}(S,\kappa)$ is \emph{strict symmetric
+monoidal} because $\wedge$ is strictly associative,
+commutative (over $\GF(2)$), and unital. Every coherence
+morphism is the identity. This is not an inductive
+argument (``strict implies trivial'') but an exhaustive
+constructive enumeration: each of the ten conditions is
+individually checked and found to be the identity.
+
+
+%----------------------------------------------------------------------
+\subsection{Finite limits: exhaustive construction}
+\label{app:limits-exhaustive}
+%----------------------------------------------------------------------
+
+We enumerate each finite limit type in
+$\mathcal{C}(S,\kappa)$, constructing the limit object
+explicitly and verifying the universal property.
+Profile linearity (Definition \ref{def:profile-linear})
+makes all constraints linear over $\GF(2)$; universality
+follows from uniqueness of linear factorizations.
+
+\emph{1. Terminal object.}
+\emph{Construction}: $1 = S$ (the entire population),
+classified by the zero discriminator $d = 0$
+($\tau_0(a) = 0$, $\sigma_0(a) = 0$ for all $a$: no
+element is distinguished). \emph{Cone}: for any object
+$X$, the unique morphism $X \to 1$ is witnessed by the
+zero discriminator (every element maps to the
+undifferentiated whole). \emph{Universality}: the zero
+discriminator is the unique discriminator that makes no
+distinction, so the morphism is unique. $\checkmark$
+
+\emph{2. Product $A \times B$.}
+\emph{Construction}: let $d_A$ classify $A$ and $d_B$
+classify $B$. The product is the equivalence class under
+the joint profile $(d_A, d_B)$ in the regime
+$\kappa' = \kappa \vee \{d_A, d_B\}$. Projections:
+$\pi_A$ extracts the $d_A$-component, $\pi_B$ extracts
+$d_B$.
+\emph{Cone}: given $f: X \to A$ (by $d_f$) and
+$g: X \to B$ (by $d_g$), the pairing
+$\langle f, g \rangle: X \to A \times B$ is
+witnessed by $d_f + d_g$ (sum over $\GF(2)$).
+\emph{Universality}: $\pi_A \circ \langle f, g \rangle$
+extracts the $d_A$-component of $d_f + d_g$. By profile
+linearity, this is $d_f$'s contribution to the
+$A$-classification, which is $f$. Similarly for $\pi_B$.
+\emph{Uniqueness}: any $h: X \to A \times B$ with
+$\pi_A \circ h = f$ and $\pi_B \circ h = g$ must have
+profile agreeing with $d_f$ on $A$ and $d_g$ on $B$.
+Over $\GF(2)$, a linear map is determined by its values
+on a basis; the two projection conditions determine $h$
+uniquely. $\checkmark$
+
+\emph{3. Equalizer.}
+\emph{Construction}: given $f, g: A \to B$ witnessed by
+$d_f, d_g$, the equalizer is $E = \{a \in A :
+\tau_{d_f}(a) = \tau_{d_g}(a),\; \sigma_{d_f}(a) =
+\sigma_{d_g}(a)\}$ --- the elements where $f$ and $g$
+agree. The equalizer discriminator is $d_f + d_g$: it
+fires ($= 1$) exactly where $f$ and $g$ differ (since
+$1 + 1 = 0$ and $0 + 0 = 0$ in $\GF(2)$, the sum is
+zero where they agree and nonzero where they differ).
+$E = \ker(d_f + d_g)$.
+\emph{Inclusion}: $\iota: E \hookrightarrow A$ is the
+sub-regime inclusion.
+\emph{Universality}: for any $h: X \to A$ with
+$f \circ h = g \circ h$, the image of $h$ lies in
+$\ker(d_f + d_g) = E$. The unique factorization
+$\bar{h}: X \to E$ is $h$ with codomain restricted to
+$E$. Uniqueness: $\iota$ is injective (a monomorphism),
+so the factorization is unique. $\checkmark$
+
+\emph{4. Pullback.}
+\emph{Construction}: given $f: A \to C$ (by $d_f$) and
+$g: B \to C$ (by $d_g$), the pullback is
+$P = \{(a, b) \in A \times B : f(a) = g(b)\}$.
+In the exterior algebra: $P$ is the kernel of
+$d_f + d_g$ restricted to $A \times B$ (elements where
+the $C$-profiles agree). The pullback discriminator is
+$d_f + d_g$ evaluated on the joint $(A, B)$ population.
+\emph{Projections}: $p_A: P \to A$ and $p_B: P \to B$
+extract the components.
+\emph{Universality}: given $h: X \to A$ and $k: X \to B$
+with $f \circ h = g \circ k$, the image of
+$(h, k): X \to A \times B$ lies in $\ker(d_f + d_g) = P$.
+The unique factorization is $(h, k)$ restricted to $P$.
+\emph{Uniqueness}: determined by the two projection
+conditions, which fix $(h, k)$ uniquely (as in the
+product case). $\checkmark$
+
+\emph{5. General finite limit.}
+A finite limit is a finite combination of products and
+equalizers (or equivalently, a terminal object and
+pullbacks). Since each component is constructed above,
+any finite limit is constructed by iterating these
+operations. At each step, the construction adds linear
+constraints over $\GF(2)$. The solution set is a
+linear subspace (intersection of kernels). The
+universal property follows from linearity: the
+factoring morphism is the unique linear map satisfying
+the projection conditions.
+
+If the constraints require discriminators not in $\kappa$,
+$\kappa$-evolution provides them (Theorem
+\ref{thm:exhaustive}, the constructive filling procedure
+of \S\ref{app:exhaustivity-full}): the residue of
+incompatible constraints is a cycle $R$, and
+$R \wedge e_{n+1}$ fills it. After evolution, the limit
+exists in $\kappa'$.
+
+The fibered topos computes finite limits at the join
+$\kappa_\vee$ of all stages involved (Definition
+\ref{def:fibered}), ensuring all needed discriminators
+are present. $\checkmark$
+
+
+%----------------------------------------------------------------------
+\subsection{Power objects: composite subobjects at joins}
+\label{app:power-composite}
+%----------------------------------------------------------------------
+
+We extend the single-discriminator verification (B.4) to
+composite subobjects, using the Galois structure of the
+$\kappa$-split.
+
+\emph{1. Single-discriminator subobjects} (verified in B.4).
+A subobject of $B$ defined by $d \in \kappa$ is classified
+by $\chi_d: A \to \Omega$ with $\chi_d(a)(b) =
+(\tau_d(a,b), \sigma_d(a,b))$. Existence, pullback, and
+uniqueness checked. $\checkmark$
+
+\emph{2. Linear-combination subobjects.}
+A subobject defined by $d_1 + d_2$ (sum in $V$) is a
+valid discriminator by profile linearity
+(Definition \ref{def:profile-linear}):
+$(d_1 + d_2)(a) = d_1(a) + d_2(a)$.
+Its classifying morphism is
+$\chi_{d_1 + d_2}(a)(b) = (\tau_{d_1+d_2}(a,b),
+\sigma_{d_1+d_2}(a,b))$, which by profile linearity
+equals the componentwise sum of the individual
+classifications. This is a well-defined element of
+$\Omega^B$, unique by the same argument as case 1.
+$\checkmark$
+
+\emph{3. Wedge-product subobjects.}
+A subobject defined by a grade-2 discriminator
+$d_1 \wedge d_2 \in \bigwedge^2 V$ classifies elements
+by the \emph{joint} profile of $d_1$ and $d_2$.
+At stage $\kappa$ containing both $d_1$ and $d_2$:
+$\chi_{d_1 \wedge d_2}(a)(b) = (d_1(a,b) \cdot d_2(a,b),
+\; \ldots)$ where the product is componentwise in
+$\GF(2)^2$.
+
+The classifying morphism is well-defined because
+$d_1, d_2 \in \kappa$ and evaluation is
+$\GF(2)$-valued. Uniqueness: the pullback condition
+determines each component. $\checkmark$
+
+\emph{4. General subobjects at stage $\kappa$.}
+Any subobject of $B$ classifiable at stage $\kappa$ is
+defined by a collection of discriminators $\{d_i\}
+\subset \kappa$ and their algebraic combinations
+(sums and wedge products). By profile linearity, the
+classifiable subobjects form a \emph{linear subspace}
+of $\operatorname{Hom}(B, \Omega)$. The power object
+$\Omega^B$ at stage $\kappa$ is this linear subspace.
+The universal property holds because:
+\begin{itemize}[nosep]
+  \item \emph{Existence}: for any relation
+    $R \hookrightarrow A \times B$ defined by
+    discriminators in $\kappa$, $\chi_R$ is constructed
+    from those discriminators.
+  \item \emph{Uniqueness}: $\chi_R$ is determined by
+    the profiles of $\kappa$'s discriminators on
+    $A \times B$. Over $\GF(2)$, a linear map is
+    determined by its values on a basis.
+  \item \emph{Pullback}: the relation is recovered as
+    $\chi_R^{-1}(\in_B)$ by construction.
+\end{itemize}
+$\checkmark$
+
+\emph{5. At the join $\kappa_1 \vee \kappa_2$.}
+The join $\kappa_\vee = \mathrm{span}(\kappa_1 \cup
+\kappa_2)$ contains all discriminators from both fibers.
+Any composite subobject involving discriminators from
+$\kappa_1$ and $\kappa_2$ is classifiable at $\kappa_\vee$.
+The power object at $\kappa_\vee$ classifies all
+$\kappa_\vee$-classifiable subobjects, which includes all
+composites from both fibers. $\checkmark$
+
+\emph{6. The Galois perspective.}
+The short exact sequence $0 \to \kappa \to V \to
+V/\kappa \to 0$ separates classifiable from
+unclassifiable subobjects. $\mathrm{Gal}(V/\kappa)
+= GL(V/\kappa, \GF(2))$ acts on the unclassifiable
+ones. As $\kappa$ grows (via joins), $\mathrm{Gal}$
+shrinks and more subobjects become classifiable.
+The transition functors between fibers' power objects
+are equivariant under Galois group reduction (the same
+compatibility condition as in the Yoneda pro-system,
+\S\ref{app:limits-exhaustive}).
+
+In the fibered topos $\int \mathcal{C}$, the power
+object at stage $\kappa$ classifies all
+$\kappa$-classifiable subobjects. The fibered
+construction takes the colimit over all stages,
+classifying every subobject that is classifiable at
+\emph{any} stage. By the operationalist axiom
+(Definition \ref{def:operationalist}), a subobject
+not classifiable at any stage is not a valid subobject.
+$\checkmark$
+
+
+%----------------------------------------------------------------------
+\subsection{Sheaf topology: non-triviality verification}
+\label{app:topology-nontrivial}
+%----------------------------------------------------------------------
+
+We verify that the Grothendieck topology generated by the
+six triadic adjunctions is strictly between trivial and
+discrete, by exhaustive enumeration of covering status.
+
+\emph{Setup.}
+The six adjunctions are organized as three axes (the three
+non-zero elements of $\GF(2)^2$) with two chiralities
+each (inclusion $\iota$ and projection $\pi$). Each axis
+contributes a 1-dimensional sub-regime of the
+2-dimensional regime $\GF(2)^2$:
+\begin{center}
+\begin{tabular}{c|c|c}
+Axis & Element of $\GF(2)^2$ & Sub-regime \\
+\hline
+$\tau$ & $(1,0)$ & $\mathrm{span}\{(1,0)\}$ \\
+$\sigma$ & $(0,1)$ & $\mathrm{span}\{(0,1)\}$ \\
+$\kappa$ & $(1,1)$ & $\mathrm{span}\{(1,1)\}$
+\end{tabular}
+\end{center}
+
+A family of sub-regimes \emph{covers} $\GF(2)^2$ iff the
+sub-regimes jointly span the full 2-dimensional space.
+
+\emph{Key fact}: any two of $\{(1,0), (0,1), (1,1)\}$
+are linearly independent over $\GF(2)$ (each pair spans
+$\GF(2)^2$). This is because $(1,0) + (0,1) = (1,1)$:
+the three elements form the triangle identity, and any
+two determine the third.
+
+\emph{Exhaustive classification.}
+
+\emph{1. Single-axis families}: a family using
+sub-regimes from only one axis (e.g.\ both chiralities
+of $\tau$). The span is 1-dimensional. Does \textbf{not}
+cover. (3 such families.) $\checkmark$
+
+\emph{2. Two-axis families}: a family using sub-regimes
+from two different axes (e.g.\ $\tau$ and $\sigma$).
+The span is 2-dimensional (any two of the three elements
+are linearly independent). \textbf{Covers.}
+($\binom{3}{2} = 3$ axis-pairs, each with $2 \times 2 = 4$
+chirality choices $= 12$ families.) $\checkmark$
+
+\emph{3. Three-axis families}: spans 2 dimensions
+(contains a two-axis subfamily). \textbf{Covers.}
+($2^3 = 8$ chirality choices.) $\checkmark$
+
+\emph{Not trivial}: the two-axis families are proper
+subfamilies of the full six adjunctions, and they cover.
+In the trivial topology, only the maximal sieve covers.
+Here, smaller sieves cover. $\checkmark$
+
+\emph{Not discrete}: the single-axis families do not
+cover. In the discrete topology, every non-empty sieve
+covers. Here, some non-empty sieves fail to cover.
+$\checkmark$
+
+\emph{Minimal covering families}: pairs of sub-regimes
+from different axes. There are 12 such pairs (3 axis-pairs
+$\times$ 4 chirality choices). The $S_3$ symmetry
+($GL(2, \GF(2)) \cong S_3$, the Galois group) acts
+transitively on the three axis-pairs. The covering
+condition is $S_3$-invariant: if a family covers, so
+does its image under any $S_3$ permutation.
+
+The topology is the \emph{unique} $S_3$-invariant
+topology on the site of $\GF(2)^2$ sub-regimes that
+declares ``two different axes cover.'' It is determined
+by the triangle identity (any two vertices determine the
+third) and the Galois group ($S_3$ acts transitively on
+axis-pairs). $\checkmark$
+
+
+%----------------------------------------------------------------------
+\subsection{$(n,1)$-structure: no direction at grade $\geq 2$}
+\label{app:no-direction-grade2}
+%----------------------------------------------------------------------
+
+We prove that no grade-$k$ element ($k \geq 2$) can
+induce a non-invertible natural transformation. Direction
+is confined to grade 1.
+
+\emph{What direction requires.}
+A non-invertible morphism $f: A \to B$ requires
+\emph{asymmetry}: the forward morphism $f$ is not the
+same as the reverse $f^{-1}$. At grade 1, this asymmetry
+comes from $\tau/\sigma$ labels on the data: $d_f$
+witnesses $A \to B$ (with $\tau_{d_f}(A) = 1$,
+$\sigma_{d_f}(B) = 1$), while the reverse $B \to A$
+would require a different discriminator $d'$ with
+$\tau_{d'}(B) = 1$, $\sigma_{d'}(A) = 1$. In general
+$d_f \neq d'$, so $f$ is non-invertible. $\checkmark$
+
+\emph{Why grade $\geq 2$ is symmetric.}
+A grade-$k$ element is $\alpha = d_1 \wedge d_2 \wedge
+\cdots \wedge d_k$. Over $\GF(2)$, the wedge product is
+commutative: any permutation $\pi \in S_k$ gives
+\[
+  d_{\pi(1)} \wedge \cdots \wedge d_{\pi(k)}
+  = d_1 \wedge \cdots \wedge d_k = \alpha.
+\]
+The ``reverse'' of $\alpha$ --- obtained by reversing the
+factor order --- is $d_k \wedge \cdots \wedge d_1 = \alpha$.
+Every grade-$k$ element is its own reverse. Therefore
+$\alpha^{-1} = \alpha$: every $k$-morphism ($k \geq 2$)
+is self-inverse, hence invertible. $\checkmark$
+
+\emph{Why grade 1 escapes.}
+A grade-1 element $d$ has no factors to permute (only
+one). Its asymmetry comes not from factor ordering but
+from the $\tau/\sigma$ labels on the \emph{population}:
+$d$ directly evaluates on elements of $S$, and the
+evaluation $d(a)$ determines whether $a$ carries the
+$\tau$ or $\sigma$ property. This is the unique grade
+where the discriminator contacts the data.
+
+At grade $\geq 2$, the element does not contact the
+population directly. It is a \emph{comparison} of
+discriminators, and the comparison is symmetric because
+$\wedge$ is commutative. The $\tau/\sigma$ labels on
+individual factors are present but their ordering is
+erased by commutativity.
+
+\emph{The Galois perspective.}
+The permutation group $S_k$ acts on the $k$ factors of
+a grade-$k$ element. Over $\GF(2)$, $S_k$ acts
+\emph{trivially} (all signs are $+1$). The ``Galois
+group of factor ordering'' is the full $S_k$, acting
+trivially: there is no information about which factor
+came first. Direction requires breaking this symmetry.
+At grade 1, the $\tau/\sigma$ population interface
+breaks it (the discriminator contacts asymmetrically
+labeled data). At grade $\geq 2$, nothing breaks it.
+
+This is why $\mathcal{C}(S,\kappa)$ is an
+$(n,1)$-category: directed (non-invertible) morphisms
+exist only at grade 1. All higher morphisms are
+invertible, forming a groupoid at each level $\geq 2$.
+$\checkmark$
+
+
+%----------------------------------------------------------------------
+\subsection{Dynamics transfer: linearity under $S_3$ rotation}
+\label{app:dynamics-s3}
+%----------------------------------------------------------------------
+
+We verify that profile linearity and evaluation linearity
+are preserved under $S_3$ rotation of perspectives.
+
+\emph{The evaluation map.}
+Profile linearity (Definition \ref{def:profile-linear})
+and evaluation linearity (Definition \ref{def:eval-linear})
+jointly assert that the evaluation map
+\[
+  \mathrm{ev}: V \times S \to \GF(2), \qquad
+  \mathrm{ev}(d, a) = d(a)
+\]
+is \emph{bilinear}: linear in $d$ (for fixed $a$) and
+linear in $a$ (for fixed $d$). When $S \cap V \neq
+\varnothing$, this is the standard pairing
+$\langle d, a \rangle$ on $V$.
+
+\emph{What $S_3$ does.}
+Under the $\sigma$-perspective (Proposition
+\ref{prop:perspectives}), the roles rotate: what was the
+discriminator space ($V$, playing $\kappa$) becomes the
+population (playing $\sigma$), and what was the population
+($S$, playing $\tau$) becomes the discriminator space
+(playing $\kappa$). The evaluation map at the rotated
+level is:
+\[
+  \mathrm{ev}'(a, d) = \mathrm{ev}(d, a) = d(a).
+\]
+This is $\mathrm{ev}$ with its arguments swapped.
+
+\emph{Bilinearity is preserved under argument swap.}
+If $\mathrm{ev}(d, a)$ is linear in $d$ (profile
+linearity) and linear in $a$ (evaluation linearity),
+then $\mathrm{ev}'(a, d) = \mathrm{ev}(d, a)$ is
+linear in $a$ (now the first argument --- this is the
+\emph{original} evaluation linearity) and linear in $d$
+(now the second argument --- this is the \emph{original}
+profile linearity).
+
+The two linearities \emph{swap} under rotation:
+\begin{center}
+\begin{tabular}{l|ll}
+& First argument & Second argument \\
+\hline
+Original: $\mathrm{ev}(d, a)$ &
+  Profile linearity &
+  Evaluation linearity \\
+Rotated: $\mathrm{ev}'(a, d)$ &
+  Evaluation linearity &
+  Profile linearity
+\end{tabular}
+\end{center}
+
+Since both hold at the original level, both hold at the
+rotated level. The swap is the $S_3$ action on the axiom
+pair. $\checkmark$
+
+\emph{Full $S_3$.}
+The six elements of $S_3$ permute $\{\kappa, \sigma,
+\tau\}$. Each permutation relabels which component plays
+which role. The evaluation map $\mathrm{ev}(d, a) =
+\langle d, a \rangle$ is the standard bilinear pairing.
+Relabeling does not change bilinearity: it may swap the
+two linearity conditions, but both are maintained at
+every perspective. $\checkmark$
+
+\emph{The Galois perspective.}
+The bilinear pairing $\langle \cdot, \cdot \rangle:
+V \times V^* \to \GF(2)$ is invariant under $GL(V)$.
+$S_3$ acts as a subgroup of $GL(V)$ (permuting basis
+elements). Bilinearity is preserved under any linear
+change of basis, hence under any $S_3$ element.
+Profile linearity and evaluation linearity are two
+facets of one $GL$-invariant structure: the bilinear
+pairing. $S_3$ rotates the facets but preserves the
+structure. $\checkmark$
+
+
+%----------------------------------------------------------------------
+\subsection{Finite choice: explicit termination bound}
+\label{app:choice-termination}
+%----------------------------------------------------------------------
+
+We provide the explicit decreasing measure for the finite
+choice argument (Theorem \ref{thm:choice}(i)).
+
+\emph{The measure.}
+$m(\kappa) = \dim(V) - \dim(\kappa) = \dim(V/\kappa)$:
+the dimension of the complement. Equivalently, $m$ is
+the dimension of the Galois group's domain (the space
+of unseen discriminators).
+
+\emph{Properties.}
+\begin{enumerate}[label=(\roman*),nosep]
+  \item $m(\kappa) \in \mathbb{N}$
+    (non-negative integer).
+  \item Each $\kappa$-evolution adds one independent
+    discriminator (the $e_{n+1}$ of the filling procedure,
+    \S\ref{app:exhaustivity-full}). Therefore
+    $\dim(\kappa') = \dim(\kappa) + 1$ and
+    $m(\kappa') = m(\kappa) - 1$. The measure
+    \emph{strictly decreases} by exactly 1 per evolution.
+  \item $m(\kappa) = 0$ iff $\kappa = V$ (every
+    discriminator is present). At $\kappa = V$, every
+    element of $S$ has a unique profile in $\GF(2)^n$.
+    Equivalence classes are singletons; selection from
+    singletons is trivial.
+  \item The process terminates in at most $n = \dim(V)$
+    evolutions.
+\end{enumerate}
+
+\emph{The selection procedure.}
+Given a finite family $\{S_1, \ldots, S_m\}$:
+\begin{enumerate}[label=\arabic*.,nosep]
+  \item For each $S_i$, attempt selection. If the
+    $\kappa$-equivalence classes of $S_i$ are singletons,
+    selection is trivial (each class contains exactly one
+    representative). Done for this $S_i$.
+  \item If selection fails (some class contains multiple
+    unresolved elements), the failure produces a residue
+    $R_i$ (elements with $\chi = 0$).
+  \item The residue $R_i$ is a $k$-cycle. The filling
+    procedure (\S\ref{app:exhaustivity-full}) adds one
+    independent discriminator $e_{n+1}$, producing
+    $\kappa' = \kappa \vee \{e_{n+1}\}$.
+  \item The new discriminator refines \emph{all}
+    sub-families simultaneously (the evolution is global,
+    not per-$S_i$). $m(\kappa')= m(\kappa) - 1$.
+  \item Repeat from step 1 with $\kappa'$.
+\end{enumerate}
+
+\emph{Termination.}
+After at most $n$ iterations, $m(\kappa) = 0$ and
+$\kappa = V$. All equivalence classes are fully refined.
+Selection succeeds for every $S_i$.
+
+\emph{Bound.} The total number of $\kappa$-evolutions
+for a finite family of any size is at most $n = \dim(V)$,
+because evolutions are shared across sub-families and
+each evolution decreases $m$ by exactly 1.
+
+\emph{Galois perspective.}
+$m(\kappa)$ is the log (base 2) of the lower bound on
+$|\mathrm{Gal}(V/\kappa)|$. Each evolution reduces the
+Galois group. At $m = 0$, the Galois group is trivial
+--- no symmetry of the unknown remains, and every
+element is uniquely determined. The selection function
+is the trivial map from each singleton class to its
+unique element. $\checkmark$
+
+
+%----------------------------------------------------------------------
+\subsection{Pairing: equivalence classes, not characteristic
+  functions}
+\label{app:pairing-linearity}
+%----------------------------------------------------------------------
+
+The reviewer's concern: the characteristic function
+$\chi_{\{a,b\}}(x) = 1$ iff $x \in \{a,b\}$ is not
+a linear functional for $|S| > 2$. Over $\GF(2)^n$
+with $n \geq 2$, a linear functional $f: V \to \GF(2)$
+has $|f^{-1}(1)| = 2^{n-1}$, which is $\geq 2$. A
+linear functional cannot single out exactly 2 elements
+from a population of $> 4$.
+
+\emph{Resolution}: pairing does not require a linear
+characteristic function. It uses $\kappa$-equivalence
+classes.
+
+\emph{The pair as an equivalence class.}
+The pair $\{a, b\}$ is the $\kappa$-equivalence class
+$[a]_\kappa = [b]_\kappa$ under a regime $\kappa$ where
+$a$ and $b$ are indistinguishable but both are
+distinguished from all other elements.
+
+The condition: for all $d \in \kappa$, $d(a) = d(b)$.
+Over $\GF(2)$, this means $a + b \in \kappa^\perp$
+(the annihilator of $\kappa$ --- the subspace of vectors
+killed by every functional in $\kappa$). Simultaneously,
+for each $c \notin \{a, b\}$, there exists $d \in \kappa$
+with $d(a) \neq d(c)$, i.e., $a + c \notin \kappa^\perp$.
+
+\emph{Existence.} Given $a \neq b$, choose $\kappa$ such
+that $a + b \in \kappa^\perp$ and $a + c \notin
+\kappa^\perp$ for each $c \notin \{a, b\}$. This is a
+condition on $\kappa$: include discriminators that
+separate $a$ from each $c \neq b$, but exclude
+discriminators that separate $a$ from $b$.
+
+Concretely: let $\kappa = \{d \in V^* : d(a + b) = 0\}
+\cap \{d : d(a + c) = 1 \text{ for some } c \notin
+\{a,b\}\}$. The first condition ensures $a \sim_\kappa b$.
+The second ensures $a \not\sim_\kappa c$ for $c \neq b$.
+Such a $\kappa$ exists because $a + b \neq a + c$ for
+$c \neq b$ (since $b \neq c$), so the conditions are
+compatible. $\checkmark$
+
+\emph{Concrete model verification.}
+In the $\GF(2)^3$ model (\S\ref{sec:concrete-model}):
+under $\kappa = \{e_1\}$, elements $a$ and $b$ both have
+$e_1(a) = e_1(b) = 1$. If no other element has $e_1 = 1$,
+then $\{a, b\} = [a]_{\{e_1\}} = \{x : e_1(x) = 1\}$.
+The pair is the equivalence class. $\checkmark$
+
+\emph{Galois perspective.}
+The pair $\{a, b\}$ exists when $a + b$ is in the
+annihilator $\kappa^\perp$. The annihilator is the
+``Galois-fixed'' subspace: elements invisible to $\kappa$.
+The pair is defined by what $\kappa$ \emph{cannot}
+distinguish, not by what a predicate positively
+identifies. Pairing is a $\kappa$-deformation that
+deliberately withholds a discriminator, preserving the
+equivalence. $\checkmark$
+
+
+%----------------------------------------------------------------------
+\subsection{Fixed-point stability and uniqueness}
+\label{app:fixed-point-stability}
+%----------------------------------------------------------------------
+
+We prove the fixed point (Theorem \ref{thm:entailed})
+is stable by showing it is the \emph{unique} non-zero
+grade-2 element, and that perturbation to zero triggers
+reinstatement.
+
+\emph{Dimensionality.}
+The toroid is $\GF(2)^2$, with $\dim = 2$. The grade-2
+part of the exterior algebra is
+$\bigwedge^2(\GF(2)^2)$, which has dimension
+$\binom{2}{2} = 1$. There is exactly \textbf{one}
+non-zero grade-2 element: $e_1 \wedge e_2$ (the top
+form, where $e_1, e_2$ is any basis of $\GF(2)^2$).
+
+\emph{Uniqueness.}
+The 2-cell filling the toroid's triangle is a non-zero
+element of $\bigwedge^2(\GF(2)^2)$. Since this space is
+1-dimensional, the filling is unique (up to the scalar
+$\GF(2)^* = \{1\}$, which is trivial). There is no
+other non-zero 2-cell to perturb to.
+
+This resolves the uniqueness question [O5]: the
+conjecture that $H_2 = 0$ is not needed. Uniqueness
+follows from $\dim \bigwedge^2(\GF(2)^2) = 1$.
+$\checkmark$
+
+\emph{Stability.}
+Two possible perturbations:
+\begin{enumerate}[label=(\roman*),nosep]
+  \item Perturbation to another non-zero 2-cell:
+    \textbf{impossible}. The space is 1-dimensional;
+    there is no other non-zero element.
+  \item Perturbation to zero (removing the 2-cell):
+    triggers the four failures of Theorem
+    \ref{thm:irremovable} (sheaf, manifold, bimodule,
+    self-resolution). The homological gap produced by
+    removal specifies its own filling, which is the
+    unique non-zero 2-cell $e_1 \wedge e_2$. Removal
+    reinstates.
+\end{enumerate}
+The fixed point is stable: any departure returns to
+$e_1 \wedge e_2$. $\checkmark$
+
+\emph{$GL$-invariance.}
+$GL(2, \GF(2)) \cong S_3$ acts on $\GF(2)^2$. The top
+form $e_1 \wedge e_2$ transforms under $g \in GL(2)$ as
+$g(e_1) \wedge g(e_2) = \det(g) \cdot (e_1 \wedge e_2)$.
+Over $\GF(2)$, $\det: GL(2, \GF(2)) \to \GF(2)^* = \{1\}$
+(the determinant is always 1, since $\GF(2)^*$ has one
+element). Therefore $e_1 \wedge e_2$ is \emph{invariant}
+under the full Galois group $S_3$. The 2-cell is the
+unique $S_3$-invariant grade-2 element. $\checkmark$
+
+\emph{Summary.}
+The fixed point is:
+\begin{itemize}[nosep]
+  \item \textbf{unique} (1-dimensional top form),
+  \item \textbf{stable} (perturbation to zero reinstates;
+    perturbation to another element is impossible),
+  \item \textbf{$S_3$-invariant} (determinant is trivial
+    over $\GF(2)$).
+\end{itemize}
+These three properties follow from $\dim \bigwedge^2
+(\GF(2)^2) = 1$ and $|\GF(2)^*| = 1$. $\checkmark$
+
+
+%----------------------------------------------------------------------
+\subsection{Foundation chain bound: link independence}
+\label{app:chain-bound}
+%----------------------------------------------------------------------
+
+We prove that distinct membership links in an acyclic
+chain require linearly independent witnessing
+discriminators, bounding chain depth by $\dim(\kappa)$.
+
+\emph{Link vectors.}
+In a chain $a_1 \ni a_2 \ni \cdots \ni a_m$
+(equivalently $a_2 \in a_1,\; a_3 \in a_2, \ldots$),
+each link $a_i \ni a_{i+1}$ is witnessed by a
+discriminator $d_i$. Define the \emph{link vector}
+$v_i = a_i + a_{i+1} \in \GF(2)^n$ (the profile
+difference; over $\GF(2)$, difference $=$ sum).
+
+Each $v_i$ is non-zero (since $a_i \neq a_{i+1}$ in an
+acyclic chain). Each $v_i$ is detected by $d_i$:
+$d_i(v_i) = d_i(a_i) + d_i(a_{i+1}) = 1$ (since $d_i$
+distinguishes $a_i$ from $a_{i+1}$). $\checkmark$
+
+\emph{Independence requirement.}
+If $v_i$ is linearly dependent on previous link vectors
+$\{v_1, \ldots, v_{i-1}\}$, then
+$v_i = \sum_{j < i} c_j v_j$ for some
+$c_j \in \GF(2)$. This means:
+\[
+  a_i + a_{i+1} = \sum_{j < i} c_j (a_j + a_{j+1}).
+\]
+The profile difference at link $i$ is a $\GF(2)$-linear
+combination of previous profile differences. The
+distinction between $a_i$ and $a_{i+1}$ is therefore
+\emph{derivable} from the distinctions already
+established by earlier links. No new discriminator
+is needed: the existing discriminators in $\kappa$
+already detect $v_i$ (since they detect each $v_j$
+and $v_i$ is in their span).
+
+A link whose vector is dependent on previous links does
+not deepen the chain --- it is a derived relation, not
+a primitive membership step. The \emph{depth} of the
+chain (the number of genuinely new distinctions) equals
+$\dim(\operatorname{span}\{v_1, \ldots, v_{m-1}\})$.
+
+\emph{The bound.}
+The link vectors $v_1, \ldots, v_{m-1}$ lie in
+$\GF(2)^n$, which has dimension $n$. Therefore:
+\[
+  \text{chain depth}
+  = \dim(\operatorname{span}\{v_1, \ldots, v_{m-1}\})
+  \leq n = \dim(V).
+\]
+An acyclic chain has at most $n$ independent links
+and at most $n + 1$ elements.
+
+\emph{Galois measure.}
+Each independent link vector $v_i$ requires a
+discriminator $d_i$ with $d_i(v_i) = 1$. Independent
+link vectors require linearly independent discriminators
+(if $d_i = d_j$ then $d_i$ detects both $v_i$ and $v_j$
+only if $v_i$ and $v_j$ lie outside $\ker(d_i)$, but
+this does not constrain $v_i$ to be independent of
+$v_j$; however, if $v_i \in \operatorname{span}\{v_j\}$
+then link $i$ is derived, as above).
+
+The measure $m(\kappa) = \dim(V/\kappa)$ decreases with
+each genuinely independent link:
+adding $d_i$ to $\kappa$ for an independent $v_i$
+increases $\dim(\kappa)$ by 1 and decreases $m$ by 1.
+After $n$ independent links, $m = 0$, the Galois group
+is trivial, and no further independent links are
+possible.
+
+\emph{Sharp bound.}
+The bound $n + 1$ is achieved: in $\GF(2)^n$ with
+basis $e_1, \ldots, e_n$, the chain
+$0 \ni e_1 \ni (e_1 + e_2) \ni \cdots \ni
+(e_1 + \cdots + e_n)$ has $n$ links with link vectors
+$e_1, e_2, \ldots, e_n$ (a basis). $\checkmark$
+
+
+%----------------------------------------------------------------------
+\subsection{Indistinguishability: $\omega$-chain stabilization}
+\label{app:omega-chain}
+%----------------------------------------------------------------------
+
+We rule out convergent $\omega$-chains of
+$\kappa$-evolutions separating actual from potential
+infinity.
+
+\emph{The concern.}
+Proposition \ref{prop:indistinguish} shows each
+individual discriminator fails to separate ``actually
+infinite'' from ``potentially infinite (finite but
+unbounded).'' The reviewer asks: could an $\omega$-chain
+$\kappa_1 \subseteq \kappa_2 \subseteq \cdots$ produce
+a \emph{collective} separation, even though no individual
+discriminator separates?
+
+\emph{Step 1: stabilization.}
+$V$ is finite-dimensional ($\dim V = n$). The ascending
+chain $\kappa_1 \subseteq \kappa_2 \subseteq \cdots$
+is a chain of subspaces of $V$. By the ascending chain
+condition in a finite-dimensional vector space, the chain
+stabilizes: there exists $N$ such that $\kappa_N =
+\kappa_{N+1} = \cdots$. The ``limit'' regime is
+$\kappa_\infty = \kappa_N$, which has
+$\dim(\kappa_\infty) \leq n$. $\checkmark$
+
+\emph{Step 2: finite span.}
+Every element of $\kappa_\infty$ is a linear combination
+of finitely many $d_i$'s (since $\kappa_\infty$ is
+finite-dimensional and the $d_i$ span it). No ``limit
+discriminator'' exists outside $\operatorname{span}
+\{d_i\}$: over a finite-dimensional space, the span
+is all there is. $\checkmark$
+
+\emph{Step 3: linearity kills collective separation.}
+The original argument shows: each $d_i$ individually
+gives the same result on ``actually infinite'' and
+``potentially infinite'' sequences. That is,
+$d_i(\text{actual}) = d_i(\text{potential})$ for all $i$.
+
+By profile linearity, any linear combination
+$d = \sum c_i d_i$ ($c_i \in \GF(2)$) satisfies:
+\[
+  d(\text{actual}) = \sum c_i\, d_i(\text{actual})
+  = \sum c_i\, d_i(\text{potential})
+  = d(\text{potential}).
+\]
+A linear combination of non-separating discriminators
+is non-separating. Therefore no element of
+$\kappa_\infty$ separates. $\checkmark$
+
+\emph{Conclusion.}
+No $\omega$-chain of $\kappa$-evolutions converges to a
+separation of actual from potential infinity. The
+stabilization (step 1) ensures the chain has a finite
+limit. The finite-dimensionality (step 2) ensures no
+discriminator lies outside the span. The linearity
+(step 3) ensures nothing in the span separates.
+
+\emph{Galois perspective.}
+The descending chain $\mathrm{Gal}(V/\kappa_1) \supseteq
+\mathrm{Gal}(V/\kappa_2) \supseteq \cdots$ is a chain
+of subgroups of the finite group $GL(V, \GF(2))$.
+It stabilizes at $\mathrm{Gal}(V/\kappa_\infty)$.
+The residual Galois group contains the symmetries that
+\emph{cannot} be broken by any $\kappa$-evolution ---
+and the actual/potential distinction lies within these
+unbreakable symmetries. No amount of Galois group
+reduction reaches it, because it is not a distinction
+that any $\GF(2)$-linear discriminator can witness.
+$\checkmark$
+
+
+%----------------------------------------------------------------------
+\subsection{Native univalence from the annihilator
+  intersection}
+\label{app:native-univalence}
+%----------------------------------------------------------------------
+
+We construct the precise univalence statement for the
+discrimination framework.
+
+\emph{The path space.}
+For two elements $a, b \in S$, the ``path'' from $a$ to
+$b$ is the vector $a + b \in V$ (over $\GF(2)$,
+difference $=$ sum). The elements $a$ and $b$ are
+$\kappa$-equivalent iff $a + b \in \kappa^\perp$ (the
+annihilator of $\kappa$: the subspace of vectors killed
+by every discriminator in $\kappa$).
+
+The \emph{path space} between $[a]$ and $[b]$ across all
+stages is:
+\[
+  \mathrm{Path}(a, b) = \{v \in V : v = a + b,\;
+  v \in \kappa^\perp \text{ for all } \kappa
+  \text{ where } a \sim_\kappa b\}.
+\]
+For persistent equivalence (equivalence at every stage):
+$\mathrm{Path}(a, b) = \{a + b\} \cap
+\bigcap_\kappa \kappa^\perp$.
+
+\emph{The operationalist axiom as $\bigcup \kappa = V$.}
+The operationalist axiom (Definition
+\ref{def:operationalist}) states: if a distinction cannot
+be witnessed by any discriminator in any $\kappa$-state,
+it is not a valid distinction. Algebraically: the union
+of all $\kappa$-regimes spans $V$:
+\[
+  \bigcup_\kappa \kappa = V.
+\]
+Every direction in $V$ is eventually probed by some
+discriminator.
+
+\emph{Annihilator intersection.}
+Taking annihilators reverses inclusions. If
+$\bigcup_\kappa \kappa = V$, then:
+\[
+  \bigcap_\kappa \kappa^\perp
+  = \left(\bigcup_\kappa \kappa\right)^\perp
+  = V^\perp = \{0\}.
+\]
+The only vector invisible to \emph{all} stages is the
+zero vector. $\checkmark$
+
+\emph{Univalence.}
+If $a \sim_\kappa b$ for all $\kappa$ (persistent
+equivalence), then $a + b \in \bigcap_\kappa
+\kappa^\perp = \{0\}$. Therefore $a + b = 0$, i.e.,
+$a = b$.
+
+The \textbf{ua map}: persistent equivalence $\to$
+identity is $a + b \mapsto 0$ (the equivalence data
+forces $a + b = 0$, which is $a = b$).
+
+The \textbf{idtoeqv map}: identity $\to$ equivalence
+is $a = b \implies a + b = 0 \in \kappa^\perp$
+for all $\kappa$ (the zero vector is in every
+annihilator).
+
+These are inverses:
+$\mathrm{ua} \circ \mathrm{idtoeqv} = \mathrm{id}$
+(identity implies equivalence implies $a + b = 0$
+implies identity);
+$\mathrm{idtoeqv} \circ \mathrm{ua} = \mathrm{id}$
+(equivalence implies $a + b = 0$ implies identity
+implies equivalence).
+$\checkmark$
+
+\emph{Contractibility of the path space.}
+For $a = b$: $\mathrm{Path}(a, a) = \{0\}$, a single
+point. Contractible.
+For $a \neq b$ but $a \sim_\kappa b$ at some stage:
+$\mathrm{Path}(a, b) = \{a + b\}$ with $a + b \neq 0$.
+This is a single non-zero point at stage $\kappa$, but
+as $\kappa$ grows, eventually some discriminator detects
+$a + b$ (since $\bigcup \kappa = V$), and the equivalence
+breaks. The path space empties.
+
+In both cases, the non-empty path space is contractible
+(a single point). This is the HoTT condition for
+univalence: the fiber of $\mathrm{idtoeqv}$ over each
+equivalence is contractible. $\checkmark$
+
+\emph{The Galois reading.}
+At each stage, $\kappa^\perp$ is the Galois group's
+domain: the directions invisible to $\kappa$. The path
+$a + b$ lives in $\kappa^\perp$ iff $a$ and $b$ are in
+the same Galois orbit. As $\kappa$ grows, the Galois
+group shrinks and orbits refine. Persistent equivalence
+means $a + b$ is in every Galois group's domain. By
+the operationalist axiom, the intersection of all
+domains is $\{0\}$. The only persistent orbit is the
+trivial orbit. Univalence is Galois-group exhaustion.
+$\checkmark$
+
+
+%----------------------------------------------------------------------
+\subsection{Segal conditions at $k \geq 3$: groupoid
+  filling}
+\label{app:segal}
+%----------------------------------------------------------------------
+
+We verify the Segal conditions for the $(n,k)$-structure
+at $k \geq 3$.
+
+\emph{The Segal condition.}
+A simplicial object $X_\bullet$ satisfies the Segal
+condition at level $k$ if the Segal map
+\[
+  X_k \to X_1 \times_{X_0} X_1 \times_{X_0}
+  \cdots \times_{X_0} X_1 \quad (k \text{ factors})
+\]
+is an equivalence: a $k$-cell is determined by its
+$k$ composable edges.
+
+\emph{Fact 1: groupoid at grade $\geq 2$}
+(Appendix \ref{app:no-direction-grade2}).
+Every grade-$k$ element ($k \geq 2$) is self-inverse:
+$d_{\pi(1)} \wedge \cdots \wedge d_{\pi(k)} =
+d_1 \wedge \cdots \wedge d_k$ for all $\pi \in S_k$
+(commutativity of $\wedge$ over $\GF(2)$). All
+$k$-morphisms are invertible. $\checkmark$
+
+\emph{Fact 2: groupoids satisfy Segal conditions.}
+In a groupoid, every $k$-cell is uniquely determined
+by its boundary of composable 1-cells:
+\begin{itemize}[nosep]
+  \item \emph{Existence}: given $k$ composable 1-forms
+    $d_1, \ldots, d_k$ (pairwise linearly independent),
+    their wedge product $d_1 \wedge \cdots \wedge d_k$
+    is a non-zero $k$-cell.
+  \item \emph{Uniqueness}: the wedge product of a given
+    set of factors is unique (one product per set, since
+    $\wedge$ is commutative and $\GF(2)^* = \{1\}$).
+  \item \emph{No filling ambiguity}: in a groupoid,
+    composition and inverses are unique. There is no
+    choice in how to fill a $k$-simplex given its edges.
+\end{itemize}
+The Segal map is a bijection. $\checkmark$
+
+\emph{The Grassmannian structure.}
+Decomposable grade-$k$ elements biject with
+$k$-dimensional subspaces of $V$ (the Grassmannian
+$\mathrm{Gr}(k, V)$ over $\GF(2)$). A $k$-subspace
+is determined by any basis, and all bases yield the
+same wedge product (since $\GF(2)^* = \{1\}$ makes
+the determinant trivial).
+
+The Segal map at level $k$:
+$\mathrm{Gr}(k, V) \to \{\text{$k$-tuples of independent
+1-forms}\}/\sim$
+is a bijection: a $k$-subspace $\leftrightarrow$ an
+unordered set of $k$ independent generators.
+
+The number of $k$-cells is the Gaussian binomial
+coefficient $\binom{n}{k}_2$, which counts
+$k$-subspaces of $\GF(2)^n$. $\checkmark$
+
+\emph{Explicit verification at $k = 3$.}
+$d_1 \wedge d_2 \wedge d_3$ is determined by
+$\{d_1, d_2, d_3\}$ (unordered). Its three 2-faces
+are $d_1 \wedge d_2$, $d_2 \wedge d_3$,
+$d_1 \wedge d_3$. Given these three 2-faces, the
+3-cell is their unique filler (exists by groupoid
+composition, unique by commutativity of $\wedge$).
+
+At $k = 4$: six 2-faces, four 3-faces, one 4-cell.
+The 4-cell $d_1 \wedge d_2 \wedge d_3 \wedge d_4$ is
+determined by any of its 3-faces (which are themselves
+determined by their 2-faces). The Segal condition
+holds inductively. $\checkmark$
+
+\emph{Why this was non-obvious.}
+The concern was that non-decomposable elements (sums
+of wedge products, e.g.\ $d_1 \wedge d_2 + d_3 \wedge
+d_4$) might violate Segal. But non-decomposable
+elements are \emph{chain-group elements} (formal sums
+of $k$-morphisms), not individual $k$-morphisms. The
+Segal condition applies to the $k$-morphisms themselves
+(decomposable elements = points of the Grassmannian),
+not to their formal sums. The exterior algebra's full
+grade-$k$ component $\bigwedge^k V$ is the chain group;
+the Segal space is the Grassmannian
+$\mathrm{Gr}(k, V) \subset \bigwedge^k V$. $\checkmark$
+
+
+%----------------------------------------------------------------------
+\subsection{O1 and O4: the RISC instruction set}
+\label{app:risc}
+%----------------------------------------------------------------------
+
+O1 (scope of evaluation linearity) and O4
+(join-semilattice of $\kappa$-states) are the same
+question, and both close simultaneously.
+
+\emph{O1: characterization of admissible discriminators.}
+Profile linearity (Definition \ref{def:profile-linear})
+requires $d(a + b) = d(a) + d(b)$. Evaluation linearity
+(Definition \ref{def:eval-linear}) requires the same in
+the second argument. Together: $\mathrm{ev}(d, a) =
+\langle d, a \rangle$ is bilinear.
+
+A function $f: \GF(2)^n \to \GF(2)$ satisfying
+$f(a + b) = f(a) + f(b)$ is a $\GF(2)$-linear
+functional. These are exactly the elements of the dual
+space $V^* = \operatorname{Hom}(V, \GF(2))$.
+
+The admissible discriminators are $V^*$. $\checkmark$
+
+\emph{Count.} $\dim(V^*) = \dim(V) = n$. $|V^*| = 2^n$
+(including zero). Non-trivial: $2^n - 1$. At $n = 3$:
+$8$ admissible (including zero), $7$ non-trivial. These
+$7$ are the points of $PG(2, \GF(2))$, the Fano plane.
+
+The ratio $2^n / 2^{2^n}$ (admissible over total) is the
+compression ratio: $3.1\%$ at $n = 3$, $0.024\%$ at
+$n = 4$. The ``RISC instruction set'' is the projective
+space $PG(n{-}1, \GF(2))$: a minimal, uniform set of
+primitives from which $\kappa$-evolution recovers full
+expressiveness.
+
+\emph{O4: the join-semilattice.}
+$\kappa$-states are subspaces of $V^*$. $V^*$ is a
+vector space. The join of two subspaces is their span:
+$\kappa_1 \vee \kappa_2 = \operatorname{span}(\kappa_1
+\cup \kappa_2)$. The span of subspaces of a vector
+space is a subspace.
+
+Therefore:
+\begin{itemize}[nosep]
+  \item The join is well-defined and produces a valid
+    $\kappa$-state. $\checkmark$
+  \item Profile linearity is preserved: every element of
+    $\operatorname{span}(\kappa_1 \cup \kappa_2)$ is a
+    $\GF(2)$-linear combination of linear functionals,
+    hence a linear functional. $\checkmark$
+  \item The meet $\kappa_1 \wedge \kappa_2 = \kappa_1
+    \cap \kappa_2$ is also a subspace. $\checkmark$
+\end{itemize}
+
+The lattice of $\kappa$-states is not merely a
+join-semilattice. It is a \emph{modular lattice}
+(the lattice of subspaces of a finite-dimensional
+vector space), which is stronger than what O4 requires.
+$\checkmark$
+
+\emph{Why they are the same question.}
+O1 asks: what are the primitives? Answer: $V^*$ (linear
+functionals). O4 asks: do the primitives compose well?
+Answer: $V^*$ is a vector space, so its subspace lattice
+is a lattice. The admissibility of the instruction set
+(O1) and the composability of regimes (O4) are both
+consequences of the single fact that $V^*$ is a vector
+space over $\GF(2)$.
+
+\emph{Consequence for the topos.}
+O4 was the sole remaining component of Theorem
+\ref{thm:topos} (fibered topos). With O4 resolved,
+all components are verified:
+\begin{itemize}[nosep]
+  \item Finite limits (G8, Appendix \ref{app:limits-exhaustive}). $\checkmark$
+  \item Subobject classifier (B.9). $\checkmark$
+  \item Power objects (G14, Appendix
+    \ref{app:power-composite}). $\checkmark$
+  \item Join-semilattice of $K$ (this section). $\checkmark$
+\end{itemize}
+The fibered category $\int \mathcal{C}$ is an elementary
+topos. $\checkmark$
+
+
+%----------------------------------------------------------------------
+\subsection{O6: Cayley--Dickson hexagon axioms via
+  in-universe recognizer construction}
+\label{app:cd-recognizer}
+%----------------------------------------------------------------------
+
+The periodic table conjecture (Conjecture \ref{conj:cd})
+asks whether the hexagon axioms hold at Cayley--Dickson
+step 2 over $\GF(2)^2$. We resolve this by reframing
+the CD construction as an in-universe recognizer
+construction.
+
+\emph{The three levels.}
+\begin{description}[nosep,leftmargin=1cm]
+  \item[Level 0] Half-bits. $d: S \to \GF(2)$. A single
+    discriminator output. Recognizer: the discriminator
+    itself. Grade 1 of $\bigwedge V$.
+  \item[Level 1] Bits (the toroid). $(\tau_d(a),
+    \sigma_d(a)) \in \GF(2)^2$. A membership profile.
+    Coproduct of two half-bits. Recognizer: the composed
+    discriminator $d_\tau \wedge d_\sigma$. Grade 2.
+  \item[Level 2] Pairs of bits.
+    $((\tau_1, \sigma_1), (\tau_2, \sigma_2)) \in
+    \GF(2)^4 = (\GF(2)^2)^2$. Coproduct of coproducts
+    of half-bits. Recognizer: a discriminator operating
+    on the space of discriminators.
+\end{description}
+
+\emph{The CD framing (Option A).}
+Treating $(\GF(2)^2)^2$ as a CD doubling gives a
+4-dimensional algebra with multiplication
+$(a,b)(c,d) = (ac + db,\; da + bc)$ (conjugation is
+trivial since $-1 = 1$ over $\GF(2)$). This algebra
+has zero divisors. The hexagon axioms for the resulting
+braided structure are unclear.
+
+\emph{The recognizer framing (Option B).}
+A recognizer for a pair-of-bits is a discriminator
+operating on the \emph{space of discriminators}. Under
+the $\sigma$-rotation (Proposition \ref{prop:perspectives}),
+discriminators become data and data become discriminators.
+A level-2 recognizer is a grade-2 element of $\bigwedge V$
+applied to grade-1 elements (discriminators-as-data).
+
+Grade-2 elements are self-inverse (Appendix
+\ref{app:no-direction-grade2}), form a groupoid
+(Theorem \ref{thm:groupoid}), and their composition
+is strict (Appendix \ref{app:monoidal-coherence}). The
+recognizer-for-recognizers uses the same $\wedge$
+product, the same bilinear pairing, the same Galois
+structure as the level-1 recognizer.
+
+\emph{Resolution.}
+The hexagon axioms at step 2 hold for the same reason
+they hold at step 1: strictness. The $\sigma$-rotation
+maps the level-2 recognizer construction to the same
+strict monoidal category whose coherences are all
+identities (Appendix \ref{app:monoidal-coherence}).
+The hexagon diagrams commute because every morphism in
+them is the identity. $\checkmark$
+
+\emph{The zero divisors are residues.}
+The CD zero divisors $(1,0) \cdot (0,1) = (0,0)$ in
+$\GF(2)^2$ are $\tau \cdot \sigma = 0$: the product
+of a $\tau$-only profile with a $\sigma$-only profile
+is the zero profile. This is the gap/overlap residue
+$\chi = 0$, which triggers $\kappa$-evolution. What
+the CD construction sees as algebraic degeneration
+(zero divisors preventing division), the discrimination
+framework sees as residue detection (the signal to
+evolve $\kappa$). The ``obstruction'' is the feature.
+
+\emph{Proof rotation.}
+The CD framing (algebraic arm) makes the hexagon axioms
+look like a new question at each doubling step. The
+recognizer framing (coherence arm via $\sigma$-rotation
+through the Galois hub) reveals it as the same
+question at every level. This is a proof rotation
+(\S\ref{sec:rotation}): the CD construction is the
+algebraic arm's view of a structure that, rotated,
+is the same strict monoidal category at every grade.
+$\checkmark$
+
+\emph{The Baez--Dolan correspondence.}
+The periodic table of $(n,k)$-categories is generated by
+in-universe recognizer construction: at each level, the
+framework builds recognizers for the previous level's
+constructs, using $\sigma$-rotation. The coherence at
+each level is inherited from the strictness of $\wedge$.
+The periodic table is not an external classification
+imposed on the framework; it is the framework's own
+recognizer hierarchy, viewed from the algebraic arm as
+iterated CD doubling and from the coherence arm as
+iterated $\sigma$-rotation of the same strict structure.

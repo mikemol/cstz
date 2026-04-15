@@ -1,0 +1,1785 @@
+%----------------------------------------------------------------------
+\section{Self-Enrichment and Topos Structure}\label{sec:topos}
+%----------------------------------------------------------------------
+
+The monoidal closed structure of Section \ref{sec:monoidal}
+equips $\mathcal{C}(S,\kappa)$ with internal hom-objects.
+We now show that the category is canonically enriched over
+itself, that the three ingredients of enrichment correspond
+to the three vertices of the $\GF(2)$ toroid, and that the
+resulting structure satisfies the axioms of a topos with a
+four-valued internal logic.
+
+\subsection{Self-enrichment from triadic closure}
+
+\begin{definition}[Enrichment data]\label{def:enrichment-data}
+An enrichment of a category $\mathcal{C}$ over a monoidal
+category $(\mathcal{V}, \otimes, I)$ requires:
+\begin{enumerate}[label=(\roman*),nosep]
+  \item For each pair of objects $A, B$, a \emph{hom-object}
+    $[A,B] \in \mathcal{V}$.
+  \item For each triple $A, B, C$, a \emph{composition
+    morphism} $\circ_{A,B,C}: [B,C] \otimes [A,B] \to [A,C]$
+    in $\mathcal{V}$.
+  \item For each object $A$, an \emph{identity morphism}
+    $j_A: I \to [A,A]$ in $\mathcal{V}$.
+\end{enumerate}
+These must satisfy associativity and unitality coherence
+conditions.
+\end{definition}
+
+\begin{theorem}[Canonical self-enrichment]\label{thm:self-enrich}
+$\mathcal{C}(S,\kappa)$ is canonically enriched over
+$(\mathcal{C}(S,\kappa), \otimes, I)$, with the three
+ingredients of enrichment corresponding to the three
+vertices of the $\GF(2)$ toroid:
+\begin{itemize}[nosep]
+  \item \textbf{Objects} (the things being enriched): the
+    $\kappa$-perspective. Objects are $\kappa$-equivalence
+    classes.
+  \item \textbf{Hom-objects} $[A,B]$: the $\sigma$-perspective.
+    Each $[A,B]$ is a sub-collection of $\kappa$ (the set
+    of discriminators witnessing $A \to B$), viewed as an
+    object via the $\sigma$-regime.
+  \item \textbf{Composition morphisms}: the $\tau$-perspective.
+    Composition $\circ_{A,B,C}: [B,C] \otimes [A,B] \to [A,C]$
+    is a $\tau$-discriminator that acts on pairs of
+    compatible discriminators (one from $[B,C]$, one from
+    $[A,B]$) and produces their sequential composite
+    in $[A,C]$.
+\end{itemize}
+\end{theorem}
+
+\begin{proof}
+\emph{Hom-objects.}
+$[A,B]$ is the set $\{d \in \kappa : \tau_d(A) = 1,\;
+\sigma_d(B) = 1\}$ (Definition \ref{def:internal-hom}).
+Under the $\sigma$-perspective (Proposition
+\ref{prop:perspectives}), this set is a sub-population of
+$\kappa$, hence a legitimate object of the category when
+viewed from the $\sigma$-vertex.
+
+\emph{Composition.}
+Given $d_1 \in [A,B]$ ($\tau_{d_1}(A) = 1$,
+$\sigma_{d_1}(B) = 1$) and $d_2 \in [B,C]$
+($\tau_{d_2}(B) = 1$, $\sigma_{d_2}(C) = 1$), the
+sequential filtration through $d_1$ then $d_2$ produces
+a composite discrimination placing $A$ in $\tau$ and $C$
+in $\sigma$ (Definition \ref{def:composition}). The map
+$(d_2, d_1) \mapsto d_2 \circ d_1 \in [A,C]$ is a
+morphism in the $\sigma$-perspective: it is a
+$\tau$-discriminator that separates ``compatible pairs of
+discriminators that compose to a given target'' from
+``incompatible pairs.''
+
+\emph{Identity.}
+The identity morphism $j_A: I \to [A,A]$ sends the
+monoidal unit $I$ (the degenerate grade-0 element) to
+the identity discriminator $\mathrm{id}_A = d \wedge d = 0
+\in [A,A]$. This is a morphism from the trivial object
+to the self-hom, selecting the degenerate self-discrimination.
+
+\emph{Associativity.}
+Composition is associative because sequential filtration is:
+$(d_3 \circ d_2) \circ d_1 = d_3 \circ (d_2 \circ d_1)$,
+inherited from associativity of the wedge product
+(Theorem \ref{thm:cat-axioms}).
+
+\emph{Unitality.}
+$\mathrm{id}_B \circ d_1 = d_1$ and $d_2 \circ \mathrm{id}_B
+= d_2$, since composing with the degenerate discriminator
+(grade 0) leaves any discriminator unchanged.
+
+All enrichment coherences are satisfied. The enrichment is
+\emph{canonical}: no choices are made. The three ingredients
+are the three vertices of the triangle identity, and the
+coherences are properties of the exterior algebra over
+$\GF(2)$.
+\end{proof}
+
+\begin{remark}[Self-enrichment is triadic closure]
+The self-enrichment of $\mathcal{C}(S,\kappa)$ is not an
+additional property discovered about the category. It is
+the triadic closure of the $\GF(2)$ toroid: the fact that
+all three vertices are equally valid perspectives on the
+same structure means the category can describe its own
+morphism spaces using its own objects and morphisms. A
+category that is \emph{not} self-enriched would require one
+vertex of the triangle to be privileged or external, which
+the toroidal symmetry forbids.
+\end{remark}
+
+\subsection{The subobject classifier}\label{sec:subobject}
+
+\begin{definition}[Subobject]\label{def:subobject}
+A \emph{subobject} of an object $A$ in
+$\mathcal{C}(S,\kappa)$ is a sub-collection of $A$
+obtained by applying a discriminator $d$ and selecting
+a $\tau/\sigma$ class. The subobject is specified by
+the $\GF(2) \times \GF(2)$ profile of $d$ restricted
+to $A$.
+\end{definition}
+
+\begin{definition}[Subobject classifier]\label{def:subobj-class}
+The \emph{subobject classifier} of $\mathcal{C}(S,\kappa)$
+is the object
+\begin{equation}
+  \Omega = \GF(2) \times \GF(2) = \{(0,0),\; (1,0),\;
+  (0,1),\; (1,1)\},
+\end{equation}
+the four-cell structure of Definition \ref{def:discriminator}.
+For any subobject $m: S' \hookrightarrow A$, there exists a
+unique \emph{classifying morphism} $\chi_m: A \to \Omega$
+that sends each element $a \in A$ to its $(\tau_d(a),
+\sigma_d(a))$ profile under the discriminator $d$ that
+defines the subobject.
+\end{definition}
+
+\begin{theorem}[$\Omega$ is a subobject classifier]
+\label{thm:subobj}
+$\Omega = \GF(2) \times \GF(2)$ satisfies the universal
+property of a subobject classifier: for every monomorphism
+$m: S' \hookrightarrow A$, there exists a unique
+$\chi_m: A \to \Omega$ such that $S'$ is the pullback of
+the ``true'' morphism $\top: 1 \to \Omega$ along $\chi_m$.
+\end{theorem}
+
+\begin{proof}
+The ``true'' morphism selects the value $(1,0) \in \Omega$
+(classified under $\tau$, not classified under $\sigma$).
+Given a subobject $S' \hookrightarrow A$ defined by a
+discriminator $d$ with $S' = \{a \in A : \tau_d(a) = 1,\;
+\sigma_d(a) = 0\}$, the classifying morphism
+$\chi_m: A \to \Omega$ sends each $a$ to
+$(\tau_d(a), \sigma_d(a))$.
+
+\emph{Existence}: $\chi_m$ is defined by the discriminator
+$d$ that determines $S'$. Each element of $A$ receives a
+unique $(\tau, \sigma)$ profile.
+
+\emph{Uniqueness}: any morphism $\chi: A \to \Omega$ that
+pulls back $\top$ to $S'$ must agree with $\chi_m$ on
+$S'$ (sending elements to $(1,0)$) and must send elements
+of $A \setminus S'$ to values other than $(1,0)$. The
+specific values for $A \setminus S'$ are determined by
+$d$'s $\tau/\sigma$ profile on those elements, which is
+unique for a given discriminator.
+
+\emph{Pullback}: $S' = \chi_m^{-1}(\{(1,0)\}) = \chi_m^{-1}(\top)$,
+which is the pullback of $\top$ along $\chi_m$.
+\end{proof}
+
+\begin{remark}[Four-valued internal logic]
+The subobject classifier $\Omega = \GF(2) \times \GF(2)$
+has four elements, so the internal logic of
+$\mathcal{C}(S,\kappa)$ is \emph{four-valued}:
+\begin{center}
+\begin{tabular}{c|l|l}
+Value & $(\tau, \sigma)$ & Logical reading \\
+\hline
+$(1,0)$ & in $\tau$, not in $\sigma$ & True \\
+$(0,1)$ & not in $\tau$, in $\sigma$ & False \\
+$(0,0)$ & neither & Unknown (gap) \\
+$(1,1)$ & both & Overdetermined (overlap)
+\end{tabular}
+\end{center}
+This is Belnap's four-valued logic, arising constructively
+from the discrimination framework. The four values are not
+imposed by fiat; they are the four cells of the
+$\GF(2) \times \GF(2)$ membership profile that has been
+present since Definition \ref{def:discriminator}.
+
+Boolean two-valued logic is recovered when the logic
+is restricted to the subset $\{(1,0), (0,1)\}$ --- the
+Boolean dimensions of Definition \ref{def:boolean-dim},
+where every element is assigned to exactly one of $\tau$
+or $\sigma$. As established throughout this paper,
+Boolean structure is a local achievement, not a global
+given. The internal logic reflects this: it defaults to
+four values and specializes to two where Booleanness has
+been earned.
+\end{remark}
+
+\subsection{Topos structure}
+
+The emergent category $\mathcal{C}(S,\kappa)$ for a
+\emph{fixed} $\kappa$ has a subobject classifier and power
+objects, but may lack some finite limits (if $\kappa$ does
+not contain enough discriminators to compute them). Rather
+than claiming topos structure for a fixed $\kappa$ and
+patching with a pro-system, we construct the topos
+directly as a fibered category over the poset of
+$\kappa$-states.
+
+\begin{definition}[The fibered category]\label{def:fibered}
+Let $\mathbf{K}$ be the category whose objects are
+$\kappa$-states (ordered by sub-regime inclusion
+$\kappa' \subseteq \kappa$) and whose morphisms are the
+inclusions. The assignment
+$\kappa \mapsto \mathcal{C}(S,\kappa)$ is a pseudofunctor
+$\mathbf{K} \to \mathbf{Cat}$ (covariant via the free
+functors $F: \mathcal{C}(S,\kappa') \to
+\mathcal{C}(S,\kappa)$).
+
+The \emph{fibered category} $\int \mathcal{C}$ is the
+Grothendieck construction on this pseudofunctor. An object
+of $\int \mathcal{C}$ is a pair $(\kappa, A)$ where $A$
+is an object of $\mathcal{C}(S,\kappa)$ --- an equivalence
+class together with the regime at which it is defined. A
+morphism $(\kappa, A) \to (\kappa', B)$ is an inclusion
+$\kappa \subseteq \kappa'$ together with a morphism
+$F(A) \to B$ in the finer category.
+\end{definition}
+
+\begin{theorem}[Fibered topos]\label{thm:topos}
+The fibered category $\int \mathcal{C}$ is an elementary
+topos.
+\end{theorem}
+
+\begin{proof}
+\emph{Finite limits.}
+Let $D$ be a finite diagram in $\int \mathcal{C}$ with
+components at stages $\kappa_1, \ldots, \kappa_m$. Define
+$\kappa_\vee = \kappa_1 \vee \cdots \vee \kappa_m$: the
+smallest regime containing all discriminators from all
+$\kappa_i$. Since $D$ is finite, $\kappa_\vee$ is finite.
+
+At the fiber over $\kappa_\vee$, all components of $D$
+are present (embedded via the free functors). Proposition
+\ref{prop:limits} establishes that limits exist in
+$\mathcal{C}(S,\kappa_\vee)$ whenever $\kappa_\vee$
+contains sufficient discriminators. If the limit does not
+exist at $\kappa_\vee$, the obstruction is a residue
+(Proposition \ref{prop:limits}), which triggers a
+$\kappa$-evolution to $\kappa_\vee'$ where the limit does
+exist. This evolution is finite (finitely many residues
+for a finite diagram). The limit of $D$ in
+$\int \mathcal{C}$ is the pair $(\kappa_\vee', L)$ where
+$L$ is the limit computed at $\kappa_\vee'$.
+
+Products: the product of $(\kappa_1, A)$ and
+$(\kappa_2, B)$ is $(\kappa_1 \vee \kappa_2,\; A \times B)$,
+where $A \times B$ is the joint equivalence class at the
+finer regime. Equalizers: computed at the join, as the
+sub-class on which two morphisms agree. Terminal object:
+$(\kappa_\varnothing, \top)$ where $\kappa_\varnothing$
+is the empty regime (zero dimensions, one equivalence
+class containing everything).
+
+\emph{Subobject classifier.}
+$\Omega = \GF(2) \times \GF(2)$ does not depend on
+$\kappa$ (the four-cell structure is the same at every
+resolution). Therefore $\Omega$ defines a \emph{constant
+object} in $\int \mathcal{C}$: the family
+$\{(\kappa, \Omega)\}_{\kappa \in \mathbf{K}}$ with
+identity transition maps. Theorem \ref{thm:subobj}
+establishes the universal property at each fiber, and
+the constant structure ensures coherence across fibers.
+
+\emph{Power objects.}
+We verify the universal property: for every relation
+$R \hookrightarrow A \times B$ (a monomorphism in the
+fiber over $\kappa$), there exists a unique
+$\chi_R: A \to \Omega^B$ such that $R$ is the pullback
+of the membership relation
+$\in_B: B \times \Omega^B \to \Omega$ along
+$\mathrm{id}_B \times \chi_R$.
+
+The power object is $\mathcal{P}(B) = \Omega^B$: the
+object of morphisms $B \to \Omega$ in
+$\mathcal{C}(S,\kappa)$. An element of $\Omega^B$ is a
+function $\phi: B \to \GF(2) \times \GF(2)$ assigning
+each $b \in B$ a four-valued membership profile. Note
+that $\Omega$ is four-valued, not two-valued, so
+$\Omega^B$ is larger than the classical power set: it
+includes ``subobjects'' with gaps and overlaps.
+
+Given a relation $R \hookrightarrow A \times B$, define
+$\chi_R: A \to \Omega^B$ by
+$\chi_R(a)(b) = (\tau_R(a,b), \sigma_R(a,b))$, where
+$\tau_R(a,b) = 1$ iff $(a,b)$ is in the $\tau$-class
+of $R$'s defining discriminator, and similarly for
+$\sigma_R$.
+
+\emph{Existence:} $\chi_R$ is well-defined because $R$'s
+discriminator produces a $(\tau, \sigma)$ profile for each
+$(a,b)$ pair. For fixed $a$, the map $b \mapsto
+\chi_R(a)(b)$ is an element of $\Omega^B$.
+
+\emph{Pullback:} The fiber of $\chi_R$ over the ``true''
+element $\top = (1,0) \in \Omega$ is
+$\{(a,b) : \chi_R(a)(b) = (1,0)\} = \{(a,b) :
+\tau_R(a,b) = 1, \sigma_R(a,b) = 0\}$, which is the
+Boolean part of $R$. Over $\Omega$, the pullback recovers
+the full four-valued relation $R$.
+
+\emph{Uniqueness:} Any $\chi': A \to \Omega^B$ that pulls
+back $\in_B$ to $R$ must satisfy
+$\chi'(a)(b) = (\tau_R(a,b), \sigma_R(a,b))$ for all
+$(a,b)$ (since the pullback condition determines each
+component). Therefore $\chi' = \chi_R$.
+
+\emph{Representability:} $\Omega^B$ must be an object of
+the category $\mathcal{C}(S,\kappa)$, not merely a
+set-theoretic construction. By monoidal closure
+(Theorem \ref{thm:closure}), the internal hom $[B, \Omega]$
+exists as an object of $\mathcal{C}(S,\kappa)$: it is
+the collection of discriminators $d \in \kappa$ such that
+$d$'s $\tau/\sigma$ profile restricted to $B$ takes values
+in $\Omega$ (Definition \ref{def:internal-hom}). This
+internal hom is $\Omega^B$. The representability is a
+consequence of the closed monoidal structure, not an
+additional assumption.
+
+The free functors $F: \mathcal{C}(S,\kappa') \to
+\mathcal{C}(S,\kappa)$ preserve $\Omega$ (it is constant
+across fibers) and preserve finite limits (Proposition
+\ref{prop:forgetful}), so they preserve the exponential
+$\Omega^B$. Power objects are well-defined in the fibered
+topos $\int \mathcal{C}$.
+\end{proof}
+
+\begin{remark}[Evolution as structure, not narrative]
+The fibered construction makes $\kappa$-evolution into
+first-class categorical structure rather than an external
+narrative about a changing topos. Objects in
+$\int \mathcal{C}$ carry their resolution: $(\kappa, A)$
+records not just \emph{what} $A$ is but \emph{at what
+level of discrimination} it was identified. Morphisms
+between different fibers are the free functors --- the
+embeddings from coarser to finer regimes that the
+framework has used throughout.
+
+Finite limits are computed at finite joins. No appeal to
+a completed colimit or an ``infinite $\kappa$'' is needed
+for any finite-limit claim. The operationalist axiom
+(Definition \ref{def:operationalist}) is invoked only for
+claims about infinite limits and completeness, which is the
+honest boundary.
+\end{remark}
+
+\begin{corollary}[Pro-system interpretation]
+\label{cor:pro-topos}
+The fibered topos $\int \mathcal{C}$ can equivalently be
+viewed as a pro-system (filtered diagram) of topoi
+$\{\mathcal{C}(S,\kappa_n)\}$ connected by geometric
+morphisms. As $\kappa$ evolves through states
+$\kappa_1 \subset \kappa_2 \subset \cdots$, the free
+functors (left exact left adjoints) provide geometric
+morphisms. The filtered colimit $\varinjlim
+\mathcal{C}(S,\kappa_n)$ is $\kappa$-indistinguishable
+from the pro-system (Proposition \ref{prop:infinity}).
+\end{corollary}
+
+\begin{remark}[A non-Boolean topos]
+$\mathcal{C}(S,\kappa)$ is a topos whose internal logic is
+not Boolean but four-valued. This places it in the family
+of non-Boolean topoi studied in constructive mathematics
+and sheaf theory, but with a distinctive character: the
+four-valuedness arises not from open-set lattices or
+forcing conditions but from the $\GF(2) \times \GF(2)$
+structure of discrimination itself.
+
+The logical connectives of the internal logic are
+determined by operations on $\Omega$:
+\begin{itemize}[nosep]
+  \item \textbf{Conjunction} $\wedge$: componentwise
+    multiplication in $\GF(2) \times \GF(2)$.
+  \item \textbf{Disjunction} $\vee$: componentwise
+    maximum (where $1 > 0$).
+  \item \textbf{Negation} $\neg$: swap the two components,
+    $\neg(\tau,\sigma) = (\sigma, \tau)$. Note that
+    $\neg\neg(\tau,\sigma) = (\tau,\sigma)$: double negation
+    elimination holds. But $(\tau, \sigma) \vee
+    \neg(\tau,\sigma) = (\tau,\sigma) \vee (\sigma,\tau)$,
+    which equals $(\max(\tau,\sigma), \max(\sigma,\tau))$.
+    This equals $(1,1)$ (overlap) only when both $\tau$
+    and $\sigma$ are non-zero. For the gap $(0,0)$,
+    $p \vee \neg p = (0,0)$: excluded middle \emph{fails}.
+  \item \textbf{Implication} $\Rightarrow$: the internal
+    hom in $\Omega$, determined by the closure adjunction
+    (Theorem \ref{thm:closure}).
+\end{itemize}
+Excluded middle fails at the gap but holds everywhere
+else. This is the logical expression of the framework's
+central thesis: Boolean structure is a local achievement.
+The gap is where Booleanness has not been earned, and the
+internal logic faithfully records this.
+\end{remark}
+
+\begin{remark}[The topos as the natural home]
+The topos $\mathcal{C}(S,\kappa)$ is the natural universe
+of discourse for the discrimination framework. It provides:
+\begin{itemize}[nosep]
+  \item An internal logic (four-valued, locally Boolean)
+    that matches the framework's epistemology.
+  \item Self-enrichment (Theorem \ref{thm:self-enrich})
+    that allows the category to describe its own structure.
+  \item Monoidal closure (Theorem \ref{thm:closure}) that
+    connects the $n$-categorical and monoidal perspectives
+    via the toroid.
+  \item A subobject classifier that \emph{is} the
+    four-cell structure from which the entire framework
+    was built.
+\end{itemize}
+The topos is not an additional layer placed on top of the
+discrimination framework. It is the discrimination
+framework, viewed categorically. The four-cell structure,
+which began as the membership profile of a single
+discriminator (Definition \ref{def:discriminator}), turns
+out to be the subobject classifier of the entire category
+--- the logical atom from which the topos's internal
+universe is generated.
+\end{remark}
+
+\subsection{Proof theory of the internal logic}\label{sec:proof-theory}
+
+We now characterize the internal logic of
+$\mathcal{C}(S,\kappa)$ precisely, clarifying its
+relationship to Belnap's four-valued logic and its
+behavior under $\kappa$-evolution.
+
+\begin{definition}[Evidence semantics]\label{def:evidence}
+The two components of the membership profile
+$(\tau_d(a), \sigma_d(a)) \in \GF(2) \times \GF(2)$
+are \emph{independent partial assertions}:
+\begin{itemize}[nosep]
+  \item $\tau_d(a) = 1$: positive evidence that predicate
+    $\tau_d$ fires on $a$. A positive assertion of
+    $\tau$-membership.
+  \item $\tau_d(a) = 0$: the predicate $\tau_d$ does not
+    fire on $a$. This is a positive fact about the
+    predicate's behavior, \emph{not} a negative assertion
+    about $a$'s membership. Absence of evidence is not
+    evidence of absence.
+  \item $\sigma_d(a) = 1$ and $\sigma_d(a) = 0$:
+    analogously for $\sigma$.
+\end{itemize}
+The value $0$ is \emph{silence}, not falsehood. A
+silent predicate makes no assertion about the element;
+it reports only that this predicate, applied to this
+element, produced no match.
+\end{definition}
+
+\begin{definition}[Information ordering]\label{def:info-order}
+The four cells carry a natural \emph{information ordering}
+$\sqsubseteq$ (the Belnap lattice):
+\begin{equation}
+  (0,0) \sqsubseteq (1,0), \qquad
+  (0,0) \sqsubseteq (0,1), \qquad
+  (1,0) \sqsubseteq (1,1), \qquad
+  (0,1) \sqsubseteq (1,1).
+\end{equation}
+The bottom element $(0,0)$ is maximally uninformative:
+both predicates are silent. The top element $(1,1)$ is
+maximally informative but conflicted: both predicates
+fire. The singly informative states $(1,0)$ and $(0,1)$
+are the stable, Boolean-compatible middle.
+
+The ordering is:
+\begin{center}
+$(0,0)$ --- gap (no evidence) \\[2pt]
+$\swarrow \qquad \searrow$ \\[2pt]
+$(1,0)$ \qquad\quad $(0,1)$ --- Boolean states \\[2pt]
+$\searrow \qquad \swarrow$ \\[2pt]
+$(1,1)$ --- overlap (conflicting evidence)
+\end{center}
+\end{definition}
+
+\begin{proposition}[Residues are extremal]\label{prop:extremal}
+The two residue types (Definition \ref{def:residue},
+Remark \ref{rem:residue-origins}) correspond to the two
+extremes of the information ordering:
+\begin{itemize}[nosep]
+  \item Gap residues $(0,0)$: the information-minimal state.
+    Neither predicate fires. The element is invisible to
+    the discriminator.
+  \item Overlap residues $(1,1)$: the information-maximal
+    state. Both predicates fire. The element is above the
+    discriminator's resolution.
+\end{itemize}
+Both have XOR signature $\chi_d(a) = 0$ in $\GF(2)$. Both
+are unstable: they trigger $\kappa$-evolution. The stable
+states $(1,0)$ and $(0,1)$ have $\chi_d(a) = 1$ and do not
+trigger evolution.
+\end{proposition}
+
+\begin{theorem}[Dynamic proof theory]\label{thm:proof-theory}
+The proof theory of the internal logic has two layers:
+a static layer (valid within a fixed $\kappa$-state) and
+a dynamic layer (governing transitions between
+$\kappa$-states).
+
+\emph{Static layer.}
+Within a fixed $\kappa$, the logic is Belnap's
+First Degree Entailment (FDE). The valid inference rules
+are:
+\begin{enumerate}[label=(\roman*),nosep]
+  \item \textbf{Conjunction introduction}: from
+    $(\tau_1, \sigma_1)$ and $(\tau_2, \sigma_2)$, infer
+    $(\tau_1 \cdot \tau_2,\; \sigma_1 \cdot \sigma_2)$.
+    (Both predicates must independently fire for the
+    conjunction to fire.)
+  \item \textbf{Disjunction introduction}: from
+    $(\tau_1, \sigma_1)$, infer
+    $(\tau_1, \sigma_1) \vee (\tau_2, \sigma_2) =
+    (\max(\tau_1, \tau_2),\; \max(\sigma_1, \sigma_2))$.
+    (Either predicate firing suffices.)
+  \item \textbf{Modus ponens}: from $(\tau, \sigma) = (1,0)$
+    and the discriminator encoding the implication, infer
+    the consequent. Modus ponens requires the premise to be
+    in the Boolean state $(1,0)$; it does not fire from
+    $(0,0)$ (silence) or $(1,1)$ (conflict).
+  \item \textbf{Modus tollens does not hold in general.}
+    From $\sigma_d(b) = 0$ (the consequent's $\sigma$-predicate
+    is silent) and an implication $a \to b$, one cannot
+    infer $\tau_d(a) = 0$. Silence in the consequent means
+    no evidence was found, not that the consequent is false.
+    Modus tollens requires Boolean structure
+    (Definition \ref{def:boolean-dim}) on the relevant
+    dimension.
+\end{enumerate}
+
+\emph{Dynamic layer.}
+When an inference produces or encounters a residue
+(a $(0,0)$ or $(1,1)$ state), the static logic provides
+no further deductions. Instead, the residue triggers
+$\kappa$-evolution:
+\begin{enumerate}[label=(\roman*),nosep]
+  \item The residue specifies the discriminator needed
+    to resolve it (Theorem \ref{thm:exhaustive}).
+  \item $\kappa$ evolves by consuming the residue.
+  \item In the new $\kappa$-state, the formerly extremal
+    element may now occupy a Boolean state $(1,0)$ or
+    $(0,1)$, enabling further static deductions.
+\end{enumerate}
+The dynamic layer drives the logic toward Boolean states:
+each evolution resolves a residue, moving an element from
+the extremes toward the informative middle.
+\end{theorem}
+
+\begin{proof}
+\emph{Static layer.}
+The connectives defined on $\Omega = \GF(2) \times \GF(2)$
+in the non-Boolean topos remark (Section \ref{sec:topos})
+match exactly the connectives of Belnap's FDE. The truth
+tables are identical:
+conjunction is componentwise multiplication,
+disjunction is componentwise maximum,
+and negation swaps components. FDE is the logic of the
+Belnap lattice, and $\GF(2) \times \GF(2)$ \emph{is} the
+Belnap lattice.
+
+Modus ponens holds for Boolean premises because $(1,0)$
+provides unambiguous positive evidence in $\tau$ and
+unambiguous silence in $\sigma$, so the implication
+discriminator can chain. Modus tollens fails for
+non-Boolean states because silence ($0$) in the consequent
+is not negation --- it carries no information from which
+the premise's status can be deduced.
+
+\emph{Dynamic layer.}
+By Proposition \ref{prop:extremal}, residues occupy the
+extremes of the information ordering. By Theorem
+\ref{thm:exhaustive}, each residue specifies its own
+resolution. By Proposition \ref{prop:monotone},
+$\kappa$-evolution is monotonic: resolved states are
+never reverted. Therefore the dynamic layer moves
+elements along the information ordering from extremes
+toward the Boolean middle.
+\end{proof}
+
+\begin{remark}[Convergence toward Booleanness]
+The dynamic proof theory describes a logic that
+\emph{tends toward Boolean} without ever being required
+to arrive. Each $\kappa$-evolution resolves one or more
+residues, converting $(0,0)$ or $(1,1)$ states into
+$(1,0)$ or $(0,1)$ states on new dimensions. But new
+discriminations can introduce new residues on their own
+dimensions. The logic oscillates:
+\begin{itemize}[nosep]
+  \item Resolution: consuming a residue earns Boolean
+    structure on one dimension.
+  \item Introduction: articulating a new predicate may
+    produce new residues on new dimensions.
+\end{itemize}
+The net effect is that the proportion of Boolean dimensions
+grows as $\kappa$ evolves (resolved dimensions stay
+resolved), but full Booleanness across all dimensions
+is an asymptotic condition, not a terminus.
+\end{remark}
+
+\begin{remark}[Relationship to classical, intuitionistic,
+  and paraconsistent logics]
+The internal logic of $\mathcal{C}(S,\kappa)$ relates to
+the standard logical traditions as follows:
+\begin{itemize}[nosep]
+  \item \textbf{Classical logic} is the restriction to
+    Boolean dimensions (Definition \ref{def:boolean-dim}),
+    where $\Omega$ collapses to $\{(1,0), (0,1)\}$.
+    Excluded middle holds. Modus tollens holds. This is a
+    local achievement, valid on specific dimensions.
+  \item \textbf{Intuitionistic logic} shares the failure of
+    excluded middle but for a different reason.
+    Intuitionistically, $p \vee \neg p$ fails because
+    disjunction requires a constructive witness.
+    In the discrimination logic, $p \vee \neg p$ fails at
+    the gap because \emph{neither $p$ nor $\neg p$ has
+    evidence}. The failure is epistemic (no evidence),
+    not constructive (no witness).
+  \item \textbf{Paraconsistent logic} tolerates
+    contradictions. The overlap state $(1,1)$ is a
+    ``contradiction'' --- both $\tau$ and $\sigma$ fire
+    --- but it does not produce explosion (derivation of
+    arbitrary conclusions). In FDE, $p \wedge \neg p$ does
+    not entail $q$. The logic is paraconsistent at the
+    overlap.
+\end{itemize}
+The discrimination logic therefore unifies aspects of
+all three traditions: it is locally classical (on Boolean
+dimensions), shares intuitionistic features at the gap,
+and is paraconsistent at the overlap. The unification
+arises not from a philosophical commitment but from the
+$\GF(2) \times \GF(2)$ structure of the subobject
+classifier.
+\end{remark}
+
+\begin{proposition}[First-order logic is internal]
+\label{prop:fol}
+First-order logic (FOL) --- including its quantifiers,
+inference rules, and proof theory --- is derivable as a
+fragment of the internal logic of the topos
+$\mathcal{C}(S,\kappa)$. The metalanguage required to
+read and validate the framework is not external to it.
+\end{proposition}
+
+\begin{proof}
+The internal logic of an elementary topos is a
+higher-order intuitionistic type theory. FOL is a
+fragment. We derive each component:
+
+\emph{Propositional connectives.}
+$\wedge$, $\vee$, $\neg$, and $\Rightarrow$ are
+operations on $\Omega = \GF(2) \times \GF(2)$, already
+defined (Theorem \ref{thm:proof-theory}).
+
+\emph{Quantifiers.}
+Let $f: A \to B$ be a morphism in $\mathcal{C}(S,\kappa)$
+and let $P: A \to \Omega$ be a predicate on $A$ (a
+subobject classifier morphism).
+\begin{itemize}[nosep]
+  \item The \emph{universal quantifier}
+    $\forall_f: \Omega^A \to \Omega^B$ is the right adjoint
+    to the pullback functor $f^*: \Omega^B \to \Omega^A$.
+    $(\forall_f P)(b) = \bigwedge_{a \in f^{-1}(b)} P(a)$:
+    the conjunction (componentwise multiplication in
+    $\GF(2) \times \GF(2)$) of $P$'s values over the
+    fiber of $f$ above $b$. This is a morphism in the
+    topos, not an external operation.
+  \item The \emph{existential quantifier}
+    $\exists_f: \Omega^A \to \Omega^B$ is the left adjoint
+    to $f^*$.
+    $(\exists_f P)(b) = \bigvee_{a \in f^{-1}(b)} P(a)$:
+    the disjunction (componentwise maximum) over the fiber.
+\end{itemize}
+
+\emph{Inference rules.}
+\begin{itemize}[nosep]
+  \item \textbf{Modus ponens} is the evaluation morphism
+    $\mathrm{ev}: [A, B] \otimes A \to B$
+    (Definition \ref{def:eval}), applied to the case
+    $A = \Omega$, $B = \Omega$. Given an implication
+    $p \Rightarrow q$ (an element of $[\Omega, \Omega]$)
+    and a premise $p$ (an element of $\Omega$), evaluation
+    produces the conclusion $q$. This is a morphism in the
+    topos.
+  \item \textbf{Universal instantiation} is the counit of
+    the $\forall_f \dashv f^*$ adjunction: given
+    $\forall_f P$ and an element $a \in f^{-1}(b)$, the
+    counit produces $P(a)$.
+  \item \textbf{Existential generalization} is the unit of
+    the $f^* \dashv \exists_f$ adjunction: given $P(a)$,
+    the unit produces $\exists_f P(f(a))$.
+\end{itemize}
+
+\emph{Terms, variables, and substitution.}
+Terms are morphisms in the topos. Variables are elements
+of objects. Substitution is composition of morphisms. All
+are internal.
+
+Therefore: every component of FOL --- connectives,
+quantifiers, inference rules, and term structure --- is
+a morphism or adjunction within $\mathcal{C}(S,\kappa)$.
+The metalanguage is not external to the framework; it is
+a fragment of the framework's own internal logic.
+\end{proof}
+
+\begin{remark}[The metatheory is internal]
+Logicians may object that validating the framework still
+requires a metatheory --- rules of inference for reading
+and checking the proofs. Proposition \ref{prop:fol} shows
+that these rules are themselves derivable within the topos.
+The framework's internal logic contains FOL as a fragment,
+so the metatheory required to validate the framework is
+a sub-theory of the framework's own internal logic. This
+does not eliminate the need for a metatheory; it shows
+that the needed metatheory is available internally rather
+than externally. Combined with self-hosting (Theorem
+\ref{thm:self-hosting}) and self-entailment (Theorem
+\ref{thm:entailed}), this means: the framework provides
+its own ground field, its own primitive operation, and
+its own rules of inference.
+\end{remark}
+
+\begin{proposition}[Boolean logic as a dependent type]
+\label{prop:bool-dependent}
+Full Boolean logic over a dimension $d$ is obtained by
+imposing the constraint $\chi_d(a) = 1$ for all $a \in S$,
+i.e.\ requiring that exactly one of $\tau_d$ or $\sigma_d$
+fires on every element. This constraint is itself a
+predicate --- a meta-discriminator in the $\sigma$-perspective
+--- that classifies discriminators into ``Boolean'' and
+``non-Boolean'' based on their behavior over the population.
+
+Since the type of an element's membership profile
+(whether it occupies two or four possible states) depends
+on a type-level assertion about the discriminator (whether
+$\chi_d = 1$ everywhere), this constraint is a
+\emph{dependent type} in the system's own type theory.
+\end{proposition}
+
+\begin{proof}
+The XOR signature $\chi_d(a) = \tau_d(a) + \sigma_d(a)$
+is a map $\chi_d: S \to \GF(2)$. The assertion
+$\forall a \in S,\; \chi_d(a) = 1$ is a universal
+statement about $d$'s behavior on $S$. This statement is
+a predicate on $d$ (a discriminator), not on elements of
+$S$. Under the $\sigma$-perspective (Proposition
+\ref{prop:perspectives}), discriminators are the population,
+so this predicate is a $\sigma$-regime discriminator: a
+meta-discriminator $\hat{d}_{\mathrm{Bool}}$ with
+$\tau_{\hat{d}}(d) = 1$ if $d$ is Boolean over $S$ and
+$\sigma_{\hat{d}}(d) = 1$ if $d$ is non-Boolean.
+
+The dependent typing arises because: if
+$\hat{d}_{\mathrm{Bool}}$ classifies $d$ as Boolean, then
+elements of $S$ under $d$ have membership profiles in
+$\{(1,0), (0,1)\}$ (two states). If $d$ is non-Boolean,
+profiles range over all of $\GF(2) \times \GF(2)$ (four
+states). The type of the membership profile depends on
+the type-level fact about the discriminator.
+\end{proof}
+
+\begin{remark}[Classical logic is a type, not a restriction]
+This result completes the paper's account of Boolean
+structure. Classical logic is not:
+\begin{itemize}[nosep]
+  \item a default that must be restricted (as in ZFC's
+    separation axiom),
+  \item an alternative logic that competes with
+    intuitionistic or paraconsistent logic,
+  \item a global property of the system.
+\end{itemize}
+Classical logic is a \emph{dependent type} within the
+system's four-valued logic. It can be freely mixed with
+unconstrained reasoning: some dimensions may carry the
+Boolean type (enabling classical inference), while others
+remain unconstrained (operating in FDE). The type system
+tracks which is which, and the boundary between classical
+and non-classical reasoning is a first-class object in the
+framework --- it is a discriminator in the $\sigma$-regime,
+subject to the same algebraic laws as every other
+discriminator.
+
+Boolean-constrained and unconstrained reasoning coexist
+within a single proof, on a single population, under a
+single $\kappa$. The ``choice'' between classical and
+non-classical logic is not a foundational commitment; it
+is a per-dimension typing judgment.
+\end{remark}
+
+\begin{proposition}[Foundational coherence]
+\label{prop:coherence}
+The framework's epistemological structure is self-reinforcing
+without circularity. Two distinct Boolean structures operate
+at different levels:
+\begin{enumerate}[label=(\roman*),nosep]
+  \item \textbf{Base level}: $\GF(2)$ records whether a
+    predicate fires ($1$) or is silent ($0$). This is
+    definitional --- it is the ground field, the atom of
+    observation. It makes no logical claims.
+  \item \textbf{Type level}: the Boolean dependent type
+    (Proposition \ref{prop:bool-dependent}) asserts that a
+    discriminator achieves exhaustive, exclusive partition
+    ($\chi_d = 1$ everywhere). This is a structural theorem
+    about the discriminator's behavior, constructed from
+    base-level observations.
+\end{enumerate}
+These two levels are mutually reinforcing:
+\begin{itemize}[nosep]
+  \item The base level makes the type level \emph{expressible}:
+    without $\GF(2)$'s ability to record predicate behavior,
+    the assertion $\chi_d = 1$ could not be formulated.
+  \item The type level makes the base level \emph{interpretable}:
+    on dimensions where the Boolean type is satisfied,
+    silence ($0$) upgrades from ``no evidence'' to ``false,''
+    because exhaustiveness guarantees that absence of
+    $\tau$-evidence entails $\sigma$-membership.
+  \item The interpretation does not alter the definition:
+    $0$ remains silence at the base level. The upgrade to
+    ``false'' is additional structure provided by the type
+    level, not a redefinition of the ground field.
+\end{itemize}
+\end{proposition}
+
+\begin{proof}
+The non-circularity follows from the asymmetry between the
+two levels. The base level ($\GF(2)$ as ground field) exists
+independently of any type-level assertion: the exterior
+algebra $\bigwedge(\GF(2)^n)$ is defined regardless of
+whether any discriminator is Boolean. The type level
+(the Boolean dependent type) is constructed from base-level
+data: it quantifies over the population's $\chi_d$ values,
+which are $\GF(2)$-valued observations.
+
+The feedback from type level to base level is
+\emph{interpretive}, not \emph{constitutive}. Knowing that
+$d$ is Boolean allows one to \emph{interpret} $\tau_d(a) = 0$
+as $\sigma_d(a) = 1$ (by exhaustiveness), but this
+interpretation does not change the value of $\tau_d(a)$
+in $\GF(2)$. It adds a derived fact ($\sigma_d(a) = 1$)
+that was already present in the data but was not
+assertible without the type-level guarantee.
+
+Therefore: the base level provides the observations, the
+type level provides the interpretation, and the
+interpretation validates the observations without
+modifying them. This is mutual exhaustive reinforcement,
+not circular derivation.
+\end{proof}
+
+\begin{remark}[Epistemological bootstrap]
+The framework bootstraps its own epistemology. The
+ability to observe whether predicates fire ($\GF(2)$) is
+used to construct the ability to determine whether the
+logic is classical (the Boolean dependent type), which
+in turn validates the full interpretive power of the
+base-level observations (upgrading silence to falsehood
+where appropriate). Each level is necessary for the
+other's full functioning, but neither depends on the
+other for its \emph{existence}. $\GF(2)$ exists without
+the Boolean type; the Boolean type has meaning only
+through $\GF(2)$.
+
+This is the same self-supporting structure seen throughout
+the paper: sets exist through discrimination
+(Section \ref{sec:settheory}), categories exist through
+sets (Section \ref{sec:cattheory}), and the logic exists
+through the categories (Section \ref{sec:topos}). At no
+point does a later construction invalidate or modify an
+earlier one. Each layer enriches the interpretation of
+the layers below without altering their definitions. The
+framework is a tower of mutually reinforcing
+interpretations, grounded in $\GF(2)$ and the wedge
+product.
+\end{remark}
+
+\begin{theorem}[Self-hosting]\label{thm:self-hosting}
+The discrimination framework is \emph{self-hosting}:
+it can construct its own ground field internally, eliminating
+any external dependency on $\GF(2)$ as a given.
+\end{theorem}
+
+\begin{proof}
+The framework begins with $\GF(2)$ as the ground field of
+the exterior algebra (Section \ref{sec:prelim}). From this
+ground field, it constructs:
+\begin{enumerate}[label=(\roman*),nosep]
+  \item the four-valued logic $\GF(2) \times \GF(2)$
+    (Definition \ref{def:discriminator}),
+  \item the Boolean dependent type, which identifies
+    discriminators achieving exhaustive, exclusive
+    partition (Proposition \ref{prop:bool-dependent}),
+  \item full Boolean logic on dimensions carrying the
+    Boolean type (the restriction to $\{(1,0), (0,1)\}$).
+\end{enumerate}
+
+Boolean logic over two values is exactly $\GF(2)$: the
+field with two elements, addition modulo 2, multiplication
+as conjunction. The Boolean dependent type therefore
+constructs $\GF(2)$ within the system's own type theory.
+
+The internally constructed $\GF(2)$ has the same algebraic
+properties as the externally given $\GF(2)$: it is a field
+of characteristic 2, with $1 + 1 = 0$ and $-x = x$.
+The exterior algebra $\bigwedge V$ can be defined over
+this internal $\GF(2)$ identically to its definition over
+the external one.
+
+Therefore the framework can serve as its own substrate.
+The construction proceeds:
+\[
+  \GF(2)_{\mathrm{ext}} \longrightarrow
+  \text{four-valued logic} \longrightarrow
+  \text{Boolean type} \longrightarrow
+  \GF(2)_{\mathrm{int}} \longrightarrow
+  \text{four-valued logic} \longrightarrow \cdots
+\]
+The internal $\GF(2)_{\mathrm{int}}$ is algebraically
+identical to $\GF(2)_{\mathrm{ext}}$. The external
+dependency can be dropped: the system re-derives its own
+ground field from its own type theory at each iteration.
+\end{proof}
+
+\begin{remark}[The only primitive is discrimination]
+Self-hosting eliminates $\GF(2)$ as an external primitive.
+The framework's sole genuine primitive is
+\emph{discrimination itself}: the act of applying a
+predicate to a population and observing whether it fires.
+Everything else is constructed:
+\begin{itemize}[nosep]
+  \item $\GF(2)$ is the record of a single observation
+    (fired or silent) --- and this record is itself
+    reconstructible internally via the Boolean type.
+  \item The exterior algebra is the structure of composed
+    observations.
+  \item Sets, categories, types, logic, and the topos are
+    the accumulated structure of all observations
+    performed.
+\end{itemize}
+The framework does not assume mathematics and then derive
+discrimination. It assumes discrimination and then derives
+mathematics --- including, at the end, the ground field
+from which it was derived. The self-reference is
+non-pathological: $\GF(2)_{\mathrm{int}}$ is
+algebraically identical to $\GF(2)_{\mathrm{ext}}$
+(Theorem \ref{thm:self-hosting}), so the reconstruction
+does not diverge, and $x \wedge x = 0$ prevents the
+self-reference from producing a contradictory fixpoint.
+\end{remark}
+
+\begin{theorem}[Discrimination is a fixed point]
+\label{thm:entailed}
+Discrimination is a stable fixed point of the
+$\GF(2)$ toroid's closure operation: the 2-cell that,
+when applied to the triangle formed by the adjunction,
+the ground field, and the product logic, reproduces
+itself. No external observer is required. The
+contrapositive --- that removing discrimination produces
+a structurally unstable gap that reinstates
+discrimination --- is proved in Theorem
+\ref{thm:irremovable}.
+
+The proof shows discrimination is \emph{a} fixed point;
+uniqueness (that no other operation fills the 2-cell)
+would require showing the homology class of the gap has
+a unique representative, which depends on $H_2 = 0$ for
+the toroid's chain complex. We conjecture this holds but
+do not prove it here.
+\end{theorem}
+
+\begin{proof}
+The proof establishes that three structures coexist
+coherently and that their binding operation is
+discrimination. This is a structural observation about
+compatibility --- not a derivation of discrimination from
+something prior to it, but a demonstration that
+discrimination is the unique operation consistent with
+the toroid's geometry.
+
+Consider three structures. Crucially, none is defined in
+terms of an observer or an external tool; each is a purely
+structural property of a category with projections.
+
+\begin{enumerate}[label=(\roman*),nosep]
+  \item \textbf{The adjunction}: the free-forgetful
+    adjunction (Theorem \ref{thm:adjunction}) between
+    $\kappa$-regimes of different resolution. This is the
+    structural capacity to project between finer and
+    coarser discrimination regimes. A \emph{predicate} is
+    not an external epistemological tool applied by an
+    observer; it \emph{is} this adjunction --- a geometric
+    projection of the category onto a sub-regime
+    (Corollary \ref{cor:free-fgt}). ``Observing whether a
+    predicate fires'' is traversing the forgetful functor
+    $\pi: \kappa \to \kappa'$: projecting a finer structure
+    onto a coarser one and registering whether the
+    projected element retains its $\tau/\sigma$ profile.
+
+  \item \textbf{$\GF(2)$}: the algebraic structure of the
+    target of the projection. The forgetful functor's
+    target is a regime of lower dimension; the minimal
+    such target is a single-dimensional regime whose
+    $\tau/\sigma$ profile is a single element of
+    $\GF(2) \times \GF(2)$, projected to a single
+    component: $\GF(2) = \{0,1\}$. $\GF(2)$ is the
+    algebraic structure of the simplest possible
+    projection.
+
+  \item \textbf{Belnap's four-valued logic}: the product
+    $\GF(2) \times \GF(2)$, arising when the full
+    (unprojected) $\tau/\sigma$ profile is retained.
+    This is the minimal structure that accommodates the
+    four possible outcomes of a projection that has not
+    been collapsed to a single component: gap $(0,0)$,
+    $\tau$-match $(1,0)$, $\sigma$-match $(0,1)$, and
+    overlap $(1,1)$.
+\end{enumerate}
+
+These three structures are the three non-zero points of
+$\GF(2)^2$ (Definition \ref{def:toroid}): the three
+vertices of the triangle on the $\GF(2)$ toroid. Each
+pair determines the third via the triangle identity
+(Definition \ref{def:triangle}):
+\begin{itemize}[nosep]
+  \item Adjunction $+$ $\GF(2)$ $=$ Belnap
+    (a projection given algebraic structure, applied
+    independently to two components, yields the
+    four-valued product).
+  \item $\GF(2)$ $+$ Belnap $=$ Adjunction
+    (the algebraic structure of a product, equipped
+    with the capacity to project between resolutions,
+    yields the adjunction).
+  \item Belnap $+$ Adjunction $=$ $\GF(2)$
+    (the four-valued logic, projected to a single
+    component via the forgetful functor, yields the
+    ground field).
+\end{itemize}
+
+The three vertices form the boundary of a 2-cell
+(Definition \ref{def:boundary}). By the structure of the
+discrimination complex, a 2-cell whose boundary consists
+of three 1-cells is the wedge product of those 1-cells:
+the operation that binds them into a coherent composite.
+This binding operation --- the geometric act that mediates
+between projection, algebra, and logic --- \emph{is}
+discrimination.
+
+No external observer is required at any step. The
+adjunction is a property of the category's internal
+structure (Theorem \ref{thm:adjunction}). $\GF(2)$ is the
+target of the category's own projections. Belnap logic is
+the category's own membership profile space. The toroid
+``observes itself'' by projecting onto its own sub-spaces
+--- this self-projection is the adjunction, and the
+adjunction is the predicate.
+
+Therefore: the three structures coexist (each pair entails
+the third), none requires an external observer, and the
+2-cell that fills their triangle is the unique stable
+completion of the toroid's geometry.
+That 2-cell is discrimination --- the fixed point of the
+toroid's own closure operation.
+\end{proof}
+
+\begin{remark}[The predicate is the adjunction]
+This formulation eliminates a potential circularity in the
+derivation. One might object that ``observing whether a
+predicate fires'' presupposes a predicate, which is itself
+a discriminator, making the derivation circular. But a
+predicate is not an external tool wielded by a homunculus.
+It is the free-forgetful adjunction
+(Theorem \ref{thm:adjunction}): a structural, geometric
+projection native to the $\GF(2)$ toroid. ``Observation''
+is the traversal of a functor; ``firing'' is the
+retention of a $\tau/\sigma$ profile under projection;
+``silence'' is the collapse of that profile. All of these
+are internal operations of the category, requiring no
+observer external to the system. Formally: the
+predicate that the entailment theorem requires is
+identical to the adjunction that the entailment theorem
+derives. The input and the output of the derivation are
+the same mathematical object (the 2-cell filling the
+triangle), identified by Theorem \ref{thm:adjunction}.
+This is self-reference, but it is non-pathological because
+$x \wedge x = 0$: the 2-cell composed with itself is
+trivial, preventing the circularity from propagating.
+\end{remark}
+
+\begin{remark}[Triadic indivisibility]
+Theorem \ref{thm:entailed} does not derive discrimination
+from three simpler parts that are \emph{prior} to it.
+The adjunction, $\GF(2)$, and Belnap logic are not
+building blocks assembled into discrimination; they are
+the three irreducible facets of discrimination, which
+cannot be separated without destroying the geometry of
+the toroid. The triangle identity
+$\kappa = \sigma + \tau$ means each facet is the XOR of
+the other two: remove one, and the relationship between
+the remaining two is undefined.
+
+Discrimination is therefore \emph{mathematically
+indivisible} in the precise sense that its internal
+triadic structure admits no proper sub-structure that is
+self-consistent. The formal content of this claim is not
+that the framework was built from nothing, but that
+discrimination is the \emph{minimal fixed point} of the
+gap-filling operation: it cannot be decomposed into
+simpler components that are independently coherent.
+\end{remark}
+
+\begin{theorem}[Discrimination is irremovable]
+\label{thm:irremovable}
+Discrimination cannot be removed from the framework without
+the framework deriving it from its own absence. The removal
+is self-defeating.
+\end{theorem}
+
+\begin{proof}
+We prove the contrapositive of Theorem \ref{thm:entailed}:
+assume discrimination is absent and derive a contradiction.
+
+\emph{Assume:} the 2-cell binding the three vertices
+(adjunction, $\GF(2)$, Belnap logic) does not exist. The
+triangle on the $\GF(2)$ toroid has three vertices and
+three edges but no filling 2-cell.
+
+\emph{Consequence 1: sheaf failure.}
+Without the 2-cell, the covering morphisms between
+perspectives (the six adjunctions of Theorem
+\ref{thm:adjunction}) do not exist. Local data on
+$\kappa$, $\sigma$, $\tau$ cannot be assembled into global
+sections: the gluing axiom has no transition maps to
+enforce. The site $\mathfrak{S}$ (Definition \ref{def:site})
+loses its Grothendieck topology. The category
+$\mathcal{C}(S,\kappa)$ ceases to be a sheaf topos and
+degrades to three disconnected presheaves --- one per
+vertex, with no interaction.
+
+\emph{Consequence 2: manifold failure.}
+The $\GF(2)$ toroid is a manifold whose atlas consists of
+charts related by the six adjunctions as transition maps.
+Without the 2-cell, the transition maps vanish. The three
+perspectives become disconnected patches with no atlas.
+The toroid is no longer a manifold; it is three isolated
+points in $\GF(2)^2$.
+
+\emph{Consequence 3: bimodule failure.}
+$\sigma$ serves as a bimodule between $\kappa$ and $\tau$:
+it carries a left $\kappa$-action and a right $\tau$-action
+simultaneously. The bimodule structure \emph{is} the
+discrimination --- it is the operation that allows
+$\kappa$-data and $\tau$-data to interact. Without it,
+$\kappa$ and $\tau$ are algebraically isolated: they
+cannot constrain each other, the triangle identity
+$\kappa = \sigma + \tau$ loses its mediating term, and the
+relationship between any two vertices is undefined.
+
+\emph{Consequence 4: the gap is self-resolving.}
+The unfilled 2-cell is a homological gap: a cycle in
+$\ker \partial_1$ that is not in $\operatorname{im}
+\partial_2$ (a non-trivial element of $H_1$). By Theorem
+\ref{thm:exhaustive} (operational exhaustivity), this gap
+fully specifies its own resolution: the precise 2-cell
+needed to fill it. That 2-cell has boundary
+$\{$adjunction, $\GF(2)$, Belnap$\}$ --- the three edges
+of the triangle. Its shape is uniquely determined
+(Theorem \ref{thm:exhaustive}, claim (iii), under the
+full $\kappa$).
+
+The specified 2-cell \emph{is} discrimination: the
+operation that mediates between projection (adjunction),
+algebra ($\GF(2)$), and logic (Belnap). Removing
+discrimination creates a residue whose self-specified
+resolution is discrimination. The removal triggers a
+$\kappa$-evolution that reinstates exactly what was
+removed.
+
+Therefore: discrimination cannot be absent. Its absence
+is a gap; the gap specifies its own filling; the filling
+is discrimination. The system derives its own necessity
+from its own absence.
+\end{proof}
+
+\begin{remark}[Internal necessity]
+Theorem \ref{thm:entailed} showed that discrimination
+is entailed by the coexistence of its three facets.
+Theorem \ref{thm:irremovable} shows the converse: even
+if discrimination is hypothetically removed, the
+framework's own machinery (homological gap detection,
+operational exhaustivity, residue-driven $\kappa$-evolution)
+reinstates it. Within the framework, discrimination is
+a \emph{stable fixed point}: its removal is its own
+reinstatement.
+
+The precise claim is \emph{internal} necessity, not
+ontological necessity. The theorems show that the
+framework is a fixed point of its own gap-filling
+operation, and that this fixed point is unique (the
+gap's shape specifies the filling). This is stronger
+than mere consistency (Peano arithmetic is consistent but
+not self-hosting) and stronger than mere self-description
+(PA can describe its own signature but cannot reconstruct
+its axioms from a gap). The framework reconstructs its
+own primitive operation from the structural instability
+of its absence.
+
+Whether ``internally necessary'' and ``ontologically
+necessary'' are themselves distinguishable is a question
+the framework addresses on its own terms. No
+discriminator within the framework separates the two
+claims: any test for ``ontological necessity'' would be a
+discrimination, which is the operation whose necessity is
+at issue. By $\kappa$-extensionality, if no discriminator
+separates the claims, they are identical \emph{within the
+framework}. The framework dissolves the objection rather
+than deflecting it --- but this dissolution is available
+only to readers who have accepted the operationalist
+principle (Remark \ref{rem:foundational-status}), which
+is the one element the framework explicitly flags as a
+foundational choice rather than a derivation.
+\end{remark}
+
+\begin{remark}[The adjunction as formal mechanism]
+The triadic adjunction system (Theorem \ref{thm:adjunction})
+provides the formal mechanism for this entailment. The six
+permutations of $\{\kappa, \sigma, \tau\}$ over the
+adjunction stencil $A \leftarrow B \to C$ are precisely
+the six ways to assign the roles of left adjoint, hom, and
+right adjoint to the three facets. The triangle identity
+guarantees that each assignment produces a valid adjunction
+--- that is, that any two of the three determine the third.
+
+The 2-cell that fills the triangle is the adjunction itself:
+the natural bijection $\operatorname{Hom}_B(A, C) \cong
+A + C$ that the triangle identity provides. This bijection
+is the operation that mediates between the three structures.
+That operation is discrimination. The triadic adjunction
+does not merely use the triangle identity; it \emph{is}
+the triangle identity, applied to the foundational triangle.
+
+Chirality determines interpretation. The two adjunctions on
+each axis --- $\kappa \leftarrow \sigma \to \tau$ and
+$\tau \leftarrow \sigma \to \kappa$ --- correspond to two
+orientations of the same mediation. The dual to a functor
+(reversing chirality) reverses which structure is ``input''
+and which is ``output'' without changing the underlying
+relationship. The triangle identity
+$\kappa = \sigma + \tau$ ensures that all three
+perspectives access the same information (each is
+determined by the other two, preserving dimension).
+What changes under rotation is not the content but the
+perspective from which the content is accessed.
+\end{remark}
+
+\begin{remark}[Internal recoverability]
+Theorem \ref{thm:self-hosting} showed that the framework
+reconstructs its own ground field internally.
+Theorem \ref{thm:entailed} shows that it reconstructs
+its own primitive operation. The framework's external
+dependencies are \emph{recoverable from within}:
+\begin{itemize}[nosep]
+  \item Discrimination is a stable fixed point of the
+    framework's own gap-filling operation
+    (Theorem \ref{thm:irremovable}).
+  \item $\GF(2)$ is reconstructible internally via the
+    Boolean dependent type.
+  \item The exterior algebra is the structure of composed
+    discriminations.
+  \item Sets, categories, types, logic, and the topos are
+    accumulated structure.
+  \item The four-cell structure that began as a definition
+    turns out to be the subobject classifier.
+  \item The toroid that organizes the perspectives turns
+    out to be the space whose closure entails
+    discrimination.
+\end{itemize}
+The framework is \emph{internally closed}: every
+component it requires is derivable from within. This is
+not the claim that the framework ``assumes nothing'' ---
+the operationalist axiom (Definition
+\ref{def:operationalist}) is a foundational
+commitment, and the initial articulation of any predicate
+is an act that the framework describes but does not
+conjure from the void. The claim is that the framework
+is a \emph{fixed point of its own operations}: once any
+discrimination is performed, the entire structure is
+recoverable, including the ground field and the
+discrimination operation itself.
+\end{remark}
+
+\subsection{Sheaf-theoretic interpretation}\label{sec:sheaf}
+
+The triadic adjunction system (Theorem \ref{thm:adjunction})
+provides the sheaf-theoretic structure of
+$\mathcal{C}(S,\kappa)$ by witnessing the construction of
+every dimension of the toroid.
+
+\begin{definition}[The site of regimes]\label{def:site}
+The \emph{site of regimes} $\mathfrak{S}$ is the category
+whose:
+\begin{itemize}[nosep]
+  \item objects are $\kappa$-regimes of all dimensions
+    (sub-regimes $\kappa' \subset \kappa$ obtained by
+    projection),
+  \item morphisms are projections $\pi: \kappa \to \kappa'$
+    (forgetful functors) and inclusions
+    $\iota: \kappa' \hookrightarrow \kappa$ (free functors).
+\end{itemize}
+The \emph{Grothendieck topology} on $\mathfrak{S}$ is:
+a family of projections $\{\pi_i: \kappa \to \kappa'_i\}$
+\emph{covers} $\kappa$ if the union of the sub-regimes
+$\kappa'_i$ recovers the full $\tau/\sigma$ information
+of $\kappa$ --- that is, if every discriminator in $\kappa$
+belongs to at least one $\kappa'_i$.
+\end{definition}
+
+\begin{theorem}[The topos is a sheaf topos]\label{thm:sheaf}
+$\mathcal{C}(S,\kappa)$ is equivalent to the category of
+sheaves on the site of regimes $\mathfrak{S}$.
+\end{theorem}
+
+\begin{proof}
+A \emph{presheaf} on $\mathfrak{S}$ assigns to each regime
+$\kappa'$ a collection (the set of $\kappa'$-equivalence
+classes of $S$) and to each projection $\pi: \kappa \to
+\kappa'$ a restriction map (coarsening the equivalence
+classes). A presheaf is a \emph{sheaf} if it satisfies the
+gluing axiom: compatible data on overlapping sub-regimes
+glue uniquely to data on the union.
+
+The gluing axiom is the order-independence of filtration
+(Proposition \ref{prop:monoidal}). If two sub-regimes
+$\kappa'_1$ and $\kappa'_2$ produce $\tau/\sigma$
+assignments that agree on their shared discriminators, the
+monoidal property guarantees that the joint filtration
+through $\kappa'_1 \cup \kappa'_2$ is well-defined and
+unique. This is precisely the sheaf condition: compatible
+local data (partitions on sub-regimes) glue to global data
+(a partition on the union).
+
+Every object of $\mathcal{C}(S,\kappa)$ defines a sheaf
+on $\mathfrak{S}$: an element $a \in S$ assigns to each
+sub-regime $\kappa'$ its $\tau/\sigma$ profile under
+$\kappa'$, and the restriction maps are the projections'
+action on profiles. Conversely, every sheaf on $\mathfrak{S}$
+that satisfies the representability condition
+(compatible local profiles for some element) corresponds
+to an object of $\mathcal{C}(S,\kappa)$.
+
+The equivalence of categories follows: the Yoneda
+embedding (Theorem \ref{thm:yoneda}) embeds
+$\mathcal{C}(S,\kappa)$ fully and faithfully into
+presheaves on $\mathfrak{S}$, and the sheaf condition
+(Proposition \ref{prop:monoidal}) selects exactly the
+representable presheaves.
+\end{proof}
+
+\begin{remark}[The six adjunctions are the covering data]
+Each of the six triadic adjunctions
+(Theorem \ref{thm:adjunction}) is a covering morphism in
+$\mathfrak{S}$. The three axes of the toroid correspond to
+three independent ``directions'' of projection, and the two
+chiralities on each axis correspond to the two orientations
+of each covering. The six adjunctions jointly provide the
+\emph{complete} covering data for the site: every
+projection between regimes factors through a composition
+of these six fundamental covering morphisms.
+
+This means the Grothendieck topology on $\mathfrak{S}$ is
+generated by the triadic adjunction system. The site is
+not an external structure imposed on the category; it is
+the toroid's own geometry, expressed as covering data.
+\end{remark}
+
+\begin{remark}[The sheaf condition was already proved]
+The identification of $\mathcal{C}(S,\kappa)$ as a sheaf
+topos is not a new result. It is the recognition that
+Proposition \ref{prop:monoidal} (order-independence of
+filtration) \emph{is} the sheaf condition, and that the
+site $\mathfrak{S}$ \emph{is} the category of
+$\kappa$-regimes with the projection topology. The sheaf
+structure was present in the framework from Section 3;
+it merely required the toroid geometry of Sections 7--8
+to be recognized as a Grothendieck topology.
+\end{remark}
+
+\begin{proposition}[The four-cell structure is the
+  presheaf-to-sheaf transition]\label{prop:presheaf-sheaf}
+The four cells of the membership profile
+(Definition \ref{def:discriminator}) correspond exactly
+to the stages of the sheaf gluing process:
+\begin{center}
+\begin{tabular}{c|l|l}
+$(\tau, \sigma)$ & Sheaf status & Covering status \\
+\hline
+$(0,0)$ & Presheaf & No covering morphism interrogated \\
+$(1,0)$ & Sheaf & $\tau$-covering sufficient \\
+$(0,1)$ & Sheaf & $\sigma$-covering sufficient \\
+$(1,1)$ & Over-covered & Coverings conflict; residue
+\end{tabular}
+\end{center}
+A value of $0$ on a component means the corresponding
+adjunctive perspective has not been interrogated on this
+dimension --- the covering morphism has not been applied.
+A value of $1$ means data has been obtained from that
+perspective.
+\end{proposition}
+
+\begin{proof}
+A presheaf on $\mathfrak{S}$ assigns data to sub-regimes
+without requiring the gluing condition. The gap state
+$(0,0)$ is the maximally presheaf condition: no projection
+has produced data on this dimension. The element exists in
+the population but is invisible to every covering morphism
+that has been applied.
+
+The Boolean states $(1,0)$ and $(0,1)$ are sheaf states:
+a sufficient covering has been applied (the $\tau$- or
+$\sigma$-adjunction has been interrogated), the gluing
+axiom is satisfied (there is a unique, consistent
+assignment), and the element's profile on this dimension
+is determined.
+
+The overlap state $(1,1)$ is the over-covered state: two
+independent coverings have both produced data, and the
+data is conflicting (the element matches both $\tau$ and
+$\sigma$). The gluing axiom fails at this point --- the
+local data does not assemble into a unique global section.
+This failure is a residue (Definition \ref{def:residue}),
+which triggers $\kappa$-evolution: a refinement of the
+topology that resolves the conflict by introducing a
+finer covering.
+
+The transition from presheaf to sheaf is therefore the
+transition from $(0,0)$ to $(1,0)$ or $(0,1)$: the
+interrogation of covering morphisms until the data is
+sufficient and consistent. $\kappa$-evolution drives this
+transition by providing new covering morphisms (new
+adjunctive perspectives) that resolve gaps and conflicts.
+\end{proof}
+
+\begin{remark}[Convergence as sheafification]
+The dynamic proof theory's tendency toward Boolean
+(Theorem \ref{thm:proof-theory}) is \emph{sheafification}:
+the process of converting presheaves into sheaves by
+applying covering morphisms until the gluing axiom is
+satisfied. Each $\kappa$-evolution interrogates a new
+adjunctive perspective, moving elements from the presheaf
+state $(0,0)$ or the over-covered state $(1,1)$ toward
+the sheaf states $(1,0)$ and $(0,1)$.
+
+Sheafification is the left adjoint to the inclusion of
+sheaves into presheaves --- and this adjunction is itself
+an instance of the triadic adjunction system
+(Theorem \ref{thm:adjunction}). The framework's dynamics
+are sheafification, and sheafification is an adjunction,
+and the adjunction is a rotation of the toroid.
+
+The two remaining states that resist sheafification ---
+elements stuck at $(0,0)$ because no covering reaches
+them, or at $(1,1)$ because every covering over-covers
+them --- are precisely the residues that drive
+$\kappa$-evolution. Sheafification never terminates for
+an inexhaustible collection (Proposition
+\ref{prop:infinity}), but every individual dimension
+can be sheafified in finite time.
+\end{remark}
+
+\subsection{The expanded classifier: $\GF(2)^3$}
+\label{sec:expanded}
+
+The presheaf-to-sheaf identification (Proposition
+\ref{prop:presheaf-sheaf}) reveals an ambiguity in the
+original four-cell structure: the gap state $(0,0)$
+conflates two distinct situations:
+\begin{itemize}[nosep]
+  \item ``The perspective was interrogated and produced no
+    match'' (genuine silence --- data was sought and not
+    found).
+  \item ``The perspective has not been interrogated at all''
+    (no covering morphism has been applied --- no data was
+    sought).
+\end{itemize}
+Distinguishing these requires a third dimension.
+
+\begin{definition}[Coverage profile]\label{def:coverage}
+For each of the three perspectives $\kappa$, $\sigma$,
+$\tau$, define an independent Boolean:
+\[
+  \gamma_\kappa, \gamma_\sigma, \gamma_\tau \in \GF(2),
+\]
+where $\gamma_x = 1$ means ``the $x$-perspective has been
+interrogated (the corresponding covering morphism has been
+applied and there is something to report)'' and
+$\gamma_x = 0$ means ``the $x$-perspective has not been
+interrogated (no covering has been applied from this
+perspective).''
+
+The \emph{full membership profile} of an element $a$
+under discriminator $d$ in regime $\kappa$ is a triple
+\begin{equation}
+  (\gamma, \tau_d(a), \sigma_d(a)) \in \GF(2)^3,
+\end{equation}
+where $\gamma$ encodes the coverage status and
+$(\tau_d(a), \sigma_d(a))$ encodes the content.
+The content is meaningful only when $\gamma = 1$;
+when $\gamma = 0$, the content bits are undefined.
+\end{definition}
+
+\begin{proposition}[The three-dimensional classifier]
+\label{prop:gf2-cubed}
+The expanded subobject classifier is
+$\Omega' = \GF(2)^3$, with five operationally distinct
+states:
+\begin{center}
+\begin{tabular}{c|c|l|l}
+$\gamma$ & $(\tau, \sigma)$ & State & Sheaf status \\
+\hline
+$0$ & --- & Uncovered & Pure presheaf \\
+$1$ & $(0,0)$ & Covered, silent & Interrogated gap \\
+$1$ & $(1,0)$ & $\tau$-match & Sheaf (determined) \\
+$1$ & $(0,1)$ & $\sigma$-match & Sheaf (determined) \\
+$1$ & $(1,1)$ & Both match & Over-covered (residue)
+\end{tabular}
+\end{center}
+The ``uncovered'' state $(\gamma = 0)$ is the true
+presheaf condition: the covering morphism has not been
+applied. The ``covered, silent'' state
+$(\gamma = 1, \tau = \sigma = 0)$ is a genuinely
+interrogated gap: the covering was applied and the
+element was invisible to it. These are operationally
+distinct and must not be conflated.
+\end{proposition}
+
+\begin{proof}
+The distinction is forced by the sheaf interpretation.
+A presheaf assigns data to open sets; a section is
+\emph{defined} on an open set $U$ if $U$ has been
+covered, and \emph{undefined} if $U$ has not. The
+sheaf condition applies only to defined sections.
+If $\gamma = 0$, no section exists to glue; the element
+is outside the domain of the covering. If $\gamma = 1$
+and $(\tau, \sigma) = (0,0)$, a section exists but
+carries no data --- the covering was applied but
+produced no match.
+
+The original $\GF(2)^2$ classifier (Definition
+\ref{def:subobj-class}) is the $\gamma = 1$ slice of
+$\GF(2)^3$. All results proved using $\Omega = \GF(2)^2$
+remain valid within this slice. The expansion adds the
+$\gamma = 0$ state without modifying the existing
+structure.
+\end{proof}
+
+\begin{proposition}[Gluing mechanics across coverage states]
+\label{prop:gluing-mechanics}
+The sheaf gluing axiom operates on the $\GF(2)^3$
+classifier as follows. Let $d$ be a discriminator and
+$a$ an element with coverage-content profile
+$(\gamma, \tau, \sigma)$.
+
+\emph{Step 1: Coverage interrogation.}
+Before any covering morphism is applied, $\gamma = 0$.
+The content $(\tau, \sigma)$ is undefined. The element
+$a$ on dimension $d$ is in the pure presheaf state:
+it exists in the population but has not been probed.
+
+\emph{Step 2: Applying a covering morphism.}
+The forgetful functor $\pi: \kappa \to \kappa'$
+(one of the six triadic adjunctions) is applied. This
+sets $\gamma = 1$ and evaluates the content: the
+discriminator $d$ produces $(\tau_d(a), \sigma_d(a))$.
+The result is one of the four Belnap states:
+$(1,0)$, $(0,1)$, $(0,0)$, or $(1,1)$.
+
+\emph{Step 3: Gluing condition.}
+Suppose two covering morphisms $\pi_1, \pi_2$ (from
+two different triadic adjunctions) are applied to $a$
+on overlapping sub-regimes. Each produces a
+coverage-content triple:
+$(\gamma_1 = 1, \tau_1, \sigma_1)$ and
+$(\gamma_2 = 1, \tau_2, \sigma_2)$.
+The gluing axiom requires: on the overlap (the
+discriminators common to both sub-regimes),
+$(\tau_1, \sigma_1) = (\tau_2, \sigma_2)$. This holds
+by Proposition \ref{prop:monoidal} (order-independence):
+the $\tau/\sigma$ profile is a function of $a$ and $d$
+alone, independent of which covering morphism was applied.
+
+\emph{Step 4: Fano inference on $\gamma = 0$ components.}
+If two linearly independent perspectives have $\gamma = 1$
+and a third has $\gamma = 0$, the Fano line through the
+two interrogated points determines the third
+(Corollary \ref{cor:self-model}). The inferred content is
+$p_3 = p_1 + p_2$ (the triangle identity applied
+componentwise). The third component transitions from
+$\gamma = 0$ (uncovered) to $\gamma = 1$ (covered by
+inference) without direct interrogation.
+
+\emph{Step 5: Sheaf completion.}
+After three linearly independent interrogations (Theorem
+\ref{thm:convergence}), all seven Fano points have
+$\gamma = 1$. The sheaf is fully glued: every component
+has well-defined content, and the gluing axiom is
+satisfied by order-independence. The element's full
+profile on dimension $d$ is determined.
+\end{proposition}
+
+\begin{proof}
+Steps 1--3 follow from Definition \ref{def:coverage} and
+Proposition \ref{prop:monoidal}. Step 4 follows from
+Theorem \ref{thm:fano} and Corollary \ref{cor:self-model}.
+Step 5 follows from Theorem \ref{thm:convergence}.
+
+The key verification is Step 4: is the inferred content
+consistent with what direct interrogation would produce?
+Yes: the triangle identity $p_3 = p_1 + p_2$ holds
+because $\kappa = \sigma + \tau$ (Definition
+\ref{def:triangle}), and this identity governs the
+relationship between the three perspectives at every
+level (the content level, the coverage level, and the
+adjunction level). Inference via Fano lines computes
+the same value that direct interrogation would compute,
+because both are governed by the same algebraic law.
+\end{proof}
+
+\begin{remark}[Coverage as dependent type]
+The coverage bit $\gamma$ is itself a dependent type
+in the same sense as the Boolean type (Proposition
+\ref{prop:bool-dependent}): it is a predicate on the
+discriminator (``has this discriminator been applied to
+this element?''), not on the element itself. The type
+of the content $(\tau, \sigma)$ depends on $\gamma$:
+if $\gamma = 1$, the content is a well-defined element
+of $\GF(2)^2$; if $\gamma = 0$, the content is
+undefined.
+
+This is the framework's account of
+\emph{definedness} --- the distinction between ``no
+value'' and ``the value zero.'' In classical
+mathematics, every variable has a value. In the
+discrimination framework, a variable has a value only
+on dimensions where the covering has been applied.
+Definedness is not a metalinguistic property; it is
+a first-class dimension of the membership profile,
+tracked by $\gamma$ and governed by the same $\GF(2)$
+algebra as every other dimension.
+\end{remark}
+
+\begin{theorem}[Fano closure via the triangle identity]
+\label{thm:fano}
+The seven non-zero points of $\GF(2)^3$ form the Fano
+plane $PG(2, \GF(2))$: the projective plane over $\GF(2)$,
+with seven points and seven lines, each line passing through
+three points. Each line of the Fano plane is an instance
+of the triangle identity: three elements that pairwise-XOR
+to produce the third. The Fano structure is the complete
+set of triangle identities in $\GF(2)^3$.
+\end{theorem}
+
+\begin{proof}
+In $\GF(2)^3$, three non-zero points $p_1, p_2, p_3$ are
+collinear (lie on a line of $PG(2, \GF(2))$) if and only
+if $p_1 + p_2 + p_3 = 0$, equivalently
+$p_3 = p_1 + p_2$. This is the triangle identity: any
+two determine the third. The seven lines of the Fano
+plane are therefore seven triangle identities.
+
+The three ``fundamental'' triangle identities of the
+framework --- $\kappa = \sigma + \tau$ and its two
+permutations --- correspond to three of the seven lines
+(those within the $\gamma = 1$ slice, where coverage is
+established). The remaining four lines involve mixed
+coverage-and-content states, providing triangle identities
+that relate coverage status to content.
+\end{proof}
+
+\begin{corollary}[Self-modeling]\label{cor:self-model}
+If two perspectives lying on the same Fano line have been
+interrogated ($\gamma = 1$), the third perspective's
+response is determined by the triangle identity on that
+line, even if the third perspective has not been directly
+interrogated ($\gamma = 0$).
+
+Therefore, the $\gamma = 0$ state is a genuine presheaf
+state \emph{only when no Fano line connects it to two
+interrogated perspectives}. The unique point where no
+inference is possible is $(0,0,0)$: the zero element of
+$\GF(2)^3$, the only point \emph{not} on the Fano plane.
+This is the sole true presheaf state --- the state of
+absolute non-interrogation.
+
+Every other state is either directly interrogated or
+inferrable from two interrogated perspectives via a
+Fano line. The system models its own uninterrogated
+states using the triangle identity applied to its own
+coverage data.
+\end{corollary}
+
+\begin{proof}
+Let $p_1, p_2$ be two interrogated points on a Fano line
+$\ell$. The third point on $\ell$ is $p_3 = p_1 + p_2$.
+The value at $p_3$ is determined by the values at $p_1$
+and $p_2$ via the triangle identity, regardless of whether
+$p_3$ has been directly interrogated.
+
+The zero element $(0,0,0)$ does not lie on any line of
+$PG(2, \GF(2))$ (projective lines consist of non-zero
+points). Therefore no pair of interrogated perspectives
+can reach $(0,0,0)$ by inference. It is the unique
+irreducible presheaf state.
+\end{proof}
+
+\begin{remark}[Self-modeling is the triangle identity at
+  the coverage level]
+The self-modeling property (Corollary \ref{cor:self-model})
+is not a new principle. It is the triangle identity ---
+the same identity that governs the content level
+($\kappa = \sigma + \tau$), the adjunction structure
+(Theorem \ref{thm:adjunction}), the monoidal closure
+(Theorem \ref{thm:closure}), and the entailment of
+discrimination (Theorem \ref{thm:entailed}) --- now
+operating at the coverage level. The system predicts its
+own unobserved states using the same algebraic law that
+governs everything else.
+
+This is the deepest expression of self-hosting
+(Theorem \ref{thm:self-hosting}): the framework not only
+constructs its own ground field and its own primitive
+operation, but \emph{infers its own uninterrogated
+coverage} from its interrogated coverage. The system
+models itself, using itself, within itself. The Fano
+plane is the geometry of this self-modeling: its seven
+lines are the seven inference channels through which
+the framework fills its own gaps.
+\end{remark}
+
+\begin{theorem}[Convergence rate]\label{thm:convergence}
+Sheafification of a single $\kappa$-dimension converges in
+exactly $3$ interrogations: the dimension of $\GF(2)^3$.
+Once three linearly independent perspectives have been
+interrogated on a dimension, all seven Fano points are
+determined and the sheaf on that dimension is fully glued.
+\end{theorem}
+
+\begin{proof}
+A basis of $\GF(2)^3$ consists of $3$ linearly independent
+vectors. Once three such vectors are interrogated (their
+$\gamma = 1$ and their $(\tau, \sigma)$ content is known),
+every other element of $\GF(2)^3$ is a linear combination
+of these three. Since the Fano lines are the triangle
+identities $p_3 = p_1 + p_2$, and every non-zero point is
+reachable from any basis by at most one addition, the
+remaining four points are determined.
+
+Therefore: three linearly independent interrogations per
+dimension suffice for complete coverage. The convergence
+rate is $3 / 7$ (three interrogations determine all seven
+perspectives), and this is sharp: fewer than three linearly
+independent interrogations leave at least one perspective
+undetermined.
+\end{proof}
+
+\begin{corollary}[The convergence rate is the triangle]
+\label{cor:convergence-triangle}
+The number $3$ --- the convergence rate, the dimension of
+the classifier, the number of vertices of the triangle,
+the number of fundamental adjunctions per chirality, and
+the number of perspectives in Proposition
+\ref{prop:perspectives} --- is the same $3$ throughout the
+framework. Convergence is not an asymptotic property; it
+is a structural constant determined by the triangle
+identity.
+\end{corollary}
+

@@ -1,0 +1,634 @@
+%----------------------------------------------------------------------
+\section{Category Theory from Discrimination}\label{sec:cattheory}
+%----------------------------------------------------------------------
+
+Section \ref{sec:homotopy} constructed a symmetric $n$-groupoid\footnote{Section-level Toulmin. \emph{Move}: add direction via $\tau/\sigma$ asymmetry. \emph{ZFC comparison}: category theory is typically layered on top of set theory as a separate framework. Here, categories are constructed from the same algebra, with direction from datum properties. The native structure is 2-categorical; the 1-categorical shadow is a principled truncation whose residue (the lost composition data) is tracked, not discarded. \emph{Residue instance}: the 2-cell $d_1 \wedge d_2$ records which discriminations were composed. Projecting to the 1-categorical shadow loses this; the loss is itself a residue.}
+from the exterior algebra over $\GF(2)$
+(plus profile linearity (Definition \ref{def:profile-linear})). In a groupoid, every
+morphism is invertible. General category theory requires
+\emph{directed} morphisms that need not be invertible. We now
+show that direction arises from the $\tau/\sigma$ asymmetry
+of the discrimination process, layered on top of the symmetric
+algebra.
+
+\subsection{Direction from $\tau/\sigma$ asymmetry}
+
+\begin{remark}[The source of asymmetry]
+The exterior algebra over $\GF(2)$ is commutative:
+$d_1 \wedge d_2 = d_2 \wedge d_1$. This symmetry produces
+groupoids. But the discrimination \emph{process} is not
+symmetric: a discriminator $d$ assigns $\tau_d(a) = 1$,
+$\sigma_d(b) = 1$ for elements $a, b$ in a population.
+The labels $\tau$ and $\sigma$ are distinct; swapping them
+produces a different discrimination. This labeling asymmetry,
+absent from the algebra, is what introduces direction.
+\end{remark}
+
+\begin{definition}[Directed morphism]\label{def:directed-morphism}
+Let $S$ be a population under regime $\kappa$, and let
+$a, b \in S$. A \emph{directed morphism} $f: a \to b$ is a
+discriminator $d \in \kappa$ such that $\tau_d(a) = 1$ and
+$\sigma_d(b) = 1$. The element $a$ is the \emph{source}
+(classified under $\tau$) and $b$ is the \emph{target}
+(classified under $\sigma$).
+
+Two directed morphisms $f: a \to b$ and $g: a \to b$
+witnessed by distinct discriminators $d_f \neq d_g$ are
+\emph{distinct morphisms} between the same source and target.
+\end{definition}
+
+\begin{proposition}[Non-invertibility]\label{prop:noninvert}
+A directed morphism $f: a \to b$ witnessed by discriminator
+$d$ does not automatically yield a morphism $b \to a$.
+The reverse morphism requires a \emph{separate} discriminator
+$d'$ with $\tau_{d'}(b) = 1$ and $\sigma_{d'}(a) = 1$.
+This $d'$ is an independent dimension of $\kappa$.
+\end{proposition}
+
+\begin{proof}
+The discriminator $d$ assigns specific $\tau/\sigma$ values
+to elements of $S$. These assignments are fixed properties
+of $d$. Over $\GF(2)$, $d = -d$, so the algebraic inverse
+of $d$ is $d$ itself --- but algebraic self-inverse does not
+swap the $\tau$ and $\sigma$ labels. The labels are structural
+metadata of the discrimination, not elements of $\GF(2)$.
+Reversing the direction $a \to b$ to $b \to a$ requires
+a discriminator with the opposite labeling, which is a
+distinct element of $\kappa$.
+\end{proof}
+
+\begin{corollary}[Cost of isomorphism]\label{cor:iso-cost}
+An isomorphism between $a$ and $b$ requires two discriminators:
+one witnessing $a \to b$ and one witnessing $b \to a$.
+Isomorphisms cost two $\kappa$-dimensions; mere morphisms
+cost one. Invertibility is not free; it is purchased by
+additional discrimination.
+\end{corollary}
+
+\subsection{The constructed category $\mathcal{C}(S,\kappa)$}
+
+\begin{definition}[Emergent category]\label{def:category}
+Let $S$ be a population and $\kappa$ a discrimination regime.
+The \emph{category} $\mathcal{C}(S,\kappa)$ has:
+\begin{itemize}[nosep]
+  \item \textbf{Objects}: $\kappa$-equivalence classes of
+    elements of $S$.
+  \item \textbf{Morphisms}: directed morphisms
+    (Definition \ref{def:directed-morphism}). For objects
+    $A, B$ (equivalence classes), $\operatorname{Hom}(A,B)$
+    is the set of discriminators $d \in \kappa$ such that
+    $\tau_d(a) = 1$ for all $a \in A$ and $\sigma_d(b) = 1$
+    for all $b \in B$.
+  \item \textbf{Identity}: for each object $A$, the identity
+    morphism $\mathrm{id}_A$ is the degenerate discriminator
+    $d \wedge d = 0$ (Definition \ref{def:degeneracy}).
+    Self-discrimination produces no partition: $A$ is mapped
+    to itself trivially.
+  \item \textbf{Composition}: defined below.
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Composition via filtration]\label{def:composition}
+Let $f: A \to B$ be witnessed by $d_1$ and $g: B \to C$ be
+witnessed by $d_2$. The composite $g \circ f$ is
+the joint filtration of $S$ through $d_1$ and $d_2$,
+recorded as the grade-2 element
+$d_1 \wedge d_2 \in \bigwedge^2 V$.
+
+This is a \emph{2-cell}, not a 1-cell. The composite of
+two directed 1-morphisms produces a 2-morphism witnessing
+their joint action. The $\tau/\sigma$ assignments track
+source ($A \in \tau_{d_1}$) and target
+($C \in \sigma_{d_2}$) through the filtration chain, with
+$B$ as the intermediate object ($\sigma_{d_1}(B) = 1$,
+$\tau_{d_2}(B) = 1$).
+\end{definition}
+
+\begin{remark}[The interchange law and self-hosting]
+\label{rem:interchange-selfhosting}
+The interchange law is not merely a coherence condition
+for the 2-category. It is the structural backbone of
+self-hosting (Theorem \ref{thm:self-hosting}) and the
+halting tower (Remark \ref{rem:hyper-recursive}).
+
+Horizontal composition ($*$) is sequential
+$\kappa$-evolution: applying discriminators in sequence.
+Vertical composition ($\circ$) is perspective shift:
+the $S_3$ rotation that reinterprets which component
+plays which role. The interchange law states that
+these commute:
+\[
+  (\beta \circ \alpha) * (\delta \circ \gamma)
+  = (\beta * \delta) \circ (\alpha * \gamma).
+\]
+In self-hosting terms: the outer system models an inner
+system. From outside, the inner system's behavior is
+finite and comprehensible (a $\kappa$-regime we
+observe). From inside, the outer world is unfathomable
+(the inner system's halting problem). The self-hosting
+isomorphism (inner $\cong$ outer) transfers results
+between levels. The interchange law says this transfer
+commutes with $\kappa$-evolution: what you learn by
+modeling the inner system's epistemic gap can be
+transferred to characterize the outer system's own gap,
+because evolving $\kappa$ and shifting perspective
+produce the same result in either order.
+
+Without interchange, the level-invariance of the halting
+tower (Remark \ref{rem:hyper-recursive}) would be a
+claim about each level separately. With interchange, it
+is a structural fact: the gap between ``finite from
+outside'' and ``unfathomable from inside'' has the
+same shape at every level because the two operations
+that define ``level'' (evolution and perspective shift)
+commute. The explicit verification (Appendix B.20)
+shows both paths through the interchange square yield
+$p(g{\circ}f) + p(g'{\circ}f') \in \GF(2)^2$: the
+cross terms cancel because $1+1=0$, collapsing the
+grade-4 expression to grade 2 via the Klein
+four-group's characteristic 2. The same $1+1=0$ that
+excludes self-reference, kills Russell's affine
+offset, and makes the halting tower level-invariant
+also makes the interchange law hold.
+\end{remark}
+
+\begin{remark}[Interchange and Russell are the same claim]
+\label{rem:interchange-russell}
+The interchange law (Theorem \ref{thm:2cat}) and
+Russell exclusion (Theorem \ref{thm:russell}) share
+the technique profile $[1{+}1{=}0 + \text{Linear}]$
+(Appendix \ref{sec:unified}, Claim F). Russell:
+evaluation linearity rejects the affine predicate
+($\tau(0) = 1 \neq 0$). Interchange: evaluation
+linearity kills the quadratic cross term ($2 = 0$).
+Both are the same fact: linearity over $\GF(2)$
+rejects the non-linear component. Self-reference
+and incoherence are the same pathology, excluded
+by the same axiom.
+\end{remark}
+
+\begin{remark}[The framework is 2-categorical from the start]
+\label{rem:2cat}
+Composition of 1-morphisms producing a 2-cell means
+$\mathcal{C}(S,\kappa)$ is not a 1-category but a
+\emph{2-category from the start}: objects are
+$\kappa$-equivalence classes, 1-morphisms are
+discriminators (grade-1 elements), and composition of
+1-morphisms is a 2-morphism (grade-2 element). This is
+not a deficiency but a feature: the framework entangles
+direction and higher structure from the beginning,
+rather than constructing a 1-category and then adding
+higher cells. The exterior algebra's grading \emph{is}
+the categorical dimension.
+
+A 1-categorical shadow is obtained by projecting: identify
+two 1-morphisms $f, g: A \to B$ whenever they are
+connected by a 2-cell (i.e.\ $d_f \wedge d_g \neq 0$).
+The resulting quotient is a 1-category, but the 2-cells
+carry information that the quotient loses.
+(Full 2-cell analysis: \S\ref{app:composition-2cell}.)
+\end{remark}
+
+\begin{theorem}[2-category axioms]\label{thm:cat-axioms}\footnote{Axiom class \textsf{A} $\cdot$ depth 4 $\cdot$ \S\ref{app:2cat-full}.  \emph{Warrant}: associativity and commutativity of $\wedge$; interchange law holds. \emph{Qualifier}: the native structure is 2-categorical; the 1-categorical shadow is a quotient Finite-$\kappa$: yes. Novel (composition produces 2-cells natively). (\S\ref{app:composition-2cell}).}
+$\mathcal{C}(S,\kappa)$ satisfies the axioms of a
+strict 2-category.
+\end{theorem}
+
+\begin{proof}
+\emph{Horizontal composition (associativity).}
+Let $f: A \to B$, $g: B \to C$, $h: C \to D$ be witnessed
+by $d_1, d_2, d_3$ respectively. Then
+$(h \circ g) \circ f$ is witnessed by
+$d_1 \wedge (d_2 \wedge d_3)$ and
+$h \circ (g \circ f)$ is witnessed by
+$(d_1 \wedge d_2) \wedge d_3$. By associativity of the
+exterior algebra, these are equal. The $\tau/\sigma$
+assignments are tracked through the filtration chain,
+and the monoidal property (Proposition \ref{prop:monoidal})
+guarantees that the order of filtration does not affect
+the result.
+
+\emph{Identity.}
+For any $f: A \to B$ witnessed by $d$, the composite
+$f \circ \mathrm{id}_A$ is witnessed by $d \wedge (d_A \wedge d_A)
+= d \wedge 0 = d$ (where $d_A$ is any discriminator
+associated with $A$). Similarly $\mathrm{id}_B \circ f = d$.
+The identity morphism, being the degenerate self-discrimination
+(grade 0), acts as the unit for the wedge product.
+The interchange law holds by associativity and
+commutativity of $\wedge$ over $\GF(2)$.
+(Full axiom check including interchange: \S\ref{app:2cat-full}.)
+\end{proof}
+
+\subsection{Functors as $\kappa$-deformations}\label{sec:functors}
+
+\begin{definition}[Functor]\label{def:functor}
+Let $\kappa$ and $\kappa'$ be two discrimination regimes
+(possibly over different populations $S$ and $S'$). A
+\emph{functor} $F: \mathcal{C}(S,\kappa) \to
+\mathcal{C}(S',\kappa')$ is a $\kappa$-deformation: a
+structure-preserving map that sends:
+\begin{itemize}[nosep]
+  \item discriminators in $\kappa$ to discriminators in
+    $\kappa'$,
+  \item $\tau/\sigma$ assignments under $\kappa$ to
+    $\tau/\sigma$ assignments under $\kappa'$,
+\end{itemize}
+such that the wedge product and boundary structure are
+preserved.
+\end{definition}
+
+\begin{proposition}[Forgetful and free functors]\label{prop:forgetful}
+Let $\kappa' \subset \kappa$ be a sub-regime.
+\begin{enumerate}[label=(\roman*),nosep]
+  \item The projection $\pi: \kappa \to \kappa'$ (omitting
+    dimensions) induces a \emph{forgetful functor}
+    $U: \mathcal{C}(S,\kappa) \to \mathcal{C}(S,\kappa')$.
+    $U$ sends each object to its coarser equivalence class
+    (merging objects that were distinguished only by the
+    omitted dimensions) and each morphism to its image under
+    projection (forgetting the contribution of omitted
+    discriminators).
+  \item The inclusion $\iota: \kappa' \hookrightarrow \kappa$
+    induces a \emph{free functor}
+    $F: \mathcal{C}(S,\kappa') \to \mathcal{C}(S,\kappa)$.
+    $F$ sends each object to itself (now embedded in a
+    finer equivalence structure) and each morphism to itself
+    (now admitting additional morphisms that the finer
+    $\kappa$ makes available).
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+We verify the functor axioms explicitly for the forgetful
+functor $U$ (the free functor $F$ is analogous).
+
+\emph{Composition preservation.}
+Let $f: A \to B$ and $g: B \to C$ be morphisms in
+$\mathcal{C}(S,\kappa)$, witnessed by discriminators
+$d_f, d_g \in \kappa$. Their composite $g \circ f$ is
+the joint filtration, whose algebraic content is recorded
+as $d_f \wedge d_g$ with $\tau/\sigma$ tracking
+(Definition \ref{def:composition}).
+
+The forgetful functor $U$ applies the projection
+$\pi: \bigwedge(\GF(2)^n) \to \bigwedge(\GF(2)^{n'})$
+(where $n' < n$ corresponds to the smaller regime
+$\kappa'$). This projection is a \emph{ring homomorphism}
+of exterior algebras: it preserves both addition and the
+wedge product. Therefore:
+\[
+  U(g \circ f) = \pi(d_f \wedge d_g)
+  = \pi(d_f) \wedge \pi(d_g)
+  = U(f) \wedge U(g) = U(g) \circ U(f).
+\]
+The second equality is the ring homomorphism property.
+The $\tau/\sigma$ tracking is preserved because $\pi$
+acts on each discriminator independently, and the
+$\tau/\sigma$ assignments of $\pi(d)$ are the restrictions
+of $d$'s assignments to the dimensions retained in
+$\kappa'$.
+
+If a discriminator $d$ involves only dimensions outside
+$\kappa'$, then $\pi(d) = 0$ (the discriminator is
+projected to the identity). This is correct: the morphism
+it witnessed is invisible at the coarser resolution,
+and $U$ maps it to the identity morphism.
+
+\emph{Identity preservation.}
+The identity morphism $\mathrm{id}_A$ is the degenerate
+discriminator $d \wedge d = 0$.
+$U(\mathrm{id}_A) = \pi(0) = 0 = \mathrm{id}_{U(A)}$.
+\end{proof}
+
+\begin{theorem}[Triadic adjunction system]\label{thm:adjunction}\footnote{Axiom class \textsf{A} $\cdot$ depth 5 $\cdot$ \S\ref{app:adjunction-full}.  \emph{Warrant}: $\pi \circ \iota = \mathrm{{id}}$ (direct summand). \emph{Qualifier}: these are retract adjunctions --- individually trivial, collectively non-trivial as covering families for the Grothendieck topology. Finite-$\kappa$: yes. Standard (retract adjunction from direct summand). Collectively novel (six adjunctions as covering families).}
+The $S_3$ symmetry of the triangle identity generates six
+adjunctions --- three chirality pairs --- by permuting
+$\kappa$, $\sigma$, $\tau$ over the adjunction stencil
+$A \leftarrow B \to C$, where $A$ is the left adjoint,
+$B$ is the hom, and $C$ is the right adjoint.
+\end{theorem}
+
+\begin{proof}
+The adjunction stencil $A \leftarrow B \to C$ places three
+roles in a fixed relationship: the hom-object $B$ mediates
+between left adjoint $A$ and right adjoint $C$. The
+adjunction is the natural bijection
+$\operatorname{Hom}(A, C) \cong B$, expressing that $B$
+determines the morphism space between $A$ and $C$.
+
+The triangle identity (Definition \ref{def:triangle})
+states that any two of $\{\kappa, \sigma, \tau\}$ determine
+the third. This is precisely the structure of an adjunction:
+given the left and right adjoints, the hom is determined, and
+given the hom and one adjoint, the other is determined.
+
+Permuting $\kappa, \sigma, \tau$ over the stencil
+$A \leftarrow B \to C$ yields six assignments, grouped
+into three pairs of opposite chirality:
+
+\emph{On the $\sigma$-axis} ($\sigma$ as hom):
+\begin{itemize}[nosep]
+  \item $\kappa \leftarrow \sigma \to \tau$:
+    $\kappa$ is left adjoint, $\sigma$ is the hom-space,
+    $\tau$ is right adjoint.
+  \item $\tau \leftarrow \sigma \to \kappa$:
+    chirality reversed. $\tau$ is left adjoint,
+    $\kappa$ is right adjoint.
+\end{itemize}
+
+\emph{On the $\tau$-axis} ($\tau$ as hom):
+\begin{itemize}[nosep]
+  \item $\kappa \leftarrow \tau \to \sigma$:
+    $\kappa$ is left adjoint, $\tau$ is the hom-space,
+    $\sigma$ is right adjoint.
+  \item $\sigma \leftarrow \tau \to \kappa$:
+    chirality reversed.
+\end{itemize}
+
+\emph{On the $\kappa$-axis} ($\kappa$ as hom):
+\begin{itemize}[nosep]
+  \item $\sigma \leftarrow \kappa \to \tau$:
+    $\sigma$ is left adjoint, $\kappa$ is the hom-space,
+    $\tau$ is right adjoint.
+  \item $\tau \leftarrow \kappa \to \sigma$:
+    chirality reversed.
+\end{itemize}
+
+Each assignment produces a valid adjunction because the
+triangle identity guarantees the required bijection. We
+prove the bijection for the first assignment; the others
+follow by $S_3$ symmetry.
+
+\emph{Bijection.}
+For the $\sigma$-axis ($\kappa \leftarrow \sigma \to \tau$):
+a morphism from a $\kappa$-element to a $\tau$-element in
+the $\sigma$-regime is determined by its $\GF(2)$-value
+via $\sigma = \kappa + \tau$. The maps
+$\Phi: \operatorname{Hom}_\sigma(\kappa, \tau) \to \sigma$
+(extract the $\sigma$-value) and
+$\Psi: \sigma \to \operatorname{Hom}_\sigma(\kappa, \tau)$
+(reconstruct from the value via $\kappa + s = \tau$) are
+mutual inverses because $\GF(2)$ addition is bijective.
+The bijection is:
+\begin{equation}\label{eq:triadic-adj}
+  \operatorname{Hom}_\sigma(\kappa, \tau) \cong \sigma.
+\end{equation}
+
+\emph{Naturality.}
+$\Phi$ is natural in both variables because
+$\pi_\sigma$ (projection onto $\sigma$-components) is a
+ring homomorphism preserving $\wedge$ and $+$.
+Precomposition with $F(f) = \pi_\sigma(d_f)$ and
+post-composition with $U(g) = \pi_\tau(d_g)$ both
+commute with $\Phi$ because $\Phi$ extracts the
+$\sigma$-value, and ring homomorphisms preserve
+products.
+
+\emph{Zig-zag equations.}
+$\kappa'$ is a direct summand of $\kappa$ as a
+$\GF(2)$-vector space ($V = \kappa' \oplus W$), so
+$\pi \circ \iota = \mathrm{id}_{\kappa'}$. The unit
+$\eta = \mathrm{id}$ and the counit $\varepsilon =
+\mathrm{id}$ on the image. Both zig-zag equations
+reduce to $\mathrm{id} \circ \mathrm{id} = \mathrm{id}$.
+This is a retract adjunction: structurally simple but
+algebraically genuine.
+
+\emph{Six adjunctions.}
+The remaining five follow by $S_3$ permutation of
+$\{\kappa, \sigma, \tau\}$ over the stencil. Within
+each axis, the two chiralities ($\kappa \leftarrow
+\sigma \to \tau$ and $\tau \leftarrow \sigma \to \kappa$)
+are related by reversing left and right adjoints. The
+triangle identity ensures all six access the same
+information ($\dim(\kappa) = \dim(\sigma) = \dim(\tau)$,
+preserved by XOR). (Full component verification: \S\ref{app:adjunction-full}.)
+\end{proof}
+
+\begin{corollary}[The free-forgetful adjunction is one of six]
+\label{cor:free-fgt}
+The free-forgetful adjunction between coarsening
+($\pi: \kappa \to \kappa'$) and refinement
+($\iota: \kappa' \hookrightarrow \kappa$) is the
+$\kappa$-axis adjunction $\sigma \leftarrow \kappa \to \tau$:
+$\kappa$ plays the hom role (the morphism space is the
+set of discriminators), $\sigma$ is the free (left) functor
+(embedding into a finer regime), and $\tau$ is the
+forgetful (right) functor (projecting to a coarser regime).
+
+The remaining five adjunctions are equally valid:
+\begin{itemize}[nosep]
+  \item The $\sigma$-axis adjunctions govern the relationship
+    between population-level structure ($\kappa$) and
+    observation-level structure ($\tau$), mediated by
+    meta-discrimination ($\sigma$).
+  \item The $\tau$-axis adjunctions govern the relationship
+    between population-level structure ($\kappa$) and
+    meta-discrimination ($\sigma$), mediated by
+    observation ($\tau$).
+\end{itemize}
+\end{corollary}
+
+\begin{remark}
+The six adjunctions are not six separate constructions.
+They are one structure --- the $\GF(2)$ toroid --- viewed
+from six orientations. Each orientation places one
+component in the hom role and the other two in adjoint
+roles, with chirality determining which is left and which
+is right. The adjunction is the toroid.
+\end{remark}
+
+\subsection{Natural transformations}\label{sec:nattrans}
+
+\begin{definition}[Natural transformation]\label{def:nattrans}
+Let $F, G: \mathcal{C}(S,\kappa) \to \mathcal{C}(S',\kappa')$
+be two functors (two $\kappa$-deformations between the same
+source and target categories). A \emph{natural transformation}
+$\eta: F \Rightarrow G$ is a family of morphisms
+$\{\eta_A: F(A) \to G(A)\}_{A \in \mathrm{Ob}(\mathcal{C}(S,\kappa))}$
+in $\mathcal{C}(S',\kappa')$ such that for every morphism
+$f: A \to B$ in $\mathcal{C}(S,\kappa)$, the following
+square commutes:
+$G(f) \circ \eta_A = \eta_B \circ F(f)$.
+
+In the discrimination framework, each component $\eta_A$ is
+a discriminator in $\kappa'$ that mediates between the
+two deformations' images of $A$. The naturality condition
+states that mediation commutes with the deformations'
+action on morphisms.
+\end{definition}
+
+\begin{proposition}[Naturality from coherence of discrimination]
+\label{prop:naturality}
+Let $F$ and $G$ be two $\kappa$-deformations that differ on
+a set of dimensions $D \subset \kappa$. A natural
+transformation $\eta: F \Rightarrow G$ exists if and only if
+there is a coherent family of discriminators in $\kappa'$
+--- one per object of the source category --- that
+compensates for the difference between $F$ and $G$ on the
+dimensions in $D$, and this compensation commutes with
+all morphisms in the source category.
+\end{proposition}
+
+\begin{proof}
+The two deformations $F$ and $G$ agree on dimensions
+outside $D$ and disagree on dimensions in $D$. For each
+object $A$, $F(A)$ and $G(A)$ differ in their $\tau/\sigma$
+profiles on the dimensions in $D$. A discriminator
+$\eta_A \in \kappa'$ with $\tau_{\eta_A}(F(A)) = 1$ and
+$\sigma_{\eta_A}(G(A)) = 1$ provides the component morphism.
+
+The coherence condition (naturality) requires that for
+$f: A \to B$ witnessed by $d$, the composite discriminations
+$G(d) \wedge \eta_A$ and $\eta_B \wedge F(d)$ agree. Since
+the wedge product is commutative over $\GF(2)$, this reduces
+to verifying that the $\tau/\sigma$ tracking is consistent
+through both paths around the square. This holds when the
+family $\{\eta_A\}$ is determined by the dimensions $D$
+uniformly --- that is, when the same dimensional shift
+applies at every object.
+\end{proof}
+
+\subsection{The Yoneda lemma}\label{sec:yoneda}
+
+The Yoneda lemma is the statement that an object is fully
+determined by its morphism profile. In the discrimination
+framework, this is not a lemma to be proved but a
+\emph{design principle that has been built in from the
+start}. We now show that the formal Yoneda lemma is a
+theorem of the framework.
+
+\begin{definition}[Representable presheaf]\label{def:representable}
+For an object $A$ in $\mathcal{C}(S,\kappa)$, the
+\emph{representable presheaf} $h_A = \operatorname{Hom}(-, A)$
+assigns to each object $B$ the set of discriminators
+$d \in \kappa$ with $\tau_d(B) = 1$ and $\sigma_d(A) = 1$.
+This is the set of all directed morphisms into $A$.
+\end{definition}
+
+\begin{theorem}[Yoneda]\label{thm:yoneda}\footnote{Axiom class \textsf{A} $\cdot$ depth 5 $\cdot$ \S\ref{app:yoneda-full}.  \emph{Warrant}: standard for any locally small category. \emph{Qualifier}: local smallness is immediate for finite $\kappa$; for infinite structures, it inherits the operationalist axiom's strength or weakness Finite-$\kappa$: yes. Re-description. Local smallness caveat for infinite. (\S6, local smallness caveat).}
+The Yoneda embedding
+$\mathcal{Y}: \mathcal{C}(S,\kappa) \hookrightarrow
+[\mathcal{C}(S,\kappa)^{\mathrm{op}}, \mathbf{Set}]$
+defined by $A \mapsto h_A$ is full and faithful. That is:
+$A \cong B$ in $\mathcal{C}(S,\kappa)$ if and only if
+$h_A \cong h_B$ as presheaves.
+\end{theorem}
+
+\begin{proof}
+\emph{Faithfulness.}
+If $f \neq g: A \to B$ (distinct discriminators $d_f \neq d_g$),
+then $h_f \neq h_g$ because $d_f$ and $d_g$ produce
+different $\tau/\sigma$ assignments on at least one element
+of $S$ (they are distinct dimensions of $\kappa$), so
+there exists an object $C$ for which
+$h_f(C) \neq h_g(C)$.
+
+\emph{Fullness.}
+Let $\eta: h_A \to h_B$ be a natural transformation. By
+the Yoneda argument, $\eta$ is determined by its component
+at $A$: $\eta_A \in h_B(A) = \operatorname{Hom}(A, B)$.
+This component is a discriminator $d$ with $\tau_d(A) = 1$
+and $\sigma_d(B) = 1$. The morphism $d: A \to B$ in
+$\mathcal{C}(S,\kappa)$ maps to $\eta$ under $\mathcal{Y}$.
+
+\emph{Equivalently, in the language of the framework:}
+two objects are isomorphic if and only if they have
+identical morphism profiles against the entire population
+--- that is, no discriminator in $\kappa$ separates them
+directionally. This is $\kappa$-extensionality
+(Theorem \ref{thm:ext}) restricted to directed morphisms.
+The Yoneda embedding is the directed version of the
+principle that identity is constituted by discrimination
+profile.
+(Full proof: \S\ref{app:yoneda-full}.)
+\end{proof}
+
+\begin{remark}
+That Yoneda is a theorem rather than a surprise is the point.
+The framework was constructed so that an element's identity is
+its relational profile (Remark after Definition
+\ref{def:membership}). Yoneda formalizes this in the directed
+setting and confirms that the construction is consistent:
+the categorical structure constructed from discrimination
+inherits the relational-identity principle from which it
+was built.
+
+For finite $S$ and $\kappa$, local smallness (that
+$\operatorname{Hom}(A,B)$ is a set) is immediate. For
+infinite structures obtained via the operationalist
+axiom, the set-theoretic status of hom-sets is exactly
+the kind of question the framework is addressing, and
+there is a circularity risk: Yoneda presupposes that
+hom-sets are well-behaved, but their well-behavedness
+depends on the framework that Yoneda helps to validate.
+The finite case is clean; the infinite case inherits
+whatever strength or weakness Finite-$\kappa$: yes. Re-description. Local smallness caveat for infinite. the operationalist axiom (Definition \ref{def:operationalist})
+confers.
+\end{remark}
+
+\subsection{Limits and colimits from residue structure}
+
+\begin{definition}[Limit as universal cone]\label{def:limit}
+Let $D: \mathcal{J} \to \mathcal{C}(S,\kappa)$ be a diagram
+(a functor from a small index category). A \emph{limit} of
+$D$ is an object $L$ with morphisms $\pi_j: L \to D(j)$
+for each $j \in \mathcal{J}$, universal among all such cones.
+
+In the discrimination framework, $L$ is the $\kappa$-equivalence
+class that is maximally classified under $\tau$ by every
+discriminator witnessing a morphism into any $D(j)$. The
+universality condition states: $L$ is the tightest equivalence
+class from which every object in the diagram is reachable.
+\end{definition}
+
+\begin{proposition}[Limits from exhaustive filtration]
+\label{prop:limits}
+The limit of a diagram $D$ exists in $\mathcal{C}(S,\kappa)$
+whenever $\kappa$ contains sufficient discriminators to
+express the universal property. If the limit does not exist,
+the obstruction is a residue: the wedge product of the cone
+morphisms produces a non-zero element in the kernel, and
+consuming this residue via $\kappa$-evolution extends the
+category to one in which the limit exists.
+\end{proposition}
+
+\begin{proof}
+The cone condition requires, for each pair of objects
+$D(j), D(k)$ connected by a morphism $D(f): D(j) \to D(k)$,
+that $\pi_k = D(f) \circ \pi_j$. This is a system of
+equations in the discriminators of $\kappa$, mediated by
+the wedge product. If the system has a solution --- a
+discriminator (or grade-$k$ element) that simultaneously
+satisfies all cone conditions --- the limit exists.
+
+If no solution exists, the wedge product of the cone
+constraints produces a non-trivial residue: the
+constraints are mutually incompatible under the current
+$\kappa$. By Theorem \ref{thm:exhaustive} (operational
+exhaustivity), this residue specifies the discriminator
+needed to resolve the incompatibility. Consuming the
+residue evolves $\kappa$, and in the evolved regime
+the limit exists.
+\end{proof}
+
+\begin{remark}
+The dual construction gives colimits: the colimit of a
+diagram is the loosest equivalence class into which every
+object of the diagram maps. Colimits that fail to exist
+produce residues with the same self-specifying property.
+\end{remark}
+
+\begin{remark}[Completeness is not a fixed property]
+A category $\mathcal{C}(S,\kappa)$ is complete (has all
+small limits) relative to its current $\kappa$-state.
+Introducing a new diagram that lacks a limit triggers
+$\kappa$-evolution, extending the category to accommodate
+it. Completeness is not a static property of the category
+but a dynamic relationship between the category and the
+demands placed on it. Every demand that exposes an
+incompleteness simultaneously provides (via the residue)
+the means to resolve it.
+\end{remark}
+
