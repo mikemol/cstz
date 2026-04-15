@@ -1,44 +1,19 @@
 # Committed triples: paper ↔ Agda ↔ Python
 
-103 triples committed by `align_perspectives.py` at current thresholds
+53 triples committed by `align_perspectives.py` at current thresholds
 (absolute score ≥ 0.30, top/second ratio ≥ 1.2×).  Each row is annotated
 with the authorial-evidence signals extracted by `validate_against_comments.py`.
 
 | Agda | Paper | Python | Evidence |
 |------|-------|--------|----------|
+| module:CSTZ.Axiom.EvalLinearity | definition:def:eval-linear | module:axioms | paper_citation_in_agda,paper_citation_in_pyt… |
 | module:CSTZ.Axiom.Operationalist | definition:def:operationalist | module:axioms | paper_citation_in_agda,paper_citation_in_pyt… |
+| module:CSTZ.Axiom.ProfileLinearity | definition:def:profile-linear | module:axioms | paper_citation_in_agda,paper_citation_in_pyt… |
 | record:DirectedMorphism | definition:def:directed-morphism | class:DirectedMorphism | — |
 | function:compose-coeff | definition:def:category | function:compose_coeff | paper_citation_in_agda |
-| data:LimitKind | definition:def:limit | class:LimitKind | — |
-| function:class-A-e₁ | definition:def:category | function:make_ast_class_registry | paper_citation_in_agda |
-| function:class-A-e₂ | definition:def:subobj-class | function:make_ast_class_registry | — |
-| function:class-B-e₁ | definition:def:subobj-class | function:make_ast_class_registry | — |
-| function:class-B-e₂ | definition:def:subobj-class | function:make_ast_class_registry | — |
-| function:class-C-e₁ | definition:def:subobj-class | function:make_ast_class_registry | — |
-| function:class-C-e₂ | definition:def:subobj-class | function:make_ast_class_registry | — |
-| function:class-D-e₁ | definition:def:subobj-class | function:make_ast_class_registry | — |
-| function:class-D-e₂ | definition:def:subobj-class | function:make_ast_class_registry | — |
-| module:CSTZ.Examples.GF2Cubed.Homotopy | definition:def:directed-homotopy | module:homotopy | — |
-| function:comm-subset | theorem:thm:groupoid | function:check_wedge_comm | paper_citation_in_agda |
-| function:univ-diff | proposition:prop:univalence | function:sym_diff_discriminator | paper_citation_in_agda |
-| function:monoidal-prod | definition:def:monoidal-prod | module:monoidal | paper_citation_in_agda |
-| function:pairing-diff | proposition:prop:pairing | function:sym_diff_discriminator | paper_citation_in_agda |
-| function:link-v₁ | theorem:thm:foundation | function:link_vector | paper_citation_in_agda |
-| function:choice-unresolved-S₁ | theorem:thm:choice | function:choice_measure | paper_citation_in_agda |
-| function:choice-unresolved-S₂ | theorem:thm:choice | function:choice_measure | — |
-| function:choice-resolved-S₁ | theorem:thm:choice | function:choice_measure | — |
-| function:choice-resolved-S₂ | theorem:thm:choice | function:choice_measure | — |
-| function:conj-τ-σ | definition:def:tau-sigma | function:omega_conj | — |
+| function:profile-lin-check-1 | definition:def:profile-linear | module:axioms | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:fano-1 | theorem:thm:fano | function:check_fano_lines | paper_citation_in_agda,paper_citation_in_pyt… |
-| function:galois-order-full | remark:rem:native-univalence | function:check_fano_lines | — |
 | module:CSTZ.Examples.TruthTables | remark:rem:proof-assistant | function:check_truth_tables | agda_path_in_python |
-| function:neg-τ | definition:def:tau-sigma | function:omega_neg | — |
-| function:neg-σ | definition:def:tau-sigma | function:omega_neg | — |
-| function:dne-τ | definition:def:tau-sigma | function:dne | — |
-| function:dne-σ | definition:def:tau-sigma | function:dne | — |
-| function:conj-τ-σ | definition:def:tau-sigma | function:omega_conj | — |
-| function:disj-τ-σ | definition:def:tau-sigma | function:omega_disj | — |
-| function:disj-gap-τ | definition:def:tau-sigma | function:omega_disj | — |
 | function:restrictToGrade | remark:anon_045 | function:ext_restrict_grade | — |
 | module:CSTZ.Exterior.Wedge | definition:def:degeneracy | function:check_wedge_self_zero | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:wedgeBasis | definition:def:degeneracy | function:check_wedge_self_zero | paper_citation_in_agda,paper_citation_in_pyt… |
@@ -47,11 +22,8 @@ with the authorial-evidence signals extracted by `validate_against_comments.py`.
 | function:wedge-self-zero | definition:def:degeneracy | function:check_wedge_self_zero | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:disjoint-comm | definition:def:degeneracy | function:check_wedge_self_zero | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:∪-comm | definition:def:degeneracy | function:check_wedge_self_zero | paper_citation_in_agda,paper_citation_in_pyt… |
-| function:isBoolean | definition:def:boolean-dim | function:is_boolean | — |
-| function:Membership | definition:def:discriminator | function:membership | paper_citation_in_agda,python_name_in_agda |
-| module:CSTZ.Higher.FreeNK | theorem:thm:nk-free | module:higher | paper_citation_in_agda |
+| function:wedge₂-comm | definition:def:degeneracy | function:check_wedge_self_zero | paper_citation_in_agda,paper_citation_in_pyt… |
 | module:CSTZ.Higher.Perspectives | proposition:prop:perspectives | function:rotate | paper_citation_in_agda,paper_citation_in_pyt… |
-| module:CSTZ.Higher.Toroid | definition:def:toroid | module:higher | — |
 | module:CSTZ.Higher.Triangle | definition:def:triangle | function:triangle_identity | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:τ-point | definition:def:triangle | function:triangle_identity | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:σ-point | definition:def:triangle | function:triangle_identity | paper_citation_in_agda,paper_citation_in_pyt… |
@@ -61,33 +33,17 @@ with the authorial-evidence signals extracted by `validate_against_comments.py`.
 | function:triangle-σ | definition:def:triangle | function:triangle_identity | paper_citation_in_agda,paper_citation_in_pyt… |
 | module:CSTZ.Homotopy.ChainComplex | proposition:prop:boundary | function:chain_complex_check | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:chain-complex | proposition:prop:boundary | function:chain_complex_check | paper_citation_in_agda,paper_citation_in_pyt… |
-| function:DiscComplex | definition:def:complex | function:chain_complex_check | — |
 | module:CSTZ.Homotopy.Degeneracy | definition:def:degeneracy | function:check_wedge_self_zero | paper_citation_in_agda,paper_citation_in_pyt… |
 | module:CSTZ.Homotopy.Exhaustivity | theorem:thm:exhaustive | function:exhaustive_filling | paper_citation_in_agda,paper_citation_in_pyt… |
-| module:CSTZ.Homotopy.Groupoid | theorem:thm:groupoid | module:homotopy | paper_citation_in_agda |
-| module:CSTZ.Homotopy.Univalence | proposition:prop:univalence | module:homotopy | paper_citation_in_agda |
-| module:CSTZ.Homotopy | definition:def:directed-homotopy | module:homotopy | — |
-| module:CSTZ.Monoidal.CayleyDickson | definition:def:cayley-dickson | module:monoidal | python_name_in_agda |
 | function:swap | definition:def:cayley-dickson | function:swap_conjugation | paper_citation_in_agda,paper_citation_in_pyt… |
-| module:CSTZ.Monoidal.Closure | theorem:thm:closure | module:monoidal | paper_citation_in_agda |
-| module:CSTZ.Monoidal.DeloopCollapse | corollary:cor:iterated-deloop | module:monoidal | paper_citation_in_agda,python_name_in_agda |
-| module:CSTZ.Monoidal.Delooping | theorem:thm:deloop | module:monoidal | paper_citation_in_agda,python_name_in_agda |
-| module:CSTZ.Monoidal.Product | definition:def:monoidal-prod | module:monoidal | paper_citation_in_agda |
-| function:_⊗-coeff_ | definition:def:monoidal-prod | function:compose_coeff | paper_citation_in_agda |
-| module:CSTZ.Monoidal.Symmetric | proposition:prop:sym-monoidal | module:monoidal | paper_citation_in_agda,python_name_in_agda |
 | function:IsBooleanDim | definition:def:boolean-dim | function:is_boolean | paper_citation_in_agda |
-| function:finite-choice-terminates | theorem:thm:choice | function:choice_measure | paper_citation_in_agda |
-| module:CSTZ.Sets.Extensionality | theorem:thm:ext | module:sets | paper_citation_in_agda,python_name_in_agda |
 | function:κ-equiv | theorem:thm:ext | function:kappa_equiv | paper_citation_in_agda |
 | function:κ-equiv-refl | theorem:thm:ext | function:kappa_equiv | paper_citation_in_agda |
 | function:κ-equiv-sym | theorem:thm:ext | function:kappa_equiv | paper_citation_in_agda |
-| module:CSTZ.Sets.Foundation | theorem:thm:foundation | module:sets | paper_citation_in_agda |
-| module:CSTZ.Sets.Infinity | proposition:prop:infinity | module:sets | paper_citation_in_agda |
 | function:russell-exclusion | theorem:thm:russell | function:russell_exclusion | paper_citation_in_agda |
 | module:CSTZ.Sets.SymDiff | proposition:prop:symdiff | function:sym_diff_discriminator | paper_citation_in_agda |
 | module:CSTZ.Topos.Convergence | theorem:thm:convergence | function:check_fano_lines | paper_citation_in_agda |
-| function:convergence-rate | theorem:thm:convergence | module:topos | paper_citation_in_agda |
-| module:CSTZ.Topos.FOL | proposition:prop:fol | module:topos | paper_citation_in_agda |
+| function:convergence-rate | theorem:thm:convergence | function:check_fano_lines | paper_citation_in_agda |
 | module:CSTZ.Topos.Fano | theorem:thm:fano | function:check_fano_lines | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:fano-line-1 | theorem:thm:fano | function:check_fano_lines | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:fano-line-2 | theorem:thm:fano | function:check_fano_lines | paper_citation_in_agda,paper_citation_in_pyt… |
@@ -96,16 +52,10 @@ with the authorial-evidence signals extracted by `validate_against_comments.py`.
 | function:fano-line-5 | theorem:thm:fano | function:check_fano_lines | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:fano-line-6 | theorem:thm:fano | function:check_fano_lines | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:fano-line-7 | theorem:thm:fano | function:check_fano_lines | paper_citation_in_agda,paper_citation_in_pyt… |
-| module:CSTZ.Topos.FiberedTopos | theorem:thm:topos | module:topos | paper_citation_in_agda,python_name_in_agda |
-| module:CSTZ.Topos.FixedPoint | theorem:thm:entailed | function:check_fixed_point_stability | paper_citation_in_agda |
+| module:CSTZ.Topos.FixedPoint | theorem:thm:entailed | function:unique_top_form | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:unique-top-form | theorem:thm:entailed | function:unique_top_form | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:unique-top-form-grade | theorem:thm:entailed | function:unique_top_form | paper_citation_in_agda,paper_citation_in_pyt… |
-| module:CSTZ.Topos.Irremovable | theorem:thm:irremovable | module:topos | paper_citation_in_agda |
-| module:CSTZ.Topos.ProofTheory | theorem:thm:proof-theory | module:topos | paper_citation_in_agda |
-| function:dne | theorem:thm:proof-theory | function:dne | paper_citation_in_agda |
 | module:CSTZ.Topos.SelfEnrichment | theorem:thm:self-enrich | function:check_fano_lines | paper_citation_in_agda,paper_citation_in_pyt… |
 | record:EnrichmentData | definition:def:enrichment-data | function:check_fano_lines | paper_citation_in_agda |
-| module:CSTZ.Topos.Sheaf | theorem:thm:sheaf | module:topos | paper_citation_in_agda,python_name_in_agda |
 | function:overdetΩ | theorem:thm:subobj | module:topos | paper_citation_in_agda |
 | function:linear-map-zero | theorem:thm:russell | function:check_linear_map_zero | paper_citation_in_agda |
-| function:pairing-via-annihilator | proposition:prop:pairing | function:in_annihilator | — |

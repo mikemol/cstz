@@ -120,10 +120,30 @@ def score_pair(
     reg: ParallelRegistry,
     a: Decl, bm_a: int,
     b: Decl, bm_b: int,
+    family_scales: dict[str, float] | None = None,
 ) -> tuple[float, int]:
-    """Return (weighted_score, firing_bitmap)."""
+    """Return (weighted_score, firing_bitmap) with optional family scaling."""
     firing = bm_a & bm_b
-    return reg.weighted_popcount(firing), firing
+    if family_scales is None:
+        return reg.weighted_popcount(firing), firing
+    total = 0.0
+    x = firing
+    while x:
+        lsb = x & -x
+        bid = lsb.bit_length() - 1
+        d = reg._by_id[bid]
+        total += d.weight * family_scales.get(d.family, 1.0)
+        x &= x - 1
+    return total, firing
+
+
+def load_family_scales(repo: Path) -> dict[str, float] | None:
+    """Load calibrated family weights if they exist, else None."""
+    path = repo / "reports" / "calibrated_weights.json"
+    if not path.exists():
+        return None
+    data = json.loads(path.read_text())
+    return data.get("family_scales")
 
 
 # ---------------------------------------------------------------------------
@@ -214,6 +234,7 @@ def align_parallel(paper: list[Decl], agda: list[Decl], python: list[Decl],
                     paper_rows: list[dict],
                     agda_docs: dict[str, str],
                     python_docs: dict[str, str],
+                    family_scales: dict[str, float] | None = None,
                     ) -> dict:
     """Parallel alignment pass."""
     reg = ParallelRegistry()
@@ -226,6 +247,8 @@ def align_parallel(paper: list[Decl], agda: list[Decl], python: list[Decl],
     print(f"# registry: {reg.size()} discriminators", file=sys.stderr)
     for fam, n in reg.by_family().items():
         print(f"#   family {fam!r:12s} {n}", file=sys.stderr)
+    if family_scales:
+        print(f"# using calibrated scales: {family_scales}", file=sys.stderr)
 
     # Compute bitmaps
     bm_paper: dict[str, int] = {}
@@ -251,14 +274,14 @@ def align_parallel(paper: list[Decl], agda: list[Decl], python: list[Decl],
         # Paper candidates
         p_scored = []
         for p in paper:
-            s, firing = score_pair(reg, a, bm_agda[a.qualname], p, bm_paper[p.qualname])
+            s, firing = score_pair(reg, a, bm_agda[a.qualname], p, bm_paper[p.qualname], family_scales)
             if s > 0:
                 p_scored.append((p.qualname, s, firing))
         p_scored.sort(key=lambda x: -x[1])
 
         y_scored = []
         for y in python:
-            s, firing = score_pair(reg, a, bm_agda[a.qualname], y, bm_python[y.qualname])
+            s, firing = score_pair(reg, a, bm_agda[a.qualname], y, bm_python[y.qualname], family_scales)
             if s > 0:
                 y_scored.append((y.qualname, s, firing))
         y_scored.sort(key=lambda x: -x[1])
@@ -346,7 +369,8 @@ def main():
 
     print(f"# paper={len(paper)} agda={len(agda)} python={len(python)}", file=sys.stderr)
 
-    result = align_parallel(paper, agda, python, paper_rows, agda_docs, python_docs)
+    family_scales = load_family_scales(repo)
+    result = align_parallel(paper, agda, python, paper_rows, agda_docs, python_docs, family_scales)
 
     reports = repo / "reports"
     reports.mkdir(exist_ok=True)

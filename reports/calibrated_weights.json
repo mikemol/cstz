@@ -1,0 +1,20 @@
+{
+  "family_scales": {
+    "token": 0.6639565270263373,
+    "name_tok": 0.5463411095457099,
+    "kind": 1.0,
+    "edge": 1.0,
+    "cite": 1.2189354121553069
+  },
+  "registry_size": 2886,
+  "registry_families": {
+    "token": 2000,
+    "name_tok": 465,
+    "kind": 47,
+    "edge": 58,
+    "cite": 316
+  },
+  "oracle_size": 453,
+  "final_top1": 78.64077669902913,
+  "final_mean_rank": 1.2378640776699028
+}
