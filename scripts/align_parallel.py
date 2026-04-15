@@ -253,21 +253,21 @@ def align_parallel(paper: list[Decl], agda: list[Decl], python: list[Decl],
     }
     if evolved_families:
         import candidate_families
+        # Build a lookup from tag → (items, fire_fn) by enumerating all
+        # candidate families (matching what the calibration saw).
+        all_candidates = {
+            tag: (items, fire_fn)
+            for tag, items, fire_fn in
+            candidate_families.enumerate_candidate_families(all_decls, paper_rows)
+        }
         for fam_tag in evolved_families:
-            gen = candidate_families.FAMILY_GENERATORS.get(fam_tag)
-            fire_fn = candidate_families.FIRE_FUNCTIONS.get(fam_tag)
-            if gen is None or fire_fn is None:
+            entry = all_candidates.get(fam_tag)
+            if entry is None:
                 continue
-            items = [(k, w) for (_, k, w) in gen(all_decls, paper_rows)]
+            items, fire_fn = entry
             reg.register_candidate_family(fam_tag, items)
-            if fam_tag == "section_num":
-                prev = fire_fn
-                def _wrap(decl, key, docstring="", _prev=prev):
-                    return _prev(decl, key, paper_row_by_qn=paper_row_by_qn, docstring=docstring)
-                active_extras[fam_tag] = _wrap
-            else:
-                active_extras[fam_tag] = fire_fn
-            print(f"# κ-evolved family registered: {fam_tag}", file=sys.stderr)
+            active_extras[fam_tag] = fire_fn
+            print(f"# κ-evolved family registered: {fam_tag} ({len(items)} discriminators)", file=sys.stderr)
 
     print(f"# registry: {reg.size()} discriminators", file=sys.stderr)
     for fam, n in reg.by_family().items():

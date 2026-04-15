@@ -1,6 +1,6 @@
 # Triples with zero authorial cross-reference evidence
 
-27 out of 96 committed triples have no supporting
+27 out of 93 committed triples have no supporting
 signal in the docstrings/comments.  These are the triples most likely
 to be wrong — the alignment engine matched them on structural
 grounds alone, without the authors ever mentioning the other side.

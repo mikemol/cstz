@@ -10,9 +10,9 @@ for the runtime.
 
 | Cell | Count | Meaning |
 |------|-------|---------|
-| E/E/E | 96 | Committed triple: paper+agda+python all present and aligned |
-| E/M/M | 115 | Paper object without triple — need agda+python or clearer name |
-| M/E/M | 344 | Agda decl without triple — either algebraic lemma (acceptable) or paper needs to state it |
+| E/E/E | 93 | Committed triple: paper+agda+python all present and aligned |
+| E/M/M | 116 | Paper object without triple — need agda+python or clearer name |
+| M/E/M | 347 | Agda decl without triple — either algebraic lemma (acceptable) or paper needs to state it |
 | M/M/E | 141 | Python object without triple — ad-hoc runtime or classification/observe subsystem |
 
 ## Partial-signal gaps (high value actionable items)
@@ -59,7 +59,7 @@ structural (no runtime witness needed).
 | definition:def:n-groupoid | module:CSTZ.Homotopy.Groupoid | 0.524 |
 | proposition:prop:monoidal | module:CSTZ.Monoidal | 0.522 |
 | conjecture:conj:CH | function:conj-over-τ | 0.522 |
-| … (7 more) | | |
+| … (8 more) | | |
 
 ### Paper objects with strong Python match but no Agda (E/M/E candidates)
 
@@ -86,6 +86,7 @@ add an Agda module or postulate.
 | proposition:prop:perspectives | class:Perspective | 0.584 |
 | theorem:prop:periodic-2d | module:exterior | 0.583 |
 | theorem:thm:n1cat | module:category | 0.582 |
+| definition:def:eval-linear | module:framework | 0.581 |
 | proposition:prop:bool-dependent | module:framework | 0.579 |
 | definition:def:functor | function:ext_boundary | 0.578 |
 | definition:def:kappa | function:is_paired | 0.576 |
@@ -97,8 +98,7 @@ add an Agda module or postulate.
 | proposition:prop:dynamics-transfer | class:Perspective | 0.566 |
 | definition:def:comprehension | function:check_wedge_self_zero | 0.560 |
 | definition:def:enrichment-data | function:triangle_identity | 0.556 |
-| definition:def:membership | function:membership | 0.555 |
-| … (26 more) | | |
+| … (27 more) | | |
 
 ### True paper gaps — agda+python present, no plausible paper match (M/E/E)
 
@@ -109,7 +109,7 @@ what Agda and Python both implement.  Action: add a definition or
 remark to the paper, or document why the construct is "internal"
 to the framework.
 
-*115 items in this bucket.*
+*117 items in this bucket.*
 
 | agda | python (score) | best paper (low score) |
 |------|----------------|------------------------|
@@ -151,9 +151,9 @@ to the framework.
 | function:pair-annihilator-e₁ | function:in_annihilator (0.63) | definition:def:membershi (0.24) |
 | function:pair-annihilator-e₃ | function:in_annihilator (0.63) | definition:def:membershi (0.24) |
 | module:CSTZ.Verification.RISC | function:check_risc (0.63) | theorem:thm:topos (0.22) |
+| function:wedge₂-comm | function:check_wedge_comm (0.63) | proposition:prop:commuta (0.24) |
 | function:classify-outside | function:classify (0.62) | remark:anon_061 (0.22) |
-| module:CSTZ.Vec | function:vec_zero (0.62) | — |
-| … (75 more) | | |
+| … (77 more) | | |
 
 ### Near-triples — all three corners have signal but ambiguity blocked commit
 
@@ -164,7 +164,7 @@ the paper candidate, these are **alignment-engine failures to recover**,
 not gaps.  They are the highest-leverage targets for refining the
 alignment pipeline.
 
-*107 items in this bucket.*
+*108 items in this bucket.*
 
 | agda | python | paper | py+paper score |
 |------|--------|-------|----------------|
@@ -208,13 +208,13 @@ alignment pipeline.
 | function:self-membership-excluded | function:membership (0.62) | corollary:cor:self-model (0.54) | 1.16 |
 | function:em-σ | function:omega_neg (0.62) | definition:def:tau-sigma (0.54) | 1.15 |
 | function:self-host-neg | function:omega_neg (0.63) | theorem:thm:self-hosting (0.52) | 1.15 |
-| … (67 more) | | | |
+| … (68 more) | | | |
 
 ## Single-source items (cofiber tips)
 
 ### Paper-only (E/M/M)
 
-115 paper decls have no plausible agda or python match.
+116 paper decls have no plausible agda or python match.
 Most are likely **remarks** and **examples** that are rhetorical
 context rather than formal objects to be mechanised.  First 20:
 
@@ -228,6 +228,7 @@ context rather than formal objects to be mechanised.  First 20:
 - `paper:proposition:prop:monoidal`  *proposition*
 - `paper:definition:def:membership`  *definition*
 - `paper:definition:def:comprehension`  *definition*
+- `paper:definition:def:eval-linear`  *definition*
 - `paper:proposition:prop:nondefault`  *proposition*
 - `paper:remark:rem:cycles`  *remark*
 - `paper:proposition:prop:empty`  *proposition*
@@ -237,15 +238,15 @@ context rather than formal objects to be mechanised.  First 20:
 - `paper:remark:rem:foundational-status`  *remark*
 - `paper:remark:rem:halting`  *remark*
 - `paper:remark:rem:hyper-recursive`  *remark*
-- `paper:remark:rem:cwa-owa`  *remark*
 
 ### Agda-only (M/E/M)
 
-344 agda decls have no paper/python match.  Many are
+347 agda decls have no paper/python match.  Many are
 low-level algebraic lemmas in GF2/Vec/Exterior — acceptable per
 STUDY.md §8.  First 20:
 
 - `agda:module:CSTZ.All`  (*module*, /home/user/cstz/agda/CSTZ/All.agda)
+- `agda:module:CSTZ.Axiom.EvalLinearity`  (*module*, /home/user/cstz/agda/CSTZ/Axiom/EvalLinearity.agda)
 - `agda:module:CSTZ.Axiom.Operationalist`  (*module*, /home/user/cstz/agda/CSTZ/Axiom/Operationalist.agda)
 - `agda:module:CSTZ.Category.Adjunction`  (*module*, /home/user/cstz/agda/CSTZ/Category/Adjunction.agda)
 - `agda:record:Adjunction`  (*record*, /home/user/cstz/agda/CSTZ/Category/Adjunction.agda)
@@ -264,7 +265,6 @@ STUDY.md §8.  First 20:
 - `agda:module:CSTZ.Category.NatTrans`  (*module*, /home/user/cstz/agda/CSTZ/Category/NatTrans.agda)
 - `agda:record:NatTrans`  (*record*, /home/user/cstz/agda/CSTZ/Category/NatTrans.agda)
 - `agda:module:CSTZ.Category.TwoCategory`  (*module*, /home/user/cstz/agda/CSTZ/Category/TwoCategory.agda)
-- `agda:function:interchange-at-F`  (*function*, /home/user/cstz/agda/CSTZ/Category/TwoCategory.agda)
 
 ### Python-only (M/M/E)
 

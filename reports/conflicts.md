@@ -31,4 +31,3 @@ one of the candidates is a better match than the aligner could tell.
 | function:residue-a₀-a₂ | definition:def:resid (0.73) / remark:rem:residue-o (0.73) |
 | function:triangle-check | definition:def:trian (0.73) / remark:rem:triangle- (0.73) |
 | function:triangle-rot-σ | definition:def:tau-s (0.73) / definition:def:trian (0.73) / remark:rem:triangle- (0.73) |
-| function:triangle-rot-τ | definition:def:tau-s (0.73) / definition:def:trian (0.73) / remark:rem:triangle- (0.73) |

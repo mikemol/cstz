@@ -1,6 +1,6 @@
 # Residues: unmatched or ambiguous Agda declarations
 
-344 Agda declarations did not produce a high-confidence triple.
+347 Agda declarations did not produce a high-confidence triple.
 The columns show the top-3 paper/python candidates and why they were rejected
 (absolute score below 0.30 or top/second margin below 1.2×).
 
@@ -14,6 +14,7 @@ In Appendix F's terms, each residue here is a four-cell signature:
 | Agda | Missing side(s) | Top paper cand. | Top python cand. |
 |------|-----------------|------------------|-------------------|
 | module:CSTZ.All | paper + python | — | function:check_boundary_squa (0.73) |
+| module:CSTZ.Axiom.EvalLinearity | python | definition:def:eval-linear (5.68) | module:axioms (4.95) |
 | module:CSTZ.Axiom.Operationalist | paper | definition:def:operationalis (5.68) | module:axioms (4.95) |
 | module:CSTZ.Category.Adjunction | paper + python | definition:def:category (0.73) | module:category (0.73) |
 | record:Adjunction | paper + python | theorem:thm:adjunction (3.64) | — |
@@ -22,13 +23,13 @@ In Appendix F's terms, each residue here is a four-cell signature:
 | module:CSTZ.Category.Emergent | python | definition:def:category (8.75) | module:category (0.73) |
 | record:DiscCtx | python | definition:def:category (4.95) | module:pyast (2.91) |
 | function:σ-target | python | definition:def:category (4.95) | module:pyast (2.91) |
-| function:compose-witnesses | paper + python | definition:def:category (4.95) | function:compose_witnesses (1.45) |
+| function:compose-witnesses | paper | definition:def:category (4.95) | function:compose_witnesses (4.93) |
 | module:CSTZ.Category.Functor | paper + python | definition:def:category (0.73) | module:category (0.73) |
 | record:DiscFunctor | paper + python | definition:def:functor (0.73) | — |
 | function:project | paper + python | — | — |
 | function:include | paper + python | — | module:pyast (2.91) |
 | module:CSTZ.Category.Limits | paper + python | definition:def:category (0.73) | module:category (0.73) |
-| function:equalizerWitness | paper + python | — | function:equalizer_witness (1.45) |
+| function:equalizerWitness | paper | — | function:equalizer_witness (4.93) |
 | module:CSTZ.Category.NatTrans | paper + python | definition:def:category (0.73) | module:category (0.73) |
 | record:NatTrans | paper + python | definition:def:nattrans (3.07) | — |
 | module:CSTZ.Category.TwoCategory | paper + python | definition:def:category (0.73) | module:category (0.73) |
@@ -59,7 +60,7 @@ In Appendix F's terms, each residue here is a four-cell signature:
 | function:resolve-a₀-a₂' | paper + python | — | — |
 | function:order-indep | python | proposition:prop:monoidal (4.95) | — |
 | module:CSTZ.Examples.GF2Cubed.Higher | paper + python | — | module:higher (0.73) |
-| function:self-inverse-e₁e₂ | python | theorem:thm:n1cat (4.95) | function:check_vec_self_inve (1.45) |
+| function:self-inverse-e₁e₂ | python | theorem:thm:n1cat (4.95) | function:check_vec_self_inve (4.47) |
 | function:triangle-check | paper + python | definition:def:triangle (0.73) | function:check_profile_linea (0.73) |
 | function:triangle-rot-σ | paper + python | definition:def:tau-sigma (0.73) | function:triangle_identity (0.73) |
 | function:triangle-rot-τ | paper + python | definition:def:tau-sigma (0.73) | function:triangle_identity (0.73) |
@@ -83,11 +84,11 @@ In Appendix F's terms, each residue here is a four-cell signature:
 | function:univ-separated | paper + python | — | — |
 | function:univ-separated' | paper + python | — | — |
 | module:CSTZ.Examples.GF2Cubed.Monoidal | paper + python | proposition:prop:monoidal (0.73) | module:monoidal (0.73) |
-| function:monoidal-prod-coeff | python | definition:def:monoidal-prod (4.53) | function:compose_coeff (0.73) |
+| function:monoidal-prod-coeff | python | definition:def:monoidal-prod (7.80) | function:compose_coeff (0.73) |
 | function:assoc-lhs | paper + python | — | — |
 | function:assoc-rhs | paper + python | — | — |
 | function:strict-assoc | python | theorem:thm:cat-axioms (3.30) | — |
-| function:sym-monoidal | paper + python | proposition:prop:sym-monoida (1.45) | module:monoidal (0.73) |
+| function:sym-monoidal | python | proposition:prop:sym-monoida (4.93) | module:monoidal (0.73) |
 | module:CSTZ.Examples.GF2Cubed.Sets | paper + python | — | module:sets (0.73) |
 | function:ext-a₀≢a₁ | python | theorem:thm:ext (5.68) | function:ext_zero (0.73) |
 | function:ext-a₃≢a₅ | paper + python | theorem:thm:ext (0.73) | function:ext_zero (0.73) |
@@ -162,5 +163,4 @@ In Appendix F's terms, each residue here is a four-cell signature:
 | function:em-overlap | paper + python | — | — |
 | function:expl-overlap | paper + python | — | module:verification (2.91) |
 | function:expl-τ | paper + python | definition:def:tau-sigma (0.73) | module:verification (2.91) |
-| module:CSTZ.Examples | paper + python | — | module:examples (0.48) |
-| … (194 more) | | | |
+| … (197 more) | | | |

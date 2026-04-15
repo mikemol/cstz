@@ -1,12 +1,11 @@
 # Committed triples: paper ↔ Agda ↔ Python
 
-96 triples committed by `align_perspectives.py` at current thresholds
+93 triples committed by `align_perspectives.py` at current thresholds
 (absolute score ≥ 0.30, top/second ratio ≥ 1.2×).  Each row is annotated
 with the authorial-evidence signals extracted by `validate_against_comments.py`.
 
 | Agda | Paper | Python | Evidence |
 |------|-------|--------|----------|
-| module:CSTZ.Axiom.EvalLinearity | definition:def:eval-linear | module:axioms | paper_citation_in_agda,paper_citation_in_pyt… |
 | module:CSTZ.Axiom.ProfileLinearity | definition:def:profile-linear | module:axioms | paper_citation_in_agda,paper_citation_in_pyt… |
 | record:DirectedMorphism | definition:def:directed-morphism | class:DirectedMorphism | — |
 | function:compose-coeff | definition:def:category | function:compose_coeff | paper_citation_in_agda |
@@ -48,7 +47,6 @@ with the authorial-evidence signals extracted by `validate_against_comments.py`.
 | function:wedge-self-zero | definition:def:degeneracy | function:check_wedge_self_zero | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:disjoint-comm | definition:def:degeneracy | function:check_wedge_self_zero | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:∪-comm | definition:def:degeneracy | function:check_wedge_self_zero | paper_citation_in_agda,paper_citation_in_pyt… |
-| function:wedge₂-comm | definition:def:degeneracy | function:check_wedge_self_zero | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:isBoolean | definition:def:boolean-dim | function:is_boolean | — |
 | function:Membership | definition:def:discriminator | function:membership | paper_citation_in_agda,python_name_in_agda |
 | module:CSTZ.Higher.FreeNK | theorem:thm:nk-free | module:higher | paper_citation_in_agda |
@@ -91,7 +89,6 @@ with the authorial-evidence signals extracted by `validate_against_comments.py`.
 | function:convergence-rate | theorem:thm:convergence | function:check_fano_lines | paper_citation_in_agda |
 | module:CSTZ.Topos.FOL | proposition:prop:fol | module:topos | paper_citation_in_agda |
 | module:CSTZ.Topos.FiberedTopos | theorem:thm:topos | module:topos | paper_citation_in_agda,python_name_in_agda |
-| module:CSTZ.Topos.FixedPoint | theorem:thm:entailed | function:unique_top_form | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:unique-top-form | theorem:thm:entailed | function:unique_top_form | paper_citation_in_agda,paper_citation_in_pyt… |
 | function:unique-top-form-grade | theorem:thm:entailed | function:unique_top_form | paper_citation_in_agda,paper_citation_in_pyt… |
 | module:CSTZ.Topos.Irremovable | theorem:thm:irremovable | module:topos | paper_citation_in_agda |

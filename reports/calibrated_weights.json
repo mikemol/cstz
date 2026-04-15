@@ -5,25 +5,30 @@
     "kind": 1.0,
     "edge": 1.0,
     "cite": 1.2370605971590973,
-    "name_bigram": 0.5
+    "ngram_name_p2": 0.5
   },
-  "registry_size": 4051,
+  "registry_size": 9618,
   "registry_families": {
     "token": 2000,
     "name_tok": 465,
     "kind": 47,
     "edge": 58,
     "cite": 316,
-    "name_bigram": 121,
-    "path_segment_DROPPED": 107,
-    "long_token_DROPPED": 884,
-    "section_num_DROPPED": 10,
-    "kind_pair_DROPPED": 43
+    "ngram_name_p2": 107,
+    "ngram_name_p3_DROPPED": 14,
+    "ngram_name_p4_DROPPED": 1,
+    "substring_qualname_p3_DROPPED": 1227,
+    "substring_qualname_p4_DROPPED": 1382,
+    "substring_qualname_p5_DROPPED": 1360,
+    "substring_qualname_p6_DROPPED": 1309,
+    "substring_qualname_p7_DROPPED": 1250,
+    "subtree_shape_p1_DROPPED": 41,
+    "subtree_shape_p2_DROPPED": 41
   },
   "oracle_size": 453,
   "final_top1": 79.12621359223301,
   "final_mean_rank": 1.233009708737864,
   "evolved_families": [
-    "name_bigram"
+    "ngram_name_p2"
   ]
 }
