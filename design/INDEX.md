@@ -6,32 +6,40 @@ Each node is a line in `design/<type>s.jsonl`.
 Use `python scripts/design_sppf.py show <id>` for full detail.
 Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 
-## Principles (13)
+## Principles (16)
 
 - ● [p-alignment-is-distribution] Alignment is a distribution, not a predicate
 - ● [p-arity-is-grade] Arity = grade; arity N is not tracked, it emerges
+- ● [p-atoms-are-formal-tau-sigma-channels] Atoms carry two independent formal channels; their content is a population choice
 - ● [p-atoms-gap-preserving] Atoms are gap-preserving
 - ● [p-boolean-earned-by-both-off-diagonals] Boolean is earned when both off-diagonal cells are populated
 - ● [p-chirality-only-for-higher-valence] Chirality semantics are optional at pair level
 - ● [p-closed-self-referential-loop] Pipeline loop must be closed and self-referential
 - ● [p-flat-k-pool] One flat K pool, no families
 - ● [p-iteration-count-unknown] Convergence count is unknown and unpromiseable
+- ● [p-kappa-is-derived-xor] κ = σ ⊕ τ is a derivation, not an independent axis
+- ● [p-maximal-freedom] Prefer interpretations that leave the greatest remaining freedom
 - ● [p-no-bespoke-recognition] No bespoke pattern recognition at any level
 - ● [p-no-canonicalization] No canonicalization at registration time
 - ● [p-source-is-a-k] Source provenance is just another K
 - ● [p-tau-sigma-not-opposite] τ/σ is not the opposite of σ/τ
 - ● [p-tau-sigma-separation] τ/σ separation is load-bearing
 
-## Decisions (8)
+## Decisions (13)
 
+- ● [d-articulation-scorer-pluggable] Articulation scorer is pluggable; multiple scorers can run simultaneously
 - ● [d-fixed-point-is-termination] Termination = no productive wedge articulation
 - ● [d-no-commit-gate] No commit/tier/triple output
 - ● [d-oracle-calibrates-not-gates] Citation oracle calibrates weights, does not gate commits
 - ● [d-pool-atoms-verbatim-kinds] Initial atoms = verbatim kind strings from subtrees
+- ● [d-report-is-full-state-jsonl] Reports dump the full state as queryable JSONL; views are separate
 - ● [d-single-closed-loop-module] Rebuild as a single closed_loop.py module
+- ● [d-smoke-test-scale-parameterized] Smoke-test corpus subset is a parameter, not a fixed choice
 - ● [d-tau-sigma-symmetric-at-grade-1] Atoms start with τ = σ (symmetric at grade 1)
 - ● [d-things-are-named-decls] Things = named declarations, not every parse-tree node
 - ● [d-wedge-bit-and-of-parents] Wedge K fires iff both parents fire (AND semantics for profile inclusion)
+- ● [d-wedge-combinator-general-exterior-algebra] Wedge combinator is the general exterior-algebra form
+- ● [d-weight-objective-pluggable] Weight-adjustment objective is pluggable
 
 ## Rejecteds (8)
 
@@ -44,7 +52,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (6)
+## Corrections (7)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -52,14 +60,16 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-context-externalized-to-sppf] Session context externalized to design/ SPPF
 - ● [c-division-notation-is-matrix-cell] '/' in (σ/τ) is matrix-cell separator, not ratio
 - ● [c-lowercase-still-hardcoded] Lowercasing is hardcoded equivalence, not a generic transform
+- ● [c-question-resolution-via-maximal-freedom] Open questions resolve via maximal freedom, not specific picks
 
-## Questions (5)
+## Questions (6)
 
-- ? [q-report-format-for-belnap-distribution] How to present the full Belnap distribution as reports
-- ? [q-smoke-test-scale] What subset of the corpus is small enough for smoke testing?
-- ? [q-tau-sigma-wedge-combinator] Exact combinator for τ/σ of a grade-2 wedge
-- ? [q-wedge-articulation-signal] What distributional signal triggers wedge articulation?
-- ? [q-weight-gradient-direction] Direction of weight gradient if not 'reduce residue to zero'
+-   [q-atom-observational-tau-sigma] What do τ and σ observe for an atomic K on a thing?
+- ✓ [q-report-format-for-belnap-distribution] How to present the full Belnap distribution as reports
+- ✓ [q-smoke-test-scale] What subset of the corpus is small enough for smoke testing?
+- ✓ [q-tau-sigma-wedge-combinator] Exact combinator for τ/σ of a grade-2 wedge
+- ✓ [q-wedge-articulation-signal] What distributional signal triggers wedge articulation?
+- ✓ [q-weight-gradient-direction] Direction of weight gradient if not 'reduce residue to zero'
 
 ## Artifacts (4)
 
