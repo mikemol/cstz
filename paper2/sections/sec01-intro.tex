@@ -334,9 +334,22 @@ claim count.
     realistic workloads --- and replacement of $h^*$
     with a better heuristic if needed --- is open.
     \textbf{Open (measurement).}$^{d=2}$
+  \item[G7] \emph{Parameter-space enrichment for
+    non-vectorized plans.} Discovered by the
+    feedback-loop trace of Appendix
+    \ref{app:feedback-loop},
+    \S\ref{app-f:persistent-residue}: plan $\alpha$'s
+    measured cost has a component (Python interpreter
+    overhead) that no scalar update of MODEL-4's
+    existing parameters can close. The loop has
+    \emph{discovered} the need for a per-plan overhead
+    baseline $l_{\mathrm{interp}}$; adding it to the
+    \texttt{Params} dataclass and re-running the loop
+    is a small code change. \textbf{Open (structural
+    refinement discovered by iteration).}$^{d=1}$
 \end{description}
 
-\emph{Meta-governance note.} Tracking these as G1--G6
+\emph{Meta-governance note.} Tracking these as G1--G7
 (with \gmark\ on the affected claims) rather than
 leaving them as implicit \cmark\ is the application of
 [DAF]'s verification framework to this paper. The

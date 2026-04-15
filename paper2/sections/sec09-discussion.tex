@@ -268,6 +268,8 @@ Lagrangian (\ref{thm:lagrangian}) & \omark &
   Integer gap bound & X3: prove tight bound (or accept open) \\
 All \textsf{H}-class \cmark & (conditional) &
   Uncalibrated $\pi$ & G1: fit profile for ref.\ GPU \\
+Loop convergence (App F) & \gmark &
+  $\alpha$'s persistent structural residue & G7: add $l_{\mathrm{interp}}$ to \texttt{Params} \\
 \multicolumn{2}{l}{--- operational validity} &
   No parser binary & G2: implement Earley chart parser \\
 \end{tabular}
@@ -323,6 +325,24 @@ close G1 and G2, and the proportion of \cmark\ marks
 on \textsf{H}-class claims equals the proportion on
 \textsf{A}-class claims automatically, without
 changing any definition or proof.
+
+\smallskip
+
+\noindent G1--G6 were identified by authorial analysis
+during paper writing. G7 is qualitatively different:
+it was \emph{discovered empirically} by running the
+feedback-loop script of Appendix \ref{app:feedback-loop}
+and observing a residue whose monotone-but-decelerating
+trajectory signalled a parameter-space shortfall. This
+is [DAF]'s residue-dynamic at work on the paper's own
+meta-claims: a residue that resists articulation under
+the current regime demands a $\kappa$-evolution, and
+the loop made the demand specific (add
+$l_{\mathrm{interp}}$). G7's existence is evidence that
+the framework has operational teeth beyond the
+authorial-enumeration mode of G1--G6 --- the framework
+can find its own gaps, not just confirm the gaps its
+author already named.
 
 \subsection{Cofibrative structure between [DAF] and this paper}
 

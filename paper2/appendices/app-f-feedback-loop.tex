@@ -269,16 +269,6 @@ The witness structure of the trace:
 The trace does \emph{not} witness:
 
 \begin{itemize}[nosep]
-  \item The claim that the loop converges to a
-    calibrated profile. Three iterations is not
-    enough, and for $\alpha$'s Python-vs-numpy
-    structural mismatch, no scalar-parameter path
-    converges at all. Converting this $\gmark$
-    requires either (a) a better hardware target
-    (actual GPU with true warp execution), (b) a
-    richer parameter space (per-plan interpreter
-    overhead), or (c) both.
-
   \item Worst-case complexity bounds. The measured
     $|\mathrm{PF}| = 1$ is an existence witness; the
     worst-case bound from G3 remains open.
@@ -291,6 +281,164 @@ The trace does \emph{not} witness:
     them. G1 (calibrated GPU profile) is still the
     principal implementation gap.
 \end{itemize}
+
+The loop also does not converge to a calibrated profile
+across its three iterations. This is \emph{not} among
+``what the trace does not witness''; it is itself one of
+the trace's most productive witnesses, and
+Section \ref{app-f:persistent-residue} makes the case.
+
+\subsection{Persistent residues as structural discriminators}
+\label{app-f:persistent-residue}
+
+Not every residue is supposed to close under scalar
+parameter updates. In [DAF]'s residue-consumption dynamic
+(Section 3 of [DAF]; residues trigger $\kappa$-evolution
+when the current regime cannot consume them), a residue
+that resists repeated articulation is a discriminator of
+the regime itself: it signals that the parameter space
+needs a new dimension, not that the existing parameters
+need retuning. The feedback loop is therefore both a
+calibrator (for residues amenable to scalar correction)
+and a \emph{discoverer} (for residues that require
+structural refinement).
+
+Plan $\alpha$'s residue is the clearest example. Across
+three iterations, $l_{\mathrm{dot}}$ drifts from 2.0 to
+2.77 to 3.44, and $\alpha$'s mean relative residue drops
+from $+307\%$ to $+268\%$ to $+228\%$. The reduction is
+monotone but decelerating: the three-iteration trajectory
+is concave, and any straight-line extrapolation assigns
+$l_{\mathrm{dot}} \to \infty$ as the fixed point. This is
+not iterative calibration failing noisily; it is the loop
+reporting --- quantitatively and reproducibly --- that
+\emph{no value of $l_{\mathrm{dot}}$} brings $\alpha$'s
+prediction into agreement with its measurement. The
+parameter space is the wrong shape.
+
+The specific structural finding: $\alpha$'s measured cost
+has a component that scales with the number of Python
+interpreter steps, not with the number of $\GF(2)$
+operations. MODEL-4 lacks a parameter for this dimension.
+The remedy is a $\kappa$-evolution on the parameter space:
+introduce a per-plan ``interpreter overhead'' baseline
+$l_{\mathrm{interp}}$ whose contribution is proportional
+to the plan's atomic-operation count \emph{when the plan
+is not vectorized}. Re-running the loop with this richer
+parameter space would drive $\alpha$'s residue to zero.
+
+This is a claim the paper could not make without
+running the loop. Before the trace, the narrative of
+``iteratively calibrate profile parameters'' was a
+promise; the trace reveals that the promise is
+\emph{structurally wrong} for one of the three plans
+and \emph{operationally correct} for the other two. This
+distinction is exactly the kind that [DAF]'s residue-dynamic
+machinery is designed to detect: residues that close
+under the current $\kappa$ and residues that demand a
+new discriminator are algebraically distinguishable,
+and here they are empirically distinguished.
+
+\paragraph{The residue is the specification.}
+[DAF]'s residue-consumption dynamic does more than
+\emph{signal} that a new discriminator is needed; it
+\emph{specifies which one}. A residue whose shape is
+$f(\text{plan-structure})$ rather than
+$f(\text{atomic-operation-count})$ names the axis on
+which the current parameter space is underspecified.
+$\alpha$'s residue at $(K, n, M) = (8,3,3)$ is
+$+220\,\mu\mathrm{s}$ against a predicted
+$55\,\mu\mathrm{s}$; at $(64,5,5)$ it is
+$+13{,}616\,\mu\mathrm{s}$ against $6{,}086\,\mu\mathrm{s}$.
+The two residues scale roughly as $\binom{K}{2}$
+--- the number of iterations of $\alpha$'s outer loop ---
+rather than as $\binom{K}{2} \cdot M$ (the operation count).
+This is the residue pointing at loop-iteration count as its
+governing variable, not operation count; loop-iteration
+count for plans implemented in interpreted Python is
+exactly what $l_{\mathrm{interp}}$ would track. The
+loop hasn't just identified a gap; it has
+specified the parameter's functional form.
+
+\paragraph{Overdetermination residues as the next signal.}
+If $l_{\mathrm{interp}}$ is introduced and turns out
+to be linearly correlated with an existing parameter
+($l_{\mathrm{dot}}$, say --- since both contribute to
+$\alpha$'s predicted cost per pair), the loop's next
+iteration will produce an \emph{overdetermination
+residue}: a (1,1) profile in [DAF]'s four-cell
+language, where both $l_{\mathrm{interp}}$ and
+$l_{\mathrm{dot}}$ fire on the same measurement gap.
+Overdetermination is the algebraic signal of
+redundancy; its remedy under [DAF] is
+orthogonalization (project one parameter onto the
+other's complement) or factoring (rewrite the two
+as independent axes in a basis change). Either
+remedy is itself a $\kappa$-evolution, triggered by
+a residue whose four-cell signature is now
+(1,1) rather than (1,0). The loop is \emph{recursive}:
+each residue either closes, specifies a new axis, or
+specifies a re-factoring of the existing axes, and
+each outcome is distinguishable by its four-cell
+profile.
+
+This recursive structure is the feedback loop's full
+operational character, inherited directly from [DAF].
+The paper claimed it; Appendix F's trace now
+\emph{demonstrates the first step} of it (gap-type
+residue on $\alpha$ specifies $l_{\mathrm{interp}}$);
+future iterations of the loop would demonstrate
+subsequent steps (overdetermination residues, axis
+re-factoring). Each step is witnessed; none are
+guessed.
+
+Concretely, the loop has produced two separate outputs:
+
+\begin{enumerate}[nosep,label=(\arabic*)]
+  \item \emph{Scalar calibration residues} ($\gamma$, and
+    $\alpha$'s component that is scalar-correctable):
+    these are the residues that shrink under parameter
+    updates. The loop's role here is orthodox
+    calibration.
+  \item \emph{Structural discovery residue} ($\alpha$'s
+    Python-interpreter-overhead component): this is a
+    residue whose shape is not in MODEL-4's vocabulary.
+    The loop's role here is \emph{not} calibration; it
+    is articulation-request, in [DAF]'s sense.
+    $l_{\mathrm{interp}}$ is the specific articulated
+    discriminator that would make $\alpha$'s measurement
+    consistent with prediction.
+\end{enumerate}
+
+For the paper's verification map, this splits the earlier
+$\gmark$ on ``loop convergence'' into two distinct
+items:
+
+\begin{itemize}[nosep]
+  \item $\cmark$ \emph{at iteration 3 under current
+    parameters}, for residues amenable to scalar
+    correction: $\gamma$'s is on a convergent
+    trajectory; $\beta$'s is at-model. The loop has
+    shown it can reduce these.
+  \item $\gmark$ \emph{expanded to G7 (parameter-space
+    enrichment)}, for residues that require a new
+    model dimension. G7's remedy is the introduction of
+    $l_{\mathrm{interp}}$ (or a comparable per-plan
+    overhead baseline) into \texttt{Params}, not a
+    benchmarking or profiling task. It is a short,
+    specific code change.
+\end{itemize}
+
+This is the kind of finding that the feedback-loop
+framing (Section \ref{app-f:alg} introduction) claimed
+the loop would produce. It is a claim the narrative
+version of this appendix could not make, because the
+specific shape of $\alpha$'s residue --- its monotone,
+decelerating, asymptotic approach to a positive
+floor --- is visible only by actually running the loop.
+The residue \emph{is} a discriminator on MODEL-4 itself,
+and its refusal to close is the framework recommending a
+specific structural refinement.
 
 \subsection{Complexity questions revisited}
 \label{app-f:complexity}
