@@ -6,7 +6,7 @@ Each node is a line in `design/<type>s.jsonl`.
 Use `python scripts/design_sppf.py show <id>` for full detail.
 Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 
-## Principles (16)
+## Principles (18)
 
 - ● [p-alignment-is-distribution] Alignment is a distribution, not a predicate
 - ● [p-arity-is-grade] Arity = grade; arity N is not tracked, it emerges
@@ -15,19 +15,22 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [p-boolean-earned-by-both-off-diagonals] Boolean is earned when both off-diagonal cells are populated
 - ● [p-chirality-only-for-higher-valence] Chirality semantics are optional at pair level
 - ● [p-closed-self-referential-loop] Pipeline loop must be closed and self-referential
+- ● [p-embarrassingly-parallel] Work cells are mergeable by concatenation
 - ● [p-flat-k-pool] One flat K pool, no families
 - ● [p-iteration-count-unknown] Convergence count is unknown and unpromiseable
 - ● [p-kappa-is-derived-xor] κ = σ ⊕ τ is a derivation, not an independent axis
 - ● [p-maximal-freedom] Prefer interpretations that leave the greatest remaining freedom
 - ● [p-no-bespoke-recognition] No bespoke pattern recognition at any level
 - ● [p-no-canonicalization] No canonicalization at registration time
+- ● [p-self-similarity] The framework is self-similar at every scale and grade
 - ● [p-source-is-a-k] Source provenance is just another K
 - ● [p-tau-sigma-not-opposite] τ/σ is not the opposite of σ/τ
 - ● [p-tau-sigma-separation] τ/σ separation is load-bearing
 
-## Decisions (13)
+## Decisions (15)
 
 - ● [d-articulation-scorer-pluggable] Articulation scorer is pluggable; multiple scorers can run simultaneously
+- ● [d-disk-as-merge-protocol] JSONL on disk is the merge protocol; append-only, no explicit join step
 - ● [d-fixed-point-is-termination] Termination = no productive wedge articulation
 - ● [d-no-commit-gate] No commit/tier/triple output
 - ● [d-oracle-calibrates-not-gates] Citation oracle calibrates weights, does not gate commits
@@ -35,6 +38,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [d-report-is-full-state-jsonl] Reports dump the full state as queryable JSONL; views are separate
 - ● [d-single-closed-loop-module] Rebuild as a single closed_loop.py module
 - ● [d-smoke-test-scale-parameterized] Smoke-test corpus subset is a parameter, not a fixed choice
+- ● [d-state-is-merge-friendly] State data structure is designed for restrict/merge from the start
 - ● [d-tau-sigma-symmetric-at-grade-1] Atoms start with τ = σ (symmetric at grade 1)
 - ● [d-things-are-named-decls] Things = named declarations, not every parse-tree node
 - ● [d-wedge-bit-and-of-parents] Wedge K fires iff both parents fire (AND semantics for profile inclusion)
