@@ -213,7 +213,8 @@ Grammar soundness (\ref{thm:soundness}) & \textsf{A} & \cmark &
 Cost-bounded Earley completeness (\ref{thm:earley-complete}) & \textsf{AH} & \cmark &
   Admissible heuristic; App.\ \ref{app:b} \\
 Planner complexity (\ref{thm:complexity}) & \textsf{AH} & \gmark &
-  $O(N^3 \cdot |\mathrm{Pareto}|)$; |Pareto| unbounded WC (G3) \\
+  $O(N^3 \cdot |\mathrm{Pareto}|)$; |Pareto|=1 at App F instances (existence);
+  WC bound open (G3) \\
 Lagrangian achievability (\ref{thm:lagrangian}) & \textsf{AH} & \omark &
   LP relaxation; integrality gap bounded (X3) \\
 Pareto portfolio extraction (\ref{prop:pareto}) & \textsf{AH} & \cmark &
@@ -227,7 +228,7 @@ Register-time-space bound (\ref{thm:reg-bound}) & \textsf{AH} & \gmark &
 Incremental replanning (\ref{prop:incremental}) & \textsf{AH} & \cmark &
   Earley chart locality \\
 Heuristic monotonicity (\ref{prop:heuristic-monotone}) & \textsf{AH} & \gmark &
-  Admissible but near-trivial; effective pruning unmeasured (G6) \\
+  Admissible; 9/9 winner-agreement at App F instances; WC pruning open (G6) \\
 \end{tabular}
 \end{center}
 
