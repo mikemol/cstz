@@ -55,7 +55,9 @@ def main():
         for k in r.get("evidence", {}):
             signal_counter[k] += 1
 
-    # Count triples by name-agreement tier
+    # Count triples by commit tier and by name-agreement
+    tier1 = sum(1 for t in triples if t.get("tier") == "tier1")
+    tier2 = sum(1 for t in triples if t.get("tier") == "tier2")
     both_agree = sum(1 for t in triples if t.get("name_agreement", {}).get("paper") and t.get("name_agreement", {}).get("python"))
     one_agree  = sum(1 for t in triples if bool(t.get("name_agreement", {}).get("paper")) ^ bool(t.get("name_agreement", {}).get("python")))
     body_only  = sum(1 for t in triples if not t.get("name_agreement", {}).get("paper") and not t.get("name_agreement", {}).get("python"))
@@ -88,7 +90,9 @@ def main():
         "",
         "## Alignment output",
         "",
-        f"- **{n_triples}** committed triples (high-confidence, unambiguous in Agda pivot)",
+        f"- **{n_triples}** committed triples total",
+        f"  - Tier 1 (confident, score ≥ 2.0, margin ≥ 1.3×): **{tier1}**",
+        f"  - Tier 2 (plausible, score ≥ 0.5, margin ≥ 1.2×): **{tier2}**",
         f"- **{n_residues}** residues (unmatched or ambiguous Agda decls)",
         f"- **{n_with_signal}** / {n_triples} triples ({100*n_with_signal/max(n_triples,1):.1f}%) have explicit authorial cross-reference evidence in docstrings/comments",
         "",

@@ -25,19 +25,21 @@ drilldown and κ-evolution are inherited from Appendix F of paper2.
 
 ## Alignment output
 
-- **53** committed triples (high-confidence, unambiguous in Agda pivot)
-- **387** residues (unmatched or ambiguous Agda decls)
-- **51** / 53 triples (96.2%) have explicit authorial cross-reference evidence in docstrings/comments
+- **109** committed triples total
+  - Tier 1 (confident, score ≥ 2.0, margin ≥ 1.3×): **53**
+  - Tier 2 (plausible, score ≥ 0.5, margin ≥ 1.2×): **56**
+- **331** residues (unmatched or ambiguous Agda decls)
+- **82** / 109 triples (75.2%) have explicit authorial cross-reference evidence in docstrings/comments
 
 ### Evidence signal breakdown
 
 | Signal | Count | % of triples |
 |--------|-------|--------------|
-| paper_citation_in_agda | 50 | 94.3% |
-| paper_citation_in_python | 38 | 71.7% |
-| agda_path_in_python | 10 | 18.9% |
-| python_path_in_agda | 3 | 5.7% |
-| python_name_in_agda | 3 | 5.7% |
+| paper_citation_in_agda | 80 | 73.4% |
+| paper_citation_in_python | 38 | 34.9% |
+| python_name_in_agda | 11 | 10.1% |
+| agda_path_in_python | 10 | 9.2% |
+| python_path_in_agda | 3 | 2.8% |
 
 ## What this demonstrates
 

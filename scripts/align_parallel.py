@@ -297,11 +297,22 @@ def align_parallel(paper: list[Decl], agda: list[Decl], python: list[Decl],
                 return scored[0]
             return None
 
-        p_pick = best_or_none(p_scored)
-        y_pick = best_or_none(y_scored)
+        # Tier 1: confident commit (score ≥ 2.0, margin ≥ 1.3)
+        # Tier 2: plausible commit (score ≥ 0.5, margin ≥ 1.2)
+        # Per the evidence-semantics principle, both are "committed"
+        # just at different confidence levels.  Downstream reports can
+        # filter by ``tier`` field.
+        p_pick = best_or_none(p_scored, min_abs=2.0, margin=1.3)
+        y_pick = best_or_none(y_scored, min_abs=2.0, margin=1.3)
+        commit_tier = "tier1" if (p_pick and y_pick) else None
+        if not (p_pick and y_pick):
+            p_pick2 = best_or_none(p_scored, min_abs=0.5, margin=1.2)
+            y_pick2 = best_or_none(y_scored, min_abs=0.5, margin=1.2)
+            if p_pick2 and y_pick2:
+                p_pick, y_pick = p_pick2, y_pick2
+                commit_tier = "tier2"
 
         if p_pick and y_pick:
-            # Summarize firing families for explainability
             p_families = reg.firing_families(p_pick[2])
             y_families = reg.firing_families(y_pick[2])
             triples.append({
@@ -315,6 +326,7 @@ def align_parallel(paper: list[Decl], agda: list[Decl], python: list[Decl],
                 "python_firing_families": dict(y_families),
                 "paper_path": paper_by_qn[p_pick[0]].path,
                 "python_path": f"{python_by_qn[y_pick[0]].path}:{python_by_qn[y_pick[0]].line}",
+                "tier": commit_tier,
             })
         else:
             residues.append({

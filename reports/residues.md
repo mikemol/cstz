@@ -1,6 +1,6 @@
 # Residues: unmatched or ambiguous Agda declarations
 
-387 Agda declarations did not produce a high-confidence triple.
+331 Agda declarations did not produce a high-confidence triple.
 The columns show the top-3 paper/python candidates and why they were rejected
 (absolute score below 0.30 or top/second margin below 1.2×).
 
@@ -27,7 +27,6 @@ In Appendix F's terms, each residue here is a four-cell signature:
 | function:project | paper + python | — | — |
 | function:include | paper + python | — | module:pyast (3.50) |
 | module:CSTZ.Category.Limits | paper + python | definition:def:category (1.64) | module:category (1.64) |
-| data:LimitKind | paper | definition:def:limit (1.64) | class:LimitKind (3.28) |
 | function:equalizerWitness | paper | — | function:equalizer_witness (3.28) |
 | module:CSTZ.Category.NatTrans | paper + python | definition:def:category (1.64) | module:category (1.64) |
 | record:NatTrans | paper + python | definition:def:nattrans (3.69) | — |
@@ -37,14 +36,6 @@ In Appendix F's terms, each residue here is a four-cell signature:
 | function:yoneda-faithful | paper + python | theorem:thm:yoneda (5.33) | — |
 | module:CSTZ.Category | paper + python | definition:def:category (1.64) | module:category (1.64) |
 | module:CSTZ.Examples.GF2Cubed.Category | paper + python | definition:def:category (1.64) | module:category (1.64) |
-| function:class-A-e₁ | python | definition:def:category (4.88) | function:make_ast_class_regi (1.64) |
-| function:class-A-e₂ | paper + python | definition:def:subobj-class (1.64) | function:make_ast_class_regi (1.64) |
-| function:class-B-e₁ | paper + python | definition:def:subobj-class (1.64) | function:make_ast_class_regi (1.64) |
-| function:class-B-e₂ | paper + python | definition:def:subobj-class (1.64) | function:make_ast_class_regi (1.64) |
-| function:class-C-e₁ | paper + python | definition:def:subobj-class (1.64) | function:make_ast_class_regi (1.64) |
-| function:class-C-e₂ | paper + python | definition:def:subobj-class (1.64) | function:make_ast_class_regi (1.64) |
-| function:class-D-e₁ | paper + python | definition:def:subobj-class (1.64) | function:make_ast_class_regi (1.64) |
-| function:class-D-e₂ | paper + python | definition:def:subobj-class (1.64) | function:make_ast_class_regi (1.64) |
 | function:compose-e₁-e₂ | python | definition:def:composition (4.88) | function:compose_witnesses (1.64) |
 | function:compose-disjoint | paper + python | — | function:compose_witnesses (1.64) |
 | function:retract-e₁ | paper + python | theorem:thm:adjunction (3.50) | — |
@@ -71,7 +62,6 @@ In Appendix F's terms, each residue here is a four-cell signature:
 | function:triangle-check | paper + python | definition:def:triangle (1.64) | function:check_profile_linea (1.64) |
 | function:triangle-rot-σ | paper + python | definition:def:tau-sigma (1.64) | function:triangle_identity (1.64) |
 | function:triangle-rot-τ | paper + python | definition:def:tau-sigma (1.64) | function:triangle_identity (1.64) |
-| module:CSTZ.Examples.GF2Cubed.Homotopy | paper + python | definition:def:directed-homo (1.64) | module:homotopy (1.64) |
 | function:g0-basis | paper + python | — | function:ext_basis (1.64) |
 | function:g0-grade | paper + python | — | function:ext_grade (1.64) |
 | function:g1-e₁ | paper + python | — | — |
@@ -89,12 +79,9 @@ In Appendix F's terms, each residue here is a four-cell signature:
 | function:dd-cancels-e₂ | paper + python | — | — |
 | function:dd-cancels-e₃ | paper + python | — | — |
 | function:dd-explicit | paper + python | — | — |
-| function:comm-subset | python | theorem:thm:groupoid (4.88) | function:check_wedge_comm (1.64) |
-| function:univ-diff | python | proposition:prop:univalence (4.88) | function:sym_diff_discrimina (1.64) |
 | function:univ-separated | paper + python | — | — |
 | function:univ-separated' | paper + python | — | — |
 | module:CSTZ.Examples.GF2Cubed.Monoidal | paper + python | proposition:prop:monoidal (1.64) | module:monoidal (1.64) |
-| function:monoidal-prod | python | definition:def:monoidal-prod (11.84) | module:monoidal (1.64) |
 | function:monoidal-prod-coeff | python | definition:def:monoidal-prod (6.97) | function:compose_coeff (1.64) |
 | function:assoc-lhs | paper + python | — | — |
 | function:assoc-rhs | paper + python | — | — |
@@ -105,20 +92,14 @@ In Appendix F's terms, each residue here is a four-cell signature:
 | function:ext-a₃≢a₅ | paper + python | theorem:thm:ext (1.64) | function:ext_zero (1.64) |
 | function:russell-at-zero | python | theorem:thm:russell (6.51) | function:ext_zero (1.64) |
 | function:russell-nonlinear | paper + python | theorem:thm:russell (1.64) | function:russell_exclusion (1.64) |
-| function:pairing-diff | python | proposition:prop:pairing (6.51) | function:sym_diff_discrimina (1.64) |
 | function:pair-annihilator-e₁ | paper + python | — | function:in_annihilator (1.64) |
 | function:pair-annihilator-e₃ | paper + python | — | function:in_annihilator (1.64) |
 | function:pair-e₁-agree | paper + python | — | — |
 | function:pair-e₃-agree | paper + python | — | — |
 | function:pair-separated | paper + python | — | — |
-| function:link-v₁ | python | theorem:thm:foundation (4.88) | function:link_vector (1.64) |
 | function:link-v₂ | paper + python | — | function:link_vector (1.64) |
 | function:links-indep | paper + python | — | — |
 | function:link-v₃ | paper + python | — | function:link_vector (1.64) |
-| function:choice-unresolved-S₁ | python | theorem:thm:choice (6.51) | function:choice_measure (1.64) |
-| function:choice-unresolved-S₂ | paper + python | theorem:thm:choice (1.64) | function:choice_measure (1.64) |
-| function:choice-resolved-S₁ | paper + python | theorem:thm:choice (1.64) | function:choice_measure (1.64) |
-| function:choice-resolved-S₂ | paper + python | theorem:thm:choice (1.64) | function:choice_measure (1.64) |
 | function:symdiff-a₂ | python | proposition:prop:symdiff (10.20) | — |
 | function:symdiff-a₆ | python | proposition:prop:symdiff (5.33) | — |
 | function:indist-e₁ | python | proposition:prop:infinity (4.88) | — |
@@ -152,15 +133,34 @@ In Appendix F's terms, each residue here is a four-cell signature:
 | function:e₁+e₂-val | paper + python | — | — |
 | function:e₁+e₂+e₃-val | paper + python | — | — |
 | module:CSTZ.Examples.GF2Cubed.Topos | paper + python | theorem:thm:topos (1.64) | module:topos (1.64) |
-| function:classify-inside | python | theorem:thm:subobj (4.88) | function:classify (1.64) |
 | function:classify-outside | paper + python | — | function:classify (1.64) |
 | function:fiber-κ₁-size | python | theorem:thm:topos (4.88) | function:dim_kappa (1.64) |
 | function:fiber-κ₂-size | python | theorem:thm:sheaf (3.50) | function:dim_kappa (1.64) |
 | function:fiber-κ₃-size | python | theorem:thm:sheaf (3.50) | function:dim_kappa (1.64) |
-| function:conj-τ-σ | python | definition:def:tau-sigma (3.28) | function:omega_conj (1.64) |
 | function:conj-overlap-τ | paper + python | definition:def:tau-sigma (1.64) | function:omega_conj (1.64) |
 | function:em-gap | paper + python | — | — |
 | function:em-bool | paper + python | proposition:prop:bool-depend (1.64) | — |
 | function:dne-check | paper + python | — | function:check_profile_linea (1.64) |
 | function:fano-4 | paper + python | theorem:thm:fano (1.64) | function:verify_fano_line (1.64) |
-| … (237 more) | | | |
+| function:fano-7 | paper + python | theorem:thm:fano (1.64) | function:verify_fano_line (1.64) |
+| function:galois-order-full | paper | theorem:thm:self-enrich (4.88) | function:check_fano_lines (4.88) |
+| module:CSTZ.Examples.GF2Cubed | paper + python | — | module:examples (1.09) |
+| function:neg-gap | paper + python | — | function:omega_neg (1.64) |
+| function:neg-overlap | paper + python | — | function:omega_neg (1.64) |
+| function:dne-gap | paper + python | — | function:dne (1.64) |
+| function:dne-overlap | paper + python | — | function:dne (1.64) |
+| function:conj-τ-τ | paper + python | definition:def:tau-sigma (1.64) | function:omega_conj (1.64) |
+| function:conj-σ-σ | paper + python | definition:def:tau-sigma (1.64) | function:omega_conj (1.64) |
+| function:conj-gap-any | paper + python | conjecture:conj:CH (1.64) | function:omega_conj (1.64) |
+| function:conj-over-τ | paper + python | definition:def:tau-sigma (1.64) | function:omega_conj (1.64) |
+| function:disj-gap-gap | paper + python | — | function:omega_disj (1.64) |
+| function:em-gap | paper + python | — | — |
+| function:em-τ | paper + python | definition:def:tau-sigma (1.64) | — |
+| function:em-σ | paper + python | definition:def:tau-sigma (1.64) | — |
+| function:em-overlap | paper + python | — | — |
+| function:expl-overlap | paper + python | — | module:verification (3.50) |
+| function:expl-τ | paper + python | definition:def:tau-sigma (1.64) | module:verification (3.50) |
+| module:CSTZ.Examples | paper + python | — | module:examples (1.09) |
+| module:CSTZ.Exterior.Basis | paper + python | — | function:ext_basis (1.64) |
+| function:Subset | paper + python | — | — |
+| … (181 more) | | | |

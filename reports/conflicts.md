@@ -28,3 +28,6 @@ one of the candidates is a better match than the aligner could tell.
 | function:chain-cycle-indep | remark:rem:cycles (3.50) / remark:anon_033 (3.50) / corollary:cor:trunca (3.50) |
 | function:profile-lin-check-2 | definition:def:profi (1.64) / definition:def:profi (1.64) |
 | function:residue-a₀-a₂ | definition:def:resid (1.64) / remark:rem:residue-o (1.64) |
+| function:triangle-check | definition:def:trian (1.64) / remark:rem:triangle- (1.64) |
+| function:triangle-rot-σ | definition:def:tau-s (1.64) / definition:def:trian (1.64) / remark:rem:triangle- (1.64) |
+| function:triangle-rot-τ | definition:def:tau-s (1.64) / definition:def:trian (1.64) / remark:rem:triangle- (1.64) |

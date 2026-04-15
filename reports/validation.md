@@ -12,21 +12,23 @@ confirmation stream has fired yet.  GAP does not mean wrong.
 
 | Tier | Count | % of triples |
 |------|-------|--------------|
-| ORDERED_σ (0,1) — Cited | 51 | 96.2% |
-| GAP (0,0) — Pending | 2 | 3.8% |
+| ORDERED_σ (0,1) — Cited | 46 | 42.2% |
+| OVER (1,1) — Confirmed | 36 | 33.0% |
+| ORDERED_τ (1,0) — Structural | 26 | 23.9% |
+| GAP (0,0) — Pending | 1 | 0.9% |
 
 ## Signal-presence rates
 
-- Total triples: **53**
-- Triples with ≥1 authorial citation: **51** (96.2%) — *this is a LOWER BOUND on correctness per the evidence-semantics principle, not an accuracy measure*
-- Average signals per triple: **1.96** / 6 possible
+- Total triples: **109**
+- Triples with ≥1 authorial citation: **82** (75.2%) — *this is a LOWER BOUND on correctness per the evidence-semantics principle, not an accuracy measure*
+- Average signals per triple: **1.30** / 6 possible
 
 ## Signal breakdown
 
 | Signal | Count | % of triples |
 |--------|-------|--------------|
-| paper_citation_in_agda | 50 | 94.3% |
-| paper_citation_in_python | 38 | 71.7% |
-| agda_path_in_python | 10 | 18.9% |
-| python_path_in_agda | 3 | 5.7% |
-| python_name_in_agda | 3 | 5.7% |
+| paper_citation_in_agda | 80 | 73.4% |
+| paper_citation_in_python | 38 | 34.9% |
+| python_name_in_agda | 11 | 10.1% |
+| agda_path_in_python | 10 | 9.2% |
+| python_path_in_agda | 3 | 2.8% |

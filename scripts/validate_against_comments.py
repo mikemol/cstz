@@ -400,7 +400,17 @@ def main():
         n_signals = len(ev)
         for k in ev:
             signal_counts[k] += 1
-        na = t.get("name_agreement", {})
+        # Name-agreement τ-axis: derive from either the legacy
+        # ``name_agreement`` tag (from align_perspectives.py) OR from
+        # the parallel aligner's ``*_firing_families`` breakdown (a
+        # triple has structural name-agreement if the name_tok family
+        # fired on BOTH paper and python axes).
+        na_legacy = t.get("name_agreement", {})
+        paper_fam = t.get("paper_firing_families", {})
+        python_fam = t.get("python_firing_families", {})
+        na_paper = bool(na_legacy.get("paper")) or (paper_fam.get("name_tok", 0) > 0)
+        na_python = bool(na_legacy.get("python")) or (python_fam.get("name_tok", 0) > 0)
+
         rec = {
             "agda": t["agda"],
             "paper": t["paper"],
@@ -410,9 +420,9 @@ def main():
             "python_path": t.get("python_path", ""),
             "evidence": ev,
             "n_signals": n_signals,
-            "name_agreement_both": bool(na.get("paper")) and bool(na.get("python")),
-            "name_agreement_paper": bool(na.get("paper")),
-            "name_agreement_python": bool(na.get("python")),
+            "name_agreement_both": na_paper and na_python,
+            "name_agreement_paper": na_paper,
+            "name_agreement_python": na_python,
         }
         records.append(rec)
         if n_signals == 0:
