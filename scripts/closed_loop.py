@@ -729,38 +729,218 @@ class Thing:
 # ---------------------------------------------------------------------------
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=False, init=False)
 class State:
     """Complete state of the closed-loop algorithm.
 
-    ``pool``          — the K registry (Pool).
-    ``things``        — mapping thing-id → Thing.  All Things' bitmaps
-                        are interpreted against ``pool``.
-    ``oracle_pairs``  — frozenset of frozenset({id_a, id_b}) — thing
+    Under l-state-things-as-parallel-arrays (enacted Stage 7.0.7b) the
+    authoritative storage for things is three parallel 1D/2D arrays
+    rather than a tuple of (ThingId, Thing) pairs.  'A Thing' is a
+    row-view: Thing objects are still constructed on demand via the
+    ``things`` / ``things_dict`` / ``with_thing`` surface, but the
+    state doesn't store them — it stores the shape-bound matrices
+    that bind directly to the pool's axis-0 (l-pool-as-structured-
+    dtype-array).  The dependent-type shape parameter pool_size
+    appears as axis-1 of tau_masks/sigma_masks AND axis-0 of pool —
+    one shape contract, three arrays, enforceable at load.
+
+    Primary fields:
+
+    - ``pool``        — the K registry (structured-dtype numpy array
+                        + K tuple).
+    - ``thing_ids``   — 1D object-dtype ndarray of ThingIds, sorted.
+    - ``tau_masks``   — 2D bool ndarray, shape (n_things, pool_size).
+                        Row i is thing_ids[i]'s τ-mask.
+    - ``sigma_masks`` — 2D bool ndarray, shape (n_things, pool_size).
+                        Row i is thing_ids[i]'s σ-mask.
+    - ``oracle_pairs``— frozenset of frozenset({id_a, id_b}) — thing
                         pairs known to correspond (citation links).
                         Used for weight calibration only, never for
-                        gating.
-    ``weights``       — per-K weight, keyed by K.key().  Pluggable
+                        gating.  (The l-oracle-pairs-as-index-array
+                        refactor is a follow-up, not Stage 7.0.7b.)
+    - ``weights``     — per-K weight, keyed by K.key().  Pluggable
                         objective adjusts these.
-    ``trajectory``    — append-only tuple of per-iteration telemetry.
-    ``iteration``     — monotonic counter.
+    - ``trajectory``  — append-only tuple of per-iteration telemetry.
+    - ``iteration``   — monotonic counter.
+
+    Backward-compat surface:
+
+    - ``things``        — computed property reconstructing the legacy
+                          Tuple[Tuple[ThingId, Thing], ...] shape.
+                          Use direct array access in hot paths.
+    - ``with_thing(t)`` — unchanged API; internally appends or replaces
+                          a row in the parallel arrays.
+    - ``things_dict()`` — unchanged API.
+    - ``State(things=...)``  ctor-kwarg accepted for legacy call sites.
 
     Frozen dataclass: step() must return a new State, never mutate.
     ``merge``, ``restrict``, and ``signature`` support self-similarity
     and embarrassingly-parallel operation per p-embarrassingly-parallel.
     """
 
-    pool: Pool = field(default_factory=Pool)
-    things: Tuple[Tuple[ThingId, Thing], ...] = ()       # sorted-by-id for hashability
-    oracle_pairs: frozenset = frozenset()                # frozenset[frozenset[ThingId]]
-    weights: Tuple[Tuple[KKey, float], ...] = ()         # sorted-by-key for hashability
-    trajectory: Tuple = ()
-    iteration: int = 0
+    pool: Pool
+    thing_ids: np.ndarray      # dtype=object, shape (n_things,)
+    tau_masks: np.ndarray      # dtype=bool,   shape (n_things, pool_size)
+    sigma_masks: np.ndarray    # dtype=bool,   shape (n_things, pool_size)
+    oracle_pairs: frozenset
+    weights: Tuple[Tuple[KKey, float], ...]
+    trajectory: Tuple
+    iteration: int
 
-    # -- accessors ----------------------------------------------------------
+    def __init__(
+        self,
+        *,
+        pool: Pool | None = None,
+        things: Tuple[Tuple[ThingId, "Thing"], ...] | None = None,
+        thing_ids: np.ndarray | None = None,
+        tau_masks: np.ndarray | None = None,
+        sigma_masks: np.ndarray | None = None,
+        oracle_pairs: frozenset = frozenset(),
+        weights: Tuple[Tuple[KKey, float], ...] = (),
+        trajectory: Tuple = (),
+        iteration: int = 0,
+    ) -> None:
+        """Accept either the legacy ``things=(id, Thing)...`` form or
+        direct parallel arrays.  Raises if both are passed.  The
+        legacy form is normalized to the primary array representation
+        once, at construction time — no lazy dual-representation."""
+        p = pool if pool is not None else Pool()
+
+        legacy_given = things is not None
+        arrays_given = any(
+            x is not None for x in (thing_ids, tau_masks, sigma_masks)
+        )
+        if legacy_given and arrays_given:
+            raise ValueError(
+                "State.__init__: pass ONE of things=... or "
+                "(thing_ids, tau_masks, sigma_masks) — not both"
+            )
+
+        if legacy_given:
+            # Legacy path: unpack tuple-of-(id, Thing) into arrays.
+            # Must be sorted by id to preserve the hash/signature
+            # invariant.  Pad masks to pool_size if shorter.
+            pool_size = p.size()
+            sorted_things = sorted(things, key=lambda kv: kv[0])
+            n = len(sorted_things)
+            ids_arr = np.array([tid for tid, _ in sorted_things], dtype=object)
+            tau = np.zeros((n, pool_size), dtype=bool)
+            sig = np.zeros((n, pool_size), dtype=bool)
+            for i, (_tid, thing) in enumerate(sorted_things):
+                k = min(len(thing.tau_mask), pool_size)
+                tau[i, :k] = thing.tau_mask[:k]
+                sig[i, :k] = thing.sigma_mask[:k]
+        elif arrays_given:
+            # Arrays path: trust the caller.  Shape is validated below.
+            pool_size = p.size()
+            ids_arr = (
+                np.asarray(thing_ids, dtype=object)
+                if thing_ids is not None
+                else np.array([], dtype=object)
+            )
+            tau = (
+                np.ascontiguousarray(tau_masks, dtype=bool)
+                if tau_masks is not None
+                else np.empty((len(ids_arr), pool_size), dtype=bool)
+            )
+            sig = (
+                np.ascontiguousarray(sigma_masks, dtype=bool)
+                if sigma_masks is not None
+                else np.empty((len(ids_arr), pool_size), dtype=bool)
+            )
+        else:
+            # Empty state
+            pool_size = p.size()
+            ids_arr = np.array([], dtype=object)
+            tau = np.empty((0, pool_size), dtype=bool)
+            sig = np.empty((0, pool_size), dtype=bool)
+
+        # Shape invariants — the point of the whole refactor
+        n = len(ids_arr)
+        if tau.shape != (n, pool_size):
+            raise ValueError(
+                f"tau_masks shape {tau.shape} != expected {(n, pool_size)}"
+            )
+        if sig.shape != (n, pool_size):
+            raise ValueError(
+                f"sigma_masks shape {sig.shape} != expected {(n, pool_size)}"
+            )
+
+        # Freeze arrays (matching Thing-mask and Pool-keys discipline)
+        tau.setflags(write=False)
+        sig.setflags(write=False)
+
+        object.__setattr__(self, "pool", p)
+        object.__setattr__(self, "thing_ids", ids_arr)
+        object.__setattr__(self, "tau_masks", tau)
+        object.__setattr__(self, "sigma_masks", sig)
+        object.__setattr__(self, "oracle_pairs", oracle_pairs)
+        object.__setattr__(self, "weights", weights)
+        object.__setattr__(self, "trajectory", trajectory)
+        object.__setattr__(self, "iteration", iteration)
+
+    # -- equality / hash (overridden since ndarray fields aren't hashable) ---
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, State):
+            return False
+        return (
+            self.pool == other.pool
+            and self.thing_ids.shape == other.thing_ids.shape
+            and self.tau_masks.shape == other.tau_masks.shape
+            and self.sigma_masks.shape == other.sigma_masks.shape
+            and np.array_equal(self.thing_ids, other.thing_ids)
+            and np.array_equal(self.tau_masks, other.tau_masks)
+            and np.array_equal(self.sigma_masks, other.sigma_masks)
+            and self.oracle_pairs == other.oracle_pairs
+            and self.weights == other.weights
+            and self.trajectory == other.trajectory
+            and self.iteration == other.iteration
+        )
+
+    def __hash__(self) -> int:
+        return hash((
+            hash(self.pool),
+            tuple(self.thing_ids.tolist()),
+            self.tau_masks.tobytes(),
+            self.sigma_masks.tobytes(),
+            self.oracle_pairs,
+            self.weights,
+            self.trajectory,
+            self.iteration,
+        ))
+
+    # -- backward-compat views ----------------------------------------------
+
+    @property
+    def things(self) -> Tuple[Tuple[ThingId, "Thing"], ...]:
+        """Reconstruct the legacy (id, Thing) tuple view.
+
+        O(n_things) per call; prefer direct ``.tau_masks`` /
+        ``.sigma_masks`` / ``.thing_ids`` access in hot paths.  Thing
+        objects returned are freshly constructed row-views over copies
+        of the underlying array rows — the primary state is not held
+        in these Things, so mutating them (which is also blocked by
+        Thing's read-only masks) would not affect the State.
+        """
+        return tuple(
+            (ThingId(str(tid)),
+             Thing(id=ThingId(str(tid)),
+                   tau_mask=self.tau_masks[i].copy(),
+                   sigma_mask=self.sigma_masks[i].copy()))
+            for i, tid in enumerate(self.thing_ids)
+        )
 
     def things_dict(self) -> dict:
-        return dict(self.things)
+        """Dict view keyed by ThingId; one-shot construction."""
+        return {
+            ThingId(str(tid)): Thing(
+                id=ThingId(str(tid)),
+                tau_mask=self.tau_masks[i].copy(),
+                sigma_mask=self.sigma_masks[i].copy(),
+            )
+            for i, tid in enumerate(self.thing_ids)
+        }
 
     def weights_dict(self) -> dict:
         return dict(self.weights)
@@ -772,15 +952,64 @@ class State:
                 return w
         return default
 
+    # -- internal array helpers --------------------------------------------
+
+    def _bit_index_of_thing(self, tid: ThingId) -> int | None:
+        """Row index for a ThingId in the parallel arrays, or None."""
+        matches = np.where(self.thing_ids == tid)[0]
+        return int(matches[0]) if len(matches) > 0 else None
+
     # -- constructors -------------------------------------------------------
 
-    def with_thing(self, thing: Thing) -> "State":
-        """Add or replace a thing by id."""
-        others = tuple((i, t) for i, t in self.things if i != thing.id)
-        new_things = tuple(sorted(others + ((thing.id, thing),), key=lambda kv: kv[0]))
+    def with_thing(self, thing: "Thing") -> "State":
+        """Add or replace a thing by id.
+
+        Internally updates the parallel arrays: if the id exists, its
+        row is overwritten; otherwise a row is inserted at the correct
+        sorted position.  The thing's masks are padded to pool_size if
+        shorter; this keeps the shape invariant a function of the
+        pool, not of the caller.
+        """
+        pool_size = self.pool.size()
+        # Pad mask to pool_size
+        def _pad(arr: np.ndarray) -> np.ndarray:
+            if len(arr) >= pool_size:
+                return np.ascontiguousarray(arr[:pool_size], dtype=bool)
+            out = np.zeros(pool_size, dtype=bool)
+            out[:len(arr)] = arr
+            return out
+
+        tau_new_row = _pad(thing.tau_mask)
+        sig_new_row = _pad(thing.sigma_mask)
+
+        existing_idx = self._bit_index_of_thing(thing.id)
+        if existing_idx is not None:
+            # Replace row in-place on a fresh copy (respecting immutability)
+            new_tau = self.tau_masks.copy()
+            new_sig = self.sigma_masks.copy()
+            new_tau[existing_idx] = tau_new_row
+            new_sig[existing_idx] = sig_new_row
+            return State(
+                pool=self.pool,
+                thing_ids=self.thing_ids,
+                tau_masks=new_tau,
+                sigma_masks=new_sig,
+                oracle_pairs=self.oracle_pairs,
+                weights=self.weights,
+                trajectory=self.trajectory,
+                iteration=self.iteration,
+            )
+
+        # Insert at sorted position
+        insert_pos = int(np.searchsorted(self.thing_ids.astype(str), str(thing.id)))
+        new_ids = np.insert(self.thing_ids, insert_pos, thing.id)
+        new_tau = np.insert(self.tau_masks, insert_pos, tau_new_row, axis=0)
+        new_sig = np.insert(self.sigma_masks, insert_pos, sig_new_row, axis=0)
         return State(
             pool=self.pool,
-            things=new_things,
+            thing_ids=new_ids,
+            tau_masks=new_tau,
+            sigma_masks=new_sig,
             oracle_pairs=self.oracle_pairs,
             weights=self.weights,
             trajectory=self.trajectory,
@@ -788,9 +1017,25 @@ class State:
         )
 
     def with_pool(self, pool: Pool) -> "State":
+        """Replace the pool.  Masks are repadded/truncated to the new
+        pool size so the shape invariant is preserved."""
+        new_size = pool.size()
+        cur_size = self.tau_masks.shape[1] if self.tau_masks.size else 0
+        if new_size == cur_size:
+            new_tau = self.tau_masks
+            new_sig = self.sigma_masks
+        elif new_size > cur_size:
+            pad = np.zeros((len(self.thing_ids), new_size - cur_size), dtype=bool)
+            new_tau = np.concatenate([self.tau_masks, pad], axis=1)
+            new_sig = np.concatenate([self.sigma_masks, pad], axis=1)
+        else:
+            new_tau = np.ascontiguousarray(self.tau_masks[:, :new_size])
+            new_sig = np.ascontiguousarray(self.sigma_masks[:, :new_size])
         return State(
             pool=pool,
-            things=self.things,
+            thing_ids=self.thing_ids,
+            tau_masks=new_tau,
+            sigma_masks=new_sig,
             oracle_pairs=self.oracle_pairs,
             weights=self.weights,
             trajectory=self.trajectory,
@@ -802,7 +1047,9 @@ class State:
         new = tuple(sorted(others + ((k_key, w),), key=lambda kv: kv[0]))
         return State(
             pool=self.pool,
-            things=self.things,
+            thing_ids=self.thing_ids,
+            tau_masks=self.tau_masks,
+            sigma_masks=self.sigma_masks,
             oracle_pairs=self.oracle_pairs,
             weights=new,
             trajectory=self.trajectory,
@@ -812,7 +1059,9 @@ class State:
     def appending_trajectory(self, entry: dict) -> "State":
         return State(
             pool=self.pool,
-            things=self.things,
+            thing_ids=self.thing_ids,
+            tau_masks=self.tau_masks,
+            sigma_masks=self.sigma_masks,
             oracle_pairs=self.oracle_pairs,
             weights=self.weights,
             trajectory=self.trajectory + (entry,),
@@ -827,55 +1076,85 @@ class State:
 
         - Pool: ``self.pool.merge(other.pool)`` — K's from self keep
           their bit indices (append-only); K's only in other get new
-          indices appended.  This produces a pool where each K's
-          extensional identity maps to a single bit index.
-        - Things: union by ThingId; if a Thing appears in both states,
-          either the two Thing records are identical OR their bitmaps
-          are both remapped to the merged pool and then compared.
-          Truly divergent Things (same id, different firing profile)
-          raise ValueError.
+          indices appended.
+        - Things: union by ThingId; if an id appears in both states,
+          its row must agree after each side's masks are remapped to
+          the merged pool's indexing.  Divergent rows raise ValueError.
         - Weights: averaged on key collision.
         - Oracle pairs: set-unioned.
-        - Trajectory: concatenated and sorted by iteration key.
+        - Trajectory: concatenated and sorted by iteration field.
 
-        Divergent-pool merge (other.pool has K's self.pool doesn't,
-        and vice versa) works correctly: Things whose source pool
-        differs from the merged pool are remapped via
-        ``Thing.remap`` before being combined.
+        Divergent-pool merge is vectorized: for each side whose local
+        pool differs from the merged pool, build a column-permutation
+        array and gather the mask rows into the merged pool's column
+        order in one numpy advanced-indexing op per side.
         """
         merged_pool = self.pool.merge(other.pool)
+        merged_size = merged_pool.size()
 
-        # Determine if remapping is needed for each side
-        self_needs_remap = self.pool.keys != merged_pool.keys
-        other_needs_remap = other.pool.keys != merged_pool.keys
+        def _remap_masks(source_state: "State", source_pool: Pool) -> Tuple[np.ndarray, np.ndarray]:
+            """Return (tau, sigma) with columns permuted into merged_pool order.
 
-        def _remap_all(things_tuple, source_pool: Pool) -> dict:
-            """Return dict ThingId → Thing with bitmaps in merged_pool indexing."""
-            out = {}
-            for tid, thing in things_tuple:
-                if source_pool is merged_pool or not (
-                    self_needs_remap if source_pool is self.pool else other_needs_remap
-                ):
-                    out[tid] = thing
-                else:
-                    out[tid] = thing.remap(source_pool, merged_pool)
-            return out
+            For each old bit i, new_idx[i] = merged_pool.bit_of(source_pool.ks[i])
+            (always found, since merged_pool is a superset of source_pool).
+            We allocate zero matrices over merged columns and scatter from old.
+            """
+            if source_pool is merged_pool or np.array_equal(
+                np.array(source_pool.keys), np.array(merged_pool.keys)
+            ):
+                # Already in merged pool's indexing; maybe pad trailing columns
+                if source_state.tau_masks.shape[1] == merged_size:
+                    return source_state.tau_masks, source_state.sigma_masks
+                pad = np.zeros(
+                    (len(source_state.thing_ids),
+                     merged_size - source_state.tau_masks.shape[1]),
+                    dtype=bool,
+                )
+                return (np.concatenate([source_state.tau_masks, pad], axis=1),
+                        np.concatenate([source_state.sigma_masks, pad], axis=1))
+            # Build remap: old_idx → new_idx
+            remap = np.array(
+                [merged_pool.bit_of(k) for k in source_pool.ks], dtype=np.int64
+            )
+            n_things = len(source_state.thing_ids)
+            new_tau = np.zeros((n_things, merged_size), dtype=bool)
+            new_sig = np.zeros((n_things, merged_size), dtype=bool)
+            new_tau[:, remap] = source_state.tau_masks
+            new_sig[:, remap] = source_state.sigma_masks
+            return new_tau, new_sig
 
-        things_self = _remap_all(self.things, self.pool)
-        things_other = _remap_all(other.things, other.pool)
+        self_tau, self_sig = _remap_masks(self, self.pool)
+        other_tau, other_sig = _remap_masks(other, other.pool)
 
-        # Union by id; collision requires equality after remap
-        combined: dict = {}
-        for tid in set(things_self) | set(things_other):
-            if tid in things_self and tid in things_other:
-                if things_self[tid] != things_other[tid]:
+        # Union by id; row-wise equality check on collision
+        self_ids = [str(t) for t in self.thing_ids]
+        other_ids = [str(t) for t in other.thing_ids]
+        self_idx = {tid: i for i, tid in enumerate(self_ids)}
+        other_idx = {tid: i for i, tid in enumerate(other_ids)}
+        all_ids = sorted(set(self_ids) | set(other_ids))
+
+        n = len(all_ids)
+        merged_ids = np.array(all_ids, dtype=object)
+        merged_tau = np.zeros((n, merged_size), dtype=bool)
+        merged_sig = np.zeros((n, merged_size), dtype=bool)
+        for i, tid in enumerate(all_ids):
+            si = self_idx.get(tid)
+            oi = other_idx.get(tid)
+            if si is not None and oi is not None:
+                if (not np.array_equal(self_tau[si], other_tau[oi])
+                        or not np.array_equal(self_sig[si], other_sig[oi])):
                     raise ValueError(
                         f"thing id {tid!r} has diverging content across states "
                         f"(after pool remap)"
                     )
-                combined[tid] = things_self[tid]
+                merged_tau[i] = self_tau[si]
+                merged_sig[i] = self_sig[si]
+            elif si is not None:
+                merged_tau[i] = self_tau[si]
+                merged_sig[i] = self_sig[si]
             else:
-                combined[tid] = things_self.get(tid, things_other.get(tid))
+                merged_tau[i] = other_tau[oi]
+                merged_sig[i] = other_sig[oi]
 
         # Weights: average on collision
         ws: dict = dict(self.weights)
@@ -885,10 +1164,7 @@ class State:
             else:
                 ws[k] = w
 
-        # Oracle: union
         oracle = self.oracle_pairs | other.oracle_pairs
-
-        # Trajectory: concatenate, sorted by iteration field if present
         traj_combined = tuple(
             sorted(
                 self.trajectory + other.trajectory,
@@ -898,7 +1174,9 @@ class State:
 
         return State(
             pool=merged_pool,
-            things=tuple(sorted(combined.items(), key=lambda kv: kv[0])),
+            thing_ids=merged_ids,
+            tau_masks=merged_tau,
+            sigma_masks=merged_sig,
             oracle_pairs=oracle,
             weights=tuple(sorted(ws.items(), key=lambda kv: kv[0])),
             trajectory=traj_combined,
@@ -911,19 +1189,24 @@ class State:
         thing_ids: frozenset | None = None,
     ) -> "State":
         """Return a sub-state containing only the requested things.
-        Pool is preserved (K-pool doesn't partition naturally at this
-        stage).  Oracle pairs restricted to those fully contained in
-        the requested thing-set.
+        Pool is preserved; oracle pairs restricted to those fully
+        contained in the requested thing-set.
+
+        Vectorized: one boolean mask on axis-0 of the mask matrices.
         """
         if thing_ids is None:
             return self
-        kept = tuple((i, t) for i, t in self.things if i in thing_ids)
+        keep_mask = np.array(
+            [str(tid) in thing_ids for tid in self.thing_ids], dtype=bool
+        )
         kept_oracle = frozenset(
             p for p in self.oracle_pairs if all(x in thing_ids for x in p)
         )
         return State(
             pool=self.pool,
-            things=kept,
+            thing_ids=self.thing_ids[keep_mask],
+            tau_masks=self.tau_masks[keep_mask],
+            sigma_masks=self.sigma_masks[keep_mask],
             oracle_pairs=kept_oracle,
             weights=self.weights,
             trajectory=self.trajectory,
@@ -933,12 +1216,18 @@ class State:
     # -- identity / fixed-point detection -----------------------------------
 
     def signature(self) -> Tuple:
-        """Structural fingerprint used by run_to_fixed_point to detect
-        stability.  Excludes trajectory (which grows monotonically)
-        and iteration counter.  Fixed point ↔ signature stable."""
+        """Structural fingerprint for state equality / fixed-point tests.
+
+        Excludes trajectory (which grows monotonically) and iteration.
+        Uses the mask matrices' tobytes() + thing_ids tuple so
+        comparison is an O(bytes) memcmp rather than per-Thing dict
+        traversal.
+        """
         return (
             self.pool.keys,
-            self.things,
+            tuple(str(t) for t in self.thing_ids),
+            self.tau_masks.tobytes(),
+            self.sigma_masks.tobytes(),
             self.oracle_pairs,
             self.weights,
         )
@@ -1985,22 +2274,38 @@ def _bit_positions(x: int) -> list:
     return out
 
 
+def firing_bitmaps_of(state: "State", channel: str = "tau") -> np.ndarray:
+    """Return the pool-major firing matrix ``(pool_size, n_things)`` for
+    the requested channel.
+
+    Under l-state-things-as-parallel-arrays (Stage 7.0.7b) the state
+    already stores per-thing masks as a ``(n_things, pool_size)``
+    bool matrix; the pool-major view is just ``.T`` on that — O(1)
+    view, no copy.  This replaces the Stage 7.0 ``_compute_firing_
+    bitmaps`` which rebuilt the matrix per step() by iterating over
+    Thing objects; with parallel arrays, there is nothing to build.
+    """
+    if channel == "tau":
+        return state.tau_masks.T
+    elif channel == "sigma":
+        return state.sigma_masks.T
+    elif channel == "kappa":
+        return np.logical_xor(state.tau_masks, state.sigma_masks).T
+    else:
+        raise ValueError(f"unknown channel {channel!r}")
+
+
 def _compute_firing_bitmaps(
     pool: "Pool",
     thing_order: list,
     channel: str = "tau",
 ) -> np.ndarray:
-    """Per-K-index firing bitmap over thing-indices, as a 2D numpy
-    array of shape ``(pool_size, n_things)`` and dtype=bool.
+    """Legacy shim kept for call sites that still build a ``thing_order``
+    list-of-(id, Thing) and expect a ``(pool_size, n_things)`` matrix.
 
-    This is the TRANSPOSE of the per-thing bitmap storage: ``result[i, j]``
-    is True iff the K at pool position i fires on thing j (in the
-    requested channel).  Computed once per step() to enable O(1)
-    cell counting via numpy bitwise ops + np.sum over rows.
-
-    Under p-numpy-is-the-natural-cpu-representation: this is an
-    array-native computation throughout; no Python int bitmask
-    intermediate.
+    Prefer ``firing_bitmaps_of(state, channel)`` on a State instance —
+    it's O(1) under the parallel-array representation.  This shim
+    rebuilds the matrix from per-Thing masks, O(n_things · pool_size).
     """
     n_pool = pool.size()
     n_things = len(thing_order)
@@ -2008,7 +2313,6 @@ def _compute_firing_bitmaps(
     for j, (_tid, thing) in enumerate(thing_order):
         mask = thing.tau_mask if channel == "tau" else thing.sigma_mask
         k = min(len(mask), n_pool)
-        # Column j of result := thing's mask up to pool_size positions
         result[:k, j] = mask[:k]
     return result
 
@@ -2020,36 +2324,23 @@ def _articulate_wedges_batch(
 ) -> Tuple["State", int]:
     """Articulate a BATCH of wedges into state in one pass.
 
-    Under p-numpy-is-the-natural-cpu-representation + p-refactor-debt-
-    paid-eagerly, Stage 7.0 replaced the per-wedge incremental
-    mutation of the old ``_articulate_wedge_into_state`` with a
-    vectorized batched form.
+    Under l-state-things-as-parallel-arrays (Stage 7.0.7b), state's
+    per-thing masks are already stacked as (n_things, pool_size) bool
+    matrices; adding new wedges is column-concatenation, not per-Thing
+    reconstruction.
 
-    For each wedge W, its firing bitmap over things is the AND of
-    its leaf atoms' rows in ``firing_bitmaps``
-    (d-wedge-bit-and-of-parents).  Compute all new wedge firings as
-    a 2D matrix of shape ``(n_new_wedges, n_things)``.  Skip wedges
-    whose firing is identically False (degenerate; no discrimination
-    added).
+    For each kept wedge W, its firing bitmap over things is the AND of
+    its leaf atoms' rows in ``firing_bitmaps`` (d-wedge-bit-and-of-
+    parents).  Kept wedges are batch-dedup'd against the existing pool
+    AND against each other in the batch (multiple distinct candidate
+    K-pairs can normalize to the same canonical wedge, e.g. x∧(y∧z),
+    y∧(x∧z), z∧(x∧y) all normalize to x∧y∧z).
 
-    Then extend every thing's τ/σ masks ONCE by concatenating the
-    new column(s).  At first appearance, τ = σ for articulated
-    wedges per d-wedge-bit-and-of-parents.
-
-    Returns (new_state, count_articulated).  The batched form avoids
-    the appearance/reality gap of the previous per-wedge mutation —
-    this function truly is a pure transformer.
+    Returns (new_state, count_articulated).  Pure transformer.
     """
-    thing_order = list(sorted(state.things, key=lambda kv: kv[0]))
-    n_things = len(thing_order)
+    n_things = len(state.thing_ids)
 
-    # For each wedge, compute its firing bitmap as AND of atom rows.
-    # Dedup against the EXISTING pool (pool_index) AND against earlier
-    # entries in this batch — multiple distinct candidate K-pairs can
-    # normalize to the same canonical wedge (e.g., x∧(y∧z), y∧(x∧z),
-    # z∧(x∧y) all normalize to x∧y∧z), so without batch-local dedup
-    # the pool would be asked to register the same key twice.
-    pool_index = {key: idx for key, idx in state.pool.by_key}
+    pool_index = state.pool._key_to_bit  # use the O(1) cache directly
     seen_in_batch: set = set()
     kept_wedges = []
     kept_firings = []  # each is a 1D bool array of length n_things
@@ -2061,7 +2352,6 @@ def _articulate_wedges_batch(
             continue  # already in pool before this batch
         if w_key in seen_in_batch:
             continue  # already queued earlier in this batch
-        # Compute firing as AND over leaf atoms
         firing = None
         for atom in wedge.atoms():
             a_idx = state.pool.bit_of(atom)
@@ -2079,31 +2369,24 @@ def _articulate_wedges_batch(
     if not kept_wedges:
         return state, 0
 
-    # Build new pool by appending each kept wedge
     new_pool = state.pool
     for w in kept_wedges:
         new_pool = new_pool.with_k(w)
 
-    # Stack firings into [n_new, n_things] then transpose to
-    # [n_things, n_new] — one column per new wedge
-    new_firings_matrix = np.stack(kept_firings, axis=0)  # [n_new, n_things]
-    n_new = new_firings_matrix.shape[0]
-    per_thing_new_cols = new_firings_matrix.T  # [n_things, n_new]
-
-    # Extend each thing's τ/σ masks: concat old mask + this thing's new columns
-    # (at first appearance τ=σ for wedges, so both masks get the same extension)
-    new_things: list = []
-    for j, (tid, thing) in enumerate(thing_order):
-        new_cols = per_thing_new_cols[j]  # [n_new]
-        new_tau = np.concatenate([thing.tau_mask, new_cols])
-        new_sigma = np.concatenate([thing.sigma_mask, new_cols])
-        new_things.append(
-            (tid, Thing(id=tid, tau_mask=new_tau, sigma_mask=new_sigma))
-        )
+    # Stack kept firings as (n_things, n_new) — one column per wedge —
+    # and concatenate onto axis-1 of the mask matrices.  At first
+    # appearance τ = σ (d-wedge-bit-and-of-parents), so both matrices
+    # gain the same columns.
+    new_cols = np.stack(kept_firings, axis=0).T  # [n_things, n_new]
+    n_new = new_cols.shape[1]
+    new_tau = np.concatenate([state.tau_masks, new_cols], axis=1)
+    new_sig = np.concatenate([state.sigma_masks, new_cols], axis=1)
 
     new_state = State(
         pool=new_pool,
-        things=tuple(sorted(new_things, key=lambda kv: kv[0])),
+        thing_ids=state.thing_ids,
+        tau_masks=new_tau,
+        sigma_masks=new_sig,
         oracle_pairs=state.oracle_pairs,
         weights=state.weights,
         trajectory=state.trajectory,
@@ -2149,10 +2432,12 @@ def step(
     framework does not pick a budget; callers do.
     """
     # -- Phase 0: precompute caches -----------------------------------------
-    thing_order = list(sorted(state.things, key=lambda kv: kv[0]))
-    firing_bitmaps = _compute_firing_bitmaps(state.pool, thing_order)
-    pool_index = {key: idx for key, idx in state.pool.by_key}
-    n_things = len(thing_order)
+    # firing_bitmaps is state.tau_masks.T under the parallel-array
+    # representation (l-state-things-as-parallel-arrays) — an O(1) view,
+    # no build step.
+    firing_bitmaps = firing_bitmaps_of(state, "tau")
+    pool_index = state.pool._key_to_bit
+    n_things = len(state.thing_ids)
 
     # -- Phase 1: enumerate candidate K-pairs (n_11 > 0) -------------------
     # Vectorized via co-fire matrix: firing_bitmaps is [P, N] bool;
@@ -3173,6 +3458,8 @@ def _smoke_test() -> None:
                       f"hash (pure __hash__, trajectory-based fixed-point)")
                 print(f"    Stage 7.0.7a: Pool uses structured-dtype numpy array; "
                       f"O(1) bit_of via _key_to_bit cache")
+                print(f"    Stage 7.0.7b: State.things → parallel arrays; "
+                      f"firing_bitmaps is .tau_masks.T (O(1) view, no build)")
 
         # Pool invariant: every observable appears as an Atom K
         for k in state.pool.ks:
@@ -3185,7 +3472,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.0.7a smoke test (Pool structured-dtype array + eager-numpy applied): all assertions passed")
+    print("Stage 1–7.0.7b smoke test (Pool + State as parallel numpy arrays; O(1) firing_bitmaps view): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
