@@ -6,7 +6,7 @@ Each node is a line in `design/<type>s.jsonl`.
 Use `python scripts/design_sppf.py show <id>` for full detail.
 Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 
-## Principles (21)
+## Principles (24)
 
 - ● [p-alignment-is-distribution] Alignment is a distribution, not a predicate
 - ● [p-arity-is-grade] Arity = grade; arity N is not tracked, it emerges
@@ -24,11 +24,14 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [p-maximal-freedom] Prefer interpretations that leave the greatest remaining freedom
 - ● [p-no-bespoke-recognition] No bespoke pattern recognition at any level
 - ● [p-no-canonicalization] No canonicalization at registration time
+- ● [p-probes-are-half-spaces] Probes define half-spaces over the thing-pool; quotienting projects to cells
 - ● [p-self-similarity] The framework is self-similar at every scale and grade
 - ● [p-source-is-a-k] Source provenance is just another K
 - ● [p-tau-sigma-not-opposite] τ/σ is not the opposite of σ/τ
 - ● [p-tau-sigma-separation] τ/σ separation is load-bearing
+- ● [p-thing-is-not-its-relations] Things with relations are distinct things, not internal fields
 - ● [p-type-theory-everywhere] Use type theory to encode intensionality structurally
+- ● [p-yoneda-identity] A thing's identity is its probe-firing profile (Yoneda)
 
 ## Decisions (17)
 
@@ -61,7 +64,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (9)
+## Corrections (10)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -72,6 +75,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-metadata-was-a-smuggled-taxonomy] Metadata class was a smuggled taxonomy, removed in Stage 2.6
 - ● [c-question-resolution-via-maximal-freedom] Open questions resolve via maximal freedom, not specific picks
 - ● [c-stage-3-5-bijective-keys-and-stable-anon-ids] Stage 3.5: bijective K keys; stable position-based anon-thing-IDs; surfaced parse errors
+- ● [c-stage-3-6-identity-as-probes] Stage 3.6: surface all identity components as probes, not just as ID-string text
 
 ## Questions (6)
 

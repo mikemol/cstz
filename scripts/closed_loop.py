@@ -869,11 +869,25 @@ def _make_thing_id(source: str, kind: str, name: str | None,
 
 def _iter_source_nodes(
     repo: Path, source: str
-) -> Iterator[Tuple[str, frozenset]]:
-    """Yield (thing_id, deep_kind_observations) for every top-level named
-    declaration in ``source``.  Uses the existing parsers in
-    ``structural_identity``; no re-implementation.  Parse failures are
-    logged to stderr rather than silently swallowed."""
+) -> Iterator[Tuple[str, frozenset, dict]]:
+    """Yield (thing_id, subtree_kind_observations, identity_components)
+    for every top-level named declaration in ``source``.
+
+    ``identity_components`` is a dict with keys:
+      - ``"kind_at_root"``: the decl's own top-level kind string
+      - ``"path_components"``: frozenset of path fragments (directory
+        components + filename) from the source path
+      - ``"name_verbatim"``: the decl's verbatim label/name if any,
+        else None
+      - ``"source"``: the source tag string ("paper", "agda", "python")
+
+    Under ``p-yoneda-identity`` these components must be surfaced as
+    probes so the identity is expressible by probe quotienting, not
+    just by parsing opaque ThingId strings.  See ``extract_initial_state``
+    for how they're registered as atomic K's.
+
+    Parse failures are logged to stderr rather than silently swallowed.
+    """
     scripts_dir = str(repo / "scripts")
     if scripts_dir not in sys.path:
         sys.path.insert(0, scripts_dir)
@@ -883,9 +897,7 @@ def _iter_source_nodes(
     )
 
     roots = _source_roots(repo)
-    # Per-file unlabeled-decl counters give stable, shard-safe IDs
-    # for anonymous things without a global counter.
-    anon_seq: dict = {}  # source_path → next index
+    anon_seq: dict = {}
 
     def _next_anon(path_str: str) -> int:
         i = anon_seq.get(path_str, 0)
@@ -893,10 +905,6 @@ def _iter_source_nodes(
         return i
 
     def _rel(p) -> str:
-        """Normalize a path to a repo-relative POSIX string.  Stable
-        across absolute/relative input forms so that Thing IDs match
-        oracle-loader remap IDs (which use manifest-stored relative
-        paths)."""
         s = str(p)
         if not s:
             return s
@@ -907,6 +915,21 @@ def _iter_source_nodes(
             except ValueError:
                 pass
         return str(pp)
+
+    def _path_components(path_str: str) -> frozenset:
+        """Split a path into its directory/file components.  Each
+        component becomes a half-space probe."""
+        if not path_str:
+            return frozenset()
+        return frozenset(p for p in Path(path_str).parts if p)
+
+    def _identity(kind: str, name, path_str: str) -> dict:
+        return {
+            "source": source,
+            "kind_at_root": kind,
+            "path_components": _path_components(path_str),
+            "name_verbatim": name if name else None,
+        }
 
     if source == "paper":
         for node in parse_paper_decls(roots["paper"]):
@@ -922,7 +945,7 @@ def _iter_source_nodes(
                 source_line=getattr(node, "source_line", 0),
                 in_file_seq=in_file_seq,
             )
-            yield tid, deep_kind_set(node)
+            yield tid, deep_kind_set(node), _identity(kind, label, path_str)
     elif source == "agda":
         for path in sorted(roots["agda"].rglob("*.agda")):
             rel_path = _rel(path)
@@ -939,7 +962,7 @@ def _iter_source_nodes(
                         source_line=getattr(node, "source_line", 0),
                         in_file_seq=in_file_seq,
                     )
-                    yield tid, deep_kind_set(node)
+                    yield tid, deep_kind_set(node), _identity(kind, name, rel_path)
             except Exception as e:
                 print(
                     f"closed_loop: parse failure in {path}: "
@@ -963,7 +986,7 @@ def _iter_source_nodes(
                         source_line=getattr(node, "source_line", 0),
                         in_file_seq=in_file_seq,
                     )
-                    yield tid, deep_kind_set(node)
+                    yield tid, deep_kind_set(node), _identity(kind, name, rel_path)
             except Exception as e:
                 print(
                     f"closed_loop: parse failure in {path}: "
@@ -1121,49 +1144,81 @@ def extract_initial_state(
     if source_filter is not None:
         sources = tuple(s for s in sources if s in source_filter)
 
-    # Phase 1: collect raw observations per Thing
-    raw: list = []  # list of (thing_id, source, frozenset[str])
+    # Phase 1: collect raw observations + identity components per Thing
+    raw: list = []  # list of (thing_id, source, frozenset[str], identity_dict)
     seen_ids: set = set()
     for src in sources:
-        for tid, obs in _iter_source_nodes(repo, src):
+        for tid, obs, identity in _iter_source_nodes(repo, src):
             if tid in seen_ids:
-                # Bijectivity violation: two things claimed the same ID.
-                # Under p-bijective-hash-consing this is a hard error —
-                # our positional disambiguation assumed uniqueness of
-                # (file, line) for unlabeled decls or globally-unique
-                # labels for labeled decls.  If this fires, upgrade to
-                # byte-offset-level positioning.
                 raise ValueError(
                     f"thing-id collision: {tid!r} extracted twice "
                     f"(violates p-bijective-hash-consing; upgrade to "
                     f"byte-level positional disambiguation)"
                 )
             seen_ids.add(tid)
-            raw.append((tid, src, obs))
+            raw.append((tid, src, obs, identity))
 
-    # Phase 2: build Pool.  Distinct observations across all Things
-    # plus one source-atom per source = the initial K pool.  Sorted
-    # for deterministic bit assignment across runs.
+    # Phase 2: build Pool.  Register probes for every discriminable
+    # identity component so probe-quotienting can resolve any subset
+    # expressible as a constraint on identity (p-yoneda-identity,
+    # p-probes-are-half-spaces).
     all_observables: set = set()
-    for _tid, src, obs in raw:
+    for _tid, src, obs, identity in raw:
+        # Subtree kind observations (existing)
         all_observables.update(obs)
+        # Source tag as probe (p-source-is-a-k)
         all_observables.add(f"source:{src}")
+        # Top-level kind: distinct probe from subtree-kind.  Fires on
+        # things whose own kind at the root is K (vs containing K
+        # anywhere in subtree).  This distinction is discriminable
+        # and therefore must be a probe per p-yoneda-identity.
+        all_observables.add(f"kind_at_root:{identity['kind_at_root']}")
+        # Path components: one probe per directory/file fragment.
+        # Enables "things in this directory" as a probe quotient.
+        for pc in identity["path_components"]:
+            all_observables.add(f"path:{pc}")
+        # Name verbatim (no tokenization — tokenizing would be
+        # canonicalization, forbidden by p-no-canonicalization).
+        # Same-named things across files share this probe; different
+        # names are distinct probes.
+        if identity["name_verbatim"]:
+            all_observables.add(f"name:{identity['name_verbatim']}")
     pool = Pool()
     for observable in sorted(all_observables):
         pool = pool.with_k(Atom(Observable(observable)))
 
-    # Phase 3: build Things with τ = σ bitmaps
+    # Phase 3: build Things with τ = σ bitmaps, firing all relevant
+    # probes for each Thing's identity components.
     things: list = []
-    for tid, src, obs in raw:
+    for tid, src, obs, identity in raw:
         mask = 0
+        # Subtree kind observations
         for observation in obs:
             idx = pool.bit_of(Atom(Observable(observation)))
             if idx is not None:
                 mask |= 1 << idx
-        # Fire the source atom
+        # Source atom
         src_idx = pool.bit_of(Atom(Observable(f"source:{src}")))
         if src_idx is not None:
             mask |= 1 << src_idx
+        # kind_at_root atom
+        kroot_idx = pool.bit_of(
+            Atom(Observable(f"kind_at_root:{identity['kind_at_root']}"))
+        )
+        if kroot_idx is not None:
+            mask |= 1 << kroot_idx
+        # path: component atoms
+        for pc in identity["path_components"]:
+            p_idx = pool.bit_of(Atom(Observable(f"path:{pc}")))
+            if p_idx is not None:
+                mask |= 1 << p_idx
+        # name:verbatim atom (if named)
+        if identity["name_verbatim"]:
+            n_idx = pool.bit_of(
+                Atom(Observable(f"name:{identity['name_verbatim']}"))
+            )
+            if n_idx is not None:
+                mask |= 1 << n_idx
         things.append(
             Thing(id=ThingId(tid), tau_mask=mask, sigma_mask=mask)
         )
@@ -1509,7 +1564,6 @@ def _smoke_test() -> None:
             src_atom = Atom(Observable(f"source:{src}"))
             idx = state.pool.bit_of(src_atom)
             assert idx is not None, f"source atom source:{src} not in pool"
-            # Every thing from that source fires the source atom on its tau
             matching = [
                 t for tid, t in state.things if tid.startswith(f"{src}:")
             ]
@@ -1517,6 +1571,47 @@ def _smoke_test() -> None:
                 assert (t.tau_mask >> idx) & 1, (
                     f"thing of source {src!r} does not fire source atom"
                 )
+
+        # p-yoneda-identity: kind_at_root probes exist and fire selectively.
+        # A thing whose top-level kind is K fires kind_at_root:K but things
+        # that only CONTAIN K in their subtree do not fire it.
+        for src in available:
+            things_of_src = [t for tid, t in state.things if tid.startswith(f"{src}:")]
+            if not things_of_src:
+                continue
+            # Pick a sample thing; verify kind_at_root matches its ThingId
+            sample = things_of_src[0]
+            # Extract kind from tid like "agda:module:CSTZ.All..." → "module"
+            parts = sample.id.split(":", 3)
+            if len(parts) >= 2:
+                expected_kind = parts[1]
+                kr_atom = Atom(Observable(f"kind_at_root:{expected_kind}"))
+                kr_idx = state.pool.bit_of(kr_atom)
+                assert kr_idx is not None, (
+                    f"kind_at_root:{expected_kind} atom not in pool"
+                )
+                assert (sample.tau_mask >> kr_idx) & 1, (
+                    f"sample thing does not fire its kind_at_root probe"
+                )
+
+        # p-yoneda-identity: path probes exist (at least the source-root component)
+        # e.g. 'agda', 'paper', 'src' should be path probes registered from
+        # the first path component of each thing's source_path.
+        expected_roots = {"paper": "paper", "agda": "agda", "python": "src"}
+        for src in available:
+            root = expected_roots.get(src)
+            if root is None:
+                continue
+            path_atom = Atom(Observable(f"path:{root}"))
+            idx = state.pool.bit_of(path_atom)
+            assert idx is not None, f"path:{root} atom not in pool"
+
+        # p-yoneda-identity: name probes exist for named things
+        named_count = sum(
+            1 for k in state.pool.ks
+            if isinstance(k, Atom) and k.observable.startswith("name:")
+        )
+        assert named_count > 0, "no name: probes were registered"
 
         # Pool invariant: every observable appears as an Atom K
         for k in state.pool.ks:
