@@ -29,7 +29,20 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Iterator, Tuple
+from typing import Iterator, NewType, Tuple
+
+
+# ---------------------------------------------------------------------------
+# Semantic NewTypes — prevent stringly-typed category confusion
+# ---------------------------------------------------------------------------
+
+
+ThingId = NewType("ThingId", str)   # opaque identity of a pooled declaration
+KKey = NewType("KKey", str)         # canonical key of a K in the pool
+Observable = NewType("Observable", str)  # raw observation string from an extractor
+# Note: NewType is a static-type device; at runtime these are plain str.
+# Treating them as distinct types requires discipline from callers;
+# mypy/pyright will catch cross-category passings.
 
 
 # ---------------------------------------------------------------------------
@@ -174,27 +187,46 @@ class K(ABC):
         ...
 
     @abstractmethod
-    def key(self) -> str:
-        """Stable string key for pool registration.
+    def key(self) -> KKey:
+        """Stable string key reflecting INTENSIONAL structure.
 
         Atoms: the verbatim observation string.
-        Wedges: recursively-derived key from sorted parents
-                (provides wedge-commutativity canonicalization).
+        Wedges: derived from parents in the order given (not sorted);
+                intensionally distinct ``Wedge(a, b)`` and ``Wedge(b, a)``
+                have distinct keys.  Extensional canonicalization is
+                the job of ``normalize()``.
         """
         ...
 
     @abstractmethod
     def normalize(self) -> "K":
         """Return a canonical representative in the K's extensional
-        equivalence class (under wedge commutativity).  Idempotent."""
+        equivalence class.  Quotients by the three path-constructors
+        of the exterior algebra:
+
+          - commutativity:  a ∧ b ≡ b ∧ a
+          - associativity:  (a ∧ b) ∧ c ≡ a ∧ (b ∧ c)
+          - nilpotency:     a ∧ a = 0
+
+        Idempotent.  Implementation flattens nested wedges, sorts the
+        resulting atom multiset, detects duplicates (→ ZeroK), and
+        rebuilds a canonical right-leaning binary tree.
+        """
         ...
 
     @abstractmethod
-    def atoms(self) -> frozenset[str]:
-        """Set of all atomic observation strings appearing in this K
-        (transitively, across wedge parents).  Atoms' own key; wedges'
-        union of their parents' atoms.  Used for redundancy checks."""
+    def atoms(self) -> frozenset["Atom"]:
+        """Set of all Atom K's appearing in this K's inductive structure
+        (transitively, across wedge parents).  Under ``p-self-similarity``,
+        atoms are themselves K's, so this must return typed Atom instances
+        rather than raw observation strings."""
         ...
+
+    def is_zero(self) -> bool:
+        """True if this K is the zero element of the exterior algebra
+        (i.e., a wedge with duplicate atoms).  Default: False.
+        Overridden by ``ZeroK``."""
+        return False
 
 
 @dataclass(frozen=True, eq=True)
@@ -208,20 +240,50 @@ class Atom(K):
     supports any population.
     """
 
-    observable: str
+    observable: Observable
 
     @property
     def grade(self) -> int:
         return 1
 
-    def key(self) -> str:
-        return f"atom:{self.observable}"
+    def key(self) -> KKey:
+        return KKey(f"atom:{self.observable}")
 
     def normalize(self) -> "Atom":
         return self  # atoms are already canonical
 
-    def atoms(self) -> frozenset[str]:
-        return frozenset({self.observable})
+    def atoms(self) -> frozenset["Atom"]:
+        return frozenset({self})
+
+
+@dataclass(frozen=True, eq=True)
+class ZeroK(K):
+    """The zero element of the exterior algebra.
+
+    Produced by ``Wedge.normalize()`` when the wedge contains duplicate
+    atoms (nilpotency: a ∧ a = 0).  Never fires on any thing; should
+    not be registered in a Pool (pool entries represent meaningful
+    discriminators, not the algebraic zero).
+    """
+
+    # Marker; no fields.  Frozen + eq gives it singleton-like behavior
+    # via structural equality (all ZeroK instances equal each other).
+
+    @property
+    def grade(self) -> int:
+        return 0
+
+    def key(self) -> KKey:
+        return KKey("zero")
+
+    def normalize(self) -> "ZeroK":
+        return self
+
+    def atoms(self) -> frozenset["Atom"]:
+        return frozenset()
+
+    def is_zero(self) -> bool:
+        return True
 
 
 @dataclass(frozen=True, eq=True)
@@ -229,10 +291,14 @@ class Wedge(K):
     """Grade-(max(a.grade, b.grade) + 1) K built from two lower K's via ∧.
 
     Intensional equality distinguishes ``Wedge(a, b)`` from ``Wedge(b, a)``
-    since they are structurally different dataclass instances.
-    Extensional equality (wedge commutativity) is earned via
-    ``normalize()`` which sorts the parents by their key, returning
-    the canonical representative.
+    since they are structurally different dataclass instances.  ``key()``
+    reflects the intensional order.
+
+    Extensional equality is earned via ``normalize()``, which quotients
+    by all three exterior-algebra path constructors (commutativity,
+    associativity, nilpotency).  The canonical representative is a
+    right-leaning binary tree whose leaves are distinct Atoms in
+    sorted key order.
     """
 
     a: K
@@ -242,21 +308,73 @@ class Wedge(K):
     def grade(self) -> int:
         return max(self.a.grade, self.b.grade) + 1
 
-    def key(self) -> str:
-        # Canonical key = sorted pair of parent keys
-        ka, kb = self.a.key(), self.b.key()
-        lo, hi = (ka, kb) if ka <= kb else (kb, ka)
-        return f"wedge({lo},{hi})"
+    def key(self) -> KKey:
+        # INTENSIONAL key: parents in given order.  Two wedges whose
+        # parents differ in structure or order get distinct keys;
+        # normalize() collapses them extensionally.
+        return KKey(f"wedge({self.a.key()},{self.b.key()})")
 
-    def normalize(self) -> "Wedge":
-        na = self.a.normalize()
-        nb = self.b.normalize()
-        if na.key() <= nb.key():
-            return Wedge(na, nb)
-        return Wedge(nb, na)
+    def normalize(self) -> K:
+        """Flatten nested wedges, collect atoms, dedupe (→ ZeroK on
+        duplicate), and rebuild a canonical right-leaning binary tree.
 
-    def atoms(self) -> frozenset[str]:
+        Returns:
+          - ``ZeroK()`` if any atom appears twice in the flattened list
+            (nilpotency);
+          - the sole ``Atom`` if the flattened multiset has exactly one
+            element (degenerate wedge);
+          - a canonical right-leaning ``Wedge`` otherwise.
+        """
+        # Recursively collect all atoms via the typed accessor.
+        all_atoms = self.atoms()
+        # Detect nilpotency by comparing flattened leaf count to
+        # distinct-atom count; if they differ, duplicates exist.
+        flat_leaves = _flatten_wedge_leaves(self)
+        if len(flat_leaves) != len(all_atoms):
+            return ZeroK()
+        # No duplicates; build right-leaning canonical tree.
+        sorted_atoms = sorted(all_atoms, key=lambda a: a.key())
+        if len(sorted_atoms) == 1:
+            return sorted_atoms[0]  # grade-1 degenerate
+        return _build_right_leaning(sorted_atoms)
+
+    def atoms(self) -> frozenset["Atom"]:
         return self.a.atoms() | self.b.atoms()
+
+
+# ---------------------------------------------------------------------------
+# Wedge canonicalization helpers
+# ---------------------------------------------------------------------------
+
+
+def _flatten_wedge_leaves(k: K) -> Tuple[Atom, ...]:
+    """Recursively collect all atom leaves of a wedge tree IN ORDER
+    (preserving multiplicity).  Used to detect duplicates for
+    nilpotency quotienting."""
+    if isinstance(k, Atom):
+        return (k,)
+    if isinstance(k, ZeroK):
+        return ()
+    if isinstance(k, Wedge):
+        return _flatten_wedge_leaves(k.a) + _flatten_wedge_leaves(k.b)
+    raise TypeError(f"unknown K constructor: {type(k).__name__}")
+
+
+def _build_right_leaning(atoms: list) -> K:
+    """Build a right-leaning binary Wedge tree from a sorted, distinct
+    list of Atoms.  Used by ``Wedge.normalize()`` to produce the
+    canonical representative of the extensional equivalence class."""
+    if len(atoms) == 0:
+        # Empty wedge is identity; represent as ZeroK for safety
+        # (shouldn't happen in practice since normalize filters this).
+        return ZeroK()
+    if len(atoms) == 1:
+        return atoms[0]
+    # Right-leaning: Wedge(a[0], Wedge(a[1], Wedge(a[2], ...)))
+    result: K = atoms[-1]
+    for atom in reversed(atoms[:-1]):
+        result = Wedge(atom, result)
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -295,7 +413,14 @@ class Pool:
         return len(self.keys)
 
     def bit_of(self, k: K) -> int | None:
-        target = k.key()
+        """Return the bit index of K's extensional equivalence class.
+
+        The pool stores extensional representatives (canonical via
+        ``normalize()``), so lookup also normalizes first.  This keeps
+        pool identity consistent with the HIT-style quotient: two
+        intensionally-distinct K's in the same extensional class
+        resolve to the same bit."""
+        target = k.normalize().key()
         for key, idx in self.by_key:
             if key == target:
                 return idx
@@ -336,10 +461,14 @@ class Pool:
 
 @dataclass(frozen=True)
 class Thing:
-    """A pooled named declaration.  The ``source_path`` + ``line`` are
-    informational; the framework makes no commitment that "source" is
-    a distinguished axis (``p-source-is-a-k`` — source is just
-    another K observable).
+    """A pooled object, identified solely by an opaque ThingId.
+
+    The algebra sees ONLY the identity and the bitmaps.  Under
+    ``p-source-is-a-k``, source provenance is not a privileged field
+    of Thing — it is an observable K registered in the Pool.  Same
+    for display names, paths, line numbers, and anything else that
+    is "reporting metadata".  Those live in a separate ``Metadata``
+    struct carried alongside State but not inside it.
 
     ``tau_mask`` and ``sigma_mask`` are bitmaps over the Pool: bit i
     set iff the K at pool position i fires on this thing in the
@@ -347,10 +476,7 @@ class Thing:
     by construction (never stored).
     """
 
-    id: str                  # unique across corpus, e.g. "agda:module:Foo.Bar"
-    display: str             # human-readable name
-    source_path: str = ""    # file path for reporting only
-    line: int = 0            # source line for reporting only
+    id: ThingId              # opaque identity; not interpreted by algebra
     tau_mask: int = 0        # bitmap over Pool
     sigma_mask: int = 0      # bitmap over Pool
 
@@ -377,6 +503,53 @@ class Thing:
             tau=(self.tau_mask >> idx) & 1,
             sigma=(self.sigma_mask >> idx) & 1,
         )
+
+    def remap(self, old_pool: Pool, new_pool: Pool) -> "Thing":
+        """Return this Thing with its bitmaps remapped from old_pool's
+        bit indexing to new_pool's bit indexing.
+
+        Used by ``State.merge`` when two shards have divergent pools:
+        self.pool bit-indices may not match the merged pool's, so
+        Things from self need each bit remapped via K-key lookup."""
+        if old_pool is new_pool:
+            return self
+        new_tau = 0
+        new_sigma = 0
+        for old_idx, k in enumerate(old_pool.ks):
+            new_idx = new_pool.bit_of(k)
+            if new_idx is None:
+                continue  # K not in new pool; bit dropped
+            if (self.tau_mask >> old_idx) & 1:
+                new_tau |= 1 << new_idx
+            if (self.sigma_mask >> old_idx) & 1:
+                new_sigma |= 1 << new_idx
+        return Thing(id=self.id, tau_mask=new_tau, sigma_mask=new_sigma)
+
+
+# ---------------------------------------------------------------------------
+# Metadata — strictly informational, never inspected by the algebra
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class Metadata:
+    """Reporting-only metadata for a Thing.
+
+    Kept separate from ``Thing`` so the algebra cannot accidentally
+    privilege source-of-origin, display names, or file paths as
+    structural features (``p-source-is-a-k``).  State carries a
+    dict of ThingId → Metadata alongside (not inside) its things
+    table; step() and merge() do not read or mutate metadata.
+
+    Extractors may populate whatever fields they find useful for
+    humans reading reports; the framework commits only to not
+    looking at them.
+    """
+
+    display: str = ""        # human-readable label
+    source_path: str = ""    # file path
+    line: int = 0            # source line
+    extra: Tuple[Tuple[str, str], ...] = ()  # arbitrary key/value strings
 
 
 # ---------------------------------------------------------------------------
@@ -406,9 +579,10 @@ class State:
     """
 
     pool: Pool = field(default_factory=Pool)
-    things: Tuple[Tuple[str, Thing], ...] = ()        # sorted-by-id for hashability
-    oracle_pairs: frozenset = frozenset()             # frozenset[frozenset[str]]
-    weights: Tuple[Tuple[str, float], ...] = ()       # sorted-by-key for hashability
+    things: Tuple[Tuple[ThingId, Thing], ...] = ()       # sorted-by-id for hashability
+    oracle_pairs: frozenset = frozenset()                # frozenset[frozenset[ThingId]]
+    weights: Tuple[Tuple[KKey, float], ...] = ()         # sorted-by-key for hashability
+    metadata: Tuple[Tuple[ThingId, Metadata], ...] = ()  # sorted-by-id; informational only
     trajectory: Tuple = ()
     iteration: int = 0
 
@@ -416,6 +590,9 @@ class State:
 
     def things_dict(self) -> dict:
         return dict(self.things)
+
+    def metadata_dict(self) -> dict:
+        return dict(self.metadata)
 
     def weights_dict(self) -> dict:
         return dict(self.weights)
@@ -427,17 +604,30 @@ class State:
                 return w
         return default
 
+    def metadata_of(self, thing_id: ThingId) -> Metadata:
+        for tid, md in self.metadata:
+            if tid == thing_id:
+                return md
+        return Metadata()
+
     # -- constructors -------------------------------------------------------
 
-    def with_thing(self, thing: Thing) -> "State":
-        """Add or replace a thing by id."""
+    def with_thing(self, thing: Thing, metadata: Metadata | None = None) -> "State":
+        """Add or replace a thing by id.  Optionally set metadata."""
         others = tuple((i, t) for i, t in self.things if i != thing.id)
-        new = tuple(sorted(others + ((thing.id, thing),), key=lambda kv: kv[0]))
+        new_things = tuple(sorted(others + ((thing.id, thing),), key=lambda kv: kv[0]))
+        new_metadata = self.metadata
+        if metadata is not None:
+            md_others = tuple((i, m) for i, m in self.metadata if i != thing.id)
+            new_metadata = tuple(
+                sorted(md_others + ((thing.id, metadata),), key=lambda kv: kv[0])
+            )
         return State(
             pool=self.pool,
-            things=new,
+            things=new_things,
             oracle_pairs=self.oracle_pairs,
             weights=self.weights,
+            metadata=new_metadata,
             trajectory=self.trajectory,
             iteration=self.iteration,
         )
@@ -448,11 +638,12 @@ class State:
             things=self.things,
             oracle_pairs=self.oracle_pairs,
             weights=self.weights,
+            metadata=self.metadata,
             trajectory=self.trajectory,
             iteration=self.iteration,
         )
 
-    def with_weight(self, k_key: str, w: float) -> "State":
+    def with_weight(self, k_key: KKey, w: float) -> "State":
         others = tuple((k, v) for k, v in self.weights if k != k_key)
         new = tuple(sorted(others + ((k_key, w),), key=lambda kv: kv[0]))
         return State(
@@ -460,6 +651,7 @@ class State:
             things=self.things,
             oracle_pairs=self.oracle_pairs,
             weights=new,
+            metadata=self.metadata,
             trajectory=self.trajectory,
             iteration=self.iteration,
         )
@@ -470,6 +662,7 @@ class State:
             things=self.things,
             oracle_pairs=self.oracle_pairs,
             weights=self.weights,
+            metadata=self.metadata,
             trajectory=self.trajectory + (entry,),
             iteration=self.iteration + 1,
         )
@@ -477,38 +670,59 @@ class State:
     # -- merge / restrict ---------------------------------------------------
 
     def merge(self, other: "State") -> "State":
-        """Union two states.  Associative and commutative up to:
-        - pool index reassignment (merged pool may index K's in a
-          different order than either input; Things' bitmaps must be
-          remapped if their Pool differs from the merged Pool);
-        - weight collision: same-key weights average;
-        - oracle pairs union;
-        - trajectory concatenation (non-commutative; order-preserving
-          via iteration counter).
+        """Union two states.  Associative and commutative per
+        ``p-embarrassingly-parallel``:
 
-        In this Stage-2 implementation we assume identical pools in
-        both inputs — enforced by an assertion.  Cross-pool merge
-        (which requires bitmap remapping) is Stage 10 concern.
+        - Pool: ``self.pool.merge(other.pool)`` — K's from self keep
+          their bit indices (append-only); K's only in other get new
+          indices appended.  This produces a pool where each K's
+          extensional identity maps to a single bit index.
+        - Things: union by ThingId; if a Thing appears in both states,
+          either the two Thing records are identical OR their bitmaps
+          are both remapped to the merged pool and then compared.
+          Truly divergent Things (same id, different firing profile)
+          raise ValueError.
+        - Weights: averaged on key collision.
+        - Oracle pairs: set-unioned.
+        - Metadata: union by ThingId; collision takes self's value
+          (not averaged; metadata is informational).
+        - Trajectory: concatenated and sorted by iteration key.
+
+        Divergent-pool merge (other.pool has K's self.pool doesn't,
+        and vice versa) works correctly: Things whose source pool
+        differs from the merged pool are remapped via
+        ``Thing.remap`` before being combined.
         """
-        # Pool merge (may reassign indices if different)
         merged_pool = self.pool.merge(other.pool)
-        if merged_pool.keys != self.pool.keys or merged_pool.keys != other.pool.keys:
-            # Cross-pool merge requires bitmap remapping; deferred.
-            # For Stage 2, reject unless one is a prefix of the other.
-            if not (self.pool.keys == merged_pool.keys[: len(self.pool.keys)]
-                    and other.pool.keys == merged_pool.keys[: len(other.pool.keys)]):
-                raise NotImplementedError(
-                    "cross-pool merge with non-prefix divergence is Stage 10"
-                )
 
-        # Things: union by id; collision requires identical Thing (no bitmap remap yet)
-        things_self = dict(self.things)
-        things_other = dict(other.things)
+        # Determine if remapping is needed for each side
+        self_needs_remap = self.pool.keys != merged_pool.keys
+        other_needs_remap = other.pool.keys != merged_pool.keys
+
+        def _remap_all(things_tuple, source_pool: Pool) -> dict:
+            """Return dict ThingId → Thing with bitmaps in merged_pool indexing."""
+            out = {}
+            for tid, thing in things_tuple:
+                if source_pool is merged_pool or not (
+                    self_needs_remap if source_pool is self.pool else other_needs_remap
+                ):
+                    out[tid] = thing
+                else:
+                    out[tid] = thing.remap(source_pool, merged_pool)
+            return out
+
+        things_self = _remap_all(self.things, self.pool)
+        things_other = _remap_all(other.things, other.pool)
+
+        # Union by id; collision requires equality after remap
         combined: dict = {}
         for tid in set(things_self) | set(things_other):
             if tid in things_self and tid in things_other:
                 if things_self[tid] != things_other[tid]:
-                    raise ValueError(f"thing id {tid!r} has diverging content across states")
+                    raise ValueError(
+                        f"thing id {tid!r} has diverging content across states "
+                        f"(after pool remap)"
+                    )
                 combined[tid] = things_self[tid]
             else:
                 combined[tid] = things_self.get(tid, things_other.get(tid))
@@ -520,6 +734,12 @@ class State:
                 ws[k] = (ws[k] + w) / 2.0
             else:
                 ws[k] = w
+
+        # Metadata: union; collision → self wins (informational only)
+        md: dict = dict(self.metadata)
+        for tid, m in other.metadata:
+            if tid not in md:
+                md[tid] = m
 
         # Oracle: union
         oracle = self.oracle_pairs | other.oracle_pairs
@@ -537,6 +757,7 @@ class State:
             things=tuple(sorted(combined.items(), key=lambda kv: kv[0])),
             oracle_pairs=oracle,
             weights=tuple(sorted(ws.items(), key=lambda kv: kv[0])),
+            metadata=tuple(sorted(md.items(), key=lambda kv: kv[0])),
             trajectory=traj_combined,
             iteration=max(self.iteration, other.iteration),
         )
@@ -544,16 +765,17 @@ class State:
     def restrict(
         self,
         *,
-        thing_ids: frozenset[str] | None = None,
+        thing_ids: frozenset | None = None,
     ) -> "State":
         """Return a sub-state containing only the requested things.
         Pool is preserved (K-pool doesn't partition naturally at this
         stage).  Oracle pairs restricted to those fully contained in
-        the requested thing-set.
+        the requested thing-set.  Metadata restricted to kept things.
         """
         if thing_ids is None:
             return self
         kept = tuple((i, t) for i, t in self.things if i in thing_ids)
+        kept_md = tuple((i, m) for i, m in self.metadata if i in thing_ids)
         kept_oracle = frozenset(
             p for p in self.oracle_pairs if all(x in thing_ids for x in p)
         )
@@ -562,6 +784,7 @@ class State:
             things=kept,
             oracle_pairs=kept_oracle,
             weights=self.weights,
+            metadata=kept_md,
             trajectory=self.trajectory,
             iteration=self.iteration,
         )
@@ -627,30 +850,57 @@ def _smoke_test() -> None:
             )
 
     # K: atoms are grade 1, wedges grow grade, keys are canonical
-    a = Atom("module")
-    b = Atom("function")
+    a = Atom(Observable("module"))
+    b = Atom(Observable("function"))
     assert a.grade == 1 and b.grade == 1
     w = Wedge(a, b)
     assert w.grade == 2
 
-    # Wedge commutativity: normalize sorts parents
+    # Intensional keys DIFFER under argument order
     w_ab = Wedge(a, b)
     w_ba = Wedge(b, a)
-    assert w_ab != w_ba  # intensionally distinct
-    assert w_ab.normalize() == w_ba.normalize(), "wedge normalize not canonical"
+    assert w_ab != w_ba, "intensionally distinct Wedge(a,b) vs Wedge(b,a)"
+    assert w_ab.key() != w_ba.key(), "intensional keys must differ by construction order"
 
-    # Key stability
-    assert w_ab.key() == w_ba.key(), "wedge key should be commutative-invariant"
+    # Extensional equality via normalize() — quotient by commutativity
+    assert w_ab.normalize() == w_ba.normalize(), "commutativity quotient failed"
+    assert w_ab.normalize().key() == w_ba.normalize().key(), (
+        "extensional keys must agree after normalize"
+    )
 
     # Grade of nested wedges
-    c = Atom("expr")
+    c = Atom(Observable("expr"))
     w2 = Wedge(w, c)
     assert w2.grade == 3
     w3 = Wedge(c, w)
     assert w3.grade == 3
 
-    # Atoms: union transitivity
-    assert w2.atoms() == frozenset({"module", "function", "expr"})
+    # Associativity quotient: (a ∧ b) ∧ c ≡ a ∧ (b ∧ c)
+    left_assoc = Wedge(Wedge(a, b), c)
+    right_assoc = Wedge(a, Wedge(b, c))
+    assert left_assoc != right_assoc, "intensionally distinct"
+    assert left_assoc.normalize() == right_assoc.normalize(), (
+        "associativity quotient failed"
+    )
+
+    # Nilpotency: a ∧ a = 0
+    nil = Wedge(a, a)
+    assert nil.normalize() == ZeroK(), "nilpotency quotient failed"
+    # Duplicate detection across associativity: (a ∧ b) ∧ a = 0
+    nil2 = Wedge(Wedge(a, b), a)
+    assert nil2.normalize() == ZeroK(), "nilpotency across associativity failed"
+
+    # atoms() returns frozenset[Atom] (typed), not raw strings
+    atoms_of_w2 = w2.atoms()
+    assert all(isinstance(x, Atom) for x in atoms_of_w2), "atoms() must return Atom instances"
+    assert atoms_of_w2 == frozenset({a, b, c}), "atoms() set membership"
+
+    # Canonical wedge is right-leaning, sorted by atom key
+    canon = Wedge(c, Wedge(b, a)).normalize()  # grade-3 built differently
+    # Canonical form should have atoms in sorted order: a, b, c (by key "atom:expr", "atom:function", "atom:module")
+    # (sort is by K.key() which is "atom:<observable>", so alphabetical on observable)
+    flat = _flatten_wedge_leaves(canon)
+    assert flat == tuple(sorted(flat, key=lambda x: x.key())), "canonical form not sorted"
 
     # Pool: append, idempotency, merge
     p = Pool()
@@ -670,92 +920,171 @@ def _smoke_test() -> None:
     assert merged.bit_of(w) == 2
     assert merged.bit_of(c) == 3  # c was not in p3, appended
 
-    # Thing: κ_mask = τ_mask ⊕ σ_mask
-    t = Thing(id="x", display="x", tau_mask=0b1010, sigma_mask=0b1100)
+    # Thing: κ_mask = τ_mask ⊕ σ_mask; Thing has ONLY id + bitmaps
+    t = Thing(id=ThingId("x"), tau_mask=0b1010, sigma_mask=0b1100)
     assert t.kappa_mask == 0b0110
+    # Thing has no source_path/display/line (they live in Metadata)
+    assert not hasattr(t, "source_path"), "Thing should not carry source_path"
+    assert not hasattr(t, "display"), "Thing should not carry display"
+
+    # Metadata is separate and informational only
+    md = Metadata(display="x (friendly name)", source_path="paper/section01.tex", line=42)
+    assert md.display == "x (friendly name)"
 
     # tausigma_at reads correctly
-    t2 = Thing(id="y", display="y", tau_mask=0b101, sigma_mask=0b011)
-    # Pool with 3 atoms a, b, c at bit indices 0, 1, 2
-    pool = Pool().with_k(Atom("k0")).with_k(Atom("k1")).with_k(Atom("k2"))
-    ts_at_0 = t2.tausigma_at(pool, Atom("k0"))
+    t2 = Thing(id=ThingId("y"), tau_mask=0b101, sigma_mask=0b011)
+    # Pool with 3 atoms at bit indices 0, 1, 2
+    pool = Pool().with_k(Atom(Observable("k0"))).with_k(
+        Atom(Observable("k1"))).with_k(Atom(Observable("k2")))
+    ts_at_0 = t2.tausigma_at(pool, Atom(Observable("k0")))
     assert ts_at_0.tau == 1 and ts_at_0.sigma == 1 and ts_at_0.kappa == 0
-    ts_at_1 = t2.tausigma_at(pool, Atom("k1"))
+    ts_at_1 = t2.tausigma_at(pool, Atom(Observable("k1")))
     assert ts_at_1.tau == 0 and ts_at_1.sigma == 1 and ts_at_1.kappa == 1
-    ts_at_2 = t2.tausigma_at(pool, Atom("k2"))
+    ts_at_2 = t2.tausigma_at(pool, Atom(Observable("k2")))
     assert ts_at_2.tau == 1 and ts_at_2.sigma == 0 and ts_at_2.kappa == 1
 
-    # -- Stage 2: State merge / restrict / signature ------------------------
+    # Thing.remap: same Thing under a permuted pool produces remapped bitmaps
+    pool_rev = Pool().with_k(Atom(Observable("k2"))).with_k(
+        Atom(Observable("k1"))).with_k(Atom(Observable("k0")))
+    # t2 in original pool has k0 and k2 firing on tau (bits 0 and 2)
+    # In reversed pool, k0 is at bit 2 and k2 is at bit 0
+    t2_remapped = t2.remap(pool, pool_rev)
+    # Original tau_mask = 0b101 (bits 0, 2 set) → after remap, same K's fire
+    # but at new indices: k0 was bit 0, now bit 2; k2 was bit 2, now bit 0
+    # So new tau mask should have bits 0 and 2 set too = 0b101 (coincidence)
+    assert t2_remapped.tausigma_at(pool_rev, Atom(Observable("k0"))) == ts_at_0
+    assert t2_remapped.tausigma_at(pool_rev, Atom(Observable("k1"))) == ts_at_1
+    assert t2_remapped.tausigma_at(pool_rev, Atom(Observable("k2"))) == ts_at_2
 
-    # Two states with disjoint things, shared pool prefix
-    pool_a = Pool().with_k(Atom("k0")).with_k(Atom("k1"))
-    t1 = Thing(id="A", display="A", tau_mask=0b01, sigma_mask=0b01)
-    t2 = Thing(id="B", display="B", tau_mask=0b10, sigma_mask=0b11)
-    s1 = State(pool=pool_a, things=(("A", t1),), weights=(("atom:k0", 1.5),))
+    # -- Stage 2 + 2.5: State merge / restrict / signature with Metadata ----
 
-    # Second state uses an extended pool (prefix-compatible)
-    pool_b = pool_a.with_k(Atom("k2"))
-    t3 = Thing(id="C", display="C", tau_mask=0b100, sigma_mask=0b000)
-    s2 = State(
-        pool=pool_b,
-        things=(("B", t2), ("C", t3)),
-        oracle_pairs=frozenset({frozenset({"A", "B"})}),
-        weights=(("atom:k1", 2.0),),
+    ak0 = Atom(Observable("k0"))
+    ak1 = Atom(Observable("k1"))
+    ak2 = Atom(Observable("k2"))
+
+    pool_a = Pool().with_k(ak0).with_k(ak1)
+    t1 = Thing(id=ThingId("A"), tau_mask=0b01, sigma_mask=0b01)
+    t2 = Thing(id=ThingId("B"), tau_mask=0b10, sigma_mask=0b11)
+    md_a = Metadata(display="thing A", source_path="x.py")
+    s1 = State(
+        pool=pool_a,
+        things=((ThingId("A"), t1),),
+        weights=((ak0.key(), 1.5),),
+        metadata=((ThingId("A"), md_a),),
     )
 
-    # Merge: pool unions to the extended form; things union; weights union
+    # Second state uses an extended pool (prefix-compatible)
+    pool_b = pool_a.with_k(ak2)
+    t3 = Thing(id=ThingId("C"), tau_mask=0b100, sigma_mask=0b000)
+    s2 = State(
+        pool=pool_b,
+        things=((ThingId("B"), t2), (ThingId("C"), t3)),
+        oracle_pairs=frozenset({frozenset({ThingId("A"), ThingId("B")})}),
+        weights=((ak1.key(), 2.0),),
+    )
+
     m = s1.merge(s2)
-    assert m.pool.size() == 3, f"merged pool size {m.pool.size()}"
-    assert len(m.things) == 3, f"merged things count {len(m.things)}"
-    assert frozenset({"A", "B"}) in m.oracle_pairs
-    assert m.weight_of(Atom("k0")) == 1.5
-    assert m.weight_of(Atom("k1")) == 2.0
+    assert m.pool.size() == 3
+    assert len(m.things) == 3
+    assert len(m.metadata) == 1, "metadata carried from s1"
+    assert m.metadata_of(ThingId("A")).display == "thing A"
+    assert frozenset({ThingId("A"), ThingId("B")}) in m.oracle_pairs
+    assert m.weight_of(ak0) == 1.5
+    assert m.weight_of(ak1) == 2.0
 
     # Merge idempotent
     assert m.merge(m).signature() == m.signature(), "merge not idempotent"
 
-    # Merge associative (order-preserving on trajectory only; identity elsewhere)
-    s3 = State(pool=pool_b, things=(("D", Thing(id="D", display="D")),))
+    # Merge associative
+    s3 = State(pool=pool_b, things=((ThingId("D"), Thing(id=ThingId("D"))),))
     left = (s1.merge(s2)).merge(s3)
     right = s1.merge(s2.merge(s3))
     assert left.signature() == right.signature(), "merge not associative"
 
     # Weight collision: averaged on merge
-    sA = State(pool=pool_a, weights=(("atom:k0", 1.0),))
-    sB = State(pool=pool_a, weights=(("atom:k0", 3.0),))
+    sA = State(pool=pool_a, weights=((ak0.key(), 1.0),))
+    sB = State(pool=pool_a, weights=((ak0.key(), 3.0),))
     sAB = sA.merge(sB)
-    assert sAB.weight_of(Atom("k0")) == 2.0, "weight collision not averaged"
+    assert sAB.weight_of(ak0) == 2.0, "weight collision not averaged"
 
-    # Restrict: subset of things + pruned oracle
-    restricted = m.restrict(thing_ids=frozenset({"A"}))
+    # Restrict: subset of things + pruned oracle + pruned metadata
+    restricted = m.restrict(thing_ids=frozenset({ThingId("A")}))
     assert len(restricted.things) == 1
     assert len(restricted.oracle_pairs) == 0, "oracle with absent endpoint not pruned"
+    assert len(restricted.metadata) == 1, "metadata restricted to kept things"
 
     # Restrict preserving oracle
-    restricted2 = m.restrict(thing_ids=frozenset({"A", "B"}))
+    restricted2 = m.restrict(thing_ids=frozenset({ThingId("A"), ThingId("B")}))
     assert len(restricted2.things) == 2
-    assert frozenset({"A", "B"}) in restricted2.oracle_pairs
+    assert frozenset({ThingId("A"), ThingId("B")}) in restricted2.oracle_pairs
 
-    # Signature changes when pool grows
+    # Signature changes when pool grows; stable under trajectory append
     sig_before = s1.signature()
     s1_ext = s1.with_pool(pool_b)
     sig_after = s1_ext.signature()
-    assert sig_before != sig_after, "signature should change when pool changes"
+    assert sig_before != sig_after
 
-    # Appending trajectory advances iteration without changing signature
     s1_traj = s1.appending_trajectory({"note": "hello"})
-    assert s1_traj.signature() == s1.signature(), (
-        "trajectory append should not affect signature"
-    )
+    assert s1_traj.signature() == s1.signature()
     assert s1_traj.iteration == s1.iteration + 1
 
-    print("Stage 1 + 2 smoke test: all assertions passed")
-    print(f"  TauSigma invariant OK for all 4 cases × 6 S3 elements")
-    print(f"  Wedge commutativity canonicalized via normalize()")
-    print(f"  Pool append/merge idempotent; bit indices stable")
-    print(f"  κ = τ ⊕ σ preserved by Thing.kappa_mask and TauSigma.kappa")
-    print(f"  State.merge associative, idempotent; weights averaged on collision")
-    print(f"  State.restrict prunes orphan oracle pairs")
+    # -- Stage 2.5 NEW: divergent-pool merge via Thing.remap ----------------
+
+    # Two shards register different K's for the same thing's observations
+    shardA_pool = Pool().with_k(ak0).with_k(ak1)       # bit 0 = k0, bit 1 = k1
+    shardB_pool = Pool().with_k(ak1).with_k(ak2)       # bit 0 = k1, bit 1 = k2
+
+    # Shard A sees thing X firing on k0 and k1 → tau_mask = 0b11
+    thingA_X = Thing(id=ThingId("X"), tau_mask=0b11, sigma_mask=0b11)
+    # Shard B sees thing Y firing on k1 and k2 → tau_mask = 0b11 (but against shardB_pool!)
+    thingB_Y = Thing(id=ThingId("Y"), tau_mask=0b11, sigma_mask=0b11)
+
+    shardA = State(pool=shardA_pool, things=((ThingId("X"), thingA_X),))
+    shardB = State(pool=shardB_pool, things=((ThingId("Y"), thingB_Y),))
+
+    # Merge MUST handle divergent pools — previously this raised
+    merged = shardA.merge(shardB)
+    # Merged pool has 3 K's: k0, k1, k2 (in some order)
+    assert merged.pool.size() == 3
+
+    # X still fires on k0 and k1 after remap
+    assert merged.things_dict()[ThingId("X")].fires(merged.pool, ak0), "X should fire k0"
+    assert merged.things_dict()[ThingId("X")].fires(merged.pool, ak1), "X should fire k1"
+    assert not merged.things_dict()[ThingId("X")].fires(merged.pool, ak2), (
+        "X should NOT fire k2 (not in shard A's observation)"
+    )
+    # Y still fires on k1 and k2 after remap
+    assert merged.things_dict()[ThingId("Y")].fires(merged.pool, ak1), "Y should fire k1"
+    assert merged.things_dict()[ThingId("Y")].fires(merged.pool, ak2), "Y should fire k2"
+    assert not merged.things_dict()[ThingId("Y")].fires(merged.pool, ak0), (
+        "Y should NOT fire k0 (not in shard B's observation)"
+    )
+
+    # Divergent merge is associative + commutative too
+    # Order should not matter: shardA.merge(shardB) ≡ shardB.merge(shardA) extensionally
+    merged_rev = shardB.merge(shardA)
+    # Pool key sets should match (order may differ due to append-only)
+    assert set(merged.pool.keys) == set(merged_rev.pool.keys)
+    # Bit-by-bit firing sets should match for every K
+    for k in [ak0, ak1, ak2]:
+        for tid in [ThingId("X"), ThingId("Y")]:
+            assert (
+                merged.things_dict()[tid].fires(merged.pool, k)
+                == merged_rev.things_dict()[tid].fires(merged_rev.pool, k)
+            ), f"divergent merge not order-invariant for K={k.key()} tid={tid}"
+
+    print("Stage 1 + 2 + 2.5 smoke test: all assertions passed")
+    print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
+    print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
+    print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
+    print(f"  K.atoms() returns typed frozenset[Atom] (not raw strings)")
+    print(f"  Intensional Wedge.key() distinguishes construction order;")
+    print(f"    extensional normalize().key() collapses equivalence class")
+    print(f"  Thing carries only identity + bitmaps; Metadata is separate")
+    print(f"  Pool append/merge idempotent; bit indices stable within shard")
+    print(f"  State.merge associative, idempotent, handles DIVERGENT pools")
+    print(f"    via Thing.remap (p-embarrassingly-parallel realized)")
+    print(f"  State.restrict prunes orphan oracle pairs and orphan metadata")
     print(f"  State.signature stable under trajectory append")
 
 
