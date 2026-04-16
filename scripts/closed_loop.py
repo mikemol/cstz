@@ -425,65 +425,146 @@ def _build_right_leaning(atoms: list) -> K:
 # ---------------------------------------------------------------------------
 
 
-@dataclass(frozen=True)
-class Pool:
-    """Append-only K registry.
+# Pool's on-disk/in-memory shape: a structured-dtype numpy array,
+# one row per K-bit.  axis-0 position = bit index.  Fields:
+#   key   — the K's bijective key string (Python object dtype; HDF5
+#           serialization converts to fixed-width unicode at the
+#           boundary, per p-storage-matches-data-shape).
+#   grade — exterior-algebra grade of the K (1 for atoms, 2+ for wedges).
+#           Stored so shape-selects like ``pool[pool['grade'] == 2]`` are
+#           array-native.  Recoverable from K.grade but stored for
+#           serialization / diagnostic queries without materializing K's.
+POOL_DTYPE = np.dtype([("key", "O"), ("grade", "u1")])
 
-    Maintains the assignment of stable bit indices to K keys.  Adding
-    a K returns a new Pool (frozen / pure).  Bit indices are assigned
-    in append order; they are stable across merges that respect key
-    equality.
+
+@dataclass(frozen=True, eq=False)
+class Pool:
+    """Append-only K registry, stored as a numpy structured-dtype array.
+
+    Under l-pool-as-structured-dtype-array (enacted Stage 7.0.7), the
+    pool's authoritative representation is a 1-D structured-dtype
+    numpy array.  axis-0 index IS bit index.  This binds the
+    ``pool_size`` dependent-type parameter to the same numpy array
+    whose shape appears on Thing masks (axis-1) and firing_bitmaps
+    (axis-0) — one shape contract enforced across every consumer.
+
+    Two fields:
+      - ``keys_array`` — structured-dtype numpy array (POOL_DTYPE)
+      - ``ks``         — tuple of K objects parallel to keys_array
+
+    K objects are Python-inductive (Atom | Wedge | ZeroK) so they
+    can't live in a numpy array; ``ks`` keeps them as a Python tuple
+    with the invariant ``keys_array[i]['key'] == ks[i].key()``.
+
+    A ``_key_to_bit: dict[str, int]`` cache is populated in
+    ``__post_init__`` to keep ``bit_of`` at O(1); without it, the
+    previous tuple representation's linear scan was the hot path of
+    ``_articulate_wedges_batch``.
 
     Design-note (``d-disk-as-merge-protocol``): pool contents map
-    one-to-one to lines of ``pool.jsonl``; line number (0-indexed) =
-    bit index.  Two shards that register the same K key independently
-    MAY get different local bit indices; the merge step reassigns
-    indices canonically during load.
+    one-to-one to rows of an HDF5 compound dataset (Stage 7.1) whose
+    compound dtype mirrors POOL_DTYPE field-for-field
+    (l-hdf5-compound-dtypes-mirror-in-memory).  Two shards that
+    register the same K key independently MAY get different local bit
+    indices; the merge step reassigns indices canonically during load.
     """
 
-    keys: Tuple[str, ...] = ()
-    by_key: Tuple[Tuple[str, int], ...] = ()  # (key, bit_index) pairs
-    # ``ks`` stores the actual K objects in bit-index order
+    keys_array: np.ndarray = field(
+        default_factory=lambda: np.empty(0, dtype=POOL_DTYPE)
+    )
     ks: Tuple[K, ...] = ()
 
     def __post_init__(self) -> None:
-        if len(self.keys) != len(self.ks):
-            raise ValueError("keys and ks length mismatch")
-        if tuple(k.key() for k in self.ks) != self.keys:
-            raise ValueError("ks[i].key() != keys[i]")
+        # Shape / dtype invariants
+        if self.keys_array.dtype != POOL_DTYPE:
+            # Coerce rather than error — callers may pass an ndarray
+            # with a compatible-but-not-identical dtype (e.g. after
+            # HDF5 load with fixed-width strings).
+            object.__setattr__(
+                self, "keys_array", self.keys_array.astype(POOL_DTYPE)
+            )
+        if len(self.keys_array) != len(self.ks):
+            raise ValueError("keys_array and ks length mismatch")
+        # Content invariant + key→bit cache build
+        cache: dict = {}
+        for i, k in enumerate(self.ks):
+            stored_key = self.keys_array[i]["key"]
+            expected_key = k.key()
+            if stored_key != expected_key:
+                raise ValueError(
+                    f"pool row {i}: keys_array['key'] = {stored_key!r} "
+                    f"but ks[i].key() = {expected_key!r}"
+                )
+            cache[expected_key] = i
+        object.__setattr__(self, "_key_to_bit", cache)
+        # Freeze array contents (matches Thing masks' read-only discipline)
+        self.keys_array.setflags(write=False)
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Pool):
+            return False
+        if len(self.keys_array) != len(other.keys_array):
+            return False
+        # Element-wise equality on structured array + K tuple
+        return (
+            np.array_equal(self.keys_array, other.keys_array)
+            and self.ks == other.ks
+        )
+
+    def __hash__(self) -> int:
+        # Hash on the tuple of keys (cheap and sufficient — two pools
+        # with identical key sequences and matching ks satisfy the
+        # __post_init__ invariant so ks tuples match too).
+        return hash(tuple(self.keys_array["key"].tolist()))
+
+    # -- Backward-compat properties ----------------------------------------
+
+    @property
+    def keys(self) -> Tuple[str, ...]:
+        """Tuple of key strings in bit-index order (view of keys_array['key'])."""
+        return tuple(self.keys_array["key"].tolist())
+
+    @property
+    def by_key(self) -> Tuple[Tuple[str, int], ...]:
+        """Tuple of (key, bit_index) pairs in bit-index order.
+
+        Retained for callers that want the legacy shape; internal
+        lookups use ``_key_to_bit`` directly.
+        """
+        return tuple((str(k), i) for i, k in enumerate(self.keys_array["key"]))
+
+    # -- Core API -----------------------------------------------------------
 
     def size(self) -> int:
-        return len(self.keys)
+        return len(self.keys_array)
 
     def bit_of(self, k: K) -> int | None:
-        """Return the bit index of K's extensional equivalence class.
+        """O(1) bit-index lookup for K's extensional equivalence class.
 
-        The pool stores extensional representatives (canonical via
-        ``normalize()``), so lookup also normalizes first.  This keeps
-        pool identity consistent with the HIT-style quotient: two
+        Normalizes (HIT-quotient) before the dict hit so that
         intensionally-distinct K's in the same extensional class
-        resolve to the same bit."""
+        resolve to the same bit.
+        """
         target = k.normalize().key()
-        for key, idx in self.by_key:
-            if key == target:
-                return idx
-        return None
+        return self._key_to_bit.get(target)
 
     def has(self, k: K) -> bool:
         return self.bit_of(k) is not None
 
     def with_k(self, k: K) -> "Pool":
-        """Return a new Pool containing ``k``; idempotent if k is already present."""
+        """Return a new Pool containing ``k``; idempotent if already present.
+
+        Appends via np.concatenate on keys_array; K objects append on
+        the ks tuple.  Normalization applied before the concat so the
+        pool stores canonical extensional representatives.
+        """
         nk = k.normalize()
-        existing = self.bit_of(nk)
-        if existing is not None:
+        key = nk.key()
+        if key in self._key_to_bit:
             return self
-        new_idx = len(self.keys)
-        return Pool(
-            keys=self.keys + (nk.key(),),
-            by_key=self.by_key + ((nk.key(), new_idx),),
-            ks=self.ks + (nk,),
-        )
+        new_row = np.array([(key, nk.grade)], dtype=POOL_DTYPE)
+        new_array = np.concatenate([self.keys_array, new_row])
+        return Pool(keys_array=new_array, ks=self.ks + (nk,))
 
     def merge(self, other: "Pool") -> "Pool":
         """Merge two pools.  K's already in self keep their bit indices;
@@ -3090,6 +3171,8 @@ def _smoke_test() -> None:
 
                 print(f"    Stage 7.0.5+.6: numpy fast path + unmaterialized "
                       f"hash (pure __hash__, trajectory-based fixed-point)")
+                print(f"    Stage 7.0.7a: Pool uses structured-dtype numpy array; "
+                      f"O(1) bit_of via _key_to_bit cache")
 
         # Pool invariant: every observable appears as an Atom K
         for k in state.pool.ks:
@@ -3102,7 +3185,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.0.6 smoke test (eager-numpy + applied numpy + unmaterialized hash): all assertions passed")
+    print("Stage 1–7.0.7a smoke test (Pool structured-dtype array + eager-numpy applied): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
