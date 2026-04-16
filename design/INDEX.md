@@ -6,7 +6,7 @@ Each node is a line in `design/<type>s.jsonl`.
 Use `python scripts/design_sppf.py show <id>` for full detail.
 Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 
-## Principles (33)
+## Principles (34)
 
 - ● [p-alignment-is-distribution] Alignment is a distribution, not a predicate
 - ● [p-arity-is-grade] Arity = grade; arity N is not tracked, it emerges
@@ -21,6 +21,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [p-flat-k-pool] One flat K pool, no families
 - ● [p-four-cell-xor-score] Four-cell score is XOR of columns; only off-diagonals contribute
 - ● [p-functions-have-structural-identity] Functions used as plug-ins / visitors carry structural identity (no anonymous closures)
+- ● [p-hit-and-dependent-types-via-tensor-shape] Dependent types and HIT manifest as tensor shape constraints and tensor path-equalities
 - ● [p-iteration-count-unknown] Convergence count is unknown and unpromiseable
 - ● [p-kappa-is-derived-xor] κ = σ ⊕ τ is a derivation, not an independent axis
 - ● [p-maximal-freedom] Prefer interpretations that leave the greatest remaining freedom
