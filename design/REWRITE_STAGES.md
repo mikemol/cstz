@@ -170,20 +170,23 @@ for Stage 10.  The original "append-only JSONL I/O" target is Stage
            Atom/Wedge/ZeroK remain self-orbit.  Enacts
            l-k-level-s3-operators as scaffolding only — semantic
            switch (step() articulating Rotated K's) deferred to
-           Tier 3 post-Stage-7.1.
+           Tier 3 post-Stage-7.1.  Supplement: compose(k1, k2, g)
+           helper + wedge-normalize generalized for Rotated leaves
+           (distinct-leaves-count nilpotency) + K ∧ 0 = 0 absorption
+           bug fixed.
 
-### Stage 7.1 — hybrid JSONL + HDF5 I/O (PENDING)
+### Stage 7.1 — hybrid JSONL + HDF5 I/O (LANDED)
 
-- `dump_state(state, out_dir)` — structured records to JSONL
-  (pool.jsonl for (key, grade) rows, oracle_pairs.jsonl,
-  weights.jsonl, trajectory.jsonl); bulk bitmap tensors to HDF5
-  with compound dtypes mirroring in-memory structured dtypes field-
-  for-field per l-hdf5-compound-dtypes-mirror-in-memory.  Append-only
-  on the JSONL side; HDF5 datasets chunked + extensible on axis-0.
-- `load_state(in_dir)` — concatenate JSONL lines; mmap HDF5 datasets;
-  semantic-merge duplicates (sum Belnap counts; union K-pool by key).
-
-Smoke test: dump, load, assert loaded state is equivalent.  Commit.
+dump_state / load_state partitioned per p-storage-matches-data-shape:
+small-algebra authoritative forms to JSONL (pool.jsonl, things.jsonl,
+oracle_pairs.jsonl, weights.jsonl, trajectory_aux.jsonl); bulk tensor
+caches to HDF5 (state.h5 with /masks/tau, optional /masks/sigma,
+/trajectory compound dtype).  Sigma masks conditional on
+state.sigma_derivable_from_tau; loader reconstructs σ = τ when absent.
+k_from_structure closes the p-bijective-hash-consing round-trip.
+Enacts l-hdf5-compound-dtypes-mirror-in-memory.  Nine of ten lemmas
+enacted; only l-combinator-and-s3-operators-are-equivalent remains
+active (Tier 3 scope).
 
 ## Stage 8: CLI (~50 lines)
 

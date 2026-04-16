@@ -70,7 +70,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 
 - ● [l-combinator-and-s3-operators-are-equivalent] General exterior-algebra combinator ≡ S3 operators + AND-wedge (two presentations, one structure)
 - ▲ [l-hash-consing-as-np-unique] Hash-consing of K becomes np.unique over the pool's structured-dtype array
-- ● [l-hdf5-compound-dtypes-mirror-in-memory] HDF5 compound dtypes on disk should mirror the in-memory structured dtypes 1:1
+- ▲ [l-hdf5-compound-dtypes-mirror-in-memory] HDF5 compound dtypes on disk should mirror the in-memory structured dtypes 1:1
 - ▲ [l-k-level-s3-operators] S3 lifts from the tsk tensor to K-level operators swap, rotate, compose
 - ▲ [l-oracle-pairs-as-index-array] Oracle pairs should become Int[Array, 'n_pairs 2'] indexing axis-0 of stacked masks, not a frozenset
 - ▲ [l-pool-as-structured-dtype-array] Pool.by_key should become a structured-dtype array, not a tuple of tuples
@@ -90,7 +90,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (28)
+## Corrections (29)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -117,6 +117,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-stage-7-0-8-oracle-indices-and-shim-cleanup] Stage 7.0.8: oracle_pair_indices + scorer vectorization + dead-code shims retired
 - ● [c-stage-7-0-9-trajectory-structured-dtype-and-thing-docstring] Stage 7.0.9: trajectory → structured-dtype array + aux; Thing docstring realigned with post-7.0.7b role
 - ● [c-stage-7-0-eager-numpy-refactor] Stage 7.0: eager numpy refactor of internal representation
+- ● [c-stage-7-1-dump-load-enactment] Stage 7.1: hybrid JSONL + HDF5 I/O — dump_state / load_state; enacts l-hdf5-compound-dtypes-mirror-in-memory
 - ● [c-stage-7-1-hybrid-jsonl-hdf5-io] Stage 7.1: hybrid JSONL + HDF5 I/O with generator run()
 - ● [c-type-theory-reframed-via-tensor-shape] p-type-theory-everywhere reframed: primary focus is tensor shape, not class shape
 - ● [c-weight-updater-becomes-new-k-articulation] WeightUpdater stub removed; weight updates reinterpreted as new-K articulation
