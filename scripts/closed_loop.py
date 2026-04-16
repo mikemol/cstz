@@ -35,6 +35,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterator, NewType, Protocol, Tuple
 
+import numpy as np
+
 
 # ---------------------------------------------------------------------------
 # Semantic NewTypes — prevent stringly-typed category confusion
@@ -500,7 +502,7 @@ class Pool:
 # ---------------------------------------------------------------------------
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=False)
 class Thing:
     """A pooled object, identified solely by an opaque ThingId.
 
@@ -510,25 +512,73 @@ class Thing:
     observable K registered in the Pool.  Same for display names,
     paths, line numbers, and anything else an extractor might want
     to surface.  There is no "metadata" category: every observable
-    is a K; reports are queries over the pool + bitmaps.  A report
-    that wants to show "source path" filters for K's whose keys
-    match its chosen convention (e.g. prefix ``source:``) — but
-    that's a REPORTER choice, not a framework taxonomy.
+    is a K; reports are queries over the pool + bitmaps.
 
-    ``tau_mask`` and ``sigma_mask`` are bitmaps over the Pool: bit i
-    set iff the K at pool position i fires on this thing in the
-    respective channel.  ``kappa_mask`` is derived as tau ^ sigma
-    by construction (never stored).
+    ``tau_mask`` and ``sigma_mask`` are np.ndarray(dtype=bool) over
+    the Pool: element i True iff the K at pool position i fires on
+    this thing in the respective channel.  ``kappa_mask`` is derived
+    as ``tau XOR sigma`` by construction (never stored).
+
+    Under p-numpy-is-the-natural-cpu-representation + p-refactor-debt-
+    paid-eagerly, Stage 7.0 converted these from Python int bitmasks
+    to numpy bool arrays.  This keeps the algebra array-native from
+    end to end, consistent with the upcoming HDF5 I/O (Stage 7.1) and
+    with the general direction of the framework's CPU representation.
+
+    Immutability: dataclass is frozen, and bitmasks are marked
+    read-only at construction time (setflags(write=False)) so the
+    frozen invariant extends to the array contents.  Custom __eq__
+    and __hash__ are defined because numpy arrays don't compare
+    element-wise for boolean equality nor hash — we compare shapes
+    + values and hash on .tobytes().
     """
 
     id: ThingId              # opaque identity; not interpreted by algebra
-    tau_mask: int = 0        # bitmap over Pool
-    sigma_mask: int = 0      # bitmap over Pool
+    tau_mask: np.ndarray     # dtype=bool, length pool_size
+    sigma_mask: np.ndarray   # dtype=bool, length pool_size
+
+    def __post_init__(self) -> None:
+        # Ensure ndarrays of bool; freeze them against mutation
+        for field_name in ("tau_mask", "sigma_mask"):
+            arr = getattr(self, field_name)
+            if not isinstance(arr, np.ndarray):
+                arr = np.asarray(arr, dtype=bool)
+                object.__setattr__(self, field_name, arr)
+            elif arr.dtype != bool:
+                arr = arr.astype(bool)
+                object.__setattr__(self, field_name, arr)
+            # Make read-only
+            arr.setflags(write=False)
+        # Invariant: tau_mask and sigma_mask have the same length
+        if self.tau_mask.shape != self.sigma_mask.shape:
+            raise ValueError(
+                f"Thing {self.id!r}: tau_mask shape {self.tau_mask.shape} "
+                f"!= sigma_mask shape {self.sigma_mask.shape}"
+            )
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Thing):
+            return False
+        return (
+            self.id == other.id
+            and self.tau_mask.shape == other.tau_mask.shape
+            and np.array_equal(self.tau_mask, other.tau_mask)
+            and np.array_equal(self.sigma_mask, other.sigma_mask)
+        )
+
+    def __hash__(self) -> int:
+        return hash((
+            self.id,
+            self.tau_mask.shape,
+            self.tau_mask.tobytes(),
+            self.sigma_mask.tobytes(),
+        ))
 
     @property
-    def kappa_mask(self) -> int:
-        """κ-mask by GF(2) XOR of τ and σ.  Derived; never stored."""
-        return self.tau_mask ^ self.sigma_mask
+    def kappa_mask(self) -> np.ndarray:
+        """κ-mask by GF(2) XOR of τ and σ.  Derived; never stored.
+        Returned array is fresh; caller owns mutation rights."""
+        return np.logical_xor(self.tau_mask, self.sigma_mask)
 
     def fires(self, pool: Pool, k: K, channel: str = "tau") -> bool:
         idx = pool.bit_of(k)
@@ -537,16 +587,18 @@ class Thing:
         mask = self.tau_mask if channel == "tau" else (
             self.sigma_mask if channel == "sigma" else self.kappa_mask
         )
-        return bool((mask >> idx) & 1)
+        if idx >= len(mask):
+            return False
+        return bool(mask[idx])
 
     def tausigma_at(self, pool: Pool, k: K) -> TauSigma:
         """Read the TauSigma state of a specific K on this thing."""
         idx = pool.bit_of(k)
-        if idx is None:
+        if idx is None or idx >= len(self.tau_mask):
             return TauSigma(0, 0)
         return TauSigma(
-            tau=(self.tau_mask >> idx) & 1,
-            sigma=(self.sigma_mask >> idx) & 1,
+            tau=int(self.tau_mask[idx]),
+            sigma=int(self.sigma_mask[idx]),
         )
 
     def remap(self, old_pool: Pool, new_pool: Pool) -> "Thing":
@@ -555,20 +607,29 @@ class Thing:
 
         Used by ``State.merge`` when two shards have divergent pools:
         self.pool bit-indices may not match the merged pool's, so
-        Things from self need each bit remapped via K-key lookup."""
-        if old_pool is new_pool:
+        Things from self need each bit remapped via K-key lookup.
+        """
+        if old_pool is new_pool and len(self.tau_mask) == new_pool.size():
             return self
-        new_tau = 0
-        new_sigma = 0
+        new_tau = np.zeros(new_pool.size(), dtype=bool)
+        new_sigma = np.zeros(new_pool.size(), dtype=bool)
+        n_old = len(self.tau_mask)
         for old_idx, k in enumerate(old_pool.ks):
+            if old_idx >= n_old:
+                break
             new_idx = new_pool.bit_of(k)
             if new_idx is None:
-                continue  # K not in new pool; bit dropped
-            if (self.tau_mask >> old_idx) & 1:
-                new_tau |= 1 << new_idx
-            if (self.sigma_mask >> old_idx) & 1:
-                new_sigma |= 1 << new_idx
+                continue  # K dropped in new pool
+            new_tau[new_idx] = self.tau_mask[old_idx]
+            new_sigma[new_idx] = self.sigma_mask[old_idx]
         return Thing(id=self.id, tau_mask=new_tau, sigma_mask=new_sigma)
+
+    @staticmethod
+    def with_empty_masks(tid: "ThingId", pool_size: int) -> "Thing":
+        """Helper: construct a Thing with all-False masks of the
+        requested length.  Used in tests and as a default form."""
+        empty = np.zeros(pool_size, dtype=bool)
+        return Thing(id=tid, tau_mask=empty.copy(), sigma_mask=empty.copy())
 
 
 # ---------------------------------------------------------------------------
@@ -1189,39 +1250,45 @@ def extract_initial_state(
         pool = pool.with_k(Atom(Observable(observable)))
 
     # Phase 3: build Things with τ = σ bitmaps, firing all relevant
-    # probes for each Thing's identity components.
+    # probes for each Thing's identity components.  Under p-numpy-is-
+    # the-natural-cpu-representation, masks are np.ndarray(dtype=bool)
+    # of length pool.size().
+    pool_size = pool.size()
     things: list = []
     for tid, src, obs, identity in raw:
-        mask = 0
+        mask = np.zeros(pool_size, dtype=bool)
         # Subtree kind observations
         for observation in obs:
             idx = pool.bit_of(Atom(Observable(observation)))
             if idx is not None:
-                mask |= 1 << idx
+                mask[idx] = True
         # Source atom
         src_idx = pool.bit_of(Atom(Observable(f"source:{src}")))
         if src_idx is not None:
-            mask |= 1 << src_idx
+            mask[src_idx] = True
         # kind_at_root atom
         kroot_idx = pool.bit_of(
             Atom(Observable(f"kind_at_root:{identity['kind_at_root']}"))
         )
         if kroot_idx is not None:
-            mask |= 1 << kroot_idx
+            mask[kroot_idx] = True
         # path: component atoms
         for pc in identity["path_components"]:
             p_idx = pool.bit_of(Atom(Observable(f"path:{pc}")))
             if p_idx is not None:
-                mask |= 1 << p_idx
+                mask[p_idx] = True
         # name:verbatim atom (if named)
         if identity["name_verbatim"]:
             n_idx = pool.bit_of(
                 Atom(Observable(f"name:{identity['name_verbatim']}"))
             )
             if n_idx is not None:
-                mask |= 1 << n_idx
+                mask[n_idx] = True
+        # τ = σ at grade 1; both masks are the same array data (use
+        # .copy() to keep them independent since Thing may freeze them
+        # separately)
         things.append(
-            Thing(id=ThingId(tid), tau_mask=mask, sigma_mask=mask)
+            Thing(id=ThingId(tid), tau_mask=mask.copy(), sigma_mask=mask.copy())
         )
 
     # Phase 4: optional oracle load (remap uses extracted IDs to
@@ -1354,22 +1421,38 @@ def _count_four_cell(state: "State", k_i: "K", k_j: "K",
     """Return (n_00, n_01, n_10, n_11): counts of things in each cell of
     the 2×2 (K_i, K_j) joint firing distribution on the given channel.
 
+    Uses numpy bitwise operations on the per-thing τ/σ arrays — each
+    thing's mask is a bool array of length pool_size; extract indices
+    i and j across all things gives two bool arrays of length
+    n_things; cell counts are sums over bitwise AND / AND-NOT
+    combinations.
+
     Under d-tau-sigma-symmetric-at-grade-1 and atoms with τ=σ, the
     ``tau`` and ``sigma`` channels produce identical counts at grade 1.
-    The parameter allows asymmetric analysis at higher grades."""
+    """
     idx_i = state.pool.bit_of(k_i)
     idx_j = state.pool.bit_of(k_j)
     if idx_i is None or idx_j is None:
         return (0, 0, 0, 0)
-    n = [0, 0, 0, 0]
+    fires_i_list = []
+    fires_j_list = []
     for _tid, thing in state.things:
         mask = thing.tau_mask if channel == "tau" else thing.sigma_mask
-        bi = (mask >> idx_i) & 1
-        bj = (mask >> idx_j) & 1
-        # Cell code: bit_i as high bit, bit_j as low bit
-        cell = (bi << 1) | bj
-        n[cell] += 1
-    return tuple(n)
+        if idx_i < len(mask):
+            fires_i_list.append(bool(mask[idx_i]))
+        else:
+            fires_i_list.append(False)
+        if idx_j < len(mask):
+            fires_j_list.append(bool(mask[idx_j]))
+        else:
+            fires_j_list.append(False)
+    fires_i = np.asarray(fires_i_list, dtype=bool)
+    fires_j = np.asarray(fires_j_list, dtype=bool)
+    n_11 = int(np.sum(fires_i & fires_j))
+    n_10 = int(np.sum(fires_i & ~fires_j))
+    n_01 = int(np.sum(~fires_i & fires_j))
+    n_00 = int(len(fires_i) - n_11 - n_10 - n_01)
+    return (n_00, n_01, n_10, n_11)
 
 
 # -- Default scorers (structural dataclass classes + singletons) ----------
@@ -1469,10 +1552,10 @@ class OracleBooleanWitnessTauSigmaScorer:
             b = things_dict.get(b_id)
             if a is None or b is None:
                 continue
-            bi_a = (a.tau_mask >> idx_i) & 1
-            bj_a = (a.tau_mask >> idx_j) & 1
-            bi_b = (b.tau_mask >> idx_i) & 1
-            bj_b = (b.tau_mask >> idx_j) & 1
+            bi_a = int(a.tau_mask[idx_i]) if idx_i < len(a.tau_mask) else 0
+            bj_a = int(a.tau_mask[idx_j]) if idx_j < len(a.tau_mask) else 0
+            bi_b = int(b.tau_mask[idx_i]) if idx_i < len(b.tau_mask) else 0
+            bj_b = int(b.tau_mask[idx_j]) if idx_j < len(b.tau_mask) else 0
             # τ-σ orientation: A=(1,0), B=(0,1)
             if (bi_a, bj_a, bi_b, bj_b) == (1, 0, 0, 1):
                 count += 1
@@ -1507,10 +1590,10 @@ class OracleBooleanWitnessSigmaTauScorer:
             b = things_dict.get(b_id)
             if a is None or b is None:
                 continue
-            bi_a = (a.tau_mask >> idx_i) & 1
-            bj_a = (a.tau_mask >> idx_j) & 1
-            bi_b = (b.tau_mask >> idx_i) & 1
-            bj_b = (b.tau_mask >> idx_j) & 1
+            bi_a = int(a.tau_mask[idx_i]) if idx_i < len(a.tau_mask) else 0
+            bj_a = int(a.tau_mask[idx_j]) if idx_j < len(a.tau_mask) else 0
+            bi_b = int(b.tau_mask[idx_i]) if idx_i < len(b.tau_mask) else 0
+            bj_b = int(b.tau_mask[idx_j]) if idx_j < len(b.tau_mask) else 0
             # σ-τ orientation: A=(0,1), B=(1,0)
             if (bi_a, bj_a, bi_b, bj_b) == (0, 1, 1, 0):
                 count += 1
@@ -1553,9 +1636,15 @@ class OraclePairsWithWitnessObjective:
             b = things_dict.get(b_id)
             if a is None or b is None:
                 continue
-            a_only = a.tau_mask & ~b.tau_mask
-            b_only = ~a.tau_mask & b.tau_mask
-            if a_only and b_only:
+            # Align mask lengths (in case a, b come from different
+            # pool snapshots — shouldn't happen within a single
+            # State, but defend)
+            n = min(len(a.tau_mask), len(b.tau_mask))
+            ta = a.tau_mask[:n]
+            tb = b.tau_mask[:n]
+            a_only = ta & ~tb
+            b_only = ~ta & tb
+            if np.any(a_only) and np.any(b_only):
                 count += 1
         return ObjectiveValue(float(count))
 
@@ -1582,9 +1671,10 @@ class PoolEntropyMarginalsObjective:
             idx = state.pool.bit_of(k)
             if idx is None:
                 continue
-            n_fires = sum(
-                1 for _tid, t in state.things if (t.tau_mask >> idx) & 1
-            )
+            n_fires = 0
+            for _tid, t in state.things:
+                if idx < len(t.tau_mask) and t.tau_mask[idx]:
+                    n_fires += 1
             p = n_fires / n_things
             if 0 < p < 1:
                 total += -p * math.log2(p) - (1 - p) * math.log2(1 - p)
@@ -1755,116 +1845,119 @@ def _compute_firing_bitmaps(
     pool: "Pool",
     thing_order: list,
     channel: str = "tau",
-) -> dict:
-    """Per-K-index bitmap over thing-indices.  Inverts the per-thing
-    bitmap-over-K-indices storage.  Called once per step() to enable
-    O(1) n-cell counts via bitwise AND/NOT + popcount.
+) -> np.ndarray:
+    """Per-K-index firing bitmap over thing-indices, as a 2D numpy
+    array of shape ``(pool_size, n_things)`` and dtype=bool.
 
-    Returns: dict[int (pool bit index) → int (bitmap over thing indices)].
+    This is the TRANSPOSE of the per-thing bitmap storage: ``result[i, j]``
+    is True iff the K at pool position i fires on thing j (in the
+    requested channel).  Computed once per step() to enable O(1)
+    cell counting via numpy bitwise ops + np.sum over rows.
+
+    Under p-numpy-is-the-natural-cpu-representation: this is an
+    array-native computation throughout; no Python int bitmask
+    intermediate.
     """
-    bitmaps: dict = {}
-    for k_idx in range(pool.size()):
-        bm = 0
-        for j, (_tid, thing) in enumerate(thing_order):
-            mask = thing.tau_mask if channel == "tau" else thing.sigma_mask
-            if (mask >> k_idx) & 1:
-                bm |= 1 << j
-        bitmaps[k_idx] = bm
-    return bitmaps
+    n_pool = pool.size()
+    n_things = len(thing_order)
+    result = np.zeros((n_pool, n_things), dtype=bool)
+    for j, (_tid, thing) in enumerate(thing_order):
+        mask = thing.tau_mask if channel == "tau" else thing.sigma_mask
+        k = min(len(mask), n_pool)
+        # Column j of result := thing's mask up to pool_size positions
+        result[:k, j] = mask[:k]
+    return result
 
 
-def _articulate_wedge_into_state(
+def _articulate_wedges_batch(
     state: "State",
-    wedge: K,
-    firing_bitmaps: dict,
-    pool_index: dict,
-    thing_order: list,
-) -> "State":
-    """Add a single wedge K to the pool and extend each thing's
-    τ/σ bitmaps with the wedge's new bit.
+    wedges: list,
+    firing_bitmaps: np.ndarray,
+) -> Tuple["State", int]:
+    """Articulate a BATCH of wedges into state in one pass.
 
-    WEDGE OF APPEARANCE AND REALITY
-    -------------------------------
-    What this function APPEARS to do (from its signature): a pure
-    state transformer — accepts State and returns a new State.  No
-    mutation of anything visible to callers.
+    Under p-numpy-is-the-natural-cpu-representation + p-refactor-debt-
+    paid-eagerly, Stage 7.0 replaced the per-wedge incremental
+    mutation of the old ``_articulate_wedge_into_state`` with a
+    vectorized batched form.
 
-    What this function ACTUALLY does (from its body): mutates the
-    step()-local caches ``firing_bitmaps``, ``pool_index``, and
-    ``thing_order`` IN PLACE as an incrementalization strategy.
-    Each articulation in a batch updates these caches so the NEXT
-    articulation in the same batch sees the newly-registered
-    wedge at its fresh bit-index.  The mutations are scoped to the
-    step() invocation and never leak beyond it — the caches are
-    freshly constructed at step() entry and discarded at exit.
+    For each wedge W, its firing bitmap over things is the AND of
+    its leaf atoms' rows in ``firing_bitmaps``
+    (d-wedge-bit-and-of-parents).  Compute all new wedge firings as
+    a 2D matrix of shape ``(n_new_wedges, n_things)``.  Skip wedges
+    whose firing is identically False (degenerate; no discrimination
+    added).
 
-    This appearance/reality gap is the incrementalization cost
-    spoken of in the audit: O(P × N) precomputation at step() entry
-    is amortized across all articulations in the batch by keeping
-    the cache live and mutating it in place.  The alternative
-    (functionally pure recomputation per articulation) is correct
-    but O(P × N × articulations) per step, which is unworkable at
-    scale.
+    Then extend every thing's τ/σ masks ONCE by concatenating the
+    new column(s).  At first appearance, τ = σ for articulated
+    wedges per d-wedge-bit-and-of-parents.
 
-    Algebra
-    -------
-    The wedge's firing on a thing is the AND of its leaf atoms'
-    firings (d-wedge-bit-and-of-parents; ``wedge.atoms()`` returns
-    the Atom leaves of the normalized inductive structure).  At
-    first appearance, τ = σ for the wedge (d-tau-sigma-symmetric-
-    at-grade-1 extended to newly-articulated K's — consistent with
-    the flat-structure reading of d-wedge-bit-and-of-parents;
-    the higher-order general-exterior-algebra reading per
-    d-wedge-combinator-general-exterior-algebra becomes relevant
-    once chirality is switched on in a later stage and the two
-    readings coexist per p-sppf-holds-coexisting-readings).
-
-    Returns
-    -------
-    New State with the wedge registered and thing bitmaps extended.
-    If the wedge's firing is zero (no thing fires it), returns state
-    unchanged (degenerate — no discrimination added).
+    Returns (new_state, count_articulated).  The batched form avoids
+    the appearance/reality gap of the previous per-wedge mutation —
+    this function truly is a pure transformer.
     """
-    # Compute firing as AND of atom-leaf bitmaps
-    fires = None
-    for atom in wedge.atoms():
-        a_idx = state.pool.bit_of(atom)
-        if a_idx is None:
-            return state
-        f = firing_bitmaps[a_idx]
-        fires = f if fires is None else fires & f
+    thing_order = list(sorted(state.things, key=lambda kv: kv[0]))
+    n_things = len(thing_order)
 
-    if not fires:
-        return state  # degenerate; no thing fires the wedge
+    # For each wedge, compute its firing bitmap as AND of atom rows.
+    # Dedup against the EXISTING pool (pool_index) AND against earlier
+    # entries in this batch — multiple distinct candidate K-pairs can
+    # normalize to the same canonical wedge (e.g., x∧(y∧z), y∧(x∧z),
+    # z∧(x∧y) all normalize to x∧y∧z), so without batch-local dedup
+    # the pool would be asked to register the same key twice.
+    pool_index = {key: idx for key, idx in state.pool.by_key}
+    seen_in_batch: set = set()
+    kept_wedges = []
+    kept_firings = []  # each is a 1D bool array of length n_things
+    for wedge in wedges:
+        if isinstance(wedge, ZeroK):
+            continue
+        w_key = wedge.key()
+        if w_key in pool_index:
+            continue  # already in pool before this batch
+        if w_key in seen_in_batch:
+            continue  # already queued earlier in this batch
+        # Compute firing as AND over leaf atoms
+        firing = None
+        for atom in wedge.atoms():
+            a_idx = state.pool.bit_of(atom)
+            if a_idx is None:
+                firing = None
+                break
+            row = firing_bitmaps[a_idx]
+            firing = row if firing is None else firing & row
+        if firing is None or not np.any(firing):
+            continue  # degenerate
+        seen_in_batch.add(w_key)
+        kept_wedges.append(wedge)
+        kept_firings.append(firing)
 
-    new_pool = state.pool.with_k(wedge)
-    wedge_idx = new_pool.bit_of(wedge)
-    if wedge_idx is None:
-        return state
+    if not kept_wedges:
+        return state, 0
 
-    # Extend each thing's bitmaps with the wedge's firing bit
-    new_things = []
+    # Build new pool by appending each kept wedge
+    new_pool = state.pool
+    for w in kept_wedges:
+        new_pool = new_pool.with_k(w)
+
+    # Stack firings into [n_new, n_things] then transpose to
+    # [n_things, n_new] — one column per new wedge
+    new_firings_matrix = np.stack(kept_firings, axis=0)  # [n_new, n_things]
+    n_new = new_firings_matrix.shape[0]
+    per_thing_new_cols = new_firings_matrix.T  # [n_things, n_new]
+
+    # Extend each thing's τ/σ masks: concat old mask + this thing's new columns
+    # (at first appearance τ=σ for wedges, so both masks get the same extension)
+    new_things: list = []
     for j, (tid, thing) in enumerate(thing_order):
-        if (fires >> j) & 1:
-            new_tau = thing.tau_mask | (1 << wedge_idx)
-            new_sigma = thing.sigma_mask | (1 << wedge_idx)
-            new_things.append(
-                (tid, Thing(id=tid, tau_mask=new_tau, sigma_mask=new_sigma))
-            )
-        else:
-            new_things.append((tid, thing))
+        new_cols = per_thing_new_cols[j]  # [n_new]
+        new_tau = np.concatenate([thing.tau_mask, new_cols])
+        new_sigma = np.concatenate([thing.sigma_mask, new_cols])
+        new_things.append(
+            (tid, Thing(id=tid, tau_mask=new_tau, sigma_mask=new_sigma))
+        )
 
-    # Update step-local caches so subsequent articulations in this
-    # batch see the new wedge
-    firing_bitmaps[wedge_idx] = fires
-    pool_index[wedge.key()] = wedge_idx
-
-    # Also update thing_order (it holds (tid, thing) tuples that need
-    # replacement so the index j maps to the updated thing).  We
-    # rebuild the list; thing_order is a step()-local sequence.
-    thing_order[:] = new_things
-
-    return State(
+    new_state = State(
         pool=new_pool,
         things=tuple(sorted(new_things, key=lambda kv: kv[0])),
         oracle_pairs=state.oracle_pairs,
@@ -1872,6 +1965,7 @@ def _articulate_wedge_into_state(
         trajectory=state.trajectory,
         iteration=state.iteration,
     )
+    return new_state, n_new
 
 
 # -- step() -----------------------------------------------------------------
@@ -1917,21 +2011,21 @@ def step(
     n_things = len(thing_order)
 
     # -- Phase 1: enumerate candidate K-pairs (n_11 > 0) -------------------
-    # For each thing, each pair of its set bits is a K-pair that co-fires
-    # on at least this thing (n_11 ≥ 1).  Set-dedup across things.
+    # For each thing, each pair of its set bits (positions where the
+    # τ-mask is True) is a K-pair that co-fires on at least this thing
+    # (n_11 ≥ 1).  Set-dedup across things.  Uses np.where to extract
+    # set-bit indices per thing — vectorized over numpy arrays.
     candidate_pairs: set = set()
     for j, (_tid, thing) in enumerate(thing_order):
-        bits = _bit_positions(thing.tau_mask)
-        for a in range(len(bits)):
-            bi = bits[a]
-            for b in range(a + 1, len(bits)):
-                bj = bits[b]
+        bits = np.where(thing.tau_mask)[0]  # indices of True entries
+        n_bits = len(bits)
+        for a in range(n_bits):
+            bi = int(bits[a])
+            for b in range(a + 1, n_bits):
+                bj = int(bits[b])
                 candidate_pairs.add((bi, bj))
 
     # -- Phase 2: filter to uncaptured demands -----------------------------
-    # For each candidate K-pair, form the normalized wedge; check if it's
-    # already in the pool (captured).  Skip ZeroK (nilpotent self-pairs
-    # shouldn't reach here from distinct atoms, but normalize() guards).
     demanded: list = []  # list of (k_left, k_right, wedge)
     for (i, j) in candidate_pairs:
         k_i = state.pool.ks[i]
@@ -1944,10 +2038,6 @@ def step(
         demanded.append((k_i, k_j, wedge))
 
     # -- Phase 3: order by scorer (if provided), else by wedge key --------
-    # Scoring cost is incurred only when we actually need ordering — i.e.,
-    # when a budget is set and demand exceeds it.  With unlimited budget
-    # (the default), we articulate everything and only sort for
-    # determinism across runs/shards.
     need_scoring = (
         scorer is not None
         and max_articulations_per_step is not None
@@ -1958,7 +2048,6 @@ def step(
         for k_i, k_j, wedge in demanded:
             s = scorer(state, k_i, k_j)
             scored.append((s, k_i, k_j, wedge))
-        # Descending score, then wedge key ascending for determinism
         scored.sort(key=lambda x: (-x[0], x[3].key()))
         ordered = [(k_i, k_j, wedge) for _s, k_i, k_j, wedge in scored]
     else:
@@ -1970,16 +2059,12 @@ def step(
     else:
         to_articulate = ordered[:max_articulations_per_step]
 
-    # -- Phase 4: articulate -----------------------------------------------
-    new_state = state
-    articulated_count = 0
-    for k_i, k_j, wedge in to_articulate:
-        before = new_state.pool.size()
-        new_state = _articulate_wedge_into_state(
-            new_state, wedge, firing_bitmaps, pool_index, thing_order
-        )
-        if new_state.pool.size() > before:
-            articulated_count += 1
+    # -- Phase 4: articulate (batched under p-numpy-is-the-natural-cpu-
+    # representation; single pure transformer, no step-local mutation) ----
+    wedges_to_articulate = [w for (_ki, _kj, w) in to_articulate]
+    new_state, articulated_count = _articulate_wedges_batch(
+        state, wedges_to_articulate, firing_bitmaps
+    )
 
     # -- Phase 5: trajectory entry -----------------------------------------
     # Weight-tuning phase removed per c-weight-updater-becomes-new-k-
@@ -2205,9 +2290,22 @@ def _smoke_test() -> None:
     assert merged.bit_of(w) == 2
     assert merged.bit_of(c) == 3  # c was not in p3, appended
 
+    # Helper: convert an integer bit-pattern to a bool ndarray of
+    # given length (smoke-test convenience; production code uses
+    # numpy directly).
+    def _int_mask(n: int, length: int) -> np.ndarray:
+        arr = np.zeros(length, dtype=bool)
+        for i in range(length):
+            if (n >> i) & 1:
+                arr[i] = True
+        return arr
+
     # Thing: κ_mask = τ_mask ⊕ σ_mask; Thing has ONLY id + bitmaps
-    t = Thing(id=ThingId("x"), tau_mask=0b1010, sigma_mask=0b1100)
-    assert t.kappa_mask == 0b0110
+    t = Thing(id=ThingId("x"),
+              tau_mask=_int_mask(0b1010, 4),
+              sigma_mask=_int_mask(0b1100, 4))
+    # κ_mask is the elementwise XOR of τ and σ: 1010 ⊕ 1100 = 0110
+    assert np.array_equal(t.kappa_mask, _int_mask(0b0110, 4))
     # Thing has no source_path/display/line — every observable is a K.
     # If an extractor wants source-path visible to reports, it registers
     # an atomic K (e.g. Atom("source:paper/x.py")) that fires on this
@@ -2217,7 +2315,9 @@ def _smoke_test() -> None:
     assert not hasattr(t, "line"), "Thing should not carry line"
 
     # tausigma_at reads correctly
-    t2 = Thing(id=ThingId("y"), tau_mask=0b101, sigma_mask=0b011)
+    t2 = Thing(id=ThingId("y"),
+               tau_mask=_int_mask(0b101, 3),
+               sigma_mask=_int_mask(0b011, 3))
     # Pool with 3 atoms at bit indices 0, 1, 2
     pool = Pool().with_k(Atom(Observable("k0"))).with_k(
         Atom(Observable("k1"))).with_k(Atom(Observable("k2")))
@@ -2248,8 +2348,12 @@ def _smoke_test() -> None:
     ak2 = Atom(Observable("k2"))
 
     pool_a = Pool().with_k(ak0).with_k(ak1)
-    t1 = Thing(id=ThingId("A"), tau_mask=0b01, sigma_mask=0b01)
-    t2 = Thing(id=ThingId("B"), tau_mask=0b10, sigma_mask=0b11)
+    t1 = Thing(id=ThingId("A"),
+               tau_mask=_int_mask(0b01, 2),
+               sigma_mask=_int_mask(0b01, 2))
+    t2 = Thing(id=ThingId("B"),
+               tau_mask=_int_mask(0b10, 2),
+               sigma_mask=_int_mask(0b11, 2))
     s1 = State(
         pool=pool_a,
         things=((ThingId("A"), t1),),
@@ -2258,10 +2362,16 @@ def _smoke_test() -> None:
 
     # Second state uses an extended pool (prefix-compatible)
     pool_b = pool_a.with_k(ak2)
-    t3 = Thing(id=ThingId("C"), tau_mask=0b100, sigma_mask=0b000)
+    # t2/t3 masks extend to length 3 to match extended pool
+    t2_ext = Thing(id=ThingId("B"),
+                   tau_mask=_int_mask(0b10, 3),
+                   sigma_mask=_int_mask(0b11, 3))
+    t3 = Thing(id=ThingId("C"),
+               tau_mask=_int_mask(0b100, 3),
+               sigma_mask=_int_mask(0b000, 3))
     s2 = State(
         pool=pool_b,
-        things=((ThingId("B"), t2), (ThingId("C"), t3)),
+        things=((ThingId("B"), t2_ext), (ThingId("C"), t3)),
         oracle_pairs=frozenset({frozenset({ThingId("A"), ThingId("B")})}),
         weights=((ak1.key(), 2.0),),
     )
@@ -2279,7 +2389,8 @@ def _smoke_test() -> None:
     assert m.merge(m).signature() == m.signature(), "merge not idempotent"
 
     # Merge associative
-    s3 = State(pool=pool_b, things=((ThingId("D"), Thing(id=ThingId("D"))),))
+    d_thing = Thing.with_empty_masks(ThingId("D"), pool_b.size())
+    s3 = State(pool=pool_b, things=((ThingId("D"), d_thing),))
     left = (s1.merge(s2)).merge(s3)
     right = s1.merge(s2.merge(s3))
     assert left.signature() == right.signature(), "merge not associative"
@@ -2316,10 +2427,14 @@ def _smoke_test() -> None:
     shardA_pool = Pool().with_k(ak0).with_k(ak1)       # bit 0 = k0, bit 1 = k1
     shardB_pool = Pool().with_k(ak1).with_k(ak2)       # bit 0 = k1, bit 1 = k2
 
-    # Shard A sees thing X firing on k0 and k1 → tau_mask = 0b11
-    thingA_X = Thing(id=ThingId("X"), tau_mask=0b11, sigma_mask=0b11)
-    # Shard B sees thing Y firing on k1 and k2 → tau_mask = 0b11 (but against shardB_pool!)
-    thingB_Y = Thing(id=ThingId("Y"), tau_mask=0b11, sigma_mask=0b11)
+    # Shard A sees thing X firing on k0 and k1 → tau_mask = [1,1] over shardA_pool
+    thingA_X = Thing(id=ThingId("X"),
+                     tau_mask=_int_mask(0b11, 2),
+                     sigma_mask=_int_mask(0b11, 2))
+    # Shard B sees thing Y firing on k1 and k2 → tau_mask = [1,1] over shardB_pool
+    thingB_Y = Thing(id=ThingId("Y"),
+                     tau_mask=_int_mask(0b11, 2),
+                     sigma_mask=_int_mask(0b11, 2))
 
     shardA = State(pool=shardA_pool, things=((ThingId("X"), thingA_X),))
     shardB = State(pool=shardB_pool, things=((ThingId("Y"), thingB_Y),))
@@ -2377,11 +2492,10 @@ def _smoke_test() -> None:
         assert state.pool.size() > 0, "extracted zero atoms"
 
         # p-atoms-are-formal-tau-sigma-channels + d-tau-sigma-symmetric-at-grade-1:
-        # κ = 0 identically for every thing at grade 1
+        # κ = 0 identically for every thing at grade 1 (tau = sigma → xor = False)
         for tid, thing in state.things:
-            assert thing.kappa_mask == 0, (
-                f"thing {tid!r} has κ ≠ 0 at grade 1: τ={thing.tau_mask:b} "
-                f"σ={thing.sigma_mask:b}; τ should equal σ for atoms"
+            assert not np.any(thing.kappa_mask), (
+                f"thing {tid!r} has κ ≠ 0 at grade 1; τ should equal σ for atoms"
             )
 
         # p-source-is-a-k: source atoms present in pool for each active source
@@ -2393,7 +2507,7 @@ def _smoke_test() -> None:
                 t for tid, t in state.things if tid.startswith(f"{src}:")
             ]
             for t in matching:
-                assert (t.tau_mask >> idx) & 1, (
+                assert idx < len(t.tau_mask) and bool(t.tau_mask[idx]), (
                     f"thing of source {src!r} does not fire source atom"
                 )
 
@@ -2415,7 +2529,7 @@ def _smoke_test() -> None:
                 assert kr_idx is not None, (
                     f"kind_at_root:{expected_kind} atom not in pool"
                 )
-                assert (sample.tau_mask >> kr_idx) & 1, (
+                assert kr_idx < len(sample.tau_mask) and bool(sample.tau_mask[kr_idx]), (
                     f"sample thing does not fire its kind_at_root probe"
                 )
 
@@ -2672,12 +2786,18 @@ def _smoke_test() -> None:
                     w_idx = s1.pool.bit_of(k)
                     assert w_idx is not None
                     for _tid, thing in s1.things:
-                        wedge_fires = bool((thing.tau_mask >> w_idx) & 1)
-                        atoms_fire = all(
-                            bool((thing.tau_mask >> s1.pool.bit_of(atom)) & 1)
-                            for atom in k.atoms()
-                            if s1.pool.bit_of(atom) is not None
+                        wedge_fires = (
+                            w_idx < len(thing.tau_mask)
+                            and bool(thing.tau_mask[w_idx])
                         )
+                        atoms_fire = True
+                        for atom in k.atoms():
+                            a_idx = s1.pool.bit_of(atom)
+                            if a_idx is None:
+                                continue
+                            if a_idx >= len(thing.tau_mask) or not bool(thing.tau_mask[a_idx]):
+                                atoms_fire = False
+                                break
                         assert wedge_fires == atoms_fire, (
                             f"wedge {k.key()[:40]!r} firing ≠ AND of atom firings "
                             f"on thing {_tid!r}"
@@ -2714,12 +2834,10 @@ def _smoke_test() -> None:
                 fires_sigma = _compute_firing_bitmaps(
                     state.pool, thing_order_local, channel="sigma"
                 )
-                # Under τ=σ atoms, all per-K firing patterns should agree
-                for k_idx in fires_tau:
-                    assert fires_tau[k_idx] == fires_sigma.get(k_idx), (
-                        f"τ/σ firing mismatch at K index {k_idx} "
-                        f"under supposedly-symmetric atoms"
-                    )
+                # Under τ=σ atoms, the 2D [pool × things] bitmaps agree
+                assert np.array_equal(fires_tau, fires_sigma), (
+                    "τ/σ firing bitmaps disagree under supposedly-symmetric atoms"
+                )
 
                 # Stage 5.5: default budget is None → articulates all
                 # demanded wedges.  Run step() on a small subset to
@@ -2759,17 +2877,26 @@ def _smoke_test() -> None:
                 idx_x = syn_pool.bit_of(ax)
                 idx_y = syn_pool.bit_of(ay)
                 idx_z = syn_pool.bit_of(az)
+                pool_size = syn_pool.size()
                 # t1 fires all three; t2 fires x,y; t3 fires x,z
-                m1 = (1 << idx_x) | (1 << idx_y) | (1 << idx_z)
-                m2 = (1 << idx_x) | (1 << idx_y)
-                m3 = (1 << idx_x) | (1 << idx_z)
+                def _synthetic_mask(*indices) -> np.ndarray:
+                    arr = np.zeros(pool_size, dtype=bool)
+                    for i in indices:
+                        arr[i] = True
+                    return arr
+                m1 = _synthetic_mask(idx_x, idx_y, idx_z)
+                m2 = _synthetic_mask(idx_x, idx_y)
+                m3 = _synthetic_mask(idx_x, idx_z)
                 syn_things = (
                     (ThingId("syn_t1"), Thing(id=ThingId("syn_t1"),
-                                              tau_mask=m1, sigma_mask=m1)),
+                                              tau_mask=m1.copy(),
+                                              sigma_mask=m1.copy())),
                     (ThingId("syn_t2"), Thing(id=ThingId("syn_t2"),
-                                              tau_mask=m2, sigma_mask=m2)),
+                                              tau_mask=m2.copy(),
+                                              sigma_mask=m2.copy())),
                     (ThingId("syn_t3"), Thing(id=ThingId("syn_t3"),
-                                              tau_mask=m3, sigma_mask=m3)),
+                                              tau_mask=m3.copy(),
+                                              sigma_mask=m3.copy())),
                 )
                 syn_state = State(pool=syn_pool, things=syn_things)
 
@@ -2832,7 +2959,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1 + 2 + 2.5 + 2.6 + 3 + 3.5 + 3.6 + 4 + 4.5 + 4.6 + 5 + 5.5 + 6 smoke test: all assertions passed")
+    print("Stage 1–7.0 smoke test (eager-numpy internal representation): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
