@@ -6,7 +6,7 @@ Each node is a line in `design/<type>s.jsonl`.
 Use `python scripts/design_sppf.py show <id>` for full detail.
 Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 
-## Principles (34)
+## Principles (35)
 
 - ● [p-alignment-is-distribution] Alignment is a distribution, not a predicate
 - ● [p-arity-is-grade] Arity = grade; arity N is not tracked, it emerges
@@ -24,6 +24,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [p-hit-and-dependent-types-via-tensor-shape] Dependent types and HIT manifest as tensor shape constraints and tensor path-equalities
 - ● [p-iteration-count-unknown] Convergence count is unknown and unpromiseable
 - ● [p-kappa-is-derived-xor] κ = σ ⊕ τ is a derivation, not an independent axis
+- ● [p-lemmas-are-checkable-derivations] Lemmas record checkable derivations from parents; they can be wrong
 - ● [p-maximal-freedom] Prefer interpretations that leave the greatest remaining freedom
 - ● [p-no-bespoke-recognition] No bespoke pattern recognition at any level
 - ● [p-no-canonicalization] No canonicalization at registration time
@@ -62,6 +63,17 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [d-wedge-bit-and-of-parents] Wedge K fires iff both parents fire (AND semantics for profile inclusion)
 - ● [d-wedge-combinator-general-exterior-algebra] Wedge combinator is the general exterior-algebra form
 - ● [d-weight-objective-pluggable] Weight-adjustment objective is pluggable
+
+## Lemmas (8)
+
+- ● [l-hash-consing-as-np-unique] Hash-consing of K becomes np.unique over the pool's structured-dtype array
+- ● [l-hdf5-compound-dtypes-mirror-in-memory] HDF5 compound dtypes on disk should mirror the in-memory structured dtypes 1:1
+- ● [l-oracle-pairs-as-index-array] Oracle pairs should become Int[Array, 'n_pairs 2'] indexing axis-0 of stacked masks, not a frozenset
+- ● [l-pool-as-structured-dtype-array] Pool.by_key should become a structured-dtype array, not a tuple of tuples
+- ● [l-s3-as-axis-permutation] S3 action is a numpy axis permutation on a length-3 stacked tensor
+- ● [l-scorer-as-shape-contract] Scorer is a shape contract: (tsk: Bool[3, P], firing: Bool[P, N], i: int, j: int) -> Float[Array, '']
+- ● [l-state-things-as-parallel-arrays] State.things should become parallel arrays (ids + stacked masks) rather than dict-of-dataclasses
+- ● [l-trajectory-as-structured-dtype-array] Trajectory should become a structured-dtype numpy array, not a tuple of dicts
 
 ## Rejecteds (8)
 

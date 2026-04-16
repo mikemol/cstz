@@ -29,6 +29,9 @@ Node types:
                 downstream decisions can be made
   artifact    — concrete code/data files produced; each references
                 the decisions it implements
+  lemma       — checkable derivation from parent principles/decisions;
+                can be falsified (counterexample) or enacted (acted on
+                via downstream decision)
 
 File layout:
   design/principles.jsonl
@@ -37,6 +40,7 @@ File layout:
   design/corrections.jsonl
   design/questions.jsonl
   design/artifacts.jsonl
+  design/lemmas.jsonl
   design/INDEX.md          — human-readable catalog
 
 Each JSONL record:
@@ -70,6 +74,7 @@ NODE_FILES = {
     "correction": "corrections.jsonl",
     "question":   "questions.jsonl",
     "artifact":   "artifacts.jsonl",
+    "lemma":      "lemmas.jsonl",
 }
 
 
@@ -163,6 +168,11 @@ def active_principles(graph: dict[str, dict]) -> list[dict]:
             if n.get("type") == "principle" and n.get("status", "active") == "active"]
 
 
+def active_lemmas(graph: dict[str, dict]) -> list[dict]:
+    return [n for n in graph.values()
+            if n.get("type") == "lemma" and n.get("status", "active") == "active"]
+
+
 # ---------------------------------------------------------------------------
 # Writing
 # ---------------------------------------------------------------------------
@@ -221,6 +231,7 @@ def render_node_brief(node: dict) -> str:
     marker = {
         "active": "●", "open": "?", "superseded": "✗",
         "deprecated": "✗", "closed": "✓",
+        "enacted": "▲", "falsified": "✗",
     }.get(status, " ")
     return f"{marker} [{node['id']}] {node.get('title', '')}"
 
@@ -263,8 +274,8 @@ def render_index() -> str:
     lines.append("Use `python scripts/design_sppf.py deps <id>` for a minimal slice.")
     lines.append("")
 
-    for node_type in ("principle", "decision", "rejected", "correction",
-                      "question", "artifact"):
+    for node_type in ("principle", "decision", "lemma", "rejected",
+                      "correction", "question", "artifact"):
         nodes = by_type.get(node_type, [])
         if not nodes:
             continue
@@ -312,6 +323,9 @@ def main() -> None:
     sub.add_parser("principles", help="active principles only").set_defaults(
         action=_cmd_principles
     )
+    sub.add_parser("lemmas", help="active lemmas only").set_defaults(
+        action=_cmd_lemmas
+    )
 
     p_list = sub.add_parser("list", help="list nodes of a given type")
     p_list.add_argument("type", choices=list(NODE_FILES.keys()))
@@ -357,6 +371,12 @@ def _cmd_questions(args) -> None:
 def _cmd_principles(args) -> None:
     graph = load_all()
     for n in active_principles(graph):
+        print(render_node_brief(n))
+
+
+def _cmd_lemmas(args) -> None:
+    graph = load_all()
+    for n in active_lemmas(graph):
         print(render_node_brief(n))
 
 
