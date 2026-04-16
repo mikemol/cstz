@@ -6,7 +6,7 @@ Each node is a line in `design/<type>s.jsonl`.
 Use `python scripts/design_sppf.py show <id>` for full detail.
 Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 
-## Principles (32)
+## Principles (33)
 
 - ● [p-alignment-is-distribution] Alignment is a distribution, not a predicate
 - ● [p-arity-is-grade] Arity = grade; arity N is not tracked, it emerges
@@ -38,6 +38,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [p-tau-sigma-separation] τ/σ separation is load-bearing
 - ● [p-thing-is-not-its-relations] Things with relations are distinct things, not internal fields
 - ● [p-type-theory-everywhere] Use type theory to encode intensionality structurally
+- ● [p-types-are-tensor-shape-obligations] Types assert tensor shape + dtype obligations, not class shape
 - ● [p-weight-update-is-new-k-articulation] Weight updates are K-articulations with different scalars, not mutations of existing scalars
 - ● [p-yoneda-identity] A thing's identity is its probe-firing profile (Yoneda)
 
@@ -72,7 +73,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (18)
+## Corrections (19)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -91,6 +92,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-stage-7-0-6-unmaterialize-hash-and-signature] Stage 7.0.6: unmaterialize Thing._hash and replace signature()-based fixed-point with trajectory signal
 - ● [c-stage-7-0-eager-numpy-refactor] Stage 7.0: eager numpy refactor of internal representation
 - ● [c-stage-7-1-hybrid-jsonl-hdf5-io] Stage 7.1: hybrid JSONL + HDF5 I/O with generator run()
+- ● [c-type-theory-reframed-via-tensor-shape] p-type-theory-everywhere reframed: primary focus is tensor shape, not class shape
 - ● [c-weight-updater-becomes-new-k-articulation] WeightUpdater stub removed; weight updates reinterpreted as new-K articulation
 
 ## Questions (6)
