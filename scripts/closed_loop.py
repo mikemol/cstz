@@ -3126,67 +3126,138 @@ def run_to_fixed_point(
 # Stage 7.1 — hybrid JSONL + HDF5 I/O (enacts l-hdf5-compound-dtypes-mirror-in-memory)
 # ---------------------------------------------------------------------------
 #
-# Per p-storage-matches-data-shape:
-#   - Small-algebra authoritative forms (pool keys+orbit metadata, thing
-#     ids, oracle pairs frozenset, weights tuple, trajectory aux dicts)
-#     go to JSONL — line-oriented, append-friendly, human-inspectable.
-#   - Bulk tensor caches (mask matrices, trajectory numeric records)
-#     go to HDF5 — chunked, typed, random-access, compound-dtype
-#     mirror of the in-memory structured dtypes per
-#     l-hdf5-compound-dtypes-mirror-in-memory.
+# Stage 7.1.1 alignment to lemma + JSONL retirement direction:
+#
+# Per p-storage-matches-data-shape and the lemma's "pool and masks as
+# separate datasets sharing the 'pool_size' attribute on their parent
+# group" formulation:
+#
+#   - Pool now lives in HDF5 as ``/pool/keys_array`` — a compound-dtype
+#     dataset that mirrors the in-memory POOL_DTYPE field-for-field
+#     (with 'key' widened from object to fixed-width S512 bytes for
+#     HDF5 compatibility).  Stage 7.1's pool.jsonl is RETIRED.
+#   - Masks live in HDF5 as ``/masks/tau`` (and optionally
+#     ``/masks/sigma``).  Both share the ``pool_size`` attribute on
+#     the ``/masks`` group, asserting axis-0-of-pool == axis-1-of-masks.
+#   - Trajectory numeric records live in HDF5 as ``/trajectory``
+#     (compound TRAJECTORY_DTYPE).
+#   - HDF5 datasets are CHUNKED with maxshape on growable axes —
+#     supports future incremental growth (Stage 10 parallel shards)
+#     without re-dumping.
+#
+# Remaining JSONL files (transitional, slated for migration):
+#   - things.jsonl / oracle_pairs.jsonl / weights.jsonl /
+#     trajectory_aux.jsonl  — small-algebra authoritative forms;
+#     migration to HDF5 awaits a satisfying handling of variable-
+#     shape aux dicts (trajectory_aux) and per-record string fields.
+#     Direction is full JSONL retirement; no new JSONL files added.
 #
 # Sigma masks are serialized conditionally: if
 # state.sigma_derivable_from_tau is True, /masks/sigma is omitted and
-# load reconstructs it as a view/copy of tau_masks.  The `sigma_stored`
+# load reconstructs it as a copy of tau_masks.  The `sigma_stored`
 # root attribute records the choice so the loader knows which branch.
 #
-# Pool orbit metadata (orbit_id, orbit_parent) is written to pool.jsonl
-# alongside key + grade.  Under the current (pre-Tier-3) regime every
-# K is self-orbit; the fields are nonetheless written so future
-# asymmetric-regime dumps round-trip losslessly.
+# Self-validation via algebraic structure (replaces explicit range
+# checks): on load, each pool row's stored orbit_id is compared to
+# the orbit_id derived from the K's intensional structure (walk the
+# Rotated chain to the orbit root, then pool.bit_of(root)).  Mismatch
+# raises — catches both range corruption and orbit/structure
+# inconsistencies.  Trajectory iteration field is checked for
+# consecutive monotonicity (iteration[i+1] - iteration[i] == 1) and
+# against the n_iter attribute.
 #
 # Round-trip invariant: state.signature() == load_state(dump_state(state)).signature().
 
-SCHEMA_VERSION = "7.1.0"
+SCHEMA_VERSION = "7.1.1"
+
+# Compound dtype for pool storage in HDF5: key field as fixed-width
+# bytes (UTF-8 encoded).  S512 accepts keys up to 512 bytes; dump
+# guards against overflow.  Future migration to variable-length
+# strings or key decomposition will widen this constraint.
+_POOL_HDF5_KEY_WIDTH = 512
+POOL_HDF5_DTYPE = np.dtype([
+    ("key", f"S{_POOL_HDF5_KEY_WIDTH}"),
+    ("grade", "u1"),
+    ("orbit_id", "u4"),
+    ("orbit_parent", "u4"),
+])
+
+
+def _orbit_root(k: K) -> K:
+    """Walk the Rotated chain to the orbit root (first non-Rotated K)."""
+    base = k
+    while isinstance(base, Rotated):
+        base = base.base
+    return base
+
+
+def _expected_orbit_id_for(k: K, pool: "Pool", own_bit: int) -> int:
+    """Re-derive the expected orbit_id for K given the pool and K's bit.
+
+    Algebraic self-validation (per the Stage 7.1.1 audit's Sev-3 fix):
+    instead of bounds-checking orbit_id ∈ [0, pool_size), derive what
+    orbit_id SHOULD be from the K's intensional structure and
+    compare on load.  Catches inconsistencies that bounds-checks
+    would miss (e.g., orbit_id pointing at a real bit but the wrong
+    one).
+
+    For a non-Rotated K, the orbit ROOT is K itself, so orbit_id ==
+    own_bit.  For a Rotated K, walk the Rotated chain to the root
+    (which must be in the pool), and orbit_id == pool.bit_of(root).
+    """
+    root = _orbit_root(k)
+    if root is k:
+        return own_bit
+    root_bit = pool.bit_of(root)
+    if root_bit is None:
+        raise ValueError(
+            f"K at bit {own_bit} has Rotated root not present in pool; "
+            f"orbit metadata cannot be re-derived"
+        )
+    return root_bit
 
 
 def dump_state(state: "State", out_dir) -> None:
-    """Serialize a State to a directory containing JSONL + HDF5 files.
+    """Serialize a State to a directory containing HDF5 + JSONL files.
+
+    Stage 7.1.1: pool migrated to HDF5; remaining JSONL files are
+    transitional (things, oracle_pairs, weights, trajectory_aux).
+    HDF5 datasets are chunked with extensible axis-0 for future
+    incremental growth.
 
     Creates ``out_dir`` if it doesn't exist.  Writes:
-      - ``pool.jsonl``              — one line per K (bit_index, key,
-                                      grade, orbit_id, orbit_parent)
-      - ``things.jsonl``            — one line per thing (row_index, id)
-      - ``oracle_pairs.jsonl``      — one line per unordered pair
-                                      (a_id, b_id with a_id <= b_id)
-      - ``weights.jsonl``           — one line per (k_key, weight) entry
-      - ``trajectory_aux.jsonl``    — one line per iteration's aux dict
-      - ``state.h5``                — HDF5 with:
-          /masks/tau       (bool, shape (n_things, pool_size))
-          /masks/sigma     (optional, only if sigma not derivable)
-          /trajectory      (compound dtype TRAJECTORY_DTYPE)
-          Root attributes: schema_version, pool_size, n_things,
-          n_iter, iteration, sigma_stored, pool_has_trivial_orbits.
 
-    Append-only on the JSONL side; HDF5 datasets are created fresh
-    per dump (no incremental append within a single dump).
+      ``state.h5`` — HDF5 with:
+          /pool/keys_array  compound POOL_HDF5_DTYPE (S512 keys)
+          /masks/tau        Bool[n_things, pool_size]
+          /masks/sigma      (optional, only if sigma not derivable)
+          /trajectory       compound TRAJECTORY_DTYPE
+          Root attributes: schema_version, pool_size, n_things,
+              n_iter, iteration, sigma_stored,
+              pool_has_trivial_orbits.
+          /masks group attribute: pool_size (asserts on load that
+              axis-1 of masks == axis-0 of pool).
+
+      ``things.jsonl``            — one line per thing (row_index, id)
+      ``oracle_pairs.jsonl``      — one line per unordered pair
+      ``weights.jsonl``           — one line per (k_key, weight)
+      ``trajectory_aux.jsonl``    — one line per iteration's aux dict
     """
     import h5py
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # -- pool.jsonl ---------------------------------------------------------
-    with (out_dir / "pool.jsonl").open("w") as f:
-        for i, k in enumerate(state.pool.ks):
-            row = state.pool.keys_array[i]
-            entry = {
-                "bit_index": i,
-                "key": str(row["key"]),
-                "grade": int(row["grade"]),
-                "orbit_id": int(row["orbit_id"]),
-                "orbit_parent": int(row["orbit_parent"]),
-            }
-            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    # -- Guard: pool keys fit in fixed-width HDF5 dtype ---------------------
+    pool_size = state.pool.size()
+    if pool_size > 0:
+        max_key_len = max(len(str(state.pool.keys_array[i]["key"]).encode("utf-8"))
+                          for i in range(pool_size))
+        if max_key_len > _POOL_HDF5_KEY_WIDTH:
+            raise ValueError(
+                f"max K key length {max_key_len} exceeds POOL_HDF5_DTYPE "
+                f"'key' field width {_POOL_HDF5_KEY_WIDTH}; key decomposition "
+                f"or wider field needed"
+            )
 
     # -- things.jsonl -------------------------------------------------------
     with (out_dir / "things.jsonl").open("w") as f:
@@ -3218,75 +3289,198 @@ def dump_state(state: "State", out_dir) -> None:
 
     # -- state.h5 -----------------------------------------------------------
     sigma_stored = not state.sigma_derivable_from_tau
+    n_things = len(state.thing_ids)
+    n_iter = len(state.trajectory)
     with h5py.File(out_dir / "state.h5", "w") as h5:
         h5.attrs["schema_version"] = SCHEMA_VERSION
-        h5.attrs["pool_size"] = state.pool.size()
-        h5.attrs["n_things"] = len(state.thing_ids)
-        h5.attrs["n_iter"] = len(state.trajectory)
+        h5.attrs["pool_size"] = pool_size
+        h5.attrs["n_things"] = n_things
+        h5.attrs["n_iter"] = n_iter
         h5.attrs["iteration"] = state.iteration
         h5.attrs["sigma_stored"] = sigma_stored
         h5.attrs["pool_has_trivial_orbits"] = state.pool_has_trivial_orbits
-        masks = h5.create_group("masks")
-        masks.attrs["pool_size"] = state.pool.size()
-        masks.create_dataset("tau", data=state.tau_masks, dtype=bool)
+
+        # Pool: compound dataset with chunking + extensible axis-0
+        pool_group = h5.create_group("pool")
+        pool_group.attrs["pool_size"] = pool_size
+        if pool_size > 0:
+            encoded = np.empty(pool_size, dtype=POOL_HDF5_DTYPE)
+            for i in range(pool_size):
+                row = state.pool.keys_array[i]
+                encoded[i] = (
+                    str(row["key"]).encode("utf-8"),
+                    int(row["grade"]),
+                    int(row["orbit_id"]),
+                    int(row["orbit_parent"]),
+                )
+        else:
+            encoded = np.empty(0, dtype=POOL_HDF5_DTYPE)
+        pool_group.create_dataset(
+            "keys_array",
+            data=encoded,
+            dtype=POOL_HDF5_DTYPE,
+            chunks=True,
+            maxshape=(None,),
+        )
+
+        # Masks: chunked, extensible on both axes (axis-0 = n_things;
+        # axis-1 = pool_size; both grow under d-disk-as-merge-protocol's
+        # successor model where dumps may extend prior dumps).
+        masks_group = h5.create_group("masks")
+        masks_group.attrs["pool_size"] = pool_size
+        masks_group.create_dataset(
+            "tau",
+            data=state.tau_masks,
+            dtype=bool,
+            chunks=True,
+            maxshape=(None, None),
+        )
         if sigma_stored:
-            masks.create_dataset("sigma", data=state.sigma_masks, dtype=bool)
+            masks_group.create_dataset(
+                "sigma",
+                data=state.sigma_masks,
+                dtype=bool,
+                chunks=True,
+                maxshape=(None, None),
+            )
+
+        # Trajectory: chunked, extensible on axis-0 for incremental
+        # iteration-by-iteration appends.
         h5.create_dataset(
             "trajectory",
             data=state.trajectory,
             dtype=TRAJECTORY_DTYPE,
+            chunks=True,
+            maxshape=(None,),
         )
 
 
 def load_state(in_dir) -> "State":
     """Reconstruct a State from a directory produced by ``dump_state``.
 
-    Validates shape invariants on load:
-      - pool_size attribute matches tau_masks.shape[1] AND pool row count
-      - n_things attribute matches tau_masks.shape[0] AND thing_ids row count
-      - Pool orbit fields round-trip losslessly
-      - If sigma_stored is False, reconstruct sigma_masks as tau_masks.copy()
-        (derivability signal asserted pre-dump via
-        state.sigma_derivable_from_tau)
-      - Schema version is checked for prefix match (major version);
-        mismatch raises ValueError.
+    Stage 7.1.1 self-validation:
+      - Schema version major matches loader's.
+      - pool_size attribute consistent across HDF5 root, /masks group,
+        /pool/keys_array length.
+      - n_things attribute matches things.jsonl row count AND
+        tau_masks axis-0.
+      - For each pool row, derived orbit_id (via _orbit_root + pool
+        bit_of) matches stored orbit_id — algebraic self-check
+        catching both bounds errors and structure/orbit inconsistencies.
+      - Pool key bijection: re-encoded key matches stored key per row.
+      - Trajectory axis-0 length matches n_iter attribute.
+      - Trajectory iteration field is consecutive (each row's
+        iteration == prior + 1, starting from 1 if non-empty).
     """
     import h5py
     in_dir = Path(in_dir)
 
-    # -- pool ---------------------------------------------------------------
-    pool_rows = []
-    ks_tuple: list = []
-    with (in_dir / "pool.jsonl").open() as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            entry = json.loads(line)
-            bit_idx = int(entry["bit_index"])
-            if bit_idx != len(pool_rows):
-                raise ValueError(
-                    f"pool.jsonl bit_index {bit_idx} out of order at row "
-                    f"{len(pool_rows)}"
-                )
-            struct = json.loads(entry["key"])
+    # -- state.h5: pool + masks + trajectory --------------------------------
+    with h5py.File(in_dir / "state.h5", "r") as h5:
+        schema = h5.attrs["schema_version"]
+        if isinstance(schema, bytes):
+            schema = schema.decode()
+        if schema.split(".")[0] != SCHEMA_VERSION.split(".")[0]:
+            raise ValueError(
+                f"schema version mismatch: disk {schema!r} vs "
+                f"loader {SCHEMA_VERSION!r}"
+            )
+        pool_size_attr = int(h5.attrs["pool_size"])
+        n_things_attr = int(h5.attrs["n_things"])
+        n_iter_attr = int(h5.attrs["n_iter"])
+        iteration = int(h5.attrs["iteration"])
+        sigma_stored = bool(h5.attrs["sigma_stored"])
+
+        # Pool reconstruction from compound dataset
+        pool_group = h5["pool"]
+        if int(pool_group.attrs["pool_size"]) != pool_size_attr:
+            raise ValueError(
+                f"/pool group pool_size {pool_group.attrs['pool_size']} "
+                f"!= root pool_size {pool_size_attr}"
+            )
+        raw = pool_group["keys_array"][()]
+        if len(raw) != pool_size_attr:
+            raise ValueError(
+                f"/pool/keys_array length {len(raw)} != pool_size "
+                f"{pool_size_attr}"
+            )
+        pool_rows: list = []
+        ks_tuple: list = []
+        for i, raw_row in enumerate(raw):
+            key_str = raw_row["key"].decode("utf-8")
+            struct = json.loads(key_str)
             k = k_from_structure(struct)
-            if k.key() != entry["key"]:
+            if k.key() != key_str:
                 raise ValueError(
-                    f"pool.jsonl bit {bit_idx}: reconstructed key differs "
-                    f"from stored key (bijection violated)"
+                    f"pool bit {i}: reconstructed key differs from stored "
+                    f"key (bijection violated)"
                 )
             pool_rows.append((
-                entry["key"],
-                int(entry["grade"]),
-                int(entry["orbit_id"]),
-                int(entry["orbit_parent"]),
+                key_str,
+                int(raw_row["grade"]),
+                int(raw_row["orbit_id"]),
+                int(raw_row["orbit_parent"]),
             ))
             ks_tuple.append(k)
-    keys_array = np.array(pool_rows, dtype=POOL_DTYPE)
-    pool = Pool(keys_array=keys_array, ks=tuple(ks_tuple))
+        keys_array = np.array(pool_rows, dtype=POOL_DTYPE) if pool_rows \
+            else np.empty(0, dtype=POOL_DTYPE)
+        pool = Pool(keys_array=keys_array, ks=tuple(ks_tuple))
 
-    # -- things -------------------------------------------------------------
+        # Algebraic orbit self-validation: derive expected orbit_id
+        # from K structure; mismatch = corruption (Sev-3 audit fix).
+        for i, k in enumerate(pool.ks):
+            expected = _expected_orbit_id_for(k, pool, i)
+            stored = int(pool.keys_array[i]["orbit_id"])
+            if expected != stored:
+                raise ValueError(
+                    f"pool bit {i}: stored orbit_id {stored} != "
+                    f"derived orbit_id {expected} (corruption or "
+                    f"K-structure / orbit metadata inconsistency)"
+                )
+
+        # Masks
+        masks_group = h5["masks"]
+        if int(masks_group.attrs["pool_size"]) != pool_size_attr:
+            raise ValueError(
+                f"/masks group pool_size {masks_group.attrs['pool_size']} "
+                f"!= root pool_size {pool_size_attr}"
+            )
+        tau_masks = np.array(masks_group["tau"][()], dtype=bool)
+        if tau_masks.shape != (n_things_attr, pool_size_attr):
+            raise ValueError(
+                f"tau_masks shape {tau_masks.shape} != expected "
+                f"({n_things_attr}, {pool_size_attr})"
+            )
+        if sigma_stored:
+            sigma_masks = np.array(masks_group["sigma"][()], dtype=bool)
+            if sigma_masks.shape != tau_masks.shape:
+                raise ValueError(
+                    f"sigma_masks shape {sigma_masks.shape} != tau_masks "
+                    f"shape {tau_masks.shape}"
+                )
+        else:
+            sigma_masks = tau_masks.copy()
+
+        # Trajectory
+        trajectory = np.array(h5["trajectory"][()], dtype=TRAJECTORY_DTYPE)
+        if trajectory.shape[0] != n_iter_attr:
+            raise ValueError(
+                f"trajectory length {trajectory.shape[0]} != n_iter "
+                f"attribute {n_iter_attr}"
+            )
+        # Algebraic trajectory self-validation: iteration field is
+        # consecutive starting from 1 (Sev-3 audit fix).
+        if n_iter_attr > 0:
+            iters = trajectory["iteration"]
+            expected_iters = np.arange(1, n_iter_attr + 1, dtype=iters.dtype)
+            if not np.array_equal(iters, expected_iters):
+                raise ValueError(
+                    f"trajectory iteration sequence not consecutive 1..N; "
+                    f"got first={int(iters[0])}, last={int(iters[-1])}, "
+                    f"expected 1..{n_iter_attr}"
+                )
+
+    # -- things.jsonl -------------------------------------------------------
     thing_id_list: list = []
     with (in_dir / "things.jsonl").open() as f:
         for line in f:
@@ -3301,9 +3495,14 @@ def load_state(in_dir) -> "State":
                     f"{len(thing_id_list)}"
                 )
             thing_id_list.append(entry["id"])
+    if len(thing_id_list) != n_things_attr:
+        raise ValueError(
+            f"things.jsonl row count {len(thing_id_list)} != n_things "
+            f"attribute {n_things_attr}"
+        )
     thing_ids = np.array(thing_id_list, dtype=object)
 
-    # -- oracle_pairs -------------------------------------------------------
+    # -- oracle_pairs.jsonl -------------------------------------------------
     oracle_pair_set = []
     pairs_path = in_dir / "oracle_pairs.jsonl"
     if pairs_path.exists():
@@ -3319,7 +3518,7 @@ def load_state(in_dir) -> "State":
                 )
     oracle_pairs = frozenset(oracle_pair_set)
 
-    # -- weights ------------------------------------------------------------
+    # -- weights.jsonl ------------------------------------------------------
     weights_list: list = []
     weights_path = in_dir / "weights.jsonl"
     if weights_path.exists():
@@ -3332,7 +3531,7 @@ def load_state(in_dir) -> "State":
                 weights_list.append((KKey(entry["k_key"]), float(entry["weight"])))
     weights = tuple(sorted(weights_list, key=lambda kv: kv[0]))
 
-    # -- trajectory_aux -----------------------------------------------------
+    # -- trajectory_aux.jsonl -----------------------------------------------
     aux_list: list = []
     aux_path = in_dir / "trajectory_aux.jsonl"
     if aux_path.exists():
@@ -3344,48 +3543,6 @@ def load_state(in_dir) -> "State":
                 entry = json.loads(line)
                 aux_list.append(entry["aux"])
     trajectory_aux = tuple(aux_list)
-
-    # -- state.h5 -----------------------------------------------------------
-    with h5py.File(in_dir / "state.h5", "r") as h5:
-        schema = h5.attrs["schema_version"]
-        if isinstance(schema, bytes):
-            schema = schema.decode()
-        if schema.split(".")[0] != SCHEMA_VERSION.split(".")[0]:
-            raise ValueError(
-                f"schema version mismatch: disk {schema!r} vs "
-                f"loader {SCHEMA_VERSION!r}"
-            )
-        pool_size_attr = int(h5.attrs["pool_size"])
-        n_things_attr = int(h5.attrs["n_things"])
-        iteration = int(h5.attrs["iteration"])
-        sigma_stored = bool(h5.attrs["sigma_stored"])
-        if pool_size_attr != pool.size():
-            raise ValueError(
-                f"pool_size attribute {pool_size_attr} != pool.jsonl row count "
-                f"{pool.size()}"
-            )
-        if n_things_attr != len(thing_ids):
-            raise ValueError(
-                f"n_things attribute {n_things_attr} != things.jsonl row count "
-                f"{len(thing_ids)}"
-            )
-        tau_masks = np.array(h5["masks/tau"][()], dtype=bool)
-        if tau_masks.shape != (n_things_attr, pool_size_attr):
-            raise ValueError(
-                f"tau_masks shape {tau_masks.shape} != expected "
-                f"({n_things_attr}, {pool_size_attr})"
-            )
-        if sigma_stored:
-            sigma_masks = np.array(h5["masks/sigma"][()], dtype=bool)
-            if sigma_masks.shape != tau_masks.shape:
-                raise ValueError(
-                    f"sigma_masks shape {sigma_masks.shape} != tau_masks shape "
-                    f"{tau_masks.shape}"
-                )
-        else:
-            # sigma_derivable_from_tau was True at dump time → σ == τ
-            sigma_masks = tau_masks.copy()
-        trajectory = np.array(h5["trajectory"][()], dtype=TRAJECTORY_DTYPE)
 
     return State(
         pool=pool,
@@ -4172,31 +4329,48 @@ def _smoke_test() -> None:
                 # -- Stage 7.1: hybrid JSONL + HDF5 I/O.  Round-trip
                 # dump_state → load_state reproduces state.signature()
                 # bit-identically.  Enacts l-hdf5-compound-dtypes-
-                # mirror-in-memory.
+                # mirror-in-memory.  Stage 7.1.1 migrated pool to HDF5
+                # /pool/keys_array (compound dtype); chunked datasets
+                # extensible on growable axes; algebraic orbit
+                # self-validation on load.
                 import tempfile
                 with tempfile.TemporaryDirectory() as td:
                     dump_state(state, td)
-                    # JSONL files present
-                    for fname in ("pool.jsonl", "things.jsonl",
-                                  "oracle_pairs.jsonl", "weights.jsonl",
-                                  "trajectory_aux.jsonl"):
+                    # Remaining JSONL files (transitional; pool.jsonl
+                    # retired in 7.1.1)
+                    for fname in ("things.jsonl", "oracle_pairs.jsonl",
+                                  "weights.jsonl", "trajectory_aux.jsonl"):
                         assert (Path(td) / fname).exists(), (
                             f"dump_state should produce {fname}"
                         )
-                    assert (Path(td) / "state.h5").exists(), (
-                        "dump_state should produce state.h5"
+                    assert not (Path(td) / "pool.jsonl").exists(), (
+                        "pool.jsonl was retired in 7.1.1 (pool now in HDF5)"
                     )
-                    # Symmetric state: sigma not stored; HDF5 only has tau
+                    assert (Path(td) / "state.h5").exists()
                     import h5py
                     with h5py.File(Path(td) / "state.h5", "r") as h5:
-                        assert bool(h5.attrs["sigma_stored"]) is False, (
-                            "symmetric state should omit /masks/sigma"
+                        # Pool in HDF5 with compound dtype + chunking
+                        assert "pool" in h5
+                        assert "keys_array" in h5["pool"]
+                        assert h5["pool/keys_array"].chunks is not None, (
+                            "pool keys_array should be chunked"
                         )
+                        assert h5["pool/keys_array"].maxshape == (None,), (
+                            "pool keys_array should be axis-0-extensible"
+                        )
+                        # Mask datasets chunked + extensible
+                        assert h5["masks/tau"].chunks is not None
+                        assert h5["masks/tau"].maxshape == (None, None)
+                        # Sigma omitted for symmetric state
+                        assert bool(h5.attrs["sigma_stored"]) is False
                         assert "sigma" not in h5["masks"]
+                        # Pool_size attribute consistent across root +
+                        # /pool group + /masks group
                         assert h5.attrs["pool_size"] == state.pool.size()
+                        assert h5["pool"].attrs["pool_size"] == state.pool.size()
+                        assert h5["masks"].attrs["pool_size"] == state.pool.size()
                         assert h5.attrs["n_things"] == len(state.thing_ids)
-                    # Round-trip: signature equality + trajectory equality +
-                    # aux equality + iteration equality
+                    # Round-trip
                     loaded = load_state(td)
                     assert loaded.signature() == state.signature(), (
                         "round-trip should preserve state.signature()"
@@ -4207,9 +4381,23 @@ def _smoke_test() -> None:
                     assert loaded.pool_has_trivial_orbits == state.pool_has_trivial_orbits
                     assert loaded.sigma_derivable_from_tau == state.sigma_derivable_from_tau
 
-                print(f"    Stage 7.1: hybrid JSONL+HDF5 I/O round-trip "
-                      f"preserves state.signature(); symmetric state omits "
-                      f"/masks/sigma from HDF5 (forward-compat with Tier 3)")
+                # Empty-state round-trip (Stage 7.1.1 audit Sev-3 fix):
+                # exercise the n_things=0, pool_size=0, n_iter=0 edge case.
+                empty = State()
+                with tempfile.TemporaryDirectory() as td2:
+                    dump_state(empty, td2)
+                    loaded_empty = load_state(td2)
+                    assert loaded_empty.signature() == empty.signature(), (
+                        "empty-state round-trip preserves signature"
+                    )
+                    assert loaded_empty.pool.size() == 0
+                    assert len(loaded_empty.thing_ids) == 0
+                    assert len(loaded_empty.trajectory) == 0
+
+                print(f"    Stage 7.1.1: pool in HDF5 (/pool/keys_array, "
+                      f"compound S512); chunked + extensible datasets; "
+                      f"algebraic orbit self-validation on load; "
+                      f"empty-state round-trip; pool.jsonl retired")
 
                 # -- Stage 5 + 5.5: step() -----------------------------
                 # Run one step on the extracted state with a small
@@ -4568,7 +4756,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.1 smoke test (S3 cluster Tier 1+2 + hybrid JSONL/HDF5 I/O round-trip): all assertions passed")
+    print("Stage 1–7.1.1 smoke test (pool migrated to HDF5; chunked + extensible; algebraic orbit self-validation): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
