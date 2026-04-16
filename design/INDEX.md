@@ -6,7 +6,7 @@ Each node is a line in `design/<type>s.jsonl`.
 Use `python scripts/design_sppf.py show <id>` for full detail.
 Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 
-## Principles (36)
+## Principles (37)
 
 - ● [p-alignment-is-distribution] Alignment is a distribution, not a predicate
 - ● [p-arity-is-grade] Arity = grade; arity N is not tracked, it emerges
@@ -40,6 +40,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [p-tau-sigma-not-opposite] τ/σ is not the opposite of σ/τ
 - ● [p-tau-sigma-separation] τ/σ separation is load-bearing
 - ● [p-thing-is-not-its-relations] Things with relations are distinct things, not internal fields
+- ● [p-two-oriented-positives-earn-a-negation] Two oriented positive assertions are required to earn a negation under Belnap semantics
 - ● [p-type-theory-everywhere] Use type theory to encode intensionality structurally
 - ● [p-types-are-tensor-shape-obligations] Types assert tensor shape + dtype obligations, not class shape
 - ● [p-weight-update-is-new-k-articulation] Weight updates are K-articulations with different scalars, not mutations of existing scalars
@@ -65,10 +66,12 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [d-wedge-combinator-general-exterior-algebra] Wedge combinator is the general exterior-algebra form
 - ● [d-weight-objective-pluggable] Weight-adjustment objective is pluggable
 
-## Lemmas (8)
+## Lemmas (10)
 
+- ● [l-combinator-and-s3-operators-are-equivalent] General exterior-algebra combinator ≡ S3 operators + AND-wedge (two presentations, one structure)
 - ▲ [l-hash-consing-as-np-unique] Hash-consing of K becomes np.unique over the pool's structured-dtype array
 - ● [l-hdf5-compound-dtypes-mirror-in-memory] HDF5 compound dtypes on disk should mirror the in-memory structured dtypes 1:1
+- ● [l-k-level-s3-operators] S3 lifts from the tsk tensor to K-level operators swap, rotate, compose
 - ▲ [l-oracle-pairs-as-index-array] Oracle pairs should become Int[Array, 'n_pairs 2'] indexing axis-0 of stacked masks, not a frozenset
 - ▲ [l-pool-as-structured-dtype-array] Pool.by_key should become a structured-dtype array, not a tuple of tuples
 - ● [l-s3-as-axis-permutation] S3 action is a numpy axis permutation on a length-3 stacked tensor
