@@ -6,7 +6,7 @@ Each node is a line in `design/<type>s.jsonl`.
 Use `python scripts/design_sppf.py show <id>` for full detail.
 Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 
-## Principles (27)
+## Principles (30)
 
 - ● [p-alignment-is-distribution] Alignment is a distribution, not a predicate
 - ● [p-arity-is-grade] Arity = grade; arity N is not tracked, it emerges
@@ -26,14 +26,17 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [p-maximal-freedom] Prefer interpretations that leave the greatest remaining freedom
 - ● [p-no-bespoke-recognition] No bespoke pattern recognition at any level
 - ● [p-no-canonicalization] No canonicalization at registration time
+- ● [p-numpy-is-the-natural-cpu-representation] For the algebra's CPU representation, numpy is natural
 - ● [p-overlap-demands-wedge-articulation] Overlap cell (n_11 > 0) demands wedge articulation when the joint is uncaptured
 - ● [p-probes-are-half-spaces] Probes define half-spaces over the thing-pool; quotienting projects to cells
 - ● [p-self-similarity] The framework is self-similar at every scale and grade
 - ● [p-source-is-a-k] Source provenance is just another K
+- ● [p-sppf-holds-coexisting-readings] The SPPF holds multiple valid readings of the same operation
 - ● [p-tau-sigma-not-opposite] τ/σ is not the opposite of σ/τ
 - ● [p-tau-sigma-separation] τ/σ separation is load-bearing
 - ● [p-thing-is-not-its-relations] Things with relations are distinct things, not internal fields
 - ● [p-type-theory-everywhere] Use type theory to encode intensionality structurally
+- ● [p-weight-update-is-new-k-articulation] Weight updates are K-articulations with different scalars, not mutations of existing scalars
 - ● [p-yoneda-identity] A thing's identity is its probe-firing profile (Yoneda)
 
 ## Decisions (17)
@@ -67,7 +70,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (12)
+## Corrections (14)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -81,6 +84,8 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-stage-3-6-identity-as-probes] Stage 3.6: surface all identity components as probes, not just as ID-string text
 - ● [c-stage-4-5-xor-score-and-overlap-demand] Stage 4.5: four-cell scoring is XOR-of-columns; overlap cell demands articulation
 - ● [c-stage-4-6-structural-functions-plus-split-orientations] Stage 4.6: structural scorer/objective classes; split two-orientation oracle scorer; decomposed signatures
+- ● [c-stage-5-5-no-default-budget-remove-weight-updater] Stage 5.5: no-default articulation budget; WeightUpdater removed; σ channel exercised
+- ● [c-weight-updater-becomes-new-k-articulation] WeightUpdater stub removed; weight updates reinterpreted as new-K articulation
 
 ## Questions (6)
 

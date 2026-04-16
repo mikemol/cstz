@@ -1697,10 +1697,11 @@ OBJECTIVES: dict = {
 #
 # step(state) → state' is the single update rule that together with
 # run_to_fixed_point (Stage 6) constitutes the entire closed loop
-# (p-closed-self-referential-loop).  Pure function; no mutation;
-# merge-compatible (p-embarrassingly-parallel).
+# (p-closed-self-referential-loop).  Pure function; no mutation of
+# input state; merge-compatible (p-embarrassingly-parallel).
 #
-# The update has three phases:
+# The update has two phases (Stage 5.5 removed the third — see
+# c-weight-updater-becomes-new-k-articulation):
 #
 #   1. Deterministic articulation (p-overlap-demands-wedge-articulation):
 #      enumerate every K-pair (K_i, K_j) in the current pool where
@@ -1715,14 +1716,18 @@ OBJECTIVES: dict = {
 #      — does NOT gate which demands are ever met (the remainder
 #      persists into subsequent steps).
 #
-#   2. Weight update (d-weight-objective-pluggable): a pluggable
-#      updater adjusts per-K weights toward the objective.  Default
-#      is no-op (weight tuning is a separate stage's concern).
-#
-#   3. Trajectory logging: an entry recording the iteration's work
+#   2. Trajectory logging: an entry recording the iteration's work
 #      is appended to state.trajectory.  Entries include scorer and
 #      objective structures (p-functions-have-structural-identity)
 #      so any wedge's provenance is recoverable from the log.
+#
+# Weight-tuning via a "WeightUpdater" phase was REMOVED in Stage 5.5
+# under p-weight-update-is-new-k-articulation: mutating a K's scalar
+# destroys the regime under which earlier wedges were articulated.
+# The information-preserving alternative is to articulate NEW K's
+# with modified scalars, letting both coexist in the pool.  step()
+# therefore does not modify weights; any scalar evolution happens
+# as new-K articulation in a future stage.
 #
 # Performance: per-K firing bitmaps are precomputed ONCE per step,
 # converting _count_four_cell-equivalent work from O(n_things) per
@@ -1730,36 +1735,6 @@ OBJECTIVES: dict = {
 # candidate enumeration uses thing-iteration (for each thing, each
 # pair of set bits is a pair with n_11 ≥ 1), bounding the candidate
 # space to pairs that actually co-fire somewhere.
-
-
-class WeightUpdater(Protocol):
-    """Pluggable weight-adjustment strategy.  Accepts the state and
-    an objective; returns the new weights-tuple.  Structural identity
-    required per p-functions-have-structural-identity.
-    """
-    def __call__(self, state: "State",
-                 objective: Objective) -> Tuple[Tuple[KKey, float], ...]: ...
-
-    @property
-    def structure(self) -> tuple: ...
-
-
-@dataclass(frozen=True)
-class NoOpWeightUpdater:
-    """Returns the current weights unchanged.  Stage 5 default — a
-    principled weight-tuning strategy is deferred to a later stage
-    that specifies the gradient semantics per p-maximal-freedom."""
-
-    def __call__(self, state: "State",
-                 objective: Objective) -> Tuple[Tuple[KKey, float], ...]:
-        return state.weights
-
-    @property
-    def structure(self) -> tuple:
-        return ("weight_updater", "noop")
-
-
-weight_updater_noop = NoOpWeightUpdater()
 
 
 # -- Precomputation helpers ------------------------------------------------
@@ -1808,16 +1783,47 @@ def _articulate_wedge_into_state(
     """Add a single wedge K to the pool and extend each thing's
     τ/σ bitmaps with the wedge's new bit.
 
-    The wedge's firing on a thing is the AND of its leaf atoms'
-    firings (per d-wedge-bit-and-of-parents; wedge.atoms() returns
-    the Atom leaves of the normalized inductive structure).  At
-    grade ≥ 1 initially, τ = σ for the wedge (d-tau-sigma-symmetric-
-    at-grade-1 extended to articulated K's in their first appearance).
+    WEDGE OF APPEARANCE AND REALITY
+    -------------------------------
+    What this function APPEARS to do (from its signature): a pure
+    state transformer — accepts State and returns a new State.  No
+    mutation of anything visible to callers.
 
-    Mutates ``firing_bitmaps`` and ``pool_index`` in place — these
-    are step()-local caches, so the mutation is private.  Returns a
-    new State.  If the wedge's firing is zero (no thing fires it),
-    returns state unchanged (degenerate — no discrimination added).
+    What this function ACTUALLY does (from its body): mutates the
+    step()-local caches ``firing_bitmaps``, ``pool_index``, and
+    ``thing_order`` IN PLACE as an incrementalization strategy.
+    Each articulation in a batch updates these caches so the NEXT
+    articulation in the same batch sees the newly-registered
+    wedge at its fresh bit-index.  The mutations are scoped to the
+    step() invocation and never leak beyond it — the caches are
+    freshly constructed at step() entry and discarded at exit.
+
+    This appearance/reality gap is the incrementalization cost
+    spoken of in the audit: O(P × N) precomputation at step() entry
+    is amortized across all articulations in the batch by keeping
+    the cache live and mutating it in place.  The alternative
+    (functionally pure recomputation per articulation) is correct
+    but O(P × N × articulations) per step, which is unworkable at
+    scale.
+
+    Algebra
+    -------
+    The wedge's firing on a thing is the AND of its leaf atoms'
+    firings (d-wedge-bit-and-of-parents; ``wedge.atoms()`` returns
+    the Atom leaves of the normalized inductive structure).  At
+    first appearance, τ = σ for the wedge (d-tau-sigma-symmetric-
+    at-grade-1 extended to newly-articulated K's — consistent with
+    the flat-structure reading of d-wedge-bit-and-of-parents;
+    the higher-order general-exterior-algebra reading per
+    d-wedge-combinator-general-exterior-algebra becomes relevant
+    once chirality is switched on in a later stage and the two
+    readings coexist per p-sppf-holds-coexisting-readings).
+
+    Returns
+    -------
+    New State with the wedge registered and thing bitmaps extended.
+    If the wedge's firing is zero (no thing fires it), returns state
+    unchanged (degenerate — no discrimination added).
     """
     # Compute firing as AND of atom-leaf bitmaps
     fires = None
@@ -1876,26 +1882,33 @@ def step(
     *,
     scorer: Scorer | None = None,
     objective: Objective | None = None,
-    weight_updater: WeightUpdater = weight_updater_noop,
-    max_articulations_per_step: int = 100,
+    max_articulations_per_step: int | None = None,
 ) -> "State":
     """One closed-loop iteration.
 
     Deterministically identifies demanded wedges (p-overlap-demands-
     wedge-articulation), orders them by the optional scorer, and
-    articulates up to ``max_articulations_per_step`` of them.  Updates
-    weights via ``weight_updater``.  Appends a trajectory entry.
-    Returns a new State.
+    articulates up to ``max_articulations_per_step`` of them (or all
+    of them when the budget is ``None``).  Appends a trajectory
+    entry.  Returns a new State.
 
     Pure: no mutation of input state; safe to call concurrently on
     disjoint State shards (p-embarrassingly-parallel).
 
     ``scorer``: if None, demanded wedges are articulated in
-    deterministic key-order.  If present, demanded wedges are
+    deterministic wedge-key order.  If present, demanded wedges are
     ordered by score descending, ties broken by wedge key.
 
-    ``objective``: handed to ``weight_updater``; unused when the
-    default no-op updater is in effect.
+    ``objective``: retained in the signature for trajectory logging
+    (its structure is recorded so a read-out can reproduce the
+    articulation regime).  step() itself does not modify weights —
+    weight evolution under p-weight-update-is-new-k-articulation is
+    a new-K-articulation concern, not a mutation of existing weights.
+
+    ``max_articulations_per_step``: default None means 'articulate
+    every demanded wedge this step'.  A positive integer bounds the
+    batch; unmet demand persists into subsequent steps.  The
+    framework does not pick a budget; callers do.
     """
     # -- Phase 0: precompute caches -----------------------------------------
     thing_order = list(sorted(state.things, key=lambda kv: kv[0]))
@@ -1931,7 +1944,16 @@ def step(
         demanded.append((k_i, k_j, wedge))
 
     # -- Phase 3: order by scorer (if provided), else by wedge key --------
-    if scorer is not None and len(demanded) > max_articulations_per_step:
+    # Scoring cost is incurred only when we actually need ordering — i.e.,
+    # when a budget is set and demand exceeds it.  With unlimited budget
+    # (the default), we articulate everything and only sort for
+    # determinism across runs/shards.
+    need_scoring = (
+        scorer is not None
+        and max_articulations_per_step is not None
+        and len(demanded) > max_articulations_per_step
+    )
+    if need_scoring:
         scored = []
         for k_i, k_j, wedge in demanded:
             s = scorer(state, k_i, k_j)
@@ -1943,7 +1965,10 @@ def step(
         demanded.sort(key=lambda x: x[2].key())
         ordered = demanded
 
-    to_articulate = ordered[:max_articulations_per_step]
+    if max_articulations_per_step is None:
+        to_articulate = ordered
+    else:
+        to_articulate = ordered[:max_articulations_per_step]
 
     # -- Phase 4: articulate -----------------------------------------------
     new_state = state
@@ -1956,19 +1981,12 @@ def step(
         if new_state.pool.size() > before:
             articulated_count += 1
 
-    # -- Phase 5: weight update --------------------------------------------
-    new_weights = weight_updater(new_state, objective)
-    if new_weights != new_state.weights:
-        new_state = State(
-            pool=new_state.pool,
-            things=new_state.things,
-            oracle_pairs=new_state.oracle_pairs,
-            weights=new_weights,
-            trajectory=new_state.trajectory,
-            iteration=new_state.iteration,
-        )
-
-    # -- Phase 6: trajectory entry -----------------------------------------
+    # -- Phase 5: trajectory entry -----------------------------------------
+    # Weight-tuning phase removed per c-weight-updater-becomes-new-k-
+    # articulation.  `objective` is retained in the signature so its
+    # structural identity is logged — a future new-K-articulation
+    # strategy can consult the trajectory to see which objective the
+    # operator thought mattered at each step.
     traj_entry = {
         "iteration": state.iteration + 1,
         "demanded_count": len(demanded),
@@ -1977,7 +1995,6 @@ def step(
         "pool_size_after": new_state.pool.size(),
         "n_things": n_things,
         "max_articulations_per_step": max_articulations_per_step,
-        "weight_updater": weight_updater.structure,
     }
     if scorer is not None:
         traj_entry["scorer"] = list(scorer.structure)
@@ -2534,15 +2551,16 @@ def _smoke_test() -> None:
                 print(f"    Stage 4 + 4.5 + 4.6 scorers/objectives: structural "
                       f"identity + orientation-split verified on extracted state")
 
-                # -- Stage 5: step() -----------------------------------
+                # -- Stage 5 + 5.5: step() -----------------------------
                 # Run one step on the extracted state with a small
                 # per-step budget to keep the smoke test fast.
+                # (Default None = unlimited, but for the smoke test we
+                # prefer a bounded iteration.)
                 s0 = state
                 s1 = step(
                     s0,
                     scorer=scorer_xor_off_diagonal,
                     objective=objective_oracle_pairs_with_witness,
-                    weight_updater=weight_updater_noop,
                     max_articulations_per_step=20,
                 )
 
@@ -2569,7 +2587,10 @@ def _smoke_test() -> None:
                 assert "scorer" in last
                 assert last["scorer"][0] == "scorer"
                 assert "objective" in last
-                assert last["weight_updater"][1] == "noop"
+                # Stage 5.5: no weight_updater field in trajectory
+                assert "weight_updater" not in last, (
+                    "weight_updater removed per c-weight-updater-becomes-new-k-articulation"
+                )
 
                 # Signature changed when pool grew
                 if pool_growth > 0:
@@ -2619,9 +2640,52 @@ def _smoke_test() -> None:
                     )
                     keys_seen.add(key)
 
-                print(f"    Stage 5 step(): articulated {pool_growth} wedges "
+                # Stage 5.5: exercise σ-channel path.  Under τ=σ atoms
+                # σ-firing bitmaps should equal τ-firing bitmaps, but
+                # the path must be callable.  This is the structural
+                # test of p-tau-sigma-separation — the machinery must
+                # exist for σ independently of whether it currently
+                # differs from τ in value.
+                thing_order_local = list(sorted(state.things, key=lambda kv: kv[0]))
+                fires_tau = _compute_firing_bitmaps(
+                    state.pool, thing_order_local, channel="tau"
+                )
+                fires_sigma = _compute_firing_bitmaps(
+                    state.pool, thing_order_local, channel="sigma"
+                )
+                # Under τ=σ atoms, all per-K firing patterns should agree
+                for k_idx in fires_tau:
+                    assert fires_tau[k_idx] == fires_sigma.get(k_idx), (
+                        f"τ/σ firing mismatch at K index {k_idx} "
+                        f"under supposedly-symmetric atoms"
+                    )
+
+                # Stage 5.5: default budget is None → articulates all
+                # demanded wedges.  Run step() on a small subset to
+                # verify we can articulate every demand (on a tiny
+                # restricted state this is fast even without budget).
+                tiny_state = state.restrict(
+                    thing_ids=frozenset(
+                        tid for tid, _ in state.things[:5]
+                    )
+                )
+                s_unbounded = step(tiny_state, scorer=scorer_xor_off_diagonal)
+                last_traj = s_unbounded.trajectory[-1]
+                assert last_traj["max_articulations_per_step"] is None, (
+                    "unbounded budget default should appear in trajectory"
+                )
+                # All demanded wedges in the tiny restricted state were
+                # articulated
+                assert last_traj["articulated_count"] == last_traj["demanded_count"], (
+                    f"with unbounded budget, all {last_traj['demanded_count']} "
+                    f"demanded should articulate; got {last_traj['articulated_count']}"
+                )
+
+                print(f"    Stage 5 + 5.5 step(): articulated {pool_growth} wedges "
                       f"in iter 1; {s2.pool.size() - s1.pool.size()} more in iter 2; "
-                      f"wedge firing consistent with AND-of-atoms")
+                      f"unbounded budget on tiny restrict articulated "
+                      f"{last_traj['articulated_count']}/{last_traj['demanded_count']}; "
+                      f"σ-channel path exercised")
 
         # Pool invariant: every observable appears as an Atom K
         for k in state.pool.ks:
@@ -2634,7 +2698,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1 + 2 + 2.5 + 2.6 + 3 + 3.5 + 3.6 + 4 + 4.5 + 4.6 + 5 smoke test: all assertions passed")
+    print("Stage 1 + 2 + 2.5 + 2.6 + 3 + 3.5 + 3.6 + 4 + 4.5 + 4.6 + 5 + 5.5 smoke test: all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
