@@ -163,6 +163,14 @@ for Stage 10.  The original "append-only JSONL I/O" target is Stage
            asymmetric regime.  Post-audit fixes: direct-Python S3.act
            for the scalar case (no tensor materialization);
            is_symmetric split into the two probes above.
+- 7.0.13 — Tier 2 of the S3-cluster: Rotated(base, perm) K subclass
+           alongside Atom/Wedge/ZeroK; top-level swap(k) and
+           rotate(k, g) helpers.  Pool.with_k propagates orbit_id
+           (root) + orbit_parent (immediate) for Rotated K's;
+           Atom/Wedge/ZeroK remain self-orbit.  Enacts
+           l-k-level-s3-operators as scaffolding only — semantic
+           switch (step() articulating Rotated K's) deferred to
+           Tier 3 post-Stage-7.1.
 
 ### Stage 7.1 — hybrid JSONL + HDF5 I/O (PENDING)
 

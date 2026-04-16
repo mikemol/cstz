@@ -71,7 +71,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [l-combinator-and-s3-operators-are-equivalent] General exterior-algebra combinator ≡ S3 operators + AND-wedge (two presentations, one structure)
 - ▲ [l-hash-consing-as-np-unique] Hash-consing of K becomes np.unique over the pool's structured-dtype array
 - ● [l-hdf5-compound-dtypes-mirror-in-memory] HDF5 compound dtypes on disk should mirror the in-memory structured dtypes 1:1
-- ● [l-k-level-s3-operators] S3 lifts from the tsk tensor to K-level operators swap, rotate, compose
+- ▲ [l-k-level-s3-operators] S3 lifts from the tsk tensor to K-level operators swap, rotate, compose
 - ▲ [l-oracle-pairs-as-index-array] Oracle pairs should become Int[Array, 'n_pairs 2'] indexing axis-0 of stacked masks, not a frozenset
 - ▲ [l-pool-as-structured-dtype-array] Pool.by_key should become a structured-dtype array, not a tuple of tuples
 - ▲ [l-s3-as-axis-permutation] S3 action is a numpy axis permutation on a length-3 stacked tensor
@@ -90,7 +90,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (26)
+## Corrections (27)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -109,6 +109,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-stage-7-0-11-count-four-cell-vectorized-int-signature] Stage 7.0.11: _count_four_cell vectorized off state.tau_masks; signature takes bit indices
 - ● [c-stage-7-0-12-audit-fixes-direct-s3-act-and-is-symmetric-split] Stage 7.0.12 audit fixes: direct S3.act + is_symmetric split into two probes
 - ● [c-stage-7-0-12-s3-tensor-refactor-and-pool-orbit-fields] Stage 7.0.12: Tier 1 of the S3-cluster — tensor-native S3 + pool orbit fields + State.is_symmetric
+- ● [c-stage-7-0-13-rotated-k-swap-rotate-tier2] Stage 7.0.13: Tier 2 S3-cluster — Rotated K + swap/rotate + pool orbit propagation
 - ● [c-stage-7-0-5-apply-numpy-not-just-store] Stage 7.0.5: apply numpy arrays array-natively, not via Python loops
 - ● [c-stage-7-0-6-unmaterialize-hash-and-signature] Stage 7.0.6: unmaterialize Thing._hash and replace signature()-based fixed-point with trajectory signal
 - ● [c-stage-7-0-7-three-lemma-bundle] Stage 7.0.7: Pool + State.things + hash-consing refactored to numpy-native shapes (three-lemma bundle)
