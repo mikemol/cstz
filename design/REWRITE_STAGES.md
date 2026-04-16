@@ -238,6 +238,30 @@ Non-goals: step()-level demand-driven Rotated articulation (future
 stage with a concrete demand-criterion design); grade-3+ recursive
 combinator; further JSONL retirement.
 
+### Stage 7.2 — post-Tier-3: step()-level asymmetric regime activation
+
+Closes q-post-tier3-demand-criterion-for-rotated and
+q-step-co-fire-enumeration-multi-channel.  step() now discovers and
+articulates asymmetric wedges automatically:
+  - Phase 1 co-fire enumeration extended to τ∪σ union (Rotated K's
+    with τ=0 but σ=1 now participate in pair discovery).
+  - articulate_rotated_from_residue(state, top_n=5): plateau-
+    triggered orbit seeding; articulates (τκ) and (σκ) S3-orbit
+    members of the top-N K's discriminating unearned oracle pairs.
+    New Rotated K's enter pool with correct firing columns via
+    _rotated_firing_columns helper (S3 axis permutation on base's
+    tsk tensor), not zero-padded.
+  - run_to_asymmetric_fixed_point(state, ...): step → plateau →
+    orbit-seed → step ... until no residue OR max_plateau_cycles.
+  - No schema change; SCHEMA_VERSION stays 7.2.0.
+
+Non-goals (deferred):
+  - Grade-3+ Rotated wedges still guarded by NotImplementedError
+    from the 7.1.2 follow-up.
+  - Automatic σ-channel scorer invocation inside
+    run_to_asymmetric_fixed_point.
+  - Further JSONL retirement.
+
 ## Stage 8: CLI (~50 lines)
 
 ```
