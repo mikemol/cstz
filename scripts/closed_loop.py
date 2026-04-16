@@ -159,13 +159,23 @@ class S3:
     def act(self, ts: TauSigma) -> TauSigma:
         """Apply this group element to a TauSigma cell.
 
-        Thin wrapper over ``act_on_tsk`` for the single-cell case.
-        Stage 7.0.12: reformulated to delegate to the tensor-native
-        primitive, preserving the legacy single-cell API.
+        Direct Python permutation on the (τ, σ, κ) triple: no numpy
+        allocation, no tensor materialization.  This is an independent
+        codepath from ``act_on_tsk`` — the single-cell case has no
+        obligation to round-trip through the tensor form.
+
+        ``act_on_tsk`` is the tensor primitive for the (3, ...) shape
+        contract per l-s3-as-axis-permutation; ``act`` is the scalar
+        analogue for a single F₂² cell.  Both share the same
+        permutation semantics but materialize only what their caller
+        needs.
+
+        Preserves the κ = τ ⊕ σ invariant: the F₂² orbit of (τ, σ, κ)
+        under axis permutation keeps κ = permuted[τ] ⊕ permuted[σ],
+        which the new TauSigma's derived-kappa enforces.
         """
-        tsk = np.array([ts.tau, ts.sigma, ts.kappa], dtype=bool)
-        permuted = self.act_on_tsk(tsk.reshape((3, 1))).reshape(3)
-        return TauSigma(tau=int(permuted[0]), sigma=int(permuted[1]))
+        t = ts.triple()
+        return TauSigma(tau=t[self.perm[0]], sigma=t[self.perm[1]])
 
     def name(self) -> str:
         return "(" + "".join(_AXIS_NAMES[p] for p in self.perm) + ")"
@@ -1124,43 +1134,57 @@ class State:
         return default
 
     @property
-    def is_symmetric(self) -> bool:
-        """True when every K in the pool is its own S3-orbit representative
-        AND sigma_masks equals tau_masks identically.
+    def pool_has_trivial_orbits(self) -> bool:
+        """True iff every K in the pool is its own S3-orbit representative
+        (orbit_id[i] == i for all i).
 
-        Under the current symmetric-atoms + AND-wedge regime
-        (d-tau-sigma-symmetric-at-grade-1 + d-wedge-bit-and-of-parents),
-        this invariant holds trivially for any State produced by
-        step() or extract_initial_state — atoms enter with τ=σ, wedges
-        AND-propagate without introducing asymmetry, and swap(K)=K for
-        every K.
+        Queries POOL STRUCTURE only — independent of whether any K's
+        sigma-firing happens to equal its tau-firing.  Under the
+        pre-Tier-2 regime every K is self-orbit trivially; under
+        Tier 2+ the pool may contain Rotated(base, g) K's whose
+        orbit_id points at their base.
 
-        Under l-k-level-s3-operators (Tier 2/3) the invariant can be
-        broken: Rotated(base, g) for non-trivial g has orbit_id !=
-        own bit_index (points at base), and its firing row can make
-        sigma_masks diverge from tau_masks.
-
-        Load-side consumers (Stage 7.1) read this property to decide
-        whether to fetch a stored sigma_masks dataset or reuse
-        tau_masks as sigma_masks.  A False value means sigma_masks is
-        NOT derivable from tau_masks alone; a True value means it is.
-
-        Cheap at query time: two O(1) numpy tests.  Under the eager/
-        no-eager stance, this is NOT cached — it's computed on demand.
+        Pure structural probe; no mask comparison.  See
+        ``sigma_derivable_from_tau`` for the storage-derivability
+        question, which is separate.
         """
         pool_size = self.pool.size()
         if pool_size == 0:
             return True
-        # All K's self-orbit?  keys_array['orbit_id'][i] == i for all i.
         orbit_ids = self.pool.keys_array["orbit_id"]
         expected = np.arange(pool_size, dtype=orbit_ids.dtype)
-        if not np.array_equal(orbit_ids, expected):
-            return False
-        # Masks equal?  (for pre-Tier-2 states this is trivially true
-        # since atoms are symmetric and wedges preserve symmetry; we
-        # still check directly so future-tier states can mutate one
-        # mask without the other without silently passing this probe).
-        return np.array_equal(self.tau_masks, self.sigma_masks)
+        return np.array_equal(orbit_ids, expected)
+
+    @property
+    def sigma_derivable_from_tau(self) -> bool:
+        """True iff sigma_masks can be reconstructed from tau_masks
+        (plus, in Tier 2+, pool orbit metadata) — the Stage 7.1
+        storage-derivability question.
+
+        Stage 7.0.12 (Tier 1) semantics: returns True iff
+        ``np.array_equal(sigma_masks, tau_masks)``.  Under the current
+        symmetric-atoms + AND-wedge regime this is the only way
+        derivability holds, so the property is equivalent to the mask
+        equality test.
+
+        Stage 7.0.13+ (Tier 2) will broaden the check: sigma is also
+        derivable when every row where sigma differs from tau has its
+        K mapped via pool orbit metadata to a base whose tau equals
+        that sigma — i.e., the orbit structure encodes the delta.
+
+        A False value tells Stage 7.1's writer to serialize sigma_masks
+        as an independent dataset; a True value tells it to omit
+        sigma_masks and reconstruct on load.
+
+        Pure structural probe; disjoint concern from
+        ``pool_has_trivial_orbits``.  The two properties were once a
+        single conflated ``is_symmetric`` (Stage 7.0.12 pre-audit)
+        before the Stage 7.0.12 audit separated them: a pool with
+        non-trivial orbits but bitwise-equal masks would have returned
+        False under the conflated form, causing Stage 7.1 to write
+        sigma_masks redundantly.
+        """
+        return bool(np.array_equal(self.tau_masks, self.sigma_masks))
 
     # -- internal array helpers --------------------------------------------
 
@@ -3480,9 +3504,10 @@ def _smoke_test() -> None:
                       f"iteration, no Thing reconstruction on the slow path")
 
                 # -- Stage 7.0.12: S3 tensor-native + pool orbit fields +
-                # State.is_symmetric (Tier 1 of the S3-cluster enactment).
-                # Schema-forward-compatibility with l-k-level-s3-operators
-                # and l-combinator-and-s3-operators-are-equivalent.
+                # separate pool_has_trivial_orbits / sigma_derivable_from_tau
+                # probes (Tier 1 of the S3-cluster enactment).  Schema-
+                # forward-compatibility with l-k-level-s3-operators and
+                # l-combinator-and-s3-operators-are-equivalent.
 
                 # S3.act_on_tsk operates on (3, ...) bool tensors.  The
                 # identity element returns an equal copy; a transposition
@@ -3529,24 +3554,37 @@ def _smoke_test() -> None:
                     "all current K's should have orbit_parent == own bit index"
                 )
 
-                # State.is_symmetric is True for extracted state (symmetric
-                # atoms + AND wedges) — the load-side consumer signal for
-                # Stage 7.1 that sigma_masks is derivable from tau_masks.
-                assert state.is_symmetric, (
-                    "extract_initial_state should produce a symmetric State"
+                # The two separate load-side storage-decision probes
+                # (split from a conflated `is_symmetric` pre-audit):
+                # 1. pool_has_trivial_orbits — pool-structure query
+                # 2. sigma_derivable_from_tau — mask-storage query
+                # Both are True for extracted state (symmetric atoms +
+                # AND-wedges).  Under Tier 2+ they can separate.
+                assert state.pool_has_trivial_orbits, (
+                    "extract_initial_state should produce a pool where "
+                    "every K is its own orbit representative"
                 )
-                # And stays True after a step() articulating wedges
-                # (AND-semantics preserves symmetry)
+                assert state.sigma_derivable_from_tau, (
+                    "extract_initial_state should produce sigma_masks == "
+                    "tau_masks (symmetric atoms + AND-wedges)"
+                )
+                # Both preserved by step() under the current regime
+                # (AND-semantics maintains symmetric masks; no Rotated
+                # K's articulated yet).
                 stepped_sym = step(
                     state, scorer=scorer_xor_off_diagonal,
                     max_articulations_per_step=5,
                 )
-                assert stepped_sym.is_symmetric, (
-                    "step() with AND-semantics preserves state.is_symmetric"
+                assert stepped_sym.pool_has_trivial_orbits, (
+                    "step() under AND-semantics should preserve trivial orbits"
+                )
+                assert stepped_sym.sigma_derivable_from_tau, (
+                    "step() under AND-semantics should preserve σ = τ"
                 )
 
                 print(f"    Stage 7.0.12: S3 tensor axis-permutation + pool "
-                      f"orbit_id/orbit_parent fields + State.is_symmetric "
+                      f"orbit_id/orbit_parent fields + "
+                      f"pool_has_trivial_orbits + sigma_derivable_from_tau "
                       f"(forward-compat for l-k-level-s3-operators)")
 
                 # -- Stage 5 + 5.5: step() -----------------------------
@@ -3906,7 +3944,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.0.12 smoke test (S3 tensor axis-permutation + pool orbit fields + State.is_symmetric): all assertions passed")
+    print("Stage 1–7.0.12 smoke test (S3 tensor axis-permutation + pool orbit fields + pool_has_trivial_orbits + sigma_derivable_from_tau): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
