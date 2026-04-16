@@ -79,10 +79,11 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ▲ [l-state-things-as-parallel-arrays] State.things should become parallel arrays (ids + stacked masks) rather than dict-of-dataclasses
 - ▲ [l-trajectory-as-structured-dtype-array] Trajectory should become a structured-dtype numpy array, not a tuple of dicts
 
-## Rejecteds (8)
+## Rejecteds (9)
 
 -   [r-bespoke-axiom-detectors] Hand-written pattern matchers for specific axioms
 -   [r-commit-as-boolean-earned] Commit predicate = pair earns Boolean on some K-pair
+- ✗ [r-eager-orbit-seeding] Eager write-path orbit seeding via articulate_rotated_from_residue + run_to_asymmetric_fixed_point
 -   [r-family-scaling] Per-family weight scaling in calibration
 -   [r-hardcoded-arity-k] Registering 'arity/N' as a primitive K
 -   [r-lowercase-canonicalization] Lowercase canonicalization of kind strings
@@ -90,7 +91,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (34)
+## Corrections (35)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -123,6 +124,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-stage-7-1-dump-load-enactment] Stage 7.1: hybrid JSONL + HDF5 I/O — dump_state / load_state; enacts l-hdf5-compound-dtypes-mirror-in-memory
 - ● [c-stage-7-1-hybrid-jsonl-hdf5-io] Stage 7.1: hybrid JSONL + HDF5 I/O with generator run()
 - ● [c-stage-7-2-1-orbit-seed-trajectory-events] Stage 7.2.1: orbit-seed events recorded as minimal (base_bit, perm) algebraic datum in trajectory
+- ● [c-stage-7-2-2-syndrome-decoded-orbit-demands] Stage 7.2.2: lazy syndrome-decoded orbit demands; (τ⊕σ)|σ = τ|σ eliminates virtual matmul
 - ● [c-stage-7-2-post-tier3-step-asymmetric-activation] Stage 7.2: post-Tier-3 step()-level asymmetric regime activation; closes two planning questions
 - ● [c-type-theory-reframed-via-tensor-shape] p-type-theory-everywhere reframed: primary focus is tensor shape, not class shape
 - ● [c-weight-updater-becomes-new-k-articulation] WeightUpdater stub removed; weight updates reinterpreted as new-K articulation

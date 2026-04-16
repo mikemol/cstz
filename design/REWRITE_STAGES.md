@@ -238,29 +238,37 @@ Non-goals: step()-level demand-driven Rotated articulation (future
 stage with a concrete demand-criterion design); grade-3+ recursive
 combinator; further JSONL retirement.
 
-### Stage 7.2 — post-Tier-3: step()-level asymmetric regime activation
+### Stage 7.2 → 7.2.2 — post-Tier-3: step()-level asymmetric orbit demands
 
-Closes q-post-tier3-demand-criterion-for-rotated and
-q-step-co-fire-enumeration-multi-channel.  step() now discovers and
-articulates asymmetric wedges automatically:
-  - Phase 1 co-fire enumeration extended to τ∪σ union (Rotated K's
-    with τ=0 but σ=1 now participate in pair discovery).
-  - articulate_rotated_from_residue(state, top_n=5): plateau-
-    triggered orbit seeding; articulates (τκ) and (σκ) S3-orbit
-    members of the top-N K's discriminating unearned oracle pairs.
-    New Rotated K's enter pool with correct firing columns via
-    _rotated_firing_columns helper (S3 axis permutation on base's
-    tsk tensor), not zero-padded.
-  - run_to_asymmetric_fixed_point(state, ...): step → plateau →
-    orbit-seed → step ... until no residue OR max_plateau_cycles.
-  - No schema change; SCHEMA_VERSION stays 7.2.0.
+7.2 initially introduced an eager write-path orbit model
+(articulate_rotated_from_residue + run_to_asymmetric_fixed_point +
+Pool.with_k_and_orbit).  This was superseded in 7.2.2 by a lazy
+read-path syndrome-decoded approach after the algebraic identity
+(τ⊕σ)|σ = τ|σ was recognized — meaning virtual orbit probes' τ∪σ
+co-fire is IDENTICAL to the base K's, and the 3P×3P virtual matmul
+was 9 copies of the base P×P block.
 
-Non-goals (deferred):
-  - Grade-3+ Rotated wedges still guarded by NotImplementedError
-    from the 7.1.2 follow-up.
-  - Automatic σ-channel scorer invocation inside
-    run_to_asymmetric_fixed_point.
-  - Further JSONL retirement.
+Current (7.2.2+ canonical) model:
+  - step() Phase 1: base P×P co-fire matmul on τ∪σ union (same
+    cost as pre-7.2).
+  - step() Phase 2: for each base candidate pair (i, j), ALSO
+    demand Wedge(K_i, Rotated(K_j, g)) for the (τκ) and (σκ) S3
+    generators on grade-1 K's.  These Rotated-leaf wedge demands
+    are INFERRED from the base co-fire — the algebraic identity IS
+    the syndrome; no virtual firing matrix materialized.
+  - Rotated-leaf wedges enter pool via _articulate_wedges_batch's
+    general combinator branch (Tier 3, grade-2 only).  Their orbit
+    is virtual — NOT materialized as separate pool entries.
+  - Grade-3+ Rotated-leaf wedges: skipped (uncapturable demand;
+    Tarski convergence preserved).
+  - No separate orbit-seeding event; no eager mask materialization;
+    no plateau detection; no max_plateau_cycles.
+  - run_to_fixed_point suffices — no run_to_asymmetric_fixed_point.
+
+Eager model REJECTED: see r-eager-orbit-seeding in rejected.jsonl.
+
+Non-goals (deferred): grade-3+ recursive combinator; σ-channel-
+aware scorer invocation; further JSONL retirement.
 
 ## Stage 8: CLI (~50 lines)
 
