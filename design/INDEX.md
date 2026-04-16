@@ -90,7 +90,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (33)
+## Corrections (34)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -122,6 +122,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-stage-7-1-2-tier3-asymmetric-regime-activation] Stage 7.1.2: Tier 3 — general combinator activation on Rotated-parent wedges; final lemma enacted
 - ● [c-stage-7-1-dump-load-enactment] Stage 7.1: hybrid JSONL + HDF5 I/O — dump_state / load_state; enacts l-hdf5-compound-dtypes-mirror-in-memory
 - ● [c-stage-7-1-hybrid-jsonl-hdf5-io] Stage 7.1: hybrid JSONL + HDF5 I/O with generator run()
+- ● [c-stage-7-2-1-orbit-seed-trajectory-events] Stage 7.2.1: orbit-seed events recorded as minimal (base_bit, perm) algebraic datum in trajectory
 - ● [c-stage-7-2-post-tier3-step-asymmetric-activation] Stage 7.2: post-Tier-3 step()-level asymmetric regime activation; closes two planning questions
 - ● [c-type-theory-reframed-via-tensor-shape] p-type-theory-everywhere reframed: primary focus is tensor shape, not class shape
 - ● [c-weight-updater-becomes-new-k-articulation] WeightUpdater stub removed; weight updates reinterpreted as new-K articulation
