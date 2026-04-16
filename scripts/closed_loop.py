@@ -2845,73 +2845,121 @@ def _articulate_wedges_batch(
     matrices; adding new wedges is column-concatenation, not per-Thing
     reconstruction.
 
-    For each kept wedge W, its firing bitmap over things is the AND of
-    its leaf atoms' rows in ``firing_bitmaps`` (d-wedge-bit-and-of-
-    parents).  Kept wedges are batch-dedup'd against the existing pool
-    AND against each other in the batch (multiple distinct candidate
-    K-pairs can normalize to the same canonical wedge, e.g. x∧(y∧z),
-    y∧(x∧z), z∧(x∧y) all normalize to x∧y∧z).
+    Two firing-predicate regimes coexist (Stage 7.1.2 / Tier 3 per
+    l-combinator-and-s3-operators-are-equivalent):
+
+      - AND-of-parents (d-wedge-bit-and-of-parents): when every leaf
+        of the wedge is non-Rotated (Atom or Wedge), τ = σ = AND of
+        the leaves' τ-firing rows.  This is the default and current
+        regime for any wedge produced by extract_initial_state + step()
+        since those only register symmetric K's.
+      - General exterior-algebra combinator (d-wedge-combinator-
+        general-exterior-algebra, strict GF(2) per the c-d-wedge-
+        combinator-typo-fix correction): when at least one leaf is a
+        Rotated K, compute τ_W and σ_W via the grade-2 cross-term
+        formula on the two leaves:
+            τ_W(X) = (τ_A · σ_B) ⊕ (σ_A · τ_B)   [GF(2)]
+            σ_W(X) = (τ_A · τ_B) ⊕ (σ_A · σ_B)   [GF(2)]
+        τ_A / σ_A come from the stored mask columns; the resulting
+        wedge may have τ ≠ σ, flipping state.sigma_derivable_from_tau
+        to False.
+
+    Only the grade-2 general-combinator case is implemented in Tier 3
+    minimum.  Higher-grade wedges with Rotated leaves fall back to
+    AND semantics (conservative); the recursive grade-k formula is
+    deferred until a use case demands it.
+
+    Kept wedges are batch-dedup'd against the existing pool AND
+    against each other (multiple distinct candidate K-pairs can
+    normalize to the same canonical wedge).
 
     Returns (new_state, count_articulated).  Pure transformer.
     """
     n_things = len(state.thing_ids)
+    pool_index = state.pool.key_to_bit  # O(1) lookup cache
 
-    pool_index = state.pool.key_to_bit  # use the O(1) cache directly
+    # σ firing bitmaps for the general-combinator path.  O(1) .T view
+    # on state.sigma_masks — no copy, no eager materialization.
+    sigma_bitmaps = state.sigma_masks.T
 
-    # Phase 1: compute firings for every non-ZeroK candidate whose key
-    # is not already in the pool.  Duplicate keys within the batch are
-    # kept in place; they're deduped by np.unique in Phase 2
-    # (l-hash-consing-as-np-unique): the canonical keys ARE the
-    # shape-level identity, and np.unique over those keys IS the
-    # hash-consing operation.
     kept_wedges: list = []
     kept_keys: list = []
-    kept_firings: list = []
+    kept_tau_firings: list = []
+    kept_sig_firings: list = []
     for wedge in wedges:
         if isinstance(wedge, ZeroK):
             continue
         w_key = wedge.key()
         if w_key in pool_index:
             continue  # already in pool before this batch
-        firing = None
-        for atom in wedge.atoms():
-            a_idx = state.pool.bit_of(atom)
-            if a_idx is None:
-                firing = None
-                break
-            row = firing_bitmaps[a_idx]
-            firing = row if firing is None else firing & row
-        if firing is None or not np.any(firing):
-            continue  # degenerate
-        kept_wedges.append(wedge)
-        kept_keys.append(w_key)
-        kept_firings.append(firing)
+
+        # Detect Rotated-parent presence to select the articulation
+        # regime.  For a normalized Wedge, the leaves are its flattened
+        # non-Wedge descendants (Atom / ZeroK / Rotated).
+        leaves = _flatten_wedge_leaves(wedge)
+        has_rotated = any(isinstance(leaf, Rotated) for leaf in leaves)
+
+        if has_rotated and len(leaves) == 2:
+            # General exterior-algebra combinator (Tier 3, grade-2).
+            bit_a = state.pool.bit_of(leaves[0])
+            bit_b = state.pool.bit_of(leaves[1])
+            if bit_a is None or bit_b is None:
+                continue  # at least one leaf not in pool; can't derive firing
+            tau_a = firing_bitmaps[bit_a]
+            sig_a = sigma_bitmaps[bit_a]
+            tau_b = firing_bitmaps[bit_b]
+            sig_b = sigma_bitmaps[bit_b]
+            tau_w = (tau_a & sig_b) ^ (sig_a & tau_b)
+            sig_w = (tau_a & tau_b) ^ (sig_a & sig_b)
+            # Skip wedges with zero firing in both channels
+            if not (np.any(tau_w) or np.any(sig_w)):
+                continue
+            kept_wedges.append(wedge)
+            kept_keys.append(w_key)
+            kept_tau_firings.append(tau_w)
+            kept_sig_firings.append(sig_w)
+        else:
+            # AND-of-parents path.  For all-non-Rotated wedges, leaves
+            # are atoms and atoms() gives the same set.  τ = σ = AND.
+            firing = None
+            for atom in wedge.atoms():
+                a_idx = state.pool.bit_of(atom)
+                if a_idx is None:
+                    firing = None
+                    break
+                row = firing_bitmaps[a_idx]
+                firing = row if firing is None else firing & row
+            if firing is None or not np.any(firing):
+                continue
+            kept_wedges.append(wedge)
+            kept_keys.append(w_key)
+            kept_tau_firings.append(firing)
+            kept_sig_firings.append(firing)  # τ = σ under AND semantics
 
     if not kept_keys:
         return state, 0
 
-    # Phase 2: np.unique-based dedup on canonical keys.  np.unique
-    # returns (sorted_uniques, first_occurrence_indices); sorting the
-    # indices back into original order preserves insertion determinism,
-    # which matters for reproducible bit-index assignment across runs.
+    # Phase 2: np.unique-based dedup on canonical keys (l-hash-consing-
+    # as-np-unique).  Preserves insertion order via np.sort on the
+    # first-occurrence indices.
     keys_arr = np.array(kept_keys, dtype=object)
     _uniques, first_idx = np.unique(keys_arr, return_index=True)
     canonical_idx = np.sort(first_idx)
     dedup_wedges = [kept_wedges[i] for i in canonical_idx]
-    dedup_firings = np.stack([kept_firings[i] for i in canonical_idx], axis=0)
+    dedup_tau = np.stack([kept_tau_firings[i] for i in canonical_idx], axis=0)
+    dedup_sig = np.stack([kept_sig_firings[i] for i in canonical_idx], axis=0)
 
-    # Phase 3: extend the pool + mask matrices.  Pool.with_k is
-    # idempotent and dedup_wedges is already key-unique, so each
-    # with_k grows the pool by exactly one bit.  At first appearance
-    # τ = σ (d-wedge-bit-and-of-parents), so both mask matrices gain
-    # the same columns.
+    # Phase 3: extend pool + mask matrices.  AND-path wedges have
+    # dedup_tau == dedup_sig (same rows); general-combinator-path
+    # wedges may have dedup_tau ≠ dedup_sig row-wise.
     new_pool = state.pool
     for w in dedup_wedges:
         new_pool = new_pool.with_k(w)
-    new_cols = dedup_firings.T  # [n_things, n_new]
-    n_new = new_cols.shape[1]
-    new_tau = np.concatenate([state.tau_masks, new_cols], axis=1)
-    new_sig = np.concatenate([state.sigma_masks, new_cols], axis=1)
+    new_tau_cols = dedup_tau.T  # [n_things, n_new]
+    new_sig_cols = dedup_sig.T
+    n_new = new_tau_cols.shape[1]
+    new_tau = np.concatenate([state.tau_masks, new_tau_cols], axis=1)
+    new_sig = np.concatenate([state.sigma_masks, new_sig_cols], axis=1)
 
     new_state = State(
         pool=new_pool,
@@ -3168,7 +3216,7 @@ def run_to_fixed_point(
 #
 # Round-trip invariant: state.signature() == load_state(dump_state(state)).signature().
 
-SCHEMA_VERSION = "7.1.1"
+SCHEMA_VERSION = "7.2.0"
 
 # Compound dtype for pool storage in HDF5: key field as fixed-width
 # bytes (UTF-8 encoded).  S512 accepts keys up to 512 bytes; dump
@@ -4399,6 +4447,145 @@ def _smoke_test() -> None:
                       f"algebraic orbit self-validation on load; "
                       f"empty-state round-trip; pool.jsonl retired")
 
+                # -- Stage 7.1.2 (a): Rotated K dump/load round-trip ------
+                # Sev 3 (c) from the post-7.1.1 audit: prior smoke didn't
+                # exercise a pool containing a Rotated K through the
+                # dump/load pipeline.  Builds such a pool, verifies
+                # orbit metadata round-trips and pool_has_trivial_orbits
+                # correctly flips.
+                atom_r = Atom(Observable("test:rotated_smoke"))
+                swapped_r = swap(atom_r)
+                assert isinstance(swapped_r, Rotated)
+                pool_r = Pool().with_k(atom_r).with_k(swapped_r)
+                state_r = State(pool=pool_r)
+                with tempfile.TemporaryDirectory() as td_r:
+                    dump_state(state_r, td_r)
+                    loaded_r = load_state(td_r)
+                    assert loaded_r.signature() == state_r.signature(), (
+                        "Rotated-K round-trip should preserve signature"
+                    )
+                    assert loaded_r.pool.size() == 2
+                    # Rotated K's orbit metadata points at base's bit
+                    assert int(loaded_r.pool.keys_array[1]["orbit_id"]) == 0
+                    assert int(loaded_r.pool.keys_array[1]["orbit_parent"]) == 0
+                    # Non-trivial orbit structure survives round-trip
+                    assert not loaded_r.pool_has_trivial_orbits, (
+                        "Rotated-K pool should report non-trivial orbits "
+                        "after load"
+                    )
+
+                # -- Stage 7.1.2 (b): Tier 3 — asymmetric regime via
+                # general combinator on Rotated-parent wedges.  Enacts
+                # l-combinator-and-s3-operators-are-equivalent.
+                #
+                # Build a state with a single synthetic thing on which
+                # two atoms both fire.  Rotate each by (τκ) — the S3
+                # element ((2, 1, 0)) — producing asymmetric profiles.
+                # Wedge the rotated K's via the general combinator
+                # (triggered by Rotated-parent detection in
+                # _articulate_wedges_batch).  Verify the resulting
+                # wedge's τ and σ columns differ on the thing.
+                atom_x = Atom(Observable("test:asym_x"))
+                atom_y = Atom(Observable("test:asym_y"))
+                s3_tau_kappa = S3((2, 1, 0))  # (τκ) transposition
+                rot_x = rotate(atom_x, s3_tau_kappa)
+                rot_y = rotate(atom_y, s3_tau_kappa)
+                assert isinstance(rot_x, Rotated)
+                assert isinstance(rot_y, Rotated)
+                # Build pool with both base atoms and both rotations
+                asym_pool = (
+                    Pool()
+                    .with_k(atom_x)
+                    .with_k(atom_y)
+                    .with_k(rot_x)
+                    .with_k(rot_y)
+                )
+                # One synthetic thing where both base atoms fire.  The
+                # Rotated K's mask columns are unused here (Tier 3
+                # minimum doesn't wire State mask population for Rotated
+                # K's); we set them manually via direct array
+                # construction to exercise the general-combinator
+                # articulation path.
+                n_pool = asym_pool.size()
+                tid_single = ThingId("asym_test_thing")
+                # For a symmetric atom (τ = σ = 1) rotated by (τκ):
+                # tsk moves from [1, 1, 0] to tsk[perm] = [0, 1, 1],
+                # i.e., τ = 0, σ = 1.  So rot_x fires in σ but not τ
+                # where atom_x fires.  Set the mask columns accordingly.
+                tau_row = np.zeros(n_pool, dtype=bool)
+                sig_row = np.zeros(n_pool, dtype=bool)
+                bit_x = asym_pool.bit_of(atom_x)
+                bit_y = asym_pool.bit_of(atom_y)
+                bit_rx = asym_pool.bit_of(rot_x)
+                bit_ry = asym_pool.bit_of(rot_y)
+                # Base atoms: symmetric (τ = σ = 1)
+                tau_row[bit_x] = True
+                sig_row[bit_x] = True
+                tau_row[bit_y] = True
+                sig_row[bit_y] = True
+                # Rotated atoms: τ = 0, σ = 1 under (τκ) on symmetric
+                sig_row[bit_rx] = True
+                sig_row[bit_ry] = True
+                asym_state = State(
+                    pool=asym_pool,
+                    thing_ids=np.array([tid_single], dtype=object),
+                    tau_masks=tau_row.reshape(1, -1),
+                    sigma_masks=sig_row.reshape(1, -1),
+                )
+                # Sanity: masks differ somewhere (rotated bits have τ=0,
+                # σ=1); this flips sigma_derivable_from_tau to False.
+                assert not asym_state.sigma_derivable_from_tau, (
+                    "state with rotated K's firing in σ but not τ should "
+                    "have sigma NOT derivable from tau"
+                )
+                # Articulate Wedge(rot_x, rot_y): under the general
+                # combinator (both parents Rotated), τ_W = τ_rx·σ_ry +
+                # σ_rx·τ_ry = 0·1 + 1·0 = 0; σ_W = τ_rx·τ_ry +
+                # σ_rx·σ_ry = 0·0 + 1·1 = 1.  So the wedge has
+                # τ = 0, σ = 1 — asymmetric.
+                tau_fb = firing_bitmaps_of(asym_state, "tau")
+                wedge_rxy = Wedge(rot_x, rot_y).normalize()
+                art_state, n_art = _articulate_wedges_batch(
+                    asym_state, [wedge_rxy], tau_fb,
+                )
+                assert n_art == 1, (
+                    "one asymmetric wedge should articulate"
+                )
+                # The new wedge's column: τ=0, σ=1 on the single thing
+                new_bit = art_state.pool.bit_of(wedge_rxy)
+                assert new_bit is not None
+                assert bool(art_state.tau_masks[0, new_bit]) is False, (
+                    "τ of Wedge(rot_x, rot_y) should be 0 under general "
+                    "combinator (0·1 + 1·0 = 0 in GF(2))"
+                )
+                assert bool(art_state.sigma_masks[0, new_bit]) is True, (
+                    "σ of Wedge(rot_x, rot_y) should be 1 under general "
+                    "combinator (0·0 + 1·1 = 1 in GF(2))"
+                )
+                assert not art_state.sigma_derivable_from_tau
+
+                # Dump/load round-trip: /masks/sigma must be a genuine
+                # HDF5 dataset now (sigma_stored=True).
+                with tempfile.TemporaryDirectory() as td_asym:
+                    dump_state(art_state, td_asym)
+                    with h5py.File(Path(td_asym) / "state.h5", "r") as h5a:
+                        assert bool(h5a.attrs["sigma_stored"]) is True, (
+                            "asymmetric state must have sigma_stored=True"
+                        )
+                        assert "sigma" in h5a["masks"], (
+                            "asymmetric state must write /masks/sigma"
+                        )
+                    loaded_asym = load_state(td_asym)
+                    assert loaded_asym.signature() == art_state.signature()
+                    # Asymmetric bit pattern preserved
+                    assert bool(loaded_asym.tau_masks[0, new_bit]) is False
+                    assert bool(loaded_asym.sigma_masks[0, new_bit]) is True
+
+                print(f"    Stage 7.1.2: Rotated K dump/load round-trip "
+                      f"preserves orbit metadata; Tier 3 general combinator "
+                      f"on Rotated-parent wedges produces σ ≠ τ; "
+                      f"/masks/sigma genuinely written on dump")
+
                 # -- Stage 5 + 5.5: step() -----------------------------
                 # Run one step on the extracted state with a small
                 # per-step budget to keep the smoke test fast.
@@ -4756,7 +4943,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.1.1 smoke test (pool migrated to HDF5; chunked + extensible; algebraic orbit self-validation): all assertions passed")
+    print("Stage 1–7.1.2 smoke test (Tier 3: general combinator on Rotated-parent wedges produces σ ≠ τ; asymmetric regime activated; /masks/sigma genuinely stored): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
