@@ -2341,17 +2341,22 @@ def _articulate_wedges_batch(
     n_things = len(state.thing_ids)
 
     pool_index = state.pool._key_to_bit  # use the O(1) cache directly
-    seen_in_batch: set = set()
-    kept_wedges = []
-    kept_firings = []  # each is a 1D bool array of length n_things
+
+    # Phase 1: compute firings for every non-ZeroK candidate whose key
+    # is not already in the pool.  Duplicate keys within the batch are
+    # kept in place; they're deduped by np.unique in Phase 2
+    # (l-hash-consing-as-np-unique): the canonical keys ARE the
+    # shape-level identity, and np.unique over those keys IS the
+    # hash-consing operation.
+    kept_wedges: list = []
+    kept_keys: list = []
+    kept_firings: list = []
     for wedge in wedges:
         if isinstance(wedge, ZeroK):
             continue
         w_key = wedge.key()
         if w_key in pool_index:
             continue  # already in pool before this batch
-        if w_key in seen_in_batch:
-            continue  # already queued earlier in this batch
         firing = None
         for atom in wedge.atoms():
             a_idx = state.pool.bit_of(atom)
@@ -2362,22 +2367,32 @@ def _articulate_wedges_batch(
             firing = row if firing is None else firing & row
         if firing is None or not np.any(firing):
             continue  # degenerate
-        seen_in_batch.add(w_key)
         kept_wedges.append(wedge)
+        kept_keys.append(w_key)
         kept_firings.append(firing)
 
-    if not kept_wedges:
+    if not kept_keys:
         return state, 0
 
-    new_pool = state.pool
-    for w in kept_wedges:
-        new_pool = new_pool.with_k(w)
+    # Phase 2: np.unique-based dedup on canonical keys.  np.unique
+    # returns (sorted_uniques, first_occurrence_indices); sorting the
+    # indices back into original order preserves insertion determinism,
+    # which matters for reproducible bit-index assignment across runs.
+    keys_arr = np.array(kept_keys, dtype=object)
+    _uniques, first_idx = np.unique(keys_arr, return_index=True)
+    canonical_idx = np.sort(first_idx)
+    dedup_wedges = [kept_wedges[i] for i in canonical_idx]
+    dedup_firings = np.stack([kept_firings[i] for i in canonical_idx], axis=0)
 
-    # Stack kept firings as (n_things, n_new) — one column per wedge —
-    # and concatenate onto axis-1 of the mask matrices.  At first
-    # appearance τ = σ (d-wedge-bit-and-of-parents), so both matrices
-    # gain the same columns.
-    new_cols = np.stack(kept_firings, axis=0).T  # [n_things, n_new]
+    # Phase 3: extend the pool + mask matrices.  Pool.with_k is
+    # idempotent and dedup_wedges is already key-unique, so each
+    # with_k grows the pool by exactly one bit.  At first appearance
+    # τ = σ (d-wedge-bit-and-of-parents), so both mask matrices gain
+    # the same columns.
+    new_pool = state.pool
+    for w in dedup_wedges:
+        new_pool = new_pool.with_k(w)
+    new_cols = dedup_firings.T  # [n_things, n_new]
     n_new = new_cols.shape[1]
     new_tau = np.concatenate([state.tau_masks, new_cols], axis=1)
     new_sig = np.concatenate([state.sigma_masks, new_cols], axis=1)
@@ -3460,6 +3475,8 @@ def _smoke_test() -> None:
                       f"O(1) bit_of via _key_to_bit cache")
                 print(f"    Stage 7.0.7b: State.things → parallel arrays; "
                       f"firing_bitmaps is .tau_masks.T (O(1) view, no build)")
+                print(f"    Stage 7.0.7c: wedge-batch dedup via np.unique on "
+                      f"canonical keys; Python seen_in_batch set retired")
 
         # Pool invariant: every observable appears as an Atom K
         for k in state.pool.ks:
@@ -3472,7 +3489,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.0.7b smoke test (Pool + State as parallel numpy arrays; O(1) firing_bitmaps view): all assertions passed")
+    print("Stage 1–7.0.7c smoke test (Pool + State parallel arrays + np.unique hash-consing): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
