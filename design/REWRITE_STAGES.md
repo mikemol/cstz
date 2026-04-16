@@ -139,6 +139,12 @@ for Stage 10.  The original "append-only JSONL I/O" target is Stage
            pattern across Pool, State.thing_ids, State.oracle_pairs,
            State.trajectory.  Enacts l-trajectory-as-structured-dtype-
            array.  Resolves Stage 7 audit post-7.0.8 Severity 2.
+- 7.0.10 — five scorer classes → CellScorer(cells, reduce) factoring:
+           CellExtractor (ThingsFourCell, OracleSixteenCell) × Reducer
+           (SumOffDiagonal, LogProductOffDiagonal, ShannonEntropy,
+           SelectCell(idx)).  Singletons written via functools.partial
+           currying (on_things, on_oracle_pairs).  Enacts
+           l-scorer-as-shape-contract.  Net LOC: -78.
 
 ### Stage 7.1 — hybrid JSONL + HDF5 I/O (PENDING)
 
