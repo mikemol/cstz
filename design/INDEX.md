@@ -68,7 +68,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 
 - ▲ [l-hash-consing-as-np-unique] Hash-consing of K becomes np.unique over the pool's structured-dtype array
 - ● [l-hdf5-compound-dtypes-mirror-in-memory] HDF5 compound dtypes on disk should mirror the in-memory structured dtypes 1:1
-- ● [l-oracle-pairs-as-index-array] Oracle pairs should become Int[Array, 'n_pairs 2'] indexing axis-0 of stacked masks, not a frozenset
+- ▲ [l-oracle-pairs-as-index-array] Oracle pairs should become Int[Array, 'n_pairs 2'] indexing axis-0 of stacked masks, not a frozenset
 - ▲ [l-pool-as-structured-dtype-array] Pool.by_key should become a structured-dtype array, not a tuple of tuples
 - ● [l-s3-as-axis-permutation] S3 action is a numpy axis permutation on a length-3 stacked tensor
 - ● [l-scorer-as-shape-contract] Scorer is a shape contract: (tsk: Bool[3, P], firing: Bool[P, N], i: int, j: int) -> Float[Array, '']
@@ -86,7 +86,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (20)
+## Corrections (21)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -104,6 +104,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-stage-7-0-5-apply-numpy-not-just-store] Stage 7.0.5: apply numpy arrays array-natively, not via Python loops
 - ● [c-stage-7-0-6-unmaterialize-hash-and-signature] Stage 7.0.6: unmaterialize Thing._hash and replace signature()-based fixed-point with trajectory signal
 - ● [c-stage-7-0-7-three-lemma-bundle] Stage 7.0.7: Pool + State.things + hash-consing refactored to numpy-native shapes (three-lemma bundle)
+- ● [c-stage-7-0-8-oracle-indices-and-shim-cleanup] Stage 7.0.8: oracle_pair_indices + scorer vectorization + dead-code shims retired
 - ● [c-stage-7-0-eager-numpy-refactor] Stage 7.0: eager numpy refactor of internal representation
 - ● [c-stage-7-1-hybrid-jsonl-hdf5-io] Stage 7.1: hybrid JSONL + HDF5 I/O with generator run()
 - ● [c-type-theory-reframed-via-tensor-shape] p-type-theory-everywhere reframed: primary focus is tensor shape, not class shape

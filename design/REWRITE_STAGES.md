@@ -97,13 +97,46 @@ signature changes, trajectory has one record.  Commit.
 
 Smoke test: run on a tiny 5-thing subset; assert it terminates.  Commit.
 
-## Stage 7: Append-only JSONL I/O (~150 lines)
+## Stage 7: split into 7.0 (eager-numpy refactor) + 7.1 (I/O)
 
-- `dump_state(state, out_dir)` — writes pool.jsonl, things.jsonl,
-  belnap.jsonl (sparse non-gap cells only), weights.jsonl,
-  trajectory.jsonl.  Append-only.
-- `load_state(in_dir)` — concatenate all lines; semantic-merge duplicates
-  (sum Belnap counts; union K-pool by key; latest-wins or averaged weights).
+Actual work through 7.0.8 has been the eager-numpy refactor required
+to make State merge-friendly for Stage 7.1 and parallel-shard-friendly
+for Stage 10.  The original "append-only JSONL I/O" target is Stage
+7.1 and has not landed yet.
+
+### Stage 7.0 — eager-numpy substages (LANDED)
+
+- 7.0    — initial conversion of Thing.tau_mask / sigma_mask from
+           Python int bitmasks to np.ndarray(dtype=bool).
+- 7.0.5  — numpy fast paths applied in _count_four_cell + step()
+           (BLAS matmul for candidate-pair enumeration).
+- 7.0.6  — Thing._hash cache reverted (signature() comparison uses
+           __eq__, never hash()); termination switched to trajectory
+           signal per d-fixed-point-is-termination.
+- 7.0.7a — Pool internal representation = structured-dtype numpy
+           array (POOL_DTYPE); O(1) bit_of via _key_to_bit cache.
+           Enacts l-pool-as-structured-dtype-array.
+- 7.0.7b — State.things → parallel (thing_ids, tau_masks, sigma_masks)
+           arrays; firing_bitmaps_of(state) returns .tau_masks.T as
+           an O(1) view.  Enacts l-state-things-as-parallel-arrays.
+- 7.0.7c — Wedge-batch dedup via np.unique on canonical keys.  Enacts
+           l-hash-consing-as-np-unique.
+- 7.0.8  — oracle_pair_indices cache (Int[n_pairs, 2]); scorer /
+           objective hot paths vectorized; Thing.remap +
+           _compute_firing_bitmaps shim retired.  Enacts
+           l-oracle-pairs-as-index-array.  Resolves Stage 7 audit
+           Severity 1 + 2.
+
+### Stage 7.1 — hybrid JSONL + HDF5 I/O (PENDING)
+
+- `dump_state(state, out_dir)` — structured records to JSONL
+  (pool.jsonl for (key, grade) rows, oracle_pairs.jsonl,
+  weights.jsonl, trajectory.jsonl); bulk bitmap tensors to HDF5
+  with compound dtypes mirroring in-memory structured dtypes field-
+  for-field per l-hdf5-compound-dtypes-mirror-in-memory.  Append-only
+  on the JSONL side; HDF5 datasets chunked + extensible on axis-0.
+- `load_state(in_dir)` — concatenate JSONL lines; mmap HDF5 datasets;
+  semantic-merge duplicates (sum Belnap counts; union K-pool by key).
 
 Smoke test: dump, load, assert loaded state is equivalent.  Commit.
 
