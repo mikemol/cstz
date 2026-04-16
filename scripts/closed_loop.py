@@ -1286,6 +1286,32 @@ Scorer = Callable[["State", "K", "K"], float]
 Objective = Callable[["State"], float]
 
 
+# -- Overlap-demand primitive (used by Stage 5 articulation rule) ----------
+
+
+def joint_already_captured(state: "State", k_i: "K", k_j: "K") -> bool:
+    """Return True iff the pool already contains a K whose firing pattern
+    equals K_i ∧ K_j — the wedge is already extensionally in the pool.
+
+    Under ``p-overlap-demands-wedge-articulation`` and
+    ``p-extensionality-via-hit``, the wedge K_i ∧ K_j normalizes to a
+    canonical representative; the question is whether that canonical
+    representative is already registered.  This check uses the pool's
+    extensional identity (``Pool.bit_of(Wedge(k_i, k_j))`` — where
+    ``bit_of`` internally normalizes before lookup).
+
+    A True return means n_11 observations do NOT demand a new wedge
+    (the joint is already captured).  False means the overlap demands
+    articulation.  ZeroK-normalized wedges (k_i == k_j after
+    normalize; nilpotency) are treated as 'captured' since the zero
+    element adds no discrimination.
+    """
+    candidate = Wedge(k_i, k_j).normalize()
+    if isinstance(candidate, ZeroK):
+        return True  # nilpotent; no new information possible
+    return state.pool.bit_of(candidate) is not None
+
+
 # -- Primitive helpers for counting K-firings across things ----------------
 
 
@@ -1315,13 +1341,47 @@ def _count_four_cell(state: "State", k_i: "K", k_j: "K",
 # -- Default scorers --------------------------------------------------------
 
 
-def scorer_entropy_of_four_cell(state: "State", k_i: "K", k_j: "K") -> float:
-    """Shannon entropy (bits) of the K-pair's 4-cell distribution.
+def scorer_xor_off_diagonal(state: "State", k_i: "K", k_j: "K") -> float:
+    """XOR-of-columns score: count of things where EXACTLY ONE of K_i,
+    K_j fires.  Under ``p-four-cell-xor-score``, only the off-diagonal
+    cells (n_01, n_10) contribute to a K-pair's score.  Gap-gap (n_00,
+    absence of evidence) and both-fire (n_11, redundant evidence)
+    contribute zero.
 
-    Range: 0 (one cell holds all things) to 2 bits (uniform).  Higher
-    entropy = the K-pair carves the thing-pool more evenly into the
-    four cells, which (under p-probes-are-half-spaces) suggests
-    more compositional information content.
+    This is the PRINCIPLED default scorer: each unit of score is one
+    observed witness that K_i and K_j genuinely pull apart some
+    thing's identity.  The scale is counts, not entropy.
+    """
+    _, n_01, n_10, _ = _count_four_cell(state, k_i, k_j)
+    return float(n_01 + n_10)
+
+
+def scorer_xor_off_diagonal_log_pair(state: "State", k_i: "K", k_j: "K") -> float:
+    """Boolean-earning variant: log(n_01) + log(n_10) when BOTH off-
+    diagonals are populated, 0 otherwise.  Rewards K-pairs whose
+    asymmetric cells are BOTH well-populated (p-boolean-earned-by-both-
+    off-diagonals), not just one.  Complement to ``scorer_xor_off_diagonal``
+    which sums both asymmetries indifferently.
+    """
+    import math
+    _, n_01, n_10, _ = _count_four_cell(state, k_i, k_j)
+    if n_01 == 0 or n_10 == 0:
+        return 0.0
+    return math.log(n_01) + math.log(n_10)
+
+
+def scorer_entropy_of_four_cell(state: "State", k_i: "K", k_j: "K") -> float:
+    """Shannon entropy (bits) of the K-pair's 4-cell distribution as
+    a CATEGORICAL distribution including gap-gap and both-fire cells.
+
+    Range: 0 (one cell holds all things) to 2 bits (uniform).
+
+    This is a CHARACTERIZATION statistic, not a scoring default.  Under
+    p-four-cell-xor-score the principled score is XOR-of-columns; this
+    function is retained as a reporting / diagnostic tool (for asking
+    "how flat is the four-cell distribution of this K-pair?").  Do NOT
+    use as the default scorer in articulation ranking — it conflates
+    gap with overlap.
     """
     import math
     cells = _count_four_cell(state, k_i, k_j)
@@ -1337,18 +1397,11 @@ def scorer_entropy_of_four_cell(state: "State", k_i: "K", k_j: "K") -> float:
 
 
 def scorer_boolean_earning_corpus(state: "State", k_i: "K", k_j: "K") -> float:
-    """Corpus-level Boolean-earning test (p-boolean-earned-by-both-off-
-    diagonals).  Returns log(n_01 · n_10) when both off-diagonal cells
-    are populated; 0 when either is empty (not Boolean-earning).
-
-    The logarithmic scaling rewards K-pairs whose asymmetric cells are
-    BOTH well-populated, over those where one off-diagonal dominates.
+    """Alias for ``scorer_xor_off_diagonal_log_pair`` — Boolean-earning
+    at the corpus level (p-boolean-earned-by-both-off-diagonals).
+    Retained for naming continuity with Stage 4 v1.
     """
-    import math
-    _, n_01, n_10, _ = _count_four_cell(state, k_i, k_j)
-    if n_01 == 0 or n_10 == 0:
-        return 0.0
-    return math.log(n_01) + math.log(n_10)
+    return scorer_xor_off_diagonal_log_pair(state, k_i, k_j)
 
 
 def scorer_oracle_boolean_witness(state: "State", k_i: "K", k_j: "K") -> float:
@@ -1482,9 +1535,18 @@ def compose_objectives(*weighted: Tuple[float, Objective]) -> Objective:
 
 
 SCORERS: dict = {
-    "entropy_of_four_cell": scorer_entropy_of_four_cell,
-    "boolean_earning_corpus": scorer_boolean_earning_corpus,
+    # Principled default (p-four-cell-xor-score): count of things where
+    # exactly one of the two K's fires.
+    "xor_off_diagonal": scorer_xor_off_diagonal,
+    # Boolean-earning (p-boolean-earned-by-both-off-diagonals): nonzero
+    # only when BOTH off-diagonals are populated.
+    "xor_off_diagonal_log_pair": scorer_xor_off_diagonal_log_pair,
+    "boolean_earning_corpus": scorer_boolean_earning_corpus,  # alias
+    # Oracle-directed: discriminating power on oracle thing-pairs.
     "oracle_boolean_witness": scorer_oracle_boolean_witness,
+    # Diagnostic (NOT principled for ranking): categorical-distribution
+    # entropy including gap and overlap cells.
+    "entropy_of_four_cell": scorer_entropy_of_four_cell,
 }
 
 
@@ -1937,8 +1999,45 @@ def _smoke_test() -> None:
                 comp_val = comp_obj(state)
                 assert _math.isfinite(comp_val), "composite objective non-finite"
 
-                print(f"    Stage 4 scorers/objectives: all registry entries "
-                      f"returned finite floats on extracted state")
+                # Stage 4.5: p-four-cell-xor-score verification.
+                # xor_off_diagonal on a K paired with itself = 0
+                # (no off-diagonal firings when the two K's are identical).
+                self_score = scorer_xor_off_diagonal(state, k_i, k_i)
+                assert self_score == 0.0, (
+                    f"K paired with itself should score 0 under XOR "
+                    f"(got {self_score})"
+                )
+                # xor_off_diagonal score equals n_01 + n_10 by construction
+                n00, n01, n10, n11 = _count_four_cell(state, k_i, k_j)
+                expected_xor = float(n01 + n10)
+                got_xor = scorer_xor_off_diagonal(state, k_i, k_j)
+                assert abs(got_xor - expected_xor) < 1e-9, (
+                    f"xor scorer mismatch: got {got_xor}, expected {expected_xor}"
+                )
+
+                # Stage 4.5: joint_already_captured semantics.
+                # An atom always captures itself: Wedge(a, a) normalizes to
+                # ZeroK (nilpotent), treated as captured.
+                assert joint_already_captured(state, k_i, k_i), (
+                    "self-wedge should be treated as 'captured' "
+                    "(nilpotent ZeroK)"
+                )
+                # Two distinct atoms whose joint is NOT yet in the pool:
+                # overlap demands articulation (joint_already_captured = False).
+                # Pick any two atoms that aren't the same.
+                if len(k_src_candidates) > 0 and len(k_kind_candidates) > 0:
+                    a1 = k_src_candidates[0]
+                    a2 = k_kind_candidates[0]
+                    # These two atoms haven't been wedged yet in the pool.
+                    # The joint is not captured.
+                    captured = joint_already_captured(state, a1, a2)
+                    assert not captured, (
+                        "fresh atom pair should have uncaptured joint "
+                        "before any wedge is registered"
+                    )
+
+                print(f"    Stage 4 + 4.5 scorers/objectives: XOR-off-diagonal "
+                      f"scorer + joint-capture check verified on extracted state")
 
         # Pool invariant: every observable appears as an Atom K
         for k in state.pool.ks:
@@ -1951,7 +2050,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1 + 2 + 2.5 + 2.6 + 3 + 3.5 + 3.6 + 4 smoke test: all assertions passed")
+    print("Stage 1 + 2 + 2.5 + 2.6 + 3 + 3.5 + 3.6 + 4 + 4.5 smoke test: all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
