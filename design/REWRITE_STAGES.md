@@ -151,6 +151,14 @@ for Stage 10.  The original "append-only JSONL I/O" target is Stage
            state.things (no Thing reconstruction).  Resolves post-
            7.0.10 Stage 7 audit Severity 1 + 2 (K-object roundtrip
            in _count_four_cell).
+- 7.0.12 — Tier 1 of the S3-cluster: S3.act_on_tsk operates on
+           (3, ...) bool tensors (enacts l-s3-as-axis-permutation);
+           POOL_DTYPE gains orbit_id + orbit_parent fields (trivial
+           self-reference for current symmetric regime);
+           State.is_symmetric property lets Stage 7.1 decide whether
+           to serialize sigma_masks independently.  Pure refactor +
+           schema-forward-compat for Tier 2/3.  No activation of the
+           asymmetric regime.
 
 ### Stage 7.1 — hybrid JSONL + HDF5 I/O (PENDING)
 

@@ -74,7 +74,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [l-k-level-s3-operators] S3 lifts from the tsk tensor to K-level operators swap, rotate, compose
 - ▲ [l-oracle-pairs-as-index-array] Oracle pairs should become Int[Array, 'n_pairs 2'] indexing axis-0 of stacked masks, not a frozenset
 - ▲ [l-pool-as-structured-dtype-array] Pool.by_key should become a structured-dtype array, not a tuple of tuples
-- ● [l-s3-as-axis-permutation] S3 action is a numpy axis permutation on a length-3 stacked tensor
+- ▲ [l-s3-as-axis-permutation] S3 action is a numpy axis permutation on a length-3 stacked tensor
 - ▲ [l-scorer-as-shape-contract] Scorer is a shape contract: (tsk: Bool[3, P], firing: Bool[P, N], i: int, j: int) -> Float[Array, '']
 - ▲ [l-state-things-as-parallel-arrays] State.things should become parallel arrays (ids + stacked masks) rather than dict-of-dataclasses
 - ▲ [l-trajectory-as-structured-dtype-array] Trajectory should become a structured-dtype numpy array, not a tuple of dicts
@@ -90,7 +90,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (24)
+## Corrections (25)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -107,6 +107,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-stage-5-5-no-default-budget-remove-weight-updater] Stage 5.5: no-default articulation budget; WeightUpdater removed; σ channel exercised
 - ● [c-stage-7-0-10-scorer-cell-extractor-reducer-factoring] Stage 7.0.10: five scorer classes factored into CellScorer(cells, reduce) compositions
 - ● [c-stage-7-0-11-count-four-cell-vectorized-int-signature] Stage 7.0.11: _count_four_cell vectorized off state.tau_masks; signature takes bit indices
+- ● [c-stage-7-0-12-s3-tensor-refactor-and-pool-orbit-fields] Stage 7.0.12: Tier 1 of the S3-cluster — tensor-native S3 + pool orbit fields + State.is_symmetric
 - ● [c-stage-7-0-5-apply-numpy-not-just-store] Stage 7.0.5: apply numpy arrays array-natively, not via Python loops
 - ● [c-stage-7-0-6-unmaterialize-hash-and-signature] Stage 7.0.6: unmaterialize Thing._hash and replace signature()-based fixed-point with trajectory signal
 - ● [c-stage-7-0-7-three-lemma-bundle] Stage 7.0.7: Pool + State.things + hash-consing refactored to numpy-native shapes (three-lemma bundle)
