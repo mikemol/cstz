@@ -448,6 +448,116 @@ def _build_right_leaning(atoms: list) -> K:
 
 
 # ---------------------------------------------------------------------------
+# Rotated — K obtained by applying an S3 element to another K's orientation
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True, eq=True)
+class Rotated(K):
+    """A K whose (τ, σ, κ) orientation is an S3-permutation of another K's.
+
+    Enacted Stage 7.0.13 under l-k-level-s3-operators.  Rotated is a
+    first-class K constructor alongside Atom / Wedge / ZeroK — the
+    inductive type of K gains this case to support K-level S3
+    operations without stepping outside the K algebra.
+
+    For ``Rotated(base, perm)``, the firing tsk vector on any thing X
+    equals ``perm.act_on_tsk(base_tsk_of(X))``.  In particular:
+      - ``swap(K) = Rotated(K, (τσ)-swap)`` has τ-firing equal to
+        base's σ-firing, σ-firing equal to base's τ-firing, κ
+        preserved.
+      - ``rotate(K, 3-cycle)`` rotates the three channels.
+
+    Equivalence (``normalize``) collapses the following cases:
+      - ``perm`` is identity             → ``base.normalize()``
+      - base is ``Rotated``              → compose perms, unwrap one level
+      - base is ``ZeroK``                → ``ZeroK()``
+      - otherwise                        → canonicalized ``Rotated(base.normalize(), perm)``
+
+    Tier 2 scope (Stage 7.0.13): the K class exists and is pool-
+    embeddable with proper orbit-metadata propagation.  The semantic
+    switch (step() / scorers / extract_initial_state articulating
+    Rotated K's) is NOT thrown — that's Tier 3.  State.tau_masks /
+    sigma_masks still track single-channel firings per bit; Rotated
+    K's entering the pool via smoke-test code grow the masks
+    consistently with the tensor semantics (see Tier 3 for wiring).
+    """
+
+    base: K
+    perm: S3
+
+    @property
+    def grade(self) -> int:
+        # S3 action preserves grade — rotation is an orientation
+        # permutation on the F₂² vector, not a wedge-product operation.
+        return self.base.grade
+
+    def structure(self) -> tuple:
+        return ("rotated", self.base.structure(), self.perm.perm)
+
+    def normalize(self) -> "K":
+        # Identity rotation is a no-op
+        if self.perm.perm == (0, 1, 2):
+            return self.base.normalize()
+        # Nested rotations compose: Rotated(Rotated(inner, g1), g2) ≡
+        # Rotated(inner, g1 * g2).  (S3.__mul__ convention: (a*b).perm[i]
+        # = a.perm[b.perm[i]]; here a=inner_perm, b=outer_perm so
+        # the combined action applies inner first, outer second.)
+        if isinstance(self.base, Rotated):
+            combined = self.base.perm * self.perm
+            return Rotated(base=self.base.base, perm=combined).normalize()
+        # ZeroK is the fixed point — rotation of zero is zero
+        if self.base.is_zero():
+            return ZeroK()
+        # Base is atomic or a wedge; canonicalize base, keep rotation
+        base_norm = self.base.normalize()
+        if base_norm.is_zero():
+            return ZeroK()
+        if isinstance(base_norm, Rotated):
+            # base.normalize() yielded a Rotated — redo composition
+            combined = base_norm.perm * self.perm
+            return Rotated(base=base_norm.base, perm=combined).normalize()
+        return Rotated(base=base_norm, perm=self.perm)
+
+    def atoms(self) -> frozenset["Atom"]:
+        # Rotation doesn't introduce or remove atoms — just permutes
+        # orientation.  Atom set invariant under the S3 action.
+        return self.base.atoms()
+
+    def is_zero(self) -> bool:
+        # Rotated is zero iff base is zero.  Under normalize() this
+        # case collapses to ZeroK, but defensive override keeps the
+        # invariant pre-normalization.
+        return self.base.is_zero()
+
+
+# The (τσ) transposition in S3 — used by the ``swap`` helper below.
+_S3_TAU_SIGMA = S3((1, 0, 2))
+
+
+def swap(k: K) -> K:
+    """Return the (τσ)-swap of ``k`` — K-level convenience over Rotated.
+
+    Under l-k-level-s3-operators, swap is the (τσ) transposition as a
+    first-class K operator: ``swap(K).τ-firing(X) = K.σ-firing(X)``
+    and vice-versa, with κ unchanged.  Involution: ``swap(swap(K)) = K``
+    (captured by normalize()'s perm-composition case).
+    """
+    return Rotated(base=k, perm=_S3_TAU_SIGMA).normalize()
+
+
+def rotate(k: K, g: S3) -> K:
+    """Return the ``g``-rotation of ``k`` — K-level convenience over Rotated.
+
+    Under l-k-level-s3-operators, rotate applies any S3 element as a
+    K-level operator; the result's firing tsk vector on any thing X
+    is ``g.act_on_tsk(base_tsk_of_X)``.  Identity rotation returns k
+    unchanged (via normalize()'s identity case).
+    """
+    return Rotated(base=k, perm=g).normalize()
+
+
+# ---------------------------------------------------------------------------
 # Pool — append-only registry mapping K keys to bit indices
 # ---------------------------------------------------------------------------
 
@@ -621,17 +731,37 @@ class Pool:
         the ks tuple.  Normalization applied before the concat so the
         pool stores canonical extensional representatives.
 
-        Stage 7.0.12: new rows populate ``orbit_id`` and ``orbit_parent``
-        as self-references (both equal the new bit index).  Under the
-        current symmetric-atoms + AND-wedge regime every K is its own
-        orbit representative, so the self-reference is correct.  When
-        l-k-level-s3-operators activates, Rotated(base, g).orbit_id
-        will point at base's bit index instead.
+        Orbit metadata (Stage 7.0.12 fields, Stage 7.0.13 wiring):
+          - For ``Atom`` / ``Wedge`` / ``ZeroK`` K's: self-orbit,
+            ``orbit_id = orbit_parent = new_bit_index``.
+          - For ``Rotated(base, perm)`` K's: base is ensured present
+            in the pool (recursive ``with_k`` call adds it if absent);
+            the new row's ``orbit_id`` inherits the base's ``orbit_id``
+            (the orbit ROOT representative), and ``orbit_parent`` points
+            at the base's bit index (the IMMEDIATE parent in the
+            orbit tree).  This lets the loader reconstruct orbit
+            structure and, under Tier 3, derive σ_K(X) from
+            τ_{orbit_root}(X) via the composed S3 element.
         """
         nk = k.normalize()
         key = nk.key()
         if key in self._key_to_bit:
             return self
+        if isinstance(nk, Rotated):
+            # Ensure base is present first; recursive add is safe
+            # because normalize() never produces nested Rotated (the
+            # composition case in Rotated.normalize collapses them).
+            base_pool = self.with_k(nk.base)
+            base_bit = base_pool._key_to_bit[nk.base.key()]
+            base_orbit_id = int(base_pool.keys_array[base_bit]["orbit_id"])
+            new_bit = len(base_pool.keys_array)
+            new_row = np.array(
+                [(key, nk.grade, base_orbit_id, base_bit)],
+                dtype=POOL_DTYPE,
+            )
+            new_array = np.concatenate([base_pool.keys_array, new_row])
+            return Pool(keys_array=new_array, ks=base_pool.ks + (nk,))
+        # Self-orbit case: Atom, Wedge, ZeroK
         new_bit = len(self.keys_array)
         new_row = np.array(
             [(key, nk.grade, new_bit, new_bit)], dtype=POOL_DTYPE
@@ -3587,6 +3717,80 @@ def _smoke_test() -> None:
                       f"pool_has_trivial_orbits + sigma_derivable_from_tau "
                       f"(forward-compat for l-k-level-s3-operators)")
 
+                # -- Stage 7.0.13: Rotated K + swap/rotate helpers
+                # (Tier 2 of the S3-cluster enactment).  Machinery
+                # exists; semantic switch not thrown — step() and
+                # extract_initial_state don't articulate Rotated K's.
+                # Smoke-test in isolation.
+
+                atom_a = Atom(Observable("kind_at_root:Module"))
+                # Rotated construction + key round-trip via JSON
+                swapped_a = swap(atom_a)
+                assert isinstance(swapped_a, Rotated)
+                assert swapped_a.grade == atom_a.grade
+                assert swapped_a.atoms() == atom_a.atoms()
+                # Bijective key encoding: structure() round-trips via JSON
+                reloaded = json.loads(swapped_a.key())
+                assert _tuples_eq_lists(swapped_a.structure(), reloaded)
+
+                # Involution: swap(swap(k)) == k under normalize()
+                assert swap(swap(atom_a)) == atom_a, (
+                    "(τσ) swap is an involution"
+                )
+
+                # Identity rotation: rotate(k, identity) == k
+                assert rotate(atom_a, S3.identity()) == atom_a
+
+                # Rotation composition: rotate(rotate(k, g1), g2) ==
+                # rotate(k, g1 * g2) under normalize().
+                g_3cycle = S3((1, 2, 0))
+                g_swap = S3((1, 0, 2))
+                composed_by_rotate = rotate(rotate(atom_a, g_3cycle), g_swap)
+                composed_by_mult = rotate(atom_a, g_3cycle * g_swap)
+                assert composed_by_rotate == composed_by_mult, (
+                    "nested rotations compose via S3 multiplication"
+                )
+
+                # Rotation of ZeroK is ZeroK
+                assert rotate(ZeroK(), g_3cycle) == ZeroK()
+                assert swap(ZeroK()) == ZeroK()
+
+                # Pool orbit bookkeeping: adding a Rotated K first
+                # ensures the base is present, then the Rotated row
+                # has orbit_id == base's orbit_id and orbit_parent
+                # == base's bit index.
+                iso_pool = Pool().with_k(swap(atom_a))
+                assert iso_pool.size() == 2, (
+                    "adding Rotated K should also add the base (2 entries)"
+                )
+                # Base is at bit 0, Rotated is at bit 1
+                base_bit = iso_pool.bit_of(atom_a)
+                rot_bit = iso_pool.bit_of(swap(atom_a))
+                assert base_bit is not None and rot_bit is not None
+                assert base_bit == 0 and rot_bit == 1
+                # Base: self-orbit
+                assert int(iso_pool.keys_array[base_bit]["orbit_id"]) == base_bit
+                assert int(iso_pool.keys_array[base_bit]["orbit_parent"]) == base_bit
+                # Rotated: orbit_id == base's orbit_id; parent == base_bit
+                assert int(iso_pool.keys_array[rot_bit]["orbit_id"]) == base_bit, (
+                    "Rotated K's orbit_id should match its base's orbit_id"
+                )
+                assert int(iso_pool.keys_array[rot_bit]["orbit_parent"]) == base_bit
+
+                # A state built atop this pool has pool_has_trivial_orbits
+                # = False (Rotated K is non-self-orbit).
+                iso_state = State(pool=iso_pool)
+                assert not iso_state.pool_has_trivial_orbits, (
+                    "state with a Rotated K should report non-trivial orbits"
+                )
+                # sigma_derivable_from_tau: no things in iso_state, so
+                # masks are (0, pool_size) shape — trivially equal.
+                assert iso_state.sigma_derivable_from_tau
+
+                print(f"    Stage 7.0.13: Rotated(base, perm) K + swap/rotate "
+                      f"helpers; Pool.with_k propagates orbit_id (root) + "
+                      f"orbit_parent (immediate); Tier 2 scaffolding only")
+
                 # -- Stage 5 + 5.5: step() -----------------------------
                 # Run one step on the extracted state with a small
                 # per-step budget to keep the smoke test fast.
@@ -3944,7 +4148,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.0.12 smoke test (S3 tensor axis-permutation + pool orbit fields + pool_has_trivial_orbits + sigma_derivable_from_tau): all assertions passed")
+    print("Stage 1–7.0.13 smoke test (Rotated K + swap/rotate + pool orbit propagation; Tier 2 scaffolding): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")

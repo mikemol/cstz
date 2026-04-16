@@ -155,10 +155,14 @@ for Stage 10.  The original "append-only JSONL I/O" target is Stage
            (3, ...) bool tensors (enacts l-s3-as-axis-permutation);
            POOL_DTYPE gains orbit_id + orbit_parent fields (trivial
            self-reference for current symmetric regime);
-           State.is_symmetric property lets Stage 7.1 decide whether
-           to serialize sigma_masks independently.  Pure refactor +
+           pool_has_trivial_orbits + sigma_derivable_from_tau probes
+           (independent signals for Stage 7.1 — orbit-structure
+           serialization is conditional on the former, sigma_masks
+           storage is conditional on the latter).  Pure refactor +
            schema-forward-compat for Tier 2/3.  No activation of the
-           asymmetric regime.
+           asymmetric regime.  Post-audit fixes: direct-Python S3.act
+           for the scalar case (no tensor materialization);
+           is_symmetric split into the two probes above.
 
 ### Stage 7.1 — hybrid JSONL + HDF5 I/O (PENDING)
 
