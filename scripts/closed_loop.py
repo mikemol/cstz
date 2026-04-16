@@ -133,23 +133,39 @@ class S3:
             inv[p] = i
         return S3(tuple(inv))
 
-    def act(self, ts: TauSigma) -> TauSigma:
-        """Apply this group element to a TauSigma.
+    def act_on_tsk(self, tsk: np.ndarray) -> np.ndarray:
+        """Apply this group element to a tsk tensor of shape (3, ...).
 
-        Interprets ``perm`` as: axis ``perm[i]`` moves to position i.
-        After permutation, positions 0, 1, 2 hold the values that were
-        at perm[0], perm[1], perm[2].  Since we only store (τ, σ) and
-        derive κ, we read the 3-triple, permute, and reconstruct τ, σ
-        from positions 0 and 1 of the permuted triple.
+        Axis-0 of ``tsk`` is the (τ, σ, κ) axis in canonical order.
+        The S3 action is axis-0 gather: ``result[i, ...] = tsk[perm[i], ...]``.
+        Enacted Stage 7.0.12 under l-s3-as-axis-permutation — this is
+        the tensor-native primitive; ``act(TauSigma)`` wraps it for the
+        single-cell case.
 
-        The linear constraint is preserved automatically because S3
-        permutations of the non-zero F₂² vectors are linear.
+        Preserves the F₂² constraint (κ = τ ⊕ σ) because axis-0 of a
+        valid tsk tensor is always in the orbit of (τ, σ, κ) under
+        that constraint, and any permutation of the three positions
+        remains in that orbit.
+
+        Returns a fresh array; caller owns it.
         """
-        t = ts.triple()
-        permuted = tuple(t[self.perm[i]] for i in range(3))
-        # Reconstruct: τ' = permuted[0], σ' = permuted[1].
-        # κ' = permuted[2], which equals τ' ⊕ σ' by linearity.
-        return TauSigma(tau=permuted[0], sigma=permuted[1])
+        if tsk.shape[0] != 3:
+            raise ValueError(
+                f"S3.act_on_tsk requires axis-0 length 3, got {tsk.shape}"
+            )
+        perm_arr = np.asarray(self.perm, dtype=np.int64)
+        return tsk[perm_arr, ...].copy()
+
+    def act(self, ts: TauSigma) -> TauSigma:
+        """Apply this group element to a TauSigma cell.
+
+        Thin wrapper over ``act_on_tsk`` for the single-cell case.
+        Stage 7.0.12: reformulated to delegate to the tensor-native
+        primitive, preserving the legacy single-cell API.
+        """
+        tsk = np.array([ts.tau, ts.sigma, ts.kappa], dtype=bool)
+        permuted = self.act_on_tsk(tsk.reshape((3, 1))).reshape(3)
+        return TauSigma(tau=int(permuted[0]), sigma=int(permuted[1]))
 
     def name(self) -> str:
         return "(" + "".join(_AXIS_NAMES[p] for p in self.perm) + ")"
@@ -428,14 +444,38 @@ def _build_right_leaning(atoms: list) -> K:
 
 # Pool's on-disk/in-memory shape: a structured-dtype numpy array,
 # one row per K-bit.  axis-0 position = bit index.  Fields:
-#   key   — the K's bijective key string (Python object dtype; HDF5
-#           serialization converts to fixed-width unicode at the
-#           boundary, per p-storage-matches-data-shape).
-#   grade — exterior-algebra grade of the K (1 for atoms, 2+ for wedges).
-#           Stored so shape-selects like ``pool[pool['grade'] == 2]`` are
-#           array-native.  Recoverable from K.grade but stored for
-#           serialization / diagnostic queries without materializing K's.
-POOL_DTYPE = np.dtype([("key", "O"), ("grade", "u1")])
+#   key           — the K's bijective key string (Python object dtype;
+#                   HDF5 serialization converts to fixed-width unicode
+#                   at the boundary, per p-storage-matches-data-shape).
+#   grade         — exterior-algebra grade of the K (1 for atoms, 2+
+#                   for wedges).  Stored so shape-selects like
+#                   ``pool[pool['grade'] == 2]`` are array-native.
+#   orbit_id      — S3-orbit identifier under l-k-level-s3-operators.
+#                   For self-orbit (currently: all K's, since atoms are
+#                   symmetric per d-tau-sigma-symmetric-at-grade-1 and
+#                   wedges use AND-semantics per d-wedge-bit-and-of-
+#                   parents), orbit_id == bit_index of the K itself
+#                   (each K is its own orbit representative).  When the
+#                   asymmetric regime activates (Tier 3), orbit_id
+#                   points at the orbit's canonical representative —
+#                   all 3-6 orbit members share it.
+#   orbit_parent  — bit_index of the orbit representative from which
+#                   THIS K was derived via an S3 operator (for
+#                   non-trivial orbit members).  For self-orbit members,
+#                   orbit_parent == bit_index.  Enables reconstructing
+#                   the orbit tree on load and deriving σ_K(X) from
+#                   τ_{orbit_representative}(X) when l-k-level-s3-
+#                   operators is enacted.
+#
+# Stage 7.0.12: orbit fields added for forward schema compatibility
+# with Tier 2/3 enactments.  Current code sets both to self-referential
+# (orbit_id == orbit_parent == own bit index), so no semantic change.
+POOL_DTYPE = np.dtype([
+    ("key", "O"),
+    ("grade", "u1"),
+    ("orbit_id", "u4"),
+    ("orbit_parent", "u4"),
+])
 
 
 @dataclass(frozen=True, eq=False)
@@ -570,12 +610,22 @@ class Pool:
         Appends via np.concatenate on keys_array; K objects append on
         the ks tuple.  Normalization applied before the concat so the
         pool stores canonical extensional representatives.
+
+        Stage 7.0.12: new rows populate ``orbit_id`` and ``orbit_parent``
+        as self-references (both equal the new bit index).  Under the
+        current symmetric-atoms + AND-wedge regime every K is its own
+        orbit representative, so the self-reference is correct.  When
+        l-k-level-s3-operators activates, Rotated(base, g).orbit_id
+        will point at base's bit index instead.
         """
         nk = k.normalize()
         key = nk.key()
         if key in self._key_to_bit:
             return self
-        new_row = np.array([(key, nk.grade)], dtype=POOL_DTYPE)
+        new_bit = len(self.keys_array)
+        new_row = np.array(
+            [(key, nk.grade, new_bit, new_bit)], dtype=POOL_DTYPE
+        )
         new_array = np.concatenate([self.keys_array, new_row])
         return Pool(keys_array=new_array, ks=self.ks + (nk,))
 
@@ -1072,6 +1122,45 @@ class State:
             if key == target:
                 return w
         return default
+
+    @property
+    def is_symmetric(self) -> bool:
+        """True when every K in the pool is its own S3-orbit representative
+        AND sigma_masks equals tau_masks identically.
+
+        Under the current symmetric-atoms + AND-wedge regime
+        (d-tau-sigma-symmetric-at-grade-1 + d-wedge-bit-and-of-parents),
+        this invariant holds trivially for any State produced by
+        step() or extract_initial_state — atoms enter with τ=σ, wedges
+        AND-propagate without introducing asymmetry, and swap(K)=K for
+        every K.
+
+        Under l-k-level-s3-operators (Tier 2/3) the invariant can be
+        broken: Rotated(base, g) for non-trivial g has orbit_id !=
+        own bit_index (points at base), and its firing row can make
+        sigma_masks diverge from tau_masks.
+
+        Load-side consumers (Stage 7.1) read this property to decide
+        whether to fetch a stored sigma_masks dataset or reuse
+        tau_masks as sigma_masks.  A False value means sigma_masks is
+        NOT derivable from tau_masks alone; a True value means it is.
+
+        Cheap at query time: two O(1) numpy tests.  Under the eager/
+        no-eager stance, this is NOT cached — it's computed on demand.
+        """
+        pool_size = self.pool.size()
+        if pool_size == 0:
+            return True
+        # All K's self-orbit?  keys_array['orbit_id'][i] == i for all i.
+        orbit_ids = self.pool.keys_array["orbit_id"]
+        expected = np.arange(pool_size, dtype=orbit_ids.dtype)
+        if not np.array_equal(orbit_ids, expected):
+            return False
+        # Masks equal?  (for pre-Tier-2 states this is trivially true
+        # since atoms are symmetric and wedges preserve symmetry; we
+        # still check directly so future-tier states can mutate one
+        # mask without the other without silently passing this probe).
+        return np.array_equal(self.tau_masks, self.sigma_masks)
 
     # -- internal array helpers --------------------------------------------
 
@@ -3390,6 +3479,76 @@ def _smoke_test() -> None:
                       f"vectorized off state.tau_masks — no state.things "
                       f"iteration, no Thing reconstruction on the slow path")
 
+                # -- Stage 7.0.12: S3 tensor-native + pool orbit fields +
+                # State.is_symmetric (Tier 1 of the S3-cluster enactment).
+                # Schema-forward-compatibility with l-k-level-s3-operators
+                # and l-combinator-and-s3-operators-are-equivalent.
+
+                # S3.act_on_tsk operates on (3, ...) bool tensors.  The
+                # identity element returns an equal copy; a transposition
+                # permutes axis-0; group composition matches element-wise
+                # composition of the axis permutations.
+                id_elem = S3.identity()
+                swap_elem = S3((1, 0, 2))
+                tsk_test = np.array(
+                    [[1, 0, 1, 1],   # τ
+                     [0, 1, 1, 0],   # σ
+                     [1, 1, 0, 1]],  # κ = τ ⊕ σ
+                    dtype=bool,
+                )
+                tsk_id = id_elem.act_on_tsk(tsk_test)
+                assert np.array_equal(tsk_id, tsk_test)
+                tsk_swap = swap_elem.act_on_tsk(tsk_test)
+                # swap interchanges axes 0 and 1; axis 2 unchanged
+                assert np.array_equal(tsk_swap[0], tsk_test[1])
+                assert np.array_equal(tsk_swap[1], tsk_test[0])
+                assert np.array_equal(tsk_swap[2], tsk_test[2])
+                # Composition: swap * swap = identity
+                swap_twice = swap_elem.act_on_tsk(tsk_swap)
+                assert np.array_equal(swap_twice, tsk_test)
+                # Single-cell wrapper agrees with tensor form
+                for t_val in (0, 1):
+                    for s_val in (0, 1):
+                        ts = TauSigma(t_val, s_val)
+                        swapped = swap_elem.act(ts)
+                        assert swapped.tau == s_val and swapped.sigma == t_val
+
+                # POOL_DTYPE fields include orbit_id + orbit_parent;
+                # every K is its own orbit representative under the
+                # current symmetric regime.
+                assert "orbit_id" in state.pool.keys_array.dtype.names
+                assert "orbit_parent" in state.pool.keys_array.dtype.names
+                pool_size = state.pool.size()
+                orbit_ids = state.pool.keys_array["orbit_id"]
+                orbit_parents = state.pool.keys_array["orbit_parent"]
+                expected_self = np.arange(pool_size, dtype=orbit_ids.dtype)
+                assert np.array_equal(orbit_ids, expected_self), (
+                    "all current K's should have orbit_id == own bit index"
+                )
+                assert np.array_equal(orbit_parents, expected_self), (
+                    "all current K's should have orbit_parent == own bit index"
+                )
+
+                # State.is_symmetric is True for extracted state (symmetric
+                # atoms + AND wedges) — the load-side consumer signal for
+                # Stage 7.1 that sigma_masks is derivable from tau_masks.
+                assert state.is_symmetric, (
+                    "extract_initial_state should produce a symmetric State"
+                )
+                # And stays True after a step() articulating wedges
+                # (AND-semantics preserves symmetry)
+                stepped_sym = step(
+                    state, scorer=scorer_xor_off_diagonal,
+                    max_articulations_per_step=5,
+                )
+                assert stepped_sym.is_symmetric, (
+                    "step() with AND-semantics preserves state.is_symmetric"
+                )
+
+                print(f"    Stage 7.0.12: S3 tensor axis-permutation + pool "
+                      f"orbit_id/orbit_parent fields + State.is_symmetric "
+                      f"(forward-compat for l-k-level-s3-operators)")
+
                 # -- Stage 5 + 5.5: step() -----------------------------
                 # Run one step on the extracted state with a small
                 # per-step budget to keep the smoke test fast.
@@ -3747,7 +3906,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.0.11 smoke test (_count_four_cell int signature + vectorized tau_masks slicing): all assertions passed")
+    print("Stage 1–7.0.12 smoke test (S3 tensor axis-permutation + pool orbit fields + State.is_symmetric): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
