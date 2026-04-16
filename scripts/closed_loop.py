@@ -383,18 +383,26 @@ class Wedge(K):
             element (degenerate wedge);
           - a canonical right-leaning ``Wedge`` otherwise.
         """
-        # Recursively collect all atoms via the typed accessor.
-        all_atoms = self.atoms()
-        # Detect nilpotency by comparing flattened leaf count to
-        # distinct-atom count; if they differ, duplicates exist.
+        # Flatten into leaves (Atom / ZeroK / Rotated; Wedge recurses).
+        # Two exterior-algebra quotient rules detect zero:
+        #   K ∧ 0 = 0  — any ZeroK leaf absorbs the whole wedge.
+        #   K ∧ K = 0  — a duplicate among the leaves is nilpotent.
+        # Under l-k-level-s3-operators, Rotated(A, non-identity) is a
+        # DISTINCT leaf from A — the nilpotency check compares distinct
+        # LEAVES (not distinct atoms), so Wedge(A, swap(A)) is correctly
+        # NOT nilpotent (A and swap(A) are different K's by intensional
+        # key).
         flat_leaves = _flatten_wedge_leaves(self)
-        if len(flat_leaves) != len(all_atoms):
+        if any(leaf.is_zero() for leaf in flat_leaves):
             return ZeroK()
-        # No duplicates; build right-leaning canonical tree.
-        sorted_atoms = sorted(all_atoms, key=lambda a: a.key())
-        if len(sorted_atoms) == 1:
-            return sorted_atoms[0]  # grade-1 degenerate
-        return _build_right_leaning(sorted_atoms)
+        if len(flat_leaves) != len(set(flat_leaves)):
+            return ZeroK()
+        # Canonicalize: sort by key (stable across K subclasses since
+        # every K carries a bijective .key()), right-leaning build.
+        sorted_leaves = sorted(flat_leaves, key=lambda leaf: leaf.key())
+        if len(sorted_leaves) == 1:
+            return sorted_leaves[0]  # grade-1 degenerate
+        return _build_right_leaning(sorted_leaves)
 
     def atoms(self) -> frozenset["Atom"]:
         return self.a.atoms() | self.b.atoms()
@@ -405,17 +413,31 @@ class Wedge(K):
 # ---------------------------------------------------------------------------
 
 
-def _flatten_wedge_leaves(k: K) -> Tuple[Atom, ...]:
-    """Recursively collect all atom leaves of a wedge tree IN ORDER
-    (preserving multiplicity).  Used to detect duplicates for
-    nilpotency quotienting."""
-    if isinstance(k, Atom):
-        return (k,)
-    if isinstance(k, ZeroK):
-        return ()
+def _flatten_wedge_leaves(k: K) -> Tuple[K, ...]:
+    """Recursively collect all non-Wedge leaves of a wedge tree IN ORDER
+    (preserving multiplicity).  Used by Wedge.normalize to detect both
+    the nilpotency quotient (K ∧ K = 0) and the zero-absorption rule
+    (K ∧ 0 = 0).
+
+    Leaves are any K that isn't itself a Wedge: Atom, ZeroK, Rotated.
+    ZeroK leaves are RETURNED (not silently dropped) so that the
+    caller can detect them and collapse the whole wedge to zero —
+    this is A ∧ 0 = 0 per exterior-algebra semantics.  Stage 7.0.13
+    supplement corrected a pre-existing latent behavior where ZeroK
+    was dropped, making Wedge(A, ZeroK).normalize() incorrectly
+    return A; the bug was uncovered in current call paths but was
+    a correctness trap for code articulating wedges including zero.
+
+    Rotated is NOT recursed through — ``Rotated(A, g)`` for non-
+    identity ``g`` is a distinct K from ``A`` under intensional keys
+    (per l-k-level-s3-operators), so treating it as its own leaf is
+    required for nilpotency to discriminate ``Wedge(A, A) = 0`` from
+    ``Wedge(A, swap(A)) ≠ 0``.
+    """
     if isinstance(k, Wedge):
         return _flatten_wedge_leaves(k.a) + _flatten_wedge_leaves(k.b)
-    raise TypeError(f"unknown K constructor: {type(k).__name__}")
+    # Atom, ZeroK, Rotated — all are valid leaves; distinguished by key()
+    return (k,)
 
 
 def _tuples_eq_lists(a, b) -> bool:
@@ -555,6 +577,31 @@ def rotate(k: K, g: S3) -> K:
     unchanged (via normalize()'s identity case).
     """
     return Rotated(base=k, perm=g).normalize()
+
+
+def compose(k1: K, k2: K, g: S3) -> K:
+    """Return the composition ``Wedge(k1, rotate(k2, g)).normalize()``.
+
+    Under l-k-level-s3-operators the third K-level primitive after
+    swap and rotate: combines two K's with the second K rotated by an
+    S3 element.  This expression produces ONE of the cross-orientation
+    terms of the general exterior-algebra combinator; the full
+    combinator (d-wedge-combinator-general-exterior-algebra) is
+    reconstructible as the GF(2) sum
+
+        compose(k1, k2, (τσ)) + compose(k2, k1, (τσ))
+
+    under AND-semantics for wedges (d-wedge-bit-and-of-parents).
+    l-combinator-and-s3-operators-are-equivalent makes this bridge
+    load-bearing: either the closed-form general combinator OR a
+    composition of compose() calls produces the same extensional
+    firing predicate.
+
+    Tier 2 scope: the primitive exists; no step() or scorer
+    articulates compose() results yet.  Tier 3 activates the
+    asymmetric regime and either path becomes a deployment choice.
+    """
+    return Wedge(k1, rotate(k2, g)).normalize()
 
 
 # ---------------------------------------------------------------------------
@@ -3755,6 +3802,27 @@ def _smoke_test() -> None:
                 assert rotate(ZeroK(), g_3cycle) == ZeroK()
                 assert swap(ZeroK()) == ZeroK()
 
+                # compose(k1, k2, g) == Wedge(k1, rotate(k2, g)).normalize()
+                # The third K-level primitive; produces one cross-orientation
+                # term of the general combinator per l-combinator-and-s3-
+                # operators-are-equivalent.
+                atom_b = Atom(Observable("kind_at_root:Function"))
+                composed = compose(atom_a, atom_b, g_swap)
+                direct = Wedge(atom_a, rotate(atom_b, g_swap)).normalize()
+                assert composed == direct, (
+                    "compose should equal Wedge(k1, rotate(k2, g)).normalize()"
+                )
+                # Identity element collapses compose to a plain wedge
+                assert compose(atom_a, atom_b, S3.identity()) == (
+                    Wedge(atom_a, atom_b).normalize()
+                )
+                # compose with second K == ZeroK produces ZeroK (rotate(0, g) = 0,
+                # Wedge(k, 0).normalize() = 0)
+                assert compose(atom_a, ZeroK(), g_swap) == ZeroK()
+                # Atoms invariant under the composition is the UNION of
+                # atoms of both inputs (rotation doesn't introduce atoms)
+                assert composed.atoms() == frozenset({atom_a, atom_b})
+
                 # Pool orbit bookkeeping: adding a Rotated K first
                 # ensures the base is present, then the Rotated row
                 # has orbit_id == base's orbit_id and orbit_parent
@@ -3787,9 +3855,9 @@ def _smoke_test() -> None:
                 # masks are (0, pool_size) shape — trivially equal.
                 assert iso_state.sigma_derivable_from_tau
 
-                print(f"    Stage 7.0.13: Rotated(base, perm) K + swap/rotate "
-                      f"helpers; Pool.with_k propagates orbit_id (root) + "
-                      f"orbit_parent (immediate); Tier 2 scaffolding only")
+                print(f"    Stage 7.0.13: Rotated(base, perm) K + swap / rotate "
+                      f"/ compose helpers; Pool.with_k propagates orbit_id "
+                      f"(root) + orbit_parent (immediate); Tier 2 scaffolding")
 
                 # -- Stage 5 + 5.5: step() -----------------------------
                 # Run one step on the extracted state with a small
