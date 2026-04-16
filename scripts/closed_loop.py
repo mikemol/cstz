@@ -32,6 +32,7 @@ import math
 import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from functools import partial
 from pathlib import Path
 from typing import Iterator, NewType, Protocol, Tuple
 
@@ -2024,165 +2025,264 @@ def _count_four_cell(state: "State", k_i: "K", k_j: "K",
 
 
 # -- Default scorers (structural dataclass classes + singletons) ----------
+#
+# Under l-scorer-as-shape-contract (enacted Stage 7.0.10), a scorer
+# factors into two orthogonal structural pieces:
+#
+#   - A CellExtractor: (state, i, j, firing_bitmaps?) → count-tensor.
+#     Chooses WHICH cells of the joint (K_i, K_j) firing distribution
+#     to materialize and over which domain (things vs oracle pairs).
+#
+#   - A Reducer: count-tensor → scalar.  Maps the cells into a scalar
+#     score via an aggregation (sum, log-product, entropy, cell-select).
+#
+# The scorer is a composition: CellScorer(cells, reduce).  A new scorer
+# is a new binding, not a new class.  The 5 original scorer classes
+# collapse to 5 singleton compositions over 2 extractors × 4 reducers.
 
 
 @dataclass(frozen=True)
-class XorOffDiagonalScorer:
-    """Score = n_01 + n_10 (count of things where exactly one K fires).
+class CellExtractor(ABC):
+    """Extract a count-tensor of cells from a State for a K-pair (i, j).
 
-    Principled default per p-four-cell-xor-score.  Units: counts.
-    Only off-diagonal cells contribute; gap-gap (n_00) and both-fire
-    (n_11) contribute zero.
+    Subclasses:
+      - ``ThingsFourCell``    → Int[Array, '2 2'] indexed [fires_i, fires_j]
+      - ``OracleSixteenCell`` → Int[Array, '2 2 2 2'] indexed [a_i, a_j, b_i, b_j]
+
+    The ``structure`` property carries intensional identity so the
+    extractor survives trajectory logging + composite structure
+    recursion per p-functions-have-structural-identity.
+    """
+
+    @abstractmethod
+    def __call__(
+        self, state: "State", i: int, j: int,
+        *, firing_bitmaps: np.ndarray | None = None,
+    ) -> np.ndarray: ...
+
+    @property
+    @abstractmethod
+    def structure(self) -> tuple: ...
+
+
+@dataclass(frozen=True)
+class ThingsFourCell(CellExtractor):
+    """4-cell joint firing distribution over things for a K-pair (i, j).
+
+    Returns Int[Array, '2 2'] where ``cells[fires_i, fires_j]`` = count
+    of things whose τ-mask has that (K_i, K_j) profile.  Matches the
+    semantics of the pre-7.0.10 ``_count_four_cell``:
+    ``(n_00, n_01, n_10, n_11) = (cells[0,0], cells[0,1], cells[1,0], cells[1,1])``.
+    """
+
+    def __call__(
+        self, state: "State", i: int, j: int,
+        *, firing_bitmaps: np.ndarray | None = None,
+    ) -> np.ndarray:
+        n_00, n_01, n_10, n_11 = _count_four_cell(
+            state, state.pool.ks[i], state.pool.ks[j],
+            firing_bitmaps=firing_bitmaps,
+        )
+        return np.array([[n_00, n_01], [n_10, n_11]], dtype=np.int64)
+
+    @property
+    def structure(self) -> tuple:
+        return ("things_four_cell",)
+
+
+@dataclass(frozen=True)
+class OracleSixteenCell(CellExtractor):
+    """16-cell joint distribution over ordered oracle pairs (A, B).
+
+    Returns Int[Array, '2 2 2 2'] where
+    ``cells[a_i, a_j, b_i, b_j]`` = count of oracle pairs whose τ-mask
+    has that joint profile.  A = pair[0] (min id by construction),
+    B = pair[1] (max id) per the l-oracle-pairs-as-index-array
+    ordering invariant.  firing_bitmaps is ignored — oracle scoring
+    indexes state.tau_masks directly.
+    """
+
+    def __call__(
+        self, state: "State", i: int, j: int,
+        *, firing_bitmaps: np.ndarray | None = None,
+    ) -> np.ndarray:
+        del firing_bitmaps  # oracle path indexes tau_masks directly
+        pairs = state.oracle_pair_indices
+        if len(pairs) == 0:
+            return np.zeros((2, 2, 2, 2), dtype=np.int64)
+        a_i = state.tau_masks[pairs[:, 0], i].astype(np.int64)
+        a_j = state.tau_masks[pairs[:, 0], j].astype(np.int64)
+        b_i = state.tau_masks[pairs[:, 1], i].astype(np.int64)
+        b_j = state.tau_masks[pairs[:, 1], j].astype(np.int64)
+        flat = (a_i << 3) | (a_j << 2) | (b_i << 1) | b_j
+        counts = np.bincount(flat, minlength=16).reshape((2, 2, 2, 2))
+        return counts.astype(np.int64)
+
+    @property
+    def structure(self) -> tuple:
+        return ("oracle_sixteen_cell",)
+
+
+@dataclass(frozen=True)
+class Reducer(ABC):
+    """Map a count-tensor of cells into a scalar score.
+
+    Each concrete Reducer declares which cell-tensor shape it expects;
+    calling with a mismatched shape is a bug at the composition site,
+    not at runtime — composition is the point where the shape contract
+    binds.
+    """
+
+    @abstractmethod
+    def __call__(self, cells: np.ndarray) -> float: ...
+
+    @property
+    @abstractmethod
+    def structure(self) -> tuple: ...
+
+
+@dataclass(frozen=True)
+class SumOffDiagonal(Reducer):
+    """Sum of off-diagonal cells on a 2×2 cell tensor: ``cells[0,1] + cells[1,0]``.
+
+    Principled XOR-earning score per p-four-cell-xor-score; only the
+    asymmetric cells contribute.  Units: counts.
     """
     units: str = "count"
 
-    def __call__(self, state: "State", k_left: "K", k_right: "K",
-                 *, firing_bitmaps: np.ndarray | None = None
-                 ) -> ScoreValue:
-        _, n_01, n_10, _ = _count_four_cell(
-            state, k_left, k_right, firing_bitmaps=firing_bitmaps
-        )
-        return ScoreValue(float(n_01 + n_10))
+    def __call__(self, cells: np.ndarray) -> float:
+        return float(int(cells[0, 1]) + int(cells[1, 0]))
 
     @property
     def structure(self) -> tuple:
-        return ("scorer", "xor_off_diagonal")
+        return ("sum_off_diagonal",)
 
 
 @dataclass(frozen=True)
-class XorOffDiagonalLogPairScorer:
-    """Score = log(n_01) + log(n_10) when BOTH off-diagonals populated,
-    else 0.  Rewards K-pairs whose asymmetric cells are BOTH well-
-    populated (p-boolean-earned-by-both-off-diagonals), rather than
-    just summing off-diagonals indifferently.  Units: nats (ln)."""
+class LogProductOffDiagonal(Reducer):
+    """Log-product of off-diagonals on a 2×2 cell tensor: ``log(c[0,1]) + log(c[1,0])``.
+
+    Rewards K-pairs whose asymmetric cells are BOTH well-populated
+    (p-boolean-earned-by-both-off-diagonals) rather than summing
+    indifferently.  Returns 0 when either off-diagonal is empty.
+    Units: nats.
+    """
     units: str = "nats"
 
-    def __call__(self, state: "State", k_left: "K", k_right: "K",
-                 *, firing_bitmaps: np.ndarray | None = None
-                 ) -> ScoreValue:
-        _, n_01, n_10, _ = _count_four_cell(
-            state, k_left, k_right, firing_bitmaps=firing_bitmaps
-        )
-        if n_01 == 0 or n_10 == 0:
-            return ScoreValue(0.0)
-        return ScoreValue(math.log(n_01) + math.log(n_10))
+    def __call__(self, cells: np.ndarray) -> float:
+        c01 = int(cells[0, 1])
+        c10 = int(cells[1, 0])
+        if c01 == 0 or c10 == 0:
+            return 0.0
+        return math.log(c01) + math.log(c10)
 
     @property
     def structure(self) -> tuple:
-        return ("scorer", "xor_off_diagonal_log_pair")
+        return ("log_product_off_diagonal",)
 
 
 @dataclass(frozen=True)
-class EntropyOfFourCellScorer:
-    """Shannon entropy (bits) of the 4-cell CATEGORICAL distribution
-    including gap-gap and both-fire cells.  DIAGNOSTIC statistic only:
-    conflates gap with overlap and is NOT principled for articulation
-    ranking (see p-four-cell-xor-score).  Retained for characterization
-    and debugging.  Units: bits.
+class ShannonEntropy(Reducer):
+    """Shannon entropy (bits) of the flattened cell distribution.
+
+    DIAGNOSTIC: operates on any cell-tensor shape; flattens, normalizes,
+    -Σ p·log2(p).  Conflates gap/overlap — not principled for
+    articulation ranking (see p-four-cell-xor-score).  Units: bits.
     """
     units: str = "bits"
 
-    def __call__(self, state: "State", k_left: "K", k_right: "K",
-                 *, firing_bitmaps: np.ndarray | None = None
-                 ) -> ScoreValue:
-        cells = _count_four_cell(
-            state, k_left, k_right, firing_bitmaps=firing_bitmaps
-        )
-        total = sum(cells)
+    def __call__(self, cells: np.ndarray) -> float:
+        flat = cells.ravel().astype(np.int64)
+        total = int(flat.sum())
         if total == 0:
-            return ScoreValue(0.0)
+            return 0.0
         ent = 0.0
-        for n in cells:
-            if n > 0:
-                p = n / total
+        for n in flat:
+            n_int = int(n)
+            if n_int > 0:
+                p = n_int / total
                 ent -= p * math.log2(p)
-        return ScoreValue(ent)
+        return ent
 
     @property
     def structure(self) -> tuple:
-        return ("scorer", "entropy_of_four_cell")
+        return ("shannon_entropy",)
 
 
 @dataclass(frozen=True)
-class OracleBooleanWitnessTauSigmaScorer:
-    """Count oracle thing-pairs (A, B) where A occupies (K_left=1,
-    K_right=0) and B occupies (K_left=0, K_right=1) — the τ-σ
-    orientation of the Boolean-earning witness pattern.
+class SelectCell(Reducer):
+    """Return a single cell's count as the score.
 
-    Splitting by orientation per p-tau-sigma-not-opposite: the two
-    orientations are distinct discriminative patterns.  Collapsing
-    them (as Stage 4.5's combined scorer did) was acceptable under
-    p-chirality-only-for-higher-valence but forecloses
-    chirality-sensitive analysis at higher grades.  Units: counts.
+    ``idx`` is a tuple matching the cell tensor's rank.  For the
+    16-cell oracle extractor, ``idx = (a_i, a_j, b_i, b_j)``.  Units:
+    counts.
     """
+    idx: Tuple[int, ...] = ()
     units: str = "count"
 
-    def __call__(self, state: "State", k_left: "K", k_right: "K",
-                 *, firing_bitmaps: np.ndarray | None = None
-                 ) -> ScoreValue:
-        del firing_bitmaps  # unused; vectorized via oracle_pair_indices
-        idx_i = state.pool.bit_of(k_left)
-        idx_j = state.pool.bit_of(k_right)
-        if idx_i is None or idx_j is None:
-            return ScoreValue(0.0)
-        pairs = state.oracle_pair_indices
-        if len(pairs) == 0:
-            return ScoreValue(0.0)
-        # Pair orientation: (a_idx, b_idx) = (min, max) by construction,
-        # so "A" = row at pairs[:,0] and "B" = row at pairs[:,1].
-        a_i = state.tau_masks[pairs[:, 0], idx_i]
-        a_j = state.tau_masks[pairs[:, 0], idx_j]
-        b_i = state.tau_masks[pairs[:, 1], idx_i]
-        b_j = state.tau_masks[pairs[:, 1], idx_j]
-        # τ-σ orientation: A=(1,0), B=(0,1)
-        hits = a_i & ~a_j & ~b_i & b_j
-        return ScoreValue(float(int(hits.sum())))
+    def __call__(self, cells: np.ndarray) -> float:
+        return float(int(cells[self.idx]))
 
     @property
     def structure(self) -> tuple:
-        return ("scorer", "oracle_boolean_witness_tau_sigma")
+        return ("select_cell", self.idx)
 
 
 @dataclass(frozen=True)
-class OracleBooleanWitnessSigmaTauScorer:
-    """Count oracle thing-pairs (A, B) where A occupies (K_left=0,
-    K_right=1) and B occupies (K_left=1, K_right=0) — the σ-τ
-    orientation, the opposite chirality from
-    OracleBooleanWitnessTauSigmaScorer.  Units: counts.
-    """
-    units: str = "count"
+class CellScorer:
+    """A scorer = (cell extractor, reducer).
 
-    def __call__(self, state: "State", k_left: "K", k_right: "K",
-                 *, firing_bitmaps: np.ndarray | None = None
-                 ) -> ScoreValue:
-        del firing_bitmaps  # unused; vectorized via oracle_pair_indices
-        idx_i = state.pool.bit_of(k_left)
-        idx_j = state.pool.bit_of(k_right)
-        if idx_i is None or idx_j is None:
+    Composition captures the two axes along which the original 5
+    scorer classes varied: WHICH cells to extract (over-things vs
+    over-oracle-pairs) and HOW to reduce them (sum off-diagonals,
+    log-product, entropy, single-cell select).  New scorers are
+    new bindings, not new classes.
+
+    Public signature preserved from the pre-7.0.10 protocol:
+    ``__call__(state, k_left, k_right, *, firing_bitmaps=None) → ScoreValue``.
+    The internal tensor signature (state → cells → scalar) is the
+    shape contract; the K-object-bearing outer signature dispatches
+    to it.
+    """
+
+    cells: CellExtractor
+    reduce: Reducer
+
+    def __call__(
+        self, state: "State", k_left: "K", k_right: "K",
+        *, firing_bitmaps: np.ndarray | None = None,
+    ) -> ScoreValue:
+        i = state.pool.bit_of(k_left)
+        j = state.pool.bit_of(k_right)
+        if i is None or j is None:
             return ScoreValue(0.0)
-        pairs = state.oracle_pair_indices
-        if len(pairs) == 0:
-            return ScoreValue(0.0)
-        a_i = state.tau_masks[pairs[:, 0], idx_i]
-        a_j = state.tau_masks[pairs[:, 0], idx_j]
-        b_i = state.tau_masks[pairs[:, 1], idx_i]
-        b_j = state.tau_masks[pairs[:, 1], idx_j]
-        # σ-τ orientation: A=(0,1), B=(1,0)
-        hits = ~a_i & a_j & b_i & ~b_j
-        return ScoreValue(float(int(hits.sum())))
+        cell_counts = self.cells(state, i, j, firing_bitmaps=firing_bitmaps)
+        return ScoreValue(float(self.reduce(cell_counts)))
 
     @property
     def structure(self) -> tuple:
-        return ("scorer", "oracle_boolean_witness_sigma_tau")
+        return ("scorer", "cell_scorer", self.cells.structure, self.reduce.structure)
 
 
-# Singletons for call-site continuity with prior stages' function names
-scorer_xor_off_diagonal = XorOffDiagonalScorer()
-scorer_xor_off_diagonal_log_pair = XorOffDiagonalLogPairScorer()
-scorer_boolean_earning_corpus = scorer_xor_off_diagonal_log_pair  # alias
-scorer_entropy_of_four_cell = EntropyOfFourCellScorer()
-scorer_oracle_boolean_witness_tau_sigma = OracleBooleanWitnessTauSigmaScorer()
-scorer_oracle_boolean_witness_sigma_tau = OracleBooleanWitnessSigmaTauScorer()
+# -- Singletons re-expressed as curried CellScorer compositions -----------
+#
+# Currying binds the domain (which cells to extract) as a partial;
+# reducers close the composition.  Reads "<reducer> on <domain>".
+# The two partials are themselves first-class values — composable
+# across modules, introspectable as functools.partial instances.
+
+
+on_things       = partial(CellScorer, ThingsFourCell())
+on_oracle_pairs = partial(CellScorer, OracleSixteenCell())
+
+
+scorer_xor_off_diagonal          = on_things(SumOffDiagonal())
+scorer_xor_off_diagonal_log_pair = on_things(LogProductOffDiagonal())
+scorer_boolean_earning_corpus    = scorer_xor_off_diagonal_log_pair  # alias
+scorer_entropy_of_four_cell      = on_things(ShannonEntropy())
+
+scorer_oracle_boolean_witness_tau_sigma = on_oracle_pairs(SelectCell(idx=(1, 0, 0, 1)))
+scorer_oracle_boolean_witness_sigma_tau = on_oracle_pairs(SelectCell(idx=(0, 1, 1, 0)))
 
 
 # -- Default objectives (structural dataclass classes + singletons) -------
@@ -3239,9 +3339,14 @@ def _smoke_test() -> None:
                 cs_struct = cs.structure
                 assert cs_struct[0] == "composite_scorer"
                 assert len(cs_struct[1]) == 2  # two components
-                # Each component structure is preserved
+                # Each component structure is preserved under the
+                # Stage 7.0.10 CellScorer factoring: structure is
+                # ("scorer", "cell_scorer", cells.structure, reduce.structure).
                 assert cs_struct[1][0][0] == 0.5
-                assert cs_struct[1][0][1] == ("scorer", "xor_off_diagonal")
+                assert cs_struct[1][0][1] == (
+                    "scorer", "cell_scorer",
+                    ("things_four_cell",), ("sum_off_diagonal",),
+                )
 
                 # Stage 4.6: split orientation scorers — τ-σ and σ-τ are
                 # distinct per p-tau-sigma-not-opposite.  Their counts
@@ -3270,8 +3375,23 @@ def _smoke_test() -> None:
                 d = {scorer_xor_off_diagonal: "principled"}
                 assert d[scorer_xor_off_diagonal] == "principled"
 
+                # Stage 7.0.10: CellScorer factoring is verified by
+                # constructing a FRESH composition and checking bit-
+                # identical output against the singleton.  Ensures the
+                # (cells, reduce) decomposition is the whole identity —
+                # no hidden state in the singleton.
+                fresh = CellScorer(ThingsFourCell(), SumOffDiagonal())
+                assert fresh(state, k_i, k_j) == scorer_xor_off_diagonal(state, k_i, k_j)
+                fresh_oracle = CellScorer(OracleSixteenCell(), SelectCell(idx=(1, 0, 0, 1)))
+                assert fresh_oracle(state, k_i, k_j) == scorer_oracle_boolean_witness_tau_sigma(state, k_i, k_j)
+                # Structure tuples match between fresh and singleton
+                assert fresh.structure == scorer_xor_off_diagonal.structure
+
                 print(f"    Stage 4 + 4.5 + 4.6 scorers/objectives: structural "
                       f"identity + orientation-split verified on extracted state")
+                print(f"    Stage 7.0.10: CellScorer(cells, reduce) factoring "
+                      f"reproduces singletons bit-identically "
+                      f"(5 classes → 1 class × 2 extractors × 4 reducers)")
 
                 # -- Stage 5 + 5.5: step() -----------------------------
                 # Run one step on the extracted state with a small
@@ -3615,7 +3735,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.0.9 smoke test (trajectory as structured-dtype array + aux; Thing docstring post-7.0.7b): all assertions passed")
+    print("Stage 1–7.0.10 smoke test (CellScorer shape contract: 5 scorer classes → CellScorer(cells, reduce)): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
