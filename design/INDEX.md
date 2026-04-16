@@ -125,11 +125,13 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-type-theory-reframed-via-tensor-shape] p-type-theory-everywhere reframed: primary focus is tensor shape, not class shape
 - ● [c-weight-updater-becomes-new-k-articulation] WeightUpdater stub removed; weight updates reinterpreted as new-K articulation
 
-## Questions (6)
+## Questions (8)
 
 -   [q-atom-observational-tau-sigma] What do τ and σ observe for an atomic K on a thing?
+- ? [q-post-tier3-demand-criterion-for-rotated] Demand criterion for step() articulating Rotated K's
 - ✓ [q-report-format-for-belnap-distribution] How to present the full Belnap distribution as reports
 - ✓ [q-smoke-test-scale] What subset of the corpus is small enough for smoke testing?
+- ? [q-step-co-fire-enumeration-multi-channel] Should step()'s co-fire enumeration extend beyond τ-only?
 - ✓ [q-tau-sigma-wedge-combinator] Exact combinator for τ/σ of a grade-2 wedge
 - ✓ [q-wedge-articulation-signal] What distributional signal triggers wedge articulation?
 - ✓ [q-weight-gradient-direction] Direction of weight gradient if not 'reduce residue to zero'

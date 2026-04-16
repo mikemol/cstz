@@ -2918,6 +2918,22 @@ def _articulate_wedges_batch(
             kept_keys.append(w_key)
             kept_tau_firings.append(tau_w)
             kept_sig_firings.append(sig_w)
+        elif has_rotated:
+            # Grade-3+ wedges with Rotated leaves: the recursive grade-k
+            # cross-term formula isn't implemented in Tier 3 minimum.
+            # Falling back to AND semantics would silently produce WRONG
+            # arithmetic (wedge.atoms() recurses through Rotated to the
+            # base, conflating rotate(X, g) with X in the product).
+            # Raise loudly so any future code path that proposes such a
+            # wedge fails visibly rather than computing nonsense.  See
+            # c-stage-7-1-2-tier3-asymmetric-regime-activation's
+            # deferred-to-future-stage note and the corresponding
+            # post-Tier-3 planning question in the SPPF.
+            raise NotImplementedError(
+                f"grade-{len(leaves)} wedge with Rotated leaves: "
+                f"recursive general-combinator formula not implemented "
+                f"(Tier 3 minimum only covers grade-2). wedge.key()={w_key!r}"
+            )
         else:
             # AND-of-parents path.  For all-non-Rotated wedges, leaves
             # are atoms and atoms() gives the same set.  τ = σ = AND.
