@@ -1966,56 +1966,47 @@ def joint_already_captured(state: "State", k_i: "K", k_j: "K") -> bool:
 # -- Primitive helpers for counting K-firings across things ----------------
 
 
-def _count_four_cell(state: "State", k_i: "K", k_j: "K",
-                     channel: str = "tau",
+def _count_four_cell(state: "State", i: int, j: int,
+                     *,
                      firing_bitmaps: np.ndarray | None = None,
+                     channel: str = "tau",
                      ) -> Tuple[int, int, int, int]:
     """Return (n_00, n_01, n_10, n_11): counts of things in each cell of
-    the 2×2 (K_i, K_j) joint firing distribution on the given channel.
+    the 2×2 (bit i, bit j) joint firing distribution on the given channel.
+
+    Signature takes bit INDICES (not K objects) under the Stage 7.0.11
+    tensor-native revision (l-scorer-as-shape-contract).  Caller
+    resolves K → bit via pool.bit_of() once, upstream.  Bit indices
+    are assumed valid (< pool_size); the caller's Protocol-level
+    guard handles the missing-K case.
 
     Two paths, same result:
 
     * Fast path (``firing_bitmaps`` provided): slice two rows of the
-      precomputed [pool_size, n_things] bool matrix and run 3 numpy
-      ops (AND, AND-NOT, SUM).  O(n_things / SIMD_width) per call.
-      Used when step() or a batched scorer has precomputed
-      firing_bitmaps at entry and wants to amortize the per-K row
-      extraction across many scorer calls.
+      precomputed [pool_size, n_things] bool matrix.  O(n_things /
+      SIMD_width) per call.  Used from step()'s hot loop where
+      firing_bitmaps is the .T view on state.tau_masks (post-7.0.7b).
 
-    * Slow path (``firing_bitmaps`` is None): build per-thing
-      fires_i / fires_j arrays from the per-thing masks one-by-one.
-      O(n_things) per call.  Used when a scorer is called in
-      isolation outside step() (diagnostic / ad-hoc queries).
+    * Slow path (``firing_bitmaps`` is None): slice two columns of
+      state.tau_masks directly — O(1) view, no iteration, no Thing
+      reconstruction.  Stage 7.0.11 replaced the pre-7.0.7b loop
+      over ``state.things`` which under the parallel-array State was
+      rebuilding n_things Thing objects with per-row mask copies.
 
     Under d-tau-sigma-symmetric-at-grade-1 and atoms with τ=σ, the
     ``tau`` and ``sigma`` channels produce identical counts at grade 1.
     """
-    idx_i = state.pool.bit_of(k_i)
-    idx_j = state.pool.bit_of(k_j)
-    if idx_i is None or idx_j is None:
-        return (0, 0, 0, 0)
-
     if firing_bitmaps is not None:
-        # Fast path: firing_bitmaps is [pool_size, n_things] bool
-        if (idx_i >= firing_bitmaps.shape[0]
-                or idx_j >= firing_bitmaps.shape[0]):
+        if i >= firing_bitmaps.shape[0] or j >= firing_bitmaps.shape[0]:
             return (0, 0, 0, 0)
-        fires_i = firing_bitmaps[idx_i]
-        fires_j = firing_bitmaps[idx_j]
+        fires_i = firing_bitmaps[i]
+        fires_j = firing_bitmaps[j]
     else:
-        # Slow path: build arrays from per-thing masks
-        fires_i_list = []
-        fires_j_list = []
-        for _tid, thing in state.things:
-            mask = thing.tau_mask if channel == "tau" else thing.sigma_mask
-            fires_i_list.append(
-                bool(mask[idx_i]) if idx_i < len(mask) else False
-            )
-            fires_j_list.append(
-                bool(mask[idx_j]) if idx_j < len(mask) else False
-            )
-        fires_i = np.asarray(fires_i_list, dtype=bool)
-        fires_j = np.asarray(fires_j_list, dtype=bool)
+        mat = state.tau_masks if channel == "tau" else state.sigma_masks
+        if i >= mat.shape[1] or j >= mat.shape[1]:
+            return (0, 0, 0, 0)
+        fires_i = mat[:, i]
+        fires_j = mat[:, j]
 
     n_11 = int(np.sum(fires_i & fires_j))
     n_10 = int(np.sum(fires_i & ~fires_j))
@@ -2080,8 +2071,7 @@ class ThingsFourCell(CellExtractor):
         *, firing_bitmaps: np.ndarray | None = None,
     ) -> np.ndarray:
         n_00, n_01, n_10, n_11 = _count_four_cell(
-            state, state.pool.ks[i], state.pool.ks[j],
-            firing_bitmaps=firing_bitmaps,
+            state, i, j, firing_bitmaps=firing_bitmaps,
         )
         return np.array([[n_00, n_01], [n_10, n_11]], dtype=np.int64)
 
@@ -3228,8 +3218,10 @@ def _smoke_test() -> None:
                 # gives 0 (the distribution collapses to a single cell
                 # by p-extensionality-via-hit: Wedge(k,k) normalizes
                 # to ZeroK, which has no firing).  Instead, test on
-                # same-K cells directly via _count_four_cell.
-                cells_self = _count_four_cell(state, k_i, k_i)
+                # same-K cells directly via _count_four_cell (int
+                # signature per Stage 7.0.11).
+                i_bit = state.pool.bit_of(k_i)
+                cells_self = _count_four_cell(state, i_bit, i_bit)
                 # A K paired with itself: (0,1) and (1,0) cells are
                 # both empty — thing either fires K or not, but can't
                 # be asymmetric with itself.
@@ -3278,7 +3270,9 @@ def _smoke_test() -> None:
                     f"(got {self_score})"
                 )
                 # xor_off_diagonal score equals n_01 + n_10 by construction
-                n00, n01, n10, n11 = _count_four_cell(state, k_i, k_j)
+                i_bit = state.pool.bit_of(k_i)
+                j_bit = state.pool.bit_of(k_j)
+                n00, n01, n10, n11 = _count_four_cell(state, i_bit, j_bit)
                 expected_xor = float(n01 + n10)
                 got_xor = scorer_xor_off_diagonal(state, k_i, k_j)
                 assert abs(got_xor - expected_xor) < 1e-9, (
@@ -3392,6 +3386,9 @@ def _smoke_test() -> None:
                 print(f"    Stage 7.0.10: CellScorer(cells, reduce) factoring "
                       f"reproduces singletons bit-identically "
                       f"(5 classes → 1 class × 2 extractors × 4 reducers)")
+                print(f"    Stage 7.0.11: _count_four_cell(state, i:int, j:int) "
+                      f"vectorized off state.tau_masks — no state.things "
+                      f"iteration, no Thing reconstruction on the slow path")
 
                 # -- Stage 5 + 5.5: step() -----------------------------
                 # Run one step on the extracted state with a small
@@ -3634,13 +3631,28 @@ def _smoke_test() -> None:
                 # Pick two atoms that both fire on at least one thing
                 k_a = k_src_candidates[0]
                 k_b = k_kind_candidates[0]
-                slow = _count_four_cell(sample_things, k_a, k_b)
+                a_bit = sample_things.pool.bit_of(k_a)
+                b_bit = sample_things.pool.bit_of(k_b)
+                slow = _count_four_cell(sample_things, a_bit, b_bit)
                 fast = _count_four_cell(
-                    sample_things, k_a, k_b,
+                    sample_things, a_bit, b_bit,
                     firing_bitmaps=sample_bitmaps,
                 )
                 assert slow == fast, (
                     f"fast-path cell counts {fast} disagree with slow {slow}"
+                )
+                # Stage 7.0.11: slow path reads state.tau_masks columns
+                # directly — no state.things iteration, no Thing
+                # reconstruction.  Verify against a direct tau_masks
+                # reference computation.
+                ref_i = sample_things.tau_masks[:, a_bit]
+                ref_j = sample_things.tau_masks[:, b_bit]
+                ref_n_11 = int(np.sum(ref_i & ref_j))
+                ref_n_10 = int(np.sum(ref_i & ~ref_j))
+                ref_n_01 = int(np.sum(~ref_i & ref_j))
+                ref_n_00 = len(ref_i) - ref_n_11 - ref_n_10 - ref_n_01
+                assert slow == (ref_n_00, ref_n_01, ref_n_10, ref_n_11), (
+                    "Stage 7.0.11 slow path diverged from tau_masks slice"
                 )
 
                 # (2) Scorer fast path via firing_bitmaps kwarg.
@@ -3735,7 +3747,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.0.10 smoke test (CellScorer shape contract: 5 scorer classes → CellScorer(cells, reduce)): all assertions passed")
+    print("Stage 1–7.0.11 smoke test (_count_four_cell int signature + vectorized tau_masks slicing): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
