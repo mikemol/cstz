@@ -126,6 +126,19 @@ for Stage 10.  The original "append-only JSONL I/O" target is Stage
            _compute_firing_bitmaps shim retired.  Enacts
            l-oracle-pairs-as-index-array.  Resolves Stage 7 audit
            Severity 1 + 2.
+- 7.0.9  — trajectory is TRAJECTORY_DTYPE structured numpy array
+           (7 mandatory numeric fields) + parallel trajectory_aux
+           tuple-of-dicts for optional scorer/objective structural
+           identity.  run_to_fixed_point termination reads
+           trajectory[-1]['articulated_count'] as a typed field —
+           typos fail dtype validation instead of silently returning
+           .get() default.  Thing docstring rewritten to reflect its
+           post-7.0.7b value-type role (not primary storage).  New
+           principle p-set-algebra-and-tensor-reduction-use-distinct-
+           forms pins the emergent "authoritative + numpy cache"
+           pattern across Pool, State.thing_ids, State.oracle_pairs,
+           State.trajectory.  Enacts l-trajectory-as-structured-dtype-
+           array.  Resolves Stage 7 audit post-7.0.8 Severity 2.
 
 ### Stage 7.1 — hybrid JSONL + HDF5 I/O (PENDING)
 

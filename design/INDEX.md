@@ -6,7 +6,7 @@ Each node is a line in `design/<type>s.jsonl`.
 Use `python scripts/design_sppf.py show <id>` for full detail.
 Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 
-## Principles (35)
+## Principles (36)
 
 - ● [p-alignment-is-distribution] Alignment is a distribution, not a predicate
 - ● [p-arity-is-grade] Arity = grade; arity N is not tracked, it emerges
@@ -33,6 +33,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [p-probes-are-half-spaces] Probes define half-spaces over the thing-pool; quotienting projects to cells
 - ● [p-refactor-debt-paid-eagerly] Pay refactor debt eagerly when the direction is clear
 - ● [p-self-similarity] The framework is self-similar at every scale and grade
+- ● [p-set-algebra-and-tensor-reduction-use-distinct-forms] State components used in BOTH set-algebra AND tensor reduction carry both forms
 - ● [p-source-is-a-k] Source provenance is just another K
 - ● [p-sppf-holds-coexisting-readings] The SPPF holds multiple valid readings of the same operation
 - ● [p-storage-matches-data-shape] Storage format matches data shape: structured → text; bitmap → numpy/HDF5
@@ -73,7 +74,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [l-s3-as-axis-permutation] S3 action is a numpy axis permutation on a length-3 stacked tensor
 - ● [l-scorer-as-shape-contract] Scorer is a shape contract: (tsk: Bool[3, P], firing: Bool[P, N], i: int, j: int) -> Float[Array, '']
 - ▲ [l-state-things-as-parallel-arrays] State.things should become parallel arrays (ids + stacked masks) rather than dict-of-dataclasses
-- ● [l-trajectory-as-structured-dtype-array] Trajectory should become a structured-dtype numpy array, not a tuple of dicts
+- ▲ [l-trajectory-as-structured-dtype-array] Trajectory should become a structured-dtype numpy array, not a tuple of dicts
 
 ## Rejecteds (8)
 
@@ -86,7 +87,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (21)
+## Corrections (22)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -105,6 +106,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-stage-7-0-6-unmaterialize-hash-and-signature] Stage 7.0.6: unmaterialize Thing._hash and replace signature()-based fixed-point with trajectory signal
 - ● [c-stage-7-0-7-three-lemma-bundle] Stage 7.0.7: Pool + State.things + hash-consing refactored to numpy-native shapes (three-lemma bundle)
 - ● [c-stage-7-0-8-oracle-indices-and-shim-cleanup] Stage 7.0.8: oracle_pair_indices + scorer vectorization + dead-code shims retired
+- ● [c-stage-7-0-9-trajectory-structured-dtype-and-thing-docstring] Stage 7.0.9: trajectory → structured-dtype array + aux; Thing docstring realigned with post-7.0.7b role
 - ● [c-stage-7-0-eager-numpy-refactor] Stage 7.0: eager numpy refactor of internal representation
 - ● [c-stage-7-1-hybrid-jsonl-hdf5-io] Stage 7.1: hybrid JSONL + HDF5 I/O with generator run()
 - ● [c-type-theory-reframed-via-tensor-shape] p-type-theory-everywhere reframed: primary focus is tensor shape, not class shape
