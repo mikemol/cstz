@@ -60,7 +60,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (7)
+## Corrections (8)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -68,6 +68,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-context-externalized-to-sppf] Session context externalized to design/ SPPF
 - ● [c-division-notation-is-matrix-cell] '/' in (σ/τ) is matrix-cell separator, not ratio
 - ● [c-lowercase-still-hardcoded] Lowercasing is hardcoded equivalence, not a generic transform
+- ● [c-metadata-was-a-smuggled-taxonomy] Metadata class was a smuggled taxonomy, removed in Stage 2.6
 - ● [c-question-resolution-via-maximal-freedom] Open questions resolve via maximal freedom, not specific picks
 
 ## Questions (6)

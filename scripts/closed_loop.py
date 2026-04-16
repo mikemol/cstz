@@ -464,11 +464,15 @@ class Thing:
     """A pooled object, identified solely by an opaque ThingId.
 
     The algebra sees ONLY the identity and the bitmaps.  Under
-    ``p-source-is-a-k``, source provenance is not a privileged field
-    of Thing — it is an observable K registered in the Pool.  Same
-    for display names, paths, line numbers, and anything else that
-    is "reporting metadata".  Those live in a separate ``Metadata``
-    struct carried alongside State but not inside it.
+    ``p-source-is-a-k`` and ``p-no-bespoke-recognition``, source
+    provenance is not a privileged field of Thing — it is an
+    observable K registered in the Pool.  Same for display names,
+    paths, line numbers, and anything else an extractor might want
+    to surface.  There is no "metadata" category: every observable
+    is a K; reports are queries over the pool + bitmaps.  A report
+    that wants to show "source path" filters for K's whose keys
+    match its chosen convention (e.g. prefix ``source:``) — but
+    that's a REPORTER choice, not a framework taxonomy.
 
     ``tau_mask`` and ``sigma_mask`` are bitmaps over the Pool: bit i
     set iff the K at pool position i fires on this thing in the
@@ -527,32 +531,6 @@ class Thing:
 
 
 # ---------------------------------------------------------------------------
-# Metadata — strictly informational, never inspected by the algebra
-# ---------------------------------------------------------------------------
-
-
-@dataclass(frozen=True)
-class Metadata:
-    """Reporting-only metadata for a Thing.
-
-    Kept separate from ``Thing`` so the algebra cannot accidentally
-    privilege source-of-origin, display names, or file paths as
-    structural features (``p-source-is-a-k``).  State carries a
-    dict of ThingId → Metadata alongside (not inside) its things
-    table; step() and merge() do not read or mutate metadata.
-
-    Extractors may populate whatever fields they find useful for
-    humans reading reports; the framework commits only to not
-    looking at them.
-    """
-
-    display: str = ""        # human-readable label
-    source_path: str = ""    # file path
-    line: int = 0            # source line
-    extra: Tuple[Tuple[str, str], ...] = ()  # arbitrary key/value strings
-
-
-# ---------------------------------------------------------------------------
 # State — the closed-loop state (Stage 2)
 # ---------------------------------------------------------------------------
 
@@ -582,7 +560,6 @@ class State:
     things: Tuple[Tuple[ThingId, Thing], ...] = ()       # sorted-by-id for hashability
     oracle_pairs: frozenset = frozenset()                # frozenset[frozenset[ThingId]]
     weights: Tuple[Tuple[KKey, float], ...] = ()         # sorted-by-key for hashability
-    metadata: Tuple[Tuple[ThingId, Metadata], ...] = ()  # sorted-by-id; informational only
     trajectory: Tuple = ()
     iteration: int = 0
 
@@ -590,9 +567,6 @@ class State:
 
     def things_dict(self) -> dict:
         return dict(self.things)
-
-    def metadata_dict(self) -> dict:
-        return dict(self.metadata)
 
     def weights_dict(self) -> dict:
         return dict(self.weights)
@@ -604,30 +578,17 @@ class State:
                 return w
         return default
 
-    def metadata_of(self, thing_id: ThingId) -> Metadata:
-        for tid, md in self.metadata:
-            if tid == thing_id:
-                return md
-        return Metadata()
-
     # -- constructors -------------------------------------------------------
 
-    def with_thing(self, thing: Thing, metadata: Metadata | None = None) -> "State":
-        """Add or replace a thing by id.  Optionally set metadata."""
+    def with_thing(self, thing: Thing) -> "State":
+        """Add or replace a thing by id."""
         others = tuple((i, t) for i, t in self.things if i != thing.id)
         new_things = tuple(sorted(others + ((thing.id, thing),), key=lambda kv: kv[0]))
-        new_metadata = self.metadata
-        if metadata is not None:
-            md_others = tuple((i, m) for i, m in self.metadata if i != thing.id)
-            new_metadata = tuple(
-                sorted(md_others + ((thing.id, metadata),), key=lambda kv: kv[0])
-            )
         return State(
             pool=self.pool,
             things=new_things,
             oracle_pairs=self.oracle_pairs,
             weights=self.weights,
-            metadata=new_metadata,
             trajectory=self.trajectory,
             iteration=self.iteration,
         )
@@ -638,7 +599,6 @@ class State:
             things=self.things,
             oracle_pairs=self.oracle_pairs,
             weights=self.weights,
-            metadata=self.metadata,
             trajectory=self.trajectory,
             iteration=self.iteration,
         )
@@ -651,7 +611,6 @@ class State:
             things=self.things,
             oracle_pairs=self.oracle_pairs,
             weights=new,
-            metadata=self.metadata,
             trajectory=self.trajectory,
             iteration=self.iteration,
         )
@@ -662,7 +621,6 @@ class State:
             things=self.things,
             oracle_pairs=self.oracle_pairs,
             weights=self.weights,
-            metadata=self.metadata,
             trajectory=self.trajectory + (entry,),
             iteration=self.iteration + 1,
         )
@@ -684,8 +642,6 @@ class State:
           raise ValueError.
         - Weights: averaged on key collision.
         - Oracle pairs: set-unioned.
-        - Metadata: union by ThingId; collision takes self's value
-          (not averaged; metadata is informational).
         - Trajectory: concatenated and sorted by iteration key.
 
         Divergent-pool merge (other.pool has K's self.pool doesn't,
@@ -735,12 +691,6 @@ class State:
             else:
                 ws[k] = w
 
-        # Metadata: union; collision → self wins (informational only)
-        md: dict = dict(self.metadata)
-        for tid, m in other.metadata:
-            if tid not in md:
-                md[tid] = m
-
         # Oracle: union
         oracle = self.oracle_pairs | other.oracle_pairs
 
@@ -757,7 +707,6 @@ class State:
             things=tuple(sorted(combined.items(), key=lambda kv: kv[0])),
             oracle_pairs=oracle,
             weights=tuple(sorted(ws.items(), key=lambda kv: kv[0])),
-            metadata=tuple(sorted(md.items(), key=lambda kv: kv[0])),
             trajectory=traj_combined,
             iteration=max(self.iteration, other.iteration),
         )
@@ -770,12 +719,11 @@ class State:
         """Return a sub-state containing only the requested things.
         Pool is preserved (K-pool doesn't partition naturally at this
         stage).  Oracle pairs restricted to those fully contained in
-        the requested thing-set.  Metadata restricted to kept things.
+        the requested thing-set.
         """
         if thing_ids is None:
             return self
         kept = tuple((i, t) for i, t in self.things if i in thing_ids)
-        kept_md = tuple((i, m) for i, m in self.metadata if i in thing_ids)
         kept_oracle = frozenset(
             p for p in self.oracle_pairs if all(x in thing_ids for x in p)
         )
@@ -784,7 +732,6 @@ class State:
             things=kept,
             oracle_pairs=kept_oracle,
             weights=self.weights,
-            metadata=kept_md,
             trajectory=self.trajectory,
             iteration=self.iteration,
         )
@@ -923,13 +870,13 @@ def _smoke_test() -> None:
     # Thing: κ_mask = τ_mask ⊕ σ_mask; Thing has ONLY id + bitmaps
     t = Thing(id=ThingId("x"), tau_mask=0b1010, sigma_mask=0b1100)
     assert t.kappa_mask == 0b0110
-    # Thing has no source_path/display/line (they live in Metadata)
+    # Thing has no source_path/display/line — every observable is a K.
+    # If an extractor wants source-path visible to reports, it registers
+    # an atomic K (e.g. Atom("source:paper/x.py")) that fires on this
+    # Thing's tau bitmap.  No privileged metadata category exists.
     assert not hasattr(t, "source_path"), "Thing should not carry source_path"
     assert not hasattr(t, "display"), "Thing should not carry display"
-
-    # Metadata is separate and informational only
-    md = Metadata(display="x (friendly name)", source_path="paper/section01.tex", line=42)
-    assert md.display == "x (friendly name)"
+    assert not hasattr(t, "line"), "Thing should not carry line"
 
     # tausigma_at reads correctly
     t2 = Thing(id=ThingId("y"), tau_mask=0b101, sigma_mask=0b011)
@@ -956,7 +903,7 @@ def _smoke_test() -> None:
     assert t2_remapped.tausigma_at(pool_rev, Atom(Observable("k1"))) == ts_at_1
     assert t2_remapped.tausigma_at(pool_rev, Atom(Observable("k2"))) == ts_at_2
 
-    # -- Stage 2 + 2.5: State merge / restrict / signature with Metadata ----
+    # -- Stage 2 + 2.5 + 2.6: State merge / restrict / signature ------------
 
     ak0 = Atom(Observable("k0"))
     ak1 = Atom(Observable("k1"))
@@ -965,12 +912,10 @@ def _smoke_test() -> None:
     pool_a = Pool().with_k(ak0).with_k(ak1)
     t1 = Thing(id=ThingId("A"), tau_mask=0b01, sigma_mask=0b01)
     t2 = Thing(id=ThingId("B"), tau_mask=0b10, sigma_mask=0b11)
-    md_a = Metadata(display="thing A", source_path="x.py")
     s1 = State(
         pool=pool_a,
         things=((ThingId("A"), t1),),
         weights=((ak0.key(), 1.5),),
-        metadata=((ThingId("A"), md_a),),
     )
 
     # Second state uses an extended pool (prefix-compatible)
@@ -986,11 +931,11 @@ def _smoke_test() -> None:
     m = s1.merge(s2)
     assert m.pool.size() == 3
     assert len(m.things) == 3
-    assert len(m.metadata) == 1, "metadata carried from s1"
-    assert m.metadata_of(ThingId("A")).display == "thing A"
     assert frozenset({ThingId("A"), ThingId("B")}) in m.oracle_pairs
     assert m.weight_of(ak0) == 1.5
     assert m.weight_of(ak1) == 2.0
+    # State has no metadata field
+    assert not hasattr(m, "metadata"), "State should not carry a metadata dict"
 
     # Merge idempotent
     assert m.merge(m).signature() == m.signature(), "merge not idempotent"
@@ -1007,11 +952,10 @@ def _smoke_test() -> None:
     sAB = sA.merge(sB)
     assert sAB.weight_of(ak0) == 2.0, "weight collision not averaged"
 
-    # Restrict: subset of things + pruned oracle + pruned metadata
+    # Restrict: subset of things + pruned oracle
     restricted = m.restrict(thing_ids=frozenset({ThingId("A")}))
     assert len(restricted.things) == 1
     assert len(restricted.oracle_pairs) == 0, "oracle with absent endpoint not pruned"
-    assert len(restricted.metadata) == 1, "metadata restricted to kept things"
 
     # Restrict preserving oracle
     restricted2 = m.restrict(thing_ids=frozenset({ThingId("A"), ThingId("B")}))
@@ -1073,18 +1017,19 @@ def _smoke_test() -> None:
                 == merged_rev.things_dict()[tid].fires(merged_rev.pool, k)
             ), f"divergent merge not order-invariant for K={k.key()} tid={tid}"
 
-    print("Stage 1 + 2 + 2.5 smoke test: all assertions passed")
+    print("Stage 1 + 2 + 2.5 + 2.6 smoke test: all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
     print(f"  K.atoms() returns typed frozenset[Atom] (not raw strings)")
     print(f"  Intensional Wedge.key() distinguishes construction order;")
     print(f"    extensional normalize().key() collapses equivalence class")
-    print(f"  Thing carries only identity + bitmaps; Metadata is separate")
+    print(f"  Thing = (id, τ_mask, σ_mask); no privileged metadata category")
+    print(f"  Every observable is a K; reports query the pool, not a metadata dict")
     print(f"  Pool append/merge idempotent; bit indices stable within shard")
     print(f"  State.merge associative, idempotent, handles DIVERGENT pools")
     print(f"    via Thing.remap (p-embarrassingly-parallel realized)")
-    print(f"  State.restrict prunes orphan oracle pairs and orphan metadata")
+    print(f"  State.restrict prunes orphan oracle pairs")
     print(f"  State.signature stable under trajectory append")
 
 
