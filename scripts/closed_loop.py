@@ -1243,6 +1243,260 @@ def extract_initial_state(
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# Stage 4 — Scorer and Objective protocols
+# ---------------------------------------------------------------------------
+#
+# Two pluggable-function types govern κ-evolution:
+#
+#   Scorer    (State, K, K) → float      — evaluates a candidate wedge
+#                                           K_i ∧ K_j; higher = more useful
+#   Objective (State) → float            — evaluates the current state;
+#                                           weights tune to maximize this
+#
+# Framework commits to the PROTOCOLS, not to specific picks
+# (d-articulation-scorer-pluggable, d-weight-objective-pluggable).
+# Step() (Stage 5) accepts lists of scorers and objectives, runs them,
+# combines their outputs.  Users can register new scorers/objectives
+# without touching the framework.
+#
+# Three default scorers cover the distinct readings of "useful wedge":
+#   - entropy_of_four_cell:   Shannon entropy of the K-pair's 4-cell
+#                              distribution across things (p-probes-are-
+#                              half-spaces — measures discrimination)
+#   - boolean_earning_corpus: both off-diagonal cells populated
+#                              (p-boolean-earned-by-both-off-diagonals)
+#   - oracle_boolean_witness: oracle thing-pairs discriminated
+#                              asymmetrically (d-oracle-calibrates-not-gates)
+#
+# Two default objectives:
+#   - oracle_pairs_with_witness: count of oracle pairs with any Boolean-
+#     earning K-pair witness (readable, not a gate)
+#   - pool_entropy_marginals:    sum of per-K marginal entropies; a
+#     total-information objective cheap enough to compute per step
+#
+# Composite scorer lets users combine defaults with weights, matching
+# "Multiple objectives can be evaluated per iteration; their gradients
+#  can be combined as weighted sums" from d-weight-objective-pluggable.
+
+from typing import Callable
+
+# Protocol types
+Scorer = Callable[["State", "K", "K"], float]
+Objective = Callable[["State"], float]
+
+
+# -- Primitive helpers for counting K-firings across things ----------------
+
+
+def _count_four_cell(state: "State", k_i: "K", k_j: "K",
+                     channel: str = "tau") -> Tuple[int, int, int, int]:
+    """Return (n_00, n_01, n_10, n_11): counts of things in each cell of
+    the 2×2 (K_i, K_j) joint firing distribution on the given channel.
+
+    Under d-tau-sigma-symmetric-at-grade-1 and atoms with τ=σ, the
+    ``tau`` and ``sigma`` channels produce identical counts at grade 1.
+    The parameter allows asymmetric analysis at higher grades."""
+    idx_i = state.pool.bit_of(k_i)
+    idx_j = state.pool.bit_of(k_j)
+    if idx_i is None or idx_j is None:
+        return (0, 0, 0, 0)
+    n = [0, 0, 0, 0]
+    for _tid, thing in state.things:
+        mask = thing.tau_mask if channel == "tau" else thing.sigma_mask
+        bi = (mask >> idx_i) & 1
+        bj = (mask >> idx_j) & 1
+        # Cell code: bit_i as high bit, bit_j as low bit
+        cell = (bi << 1) | bj
+        n[cell] += 1
+    return tuple(n)
+
+
+# -- Default scorers --------------------------------------------------------
+
+
+def scorer_entropy_of_four_cell(state: "State", k_i: "K", k_j: "K") -> float:
+    """Shannon entropy (bits) of the K-pair's 4-cell distribution.
+
+    Range: 0 (one cell holds all things) to 2 bits (uniform).  Higher
+    entropy = the K-pair carves the thing-pool more evenly into the
+    four cells, which (under p-probes-are-half-spaces) suggests
+    more compositional information content.
+    """
+    import math
+    cells = _count_four_cell(state, k_i, k_j)
+    total = sum(cells)
+    if total == 0:
+        return 0.0
+    ent = 0.0
+    for n in cells:
+        if n > 0:
+            p = n / total
+            ent -= p * math.log2(p)
+    return ent
+
+
+def scorer_boolean_earning_corpus(state: "State", k_i: "K", k_j: "K") -> float:
+    """Corpus-level Boolean-earning test (p-boolean-earned-by-both-off-
+    diagonals).  Returns log(n_01 · n_10) when both off-diagonal cells
+    are populated; 0 when either is empty (not Boolean-earning).
+
+    The logarithmic scaling rewards K-pairs whose asymmetric cells are
+    BOTH well-populated, over those where one off-diagonal dominates.
+    """
+    import math
+    _, n_01, n_10, _ = _count_four_cell(state, k_i, k_j)
+    if n_01 == 0 or n_10 == 0:
+        return 0.0
+    return math.log(n_01) + math.log(n_10)
+
+
+def scorer_oracle_boolean_witness(state: "State", k_i: "K", k_j: "K") -> float:
+    """Count oracle thing-pairs (A, B) that this K-pair Boolean-earns.
+
+    A thing-pair (A, B) is Boolean-earned by (K_i, K_j) iff one thing
+    fires K_i but not K_j AND the other fires K_j but not K_i — i.e.,
+    (A, B) occupy opposite off-diagonals of the K-pair's joint
+    distribution.  Either orientation counts.
+
+    This scorer directly measures the K-pair's usefulness for
+    discriminating oracle-aligned thing-pairs.  Under d-oracle-
+    calibrates-not-gates this is a signal, not a gate — it weights
+    articulation preference, not commit admission.
+    """
+    idx_i = state.pool.bit_of(k_i)
+    idx_j = state.pool.bit_of(k_j)
+    if idx_i is None or idx_j is None:
+        return 0.0
+    things_dict = dict(state.things)
+    count = 0
+    for pair in state.oracle_pairs:
+        if len(pair) != 2:
+            continue
+        a_id, b_id = list(pair)
+        a = things_dict.get(a_id)
+        b = things_dict.get(b_id)
+        if a is None or b is None:
+            continue
+        bi_a = (a.tau_mask >> idx_i) & 1
+        bj_a = (a.tau_mask >> idx_j) & 1
+        bi_b = (b.tau_mask >> idx_i) & 1
+        bj_b = (b.tau_mask >> idx_j) & 1
+        # Boolean-earning patterns: A=(1,0) B=(0,1) or A=(0,1) B=(1,0)
+        if (bi_a, bj_a, bi_b, bj_b) in {(1, 0, 0, 1), (0, 1, 1, 0)}:
+            count += 1
+    return float(count)
+
+
+# -- Default objectives -----------------------------------------------------
+
+
+def objective_oracle_pairs_with_witness(state: "State") -> float:
+    """Count oracle thing-pairs for which ANY K in the pool fires on
+    one thing but not the other.  This is a Boolean-earning existence
+    test against the pool's CURRENT discriminative power.
+
+    Under p-alignment-is-distribution this is an informational
+    read-out, not a commit threshold.  A pair with witness exists =
+    the pool can tell the pair apart on some K.  A pair without
+    witness = the pool can't discriminate — candidates for wedge
+    articulation.
+
+    Implementation: for each oracle pair, compute bitwise
+    (a.tau & ~b.tau) and (~a.tau & b.tau); pair has witness iff
+    both bitmasks are non-zero.
+    """
+    things_dict = dict(state.things)
+    count = 0
+    for pair in state.oracle_pairs:
+        if len(pair) != 2:
+            continue
+        a_id, b_id = list(pair)
+        a = things_dict.get(a_id)
+        b = things_dict.get(b_id)
+        if a is None or b is None:
+            continue
+        a_only = a.tau_mask & ~b.tau_mask
+        b_only = ~a.tau_mask & b.tau_mask
+        if a_only and b_only:
+            count += 1
+    return float(count)
+
+
+def objective_pool_entropy_marginals(state: "State") -> float:
+    """Sum of per-K marginal entropies (firing-vs-gapping balance).
+
+    For each K in the pool, compute the entropy of its firing
+    distribution across things — a bit that's balanced near 50%
+    contributes near 1 bit; a bit that fires on everyone or no one
+    contributes 0.  Sum across pool.
+
+    Maximizing this objective corresponds to configuring weights
+    toward K's that maximally discriminate — not necessarily the
+    ones closest to an oracle signal.  Contrasts with
+    ``objective_oracle_pairs_with_witness``, which emphasizes the
+    oracle.  Composing them (with weights) lets step() balance
+    general discrimination against oracle-specific discrimination.
+    """
+    import math
+    n_things = len(state.things)
+    if n_things == 0:
+        return 0.0
+    total = 0.0
+    for k in state.pool.ks:
+        idx = state.pool.bit_of(k)
+        if idx is None:
+            continue
+        n_fires = sum(
+            1 for _tid, t in state.things if (t.tau_mask >> idx) & 1
+        )
+        p = n_fires / n_things
+        if 0 < p < 1:
+            total += -p * math.log2(p) - (1 - p) * math.log2(1 - p)
+    return total
+
+
+# -- Composite combinator --------------------------------------------------
+
+
+def compose_scorers(*weighted: Tuple[float, Scorer]) -> Scorer:
+    """Build a scorer from (weight, scorer) pairs, weighted sum.
+
+    Matches d-articulation-scorer-pluggable: 'Multiple scorers can run
+    simultaneously... their gradients can be combined as weighted sums.
+    No single scorer is privileged by the framework.'
+    """
+    def _composite(state: "State", k_i: "K", k_j: "K") -> float:
+        return sum(w * s(state, k_i, k_j) for w, s in weighted)
+    return _composite
+
+
+def compose_objectives(*weighted: Tuple[float, Objective]) -> Objective:
+    """Build an objective from (weight, objective) pairs, weighted sum."""
+    def _composite(state: "State") -> float:
+        return sum(w * f(state) for w, f in weighted)
+    return _composite
+
+
+# -- Registries (for CLI / discovery; not privileged by the framework) ----
+
+
+SCORERS: dict = {
+    "entropy_of_four_cell": scorer_entropy_of_four_cell,
+    "boolean_earning_corpus": scorer_boolean_earning_corpus,
+    "oracle_boolean_witness": scorer_oracle_boolean_witness,
+}
+
+
+OBJECTIVES: dict = {
+    "oracle_pairs_with_witness": objective_oracle_pairs_with_witness,
+    "pool_entropy_marginals": objective_pool_entropy_marginals,
+}
+
+
+# ---------------------------------------------------------------------------
+
+
 def _smoke_test() -> None:
     """Exercise the type core; assert the κ = τ ⊕ σ invariant holds
     under S3 action and under TauSigma construction at the boundaries."""
@@ -1613,6 +1867,79 @@ def _smoke_test() -> None:
         )
         assert named_count > 0, "no name: probes were registered"
 
+        # -- Stage 4: scorer / objective protocols --------------------------
+        # Pick two K's that are likely to be informative: a source atom
+        # and a kind_at_root atom.
+        if state.pool.size() >= 2:
+            k_src_candidates = [k for k in state.pool.ks
+                                 if isinstance(k, Atom)
+                                 and k.observable.startswith("source:")]
+            k_kind_candidates = [k for k in state.pool.ks
+                                  if isinstance(k, Atom)
+                                  and k.observable.startswith("kind_at_root:")]
+            if k_src_candidates and k_kind_candidates:
+                k_i = k_src_candidates[0]
+                k_j = k_kind_candidates[0]
+
+                # Each default scorer returns a finite float
+                import math as _math
+                for name, fn in SCORERS.items():
+                    v = fn(state, k_i, k_j)
+                    assert isinstance(v, float), (
+                        f"scorer {name!r} did not return a float"
+                    )
+                    assert _math.isfinite(v), (
+                        f"scorer {name!r} returned non-finite value {v!r}"
+                    )
+
+                # entropy scorer on the same K paired with itself
+                # gives 0 (the distribution collapses to a single cell
+                # by p-extensionality-via-hit: Wedge(k,k) normalizes
+                # to ZeroK, which has no firing).  Instead, test on
+                # same-K cells directly via _count_four_cell.
+                cells_self = _count_four_cell(state, k_i, k_i)
+                # A K paired with itself: (0,1) and (1,0) cells are
+                # both empty — thing either fires K or not, but can't
+                # be asymmetric with itself.
+                assert cells_self[1] == 0 and cells_self[2] == 0, (
+                    "K with itself should have empty off-diagonals"
+                )
+
+                # Default objectives return finite floats
+                for name, fn in OBJECTIVES.items():
+                    v = fn(state)
+                    assert isinstance(v, float), (
+                        f"objective {name!r} did not return a float"
+                    )
+                    assert _math.isfinite(v), (
+                        f"objective {name!r} returned non-finite value {v!r}"
+                    )
+
+                # Composite scorer sums correctly
+                composite = compose_scorers(
+                    (0.5, scorer_entropy_of_four_cell),
+                    (1.0, scorer_boolean_earning_corpus),
+                )
+                expected = (
+                    0.5 * scorer_entropy_of_four_cell(state, k_i, k_j)
+                    + 1.0 * scorer_boolean_earning_corpus(state, k_i, k_j)
+                )
+                got = composite(state, k_i, k_j)
+                assert abs(got - expected) < 1e-9, (
+                    f"composite scorer arithmetic mismatch: {got} vs {expected}"
+                )
+
+                # Composite objective similarly
+                comp_obj = compose_objectives(
+                    (1.0, objective_oracle_pairs_with_witness),
+                    (0.1, objective_pool_entropy_marginals),
+                )
+                comp_val = comp_obj(state)
+                assert _math.isfinite(comp_val), "composite objective non-finite"
+
+                print(f"    Stage 4 scorers/objectives: all registry entries "
+                      f"returned finite floats on extracted state")
+
         # Pool invariant: every observable appears as an Atom K
         for k in state.pool.ks:
             assert isinstance(k, Atom), (
@@ -1624,7 +1951,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1 + 2 + 2.5 + 2.6 + 3 smoke test: all assertions passed")
+    print("Stage 1 + 2 + 2.5 + 2.6 + 3 + 3.5 + 3.6 + 4 smoke test: all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
