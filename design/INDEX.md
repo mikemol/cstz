@@ -90,7 +90,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (25)
+## Corrections (26)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -107,6 +107,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-stage-5-5-no-default-budget-remove-weight-updater] Stage 5.5: no-default articulation budget; WeightUpdater removed; σ channel exercised
 - ● [c-stage-7-0-10-scorer-cell-extractor-reducer-factoring] Stage 7.0.10: five scorer classes factored into CellScorer(cells, reduce) compositions
 - ● [c-stage-7-0-11-count-four-cell-vectorized-int-signature] Stage 7.0.11: _count_four_cell vectorized off state.tau_masks; signature takes bit indices
+- ● [c-stage-7-0-12-audit-fixes-direct-s3-act-and-is-symmetric-split] Stage 7.0.12 audit fixes: direct S3.act + is_symmetric split into two probes
 - ● [c-stage-7-0-12-s3-tensor-refactor-and-pool-orbit-fields] Stage 7.0.12: Tier 1 of the S3-cluster — tensor-native S3 + pool orbit fields + State.is_symmetric
 - ● [c-stage-7-0-5-apply-numpy-not-just-store] Stage 7.0.5: apply numpy arrays array-natively, not via Python loops
 - ● [c-stage-7-0-6-unmaterialize-hash-and-signature] Stage 7.0.6: unmaterialize Thing._hash and replace signature()-based fixed-point with trajectory signal
