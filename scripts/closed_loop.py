@@ -2005,6 +2005,67 @@ def step(
 
 
 # ---------------------------------------------------------------------------
+# Stage 6 — run_to_fixed_point() — closed-loop driver
+# ---------------------------------------------------------------------------
+#
+# run_to_fixed_point(state) iterates step() until the state's signature
+# stabilizes — no new wedges were articulated on the last step
+# (d-fixed-point-is-termination).  Under p-iteration-count-unknown
+# there is NO max_iters parameter: the loop runs until fixed-point,
+# however long that takes.  Callers needing a hard bound impose it
+# externally; the framework does not.
+#
+# Since Stage 5.5 removed weight-updating as a framework concern
+# (c-weight-updater-becomes-new-k-articulation), the termination
+# criterion simplifies to pool stabilization.  State.signature()
+# already excludes the trajectory (monotonically growing) and
+# iteration counter, so signature equality between successive states
+# means exactly: the pool did not grow AND things' bitmaps did not
+# change AND oracle pairs didn't shift.  All real progress shows up
+# as a signature change; no-progress is the fixed point.
+#
+# Pure and merge-compatible (p-embarrassingly-parallel): callers can
+# run_to_fixed_point on disjoint state shards independently, then
+# merge and re-run run_to_fixed_point on the union to settle any
+# cross-shard articulations that neither local fixed-point captured.
+
+
+def run_to_fixed_point(
+    state: "State",
+    *,
+    scorer: Scorer | None = None,
+    objective: Objective | None = None,
+    max_articulations_per_step: int | None = None,
+) -> "State":
+    """Iterate step() until the state signature stops changing.
+
+    Termination per d-fixed-point-is-termination: when two successive
+    step() invocations produce states with identical signatures, the
+    loop has reached a fixed point and the current state is returned.
+
+    No max_iters (p-iteration-count-unknown).  Callers needing a
+    budget should either bound max_articulations_per_step (slowing
+    each iteration) or wrap this function in their own bounded loop.
+
+    Parameters are forwarded to step() unchanged.
+
+    Pure: does not mutate input state.  Returns the fixed-point state,
+    including the full trajectory of every intermediate iteration for
+    inspection / replay / p-bijective-hash-consing round-trips.
+    """
+    while True:
+        prev_sig = state.signature()
+        state = step(
+            state,
+            scorer=scorer,
+            objective=objective,
+            max_articulations_per_step=max_articulations_per_step,
+        )
+        if state.signature() == prev_sig:
+            return state
+
+
+# ---------------------------------------------------------------------------
 
 
 def _smoke_test() -> None:
@@ -2687,6 +2748,79 @@ def _smoke_test() -> None:
                       f"{last_traj['articulated_count']}/{last_traj['demanded_count']}; "
                       f"σ-channel path exercised")
 
+                # -- Stage 6: run_to_fixed_point() ---------------------
+                # Synthetic minimal state: 3 atoms × 3 things; pool
+                # closure is small enough to reach fixed-point quickly
+                # and verify convergence is a genuine fixed-point.
+                ax = Atom(Observable("synth_x"))
+                ay = Atom(Observable("synth_y"))
+                az = Atom(Observable("synth_z"))
+                syn_pool = Pool().with_k(ax).with_k(ay).with_k(az)
+                idx_x = syn_pool.bit_of(ax)
+                idx_y = syn_pool.bit_of(ay)
+                idx_z = syn_pool.bit_of(az)
+                # t1 fires all three; t2 fires x,y; t3 fires x,z
+                m1 = (1 << idx_x) | (1 << idx_y) | (1 << idx_z)
+                m2 = (1 << idx_x) | (1 << idx_y)
+                m3 = (1 << idx_x) | (1 << idx_z)
+                syn_things = (
+                    (ThingId("syn_t1"), Thing(id=ThingId("syn_t1"),
+                                              tau_mask=m1, sigma_mask=m1)),
+                    (ThingId("syn_t2"), Thing(id=ThingId("syn_t2"),
+                                              tau_mask=m2, sigma_mask=m2)),
+                    (ThingId("syn_t3"), Thing(id=ThingId("syn_t3"),
+                                              tau_mask=m3, sigma_mask=m3)),
+                )
+                syn_state = State(pool=syn_pool, things=syn_things)
+
+                # Run to fixed point
+                fixed = run_to_fixed_point(syn_state)
+
+                # Termination reached: one more step should add nothing
+                verify = step(fixed)
+                assert verify.signature() == fixed.signature(), (
+                    "run_to_fixed_point did not reach a true fixed point; "
+                    "step() still changes state signature after"
+                )
+                # Articulated count on the verification step is 0
+                verify_traj = verify.trajectory[-1]
+                assert verify_traj["articulated_count"] == 0, (
+                    f"fixed-point state should produce 0 articulations on "
+                    f"next step; got {verify_traj['articulated_count']}"
+                )
+
+                # Trajectory records every iteration
+                n_iters = len(fixed.trajectory) - len(syn_state.trajectory)
+                assert n_iters >= 1, (
+                    "run_to_fixed_point should produce at least one "
+                    "trajectory entry"
+                )
+
+                # Pool has grown: at minimum x∧y (co-fire on t1,t2),
+                # x∧z (co-fire on t1,t3), y∧z (co-fire on t1) are
+                # articulated; possibly also x∧y∧z on t1.
+                assert fixed.pool.size() > syn_pool.size(), (
+                    "fixed-point pool should be larger than initial"
+                )
+
+                # Verify the three expected grade-2 wedges exist
+                for a, b in [(ax, ay), (ax, az), (ay, az)]:
+                    w = Wedge(a, b).normalize()
+                    assert fixed.pool.bit_of(w) is not None, (
+                        f"expected wedge {w.key()[:40]!r} not in fixed-point pool"
+                    )
+
+                # And the grade-3 wedge (fires only on t1)
+                w3 = Wedge(ax, Wedge(ay, az)).normalize()
+                assert fixed.pool.bit_of(w3) is not None, (
+                    "expected grade-3 wedge not in fixed-point pool"
+                )
+
+                print(f"    Stage 6 run_to_fixed_point(): synthetic 3×3 state "
+                      f"converged in {n_iters} iter(s); pool grew "
+                      f"{syn_pool.size()} → {fixed.pool.size()}; "
+                      f"fixed-point verified by no-op step()")
+
         # Pool invariant: every observable appears as an Atom K
         for k in state.pool.ks:
             assert isinstance(k, Atom), (
@@ -2698,7 +2832,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1 + 2 + 2.5 + 2.6 + 3 + 3.5 + 3.6 + 4 + 4.5 + 4.6 + 5 + 5.5 smoke test: all assertions passed")
+    print("Stage 1 + 2 + 2.5 + 2.6 + 3 + 3.5 + 3.6 + 4 + 4.5 + 4.6 + 5 + 5.5 + 6 smoke test: all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
