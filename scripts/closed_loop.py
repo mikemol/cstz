@@ -28,11 +28,12 @@ No I/O, no extraction, no step(), no scoring.  Those are Stages 3-7.
 from __future__ import annotations
 
 import json
+import math
 import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterator, NewType, Tuple
+from typing import Iterator, NewType, Protocol, Tuple
 
 
 # ---------------------------------------------------------------------------
@@ -1279,11 +1280,44 @@ def extract_initial_state(
 # "Multiple objectives can be evaluated per iteration; their gradients
 #  can be combined as weighted sums" from d-weight-objective-pluggable.
 
-from typing import Callable
+# Decomposed signature types (p-type-theory-everywhere): the return
+# values of scorers and objectives get distinct NewType wrappers so a
+# static checker can catch cross-category misuse (even though at
+# runtime they are both float).  Units per scorer class are documented
+# on the class; a future tightening could make units part of the
+# return-type taxonomy.
+ScoreValue = NewType("ScoreValue", float)
+ObjectiveValue = NewType("ObjectiveValue", float)
 
-# Protocol types
-Scorer = Callable[["State", "K", "K"], float]
-Objective = Callable[["State"], float]
+
+class Scorer(Protocol):
+    """A scorer evaluates a candidate wedge K_left ∧ K_right against
+    the current State.  Returns a ScoreValue (higher = more useful).
+
+    Every Scorer implementation MUST carry a structural identity
+    (``structure`` property) per p-functions-have-structural-identity
+    so it survives pickling (p-embarrassingly-parallel), logging
+    (trajectory records), and cross-session merging.  The structure
+    tuple is bijective: composite scorers recurse into their
+    components' structures.
+    """
+
+    def __call__(self, state: "State",
+                 k_left: "K", k_right: "K") -> ScoreValue: ...
+
+    @property
+    def structure(self) -> tuple: ...
+
+
+class Objective(Protocol):
+    """An objective evaluates the current State.  Returns an
+    ObjectiveValue the weight-update direction tunes to maximize.
+    Same structural-identity requirement as Scorer."""
+
+    def __call__(self, state: "State") -> ObjectiveValue: ...
+
+    @property
+    def structure(self) -> tuple: ...
 
 
 # -- Overlap-demand primitive (used by Stage 5 articulation rule) ----------
@@ -1338,214 +1372,312 @@ def _count_four_cell(state: "State", k_i: "K", k_j: "K",
     return tuple(n)
 
 
-# -- Default scorers --------------------------------------------------------
+# -- Default scorers (structural dataclass classes + singletons) ----------
 
 
-def scorer_xor_off_diagonal(state: "State", k_i: "K", k_j: "K") -> float:
-    """XOR-of-columns score: count of things where EXACTLY ONE of K_i,
-    K_j fires.  Under ``p-four-cell-xor-score``, only the off-diagonal
-    cells (n_01, n_10) contribute to a K-pair's score.  Gap-gap (n_00,
-    absence of evidence) and both-fire (n_11, redundant evidence)
-    contribute zero.
+@dataclass(frozen=True)
+class XorOffDiagonalScorer:
+    """Score = n_01 + n_10 (count of things where exactly one K fires).
 
-    This is the PRINCIPLED default scorer: each unit of score is one
-    observed witness that K_i and K_j genuinely pull apart some
-    thing's identity.  The scale is counts, not entropy.
+    Principled default per p-four-cell-xor-score.  Units: counts.
+    Only off-diagonal cells contribute; gap-gap (n_00) and both-fire
+    (n_11) contribute zero.
     """
-    _, n_01, n_10, _ = _count_four_cell(state, k_i, k_j)
-    return float(n_01 + n_10)
+    units: str = "count"
+
+    def __call__(self, state: "State", k_left: "K", k_right: "K") -> ScoreValue:
+        _, n_01, n_10, _ = _count_four_cell(state, k_left, k_right)
+        return ScoreValue(float(n_01 + n_10))
+
+    @property
+    def structure(self) -> tuple:
+        return ("scorer", "xor_off_diagonal")
 
 
-def scorer_xor_off_diagonal_log_pair(state: "State", k_i: "K", k_j: "K") -> float:
-    """Boolean-earning variant: log(n_01) + log(n_10) when BOTH off-
-    diagonals are populated, 0 otherwise.  Rewards K-pairs whose
-    asymmetric cells are BOTH well-populated (p-boolean-earned-by-both-
-    off-diagonals), not just one.  Complement to ``scorer_xor_off_diagonal``
-    which sums both asymmetries indifferently.
+@dataclass(frozen=True)
+class XorOffDiagonalLogPairScorer:
+    """Score = log(n_01) + log(n_10) when BOTH off-diagonals populated,
+    else 0.  Rewards K-pairs whose asymmetric cells are BOTH well-
+    populated (p-boolean-earned-by-both-off-diagonals), rather than
+    just summing off-diagonals indifferently.  Units: nats (ln)."""
+    units: str = "nats"
+
+    def __call__(self, state: "State", k_left: "K", k_right: "K") -> ScoreValue:
+        _, n_01, n_10, _ = _count_four_cell(state, k_left, k_right)
+        if n_01 == 0 or n_10 == 0:
+            return ScoreValue(0.0)
+        return ScoreValue(math.log(n_01) + math.log(n_10))
+
+    @property
+    def structure(self) -> tuple:
+        return ("scorer", "xor_off_diagonal_log_pair")
+
+
+@dataclass(frozen=True)
+class EntropyOfFourCellScorer:
+    """Shannon entropy (bits) of the 4-cell CATEGORICAL distribution
+    including gap-gap and both-fire cells.  DIAGNOSTIC statistic only:
+    conflates gap with overlap and is NOT principled for articulation
+    ranking (see p-four-cell-xor-score).  Retained for characterization
+    and debugging.  Units: bits.
     """
-    import math
-    _, n_01, n_10, _ = _count_four_cell(state, k_i, k_j)
-    if n_01 == 0 or n_10 == 0:
-        return 0.0
-    return math.log(n_01) + math.log(n_10)
+    units: str = "bits"
+
+    def __call__(self, state: "State", k_left: "K", k_right: "K") -> ScoreValue:
+        cells = _count_four_cell(state, k_left, k_right)
+        total = sum(cells)
+        if total == 0:
+            return ScoreValue(0.0)
+        ent = 0.0
+        for n in cells:
+            if n > 0:
+                p = n / total
+                ent -= p * math.log2(p)
+        return ScoreValue(ent)
+
+    @property
+    def structure(self) -> tuple:
+        return ("scorer", "entropy_of_four_cell")
 
 
-def scorer_entropy_of_four_cell(state: "State", k_i: "K", k_j: "K") -> float:
-    """Shannon entropy (bits) of the K-pair's 4-cell distribution as
-    a CATEGORICAL distribution including gap-gap and both-fire cells.
+@dataclass(frozen=True)
+class OracleBooleanWitnessTauSigmaScorer:
+    """Count oracle thing-pairs (A, B) where A occupies (K_left=1,
+    K_right=0) and B occupies (K_left=0, K_right=1) — the τ-σ
+    orientation of the Boolean-earning witness pattern.
 
-    Range: 0 (one cell holds all things) to 2 bits (uniform).
-
-    This is a CHARACTERIZATION statistic, not a scoring default.  Under
-    p-four-cell-xor-score the principled score is XOR-of-columns; this
-    function is retained as a reporting / diagnostic tool (for asking
-    "how flat is the four-cell distribution of this K-pair?").  Do NOT
-    use as the default scorer in articulation ranking — it conflates
-    gap with overlap.
+    Splitting by orientation per p-tau-sigma-not-opposite: the two
+    orientations are distinct discriminative patterns.  Collapsing
+    them (as Stage 4.5's combined scorer did) was acceptable under
+    p-chirality-only-for-higher-valence but forecloses
+    chirality-sensitive analysis at higher grades.  Units: counts.
     """
-    import math
-    cells = _count_four_cell(state, k_i, k_j)
-    total = sum(cells)
-    if total == 0:
-        return 0.0
-    ent = 0.0
-    for n in cells:
-        if n > 0:
-            p = n / total
-            ent -= p * math.log2(p)
-    return ent
+    units: str = "count"
+
+    def __call__(self, state: "State", k_left: "K", k_right: "K") -> ScoreValue:
+        idx_i = state.pool.bit_of(k_left)
+        idx_j = state.pool.bit_of(k_right)
+        if idx_i is None or idx_j is None:
+            return ScoreValue(0.0)
+        things_dict = dict(state.things)
+        count = 0
+        for pair in state.oracle_pairs:
+            if len(pair) != 2:
+                continue
+            a_id, b_id = list(pair)
+            a = things_dict.get(a_id)
+            b = things_dict.get(b_id)
+            if a is None or b is None:
+                continue
+            bi_a = (a.tau_mask >> idx_i) & 1
+            bj_a = (a.tau_mask >> idx_j) & 1
+            bi_b = (b.tau_mask >> idx_i) & 1
+            bj_b = (b.tau_mask >> idx_j) & 1
+            # τ-σ orientation: A=(1,0), B=(0,1)
+            if (bi_a, bj_a, bi_b, bj_b) == (1, 0, 0, 1):
+                count += 1
+        return ScoreValue(float(count))
+
+    @property
+    def structure(self) -> tuple:
+        return ("scorer", "oracle_boolean_witness_tau_sigma")
 
 
-def scorer_boolean_earning_corpus(state: "State", k_i: "K", k_j: "K") -> float:
-    """Alias for ``scorer_xor_off_diagonal_log_pair`` — Boolean-earning
-    at the corpus level (p-boolean-earned-by-both-off-diagonals).
-    Retained for naming continuity with Stage 4 v1.
+@dataclass(frozen=True)
+class OracleBooleanWitnessSigmaTauScorer:
+    """Count oracle thing-pairs (A, B) where A occupies (K_left=0,
+    K_right=1) and B occupies (K_left=1, K_right=0) — the σ-τ
+    orientation, the opposite chirality from
+    OracleBooleanWitnessTauSigmaScorer.  Units: counts.
     """
-    return scorer_xor_off_diagonal_log_pair(state, k_i, k_j)
+    units: str = "count"
+
+    def __call__(self, state: "State", k_left: "K", k_right: "K") -> ScoreValue:
+        idx_i = state.pool.bit_of(k_left)
+        idx_j = state.pool.bit_of(k_right)
+        if idx_i is None or idx_j is None:
+            return ScoreValue(0.0)
+        things_dict = dict(state.things)
+        count = 0
+        for pair in state.oracle_pairs:
+            if len(pair) != 2:
+                continue
+            a_id, b_id = list(pair)
+            a = things_dict.get(a_id)
+            b = things_dict.get(b_id)
+            if a is None or b is None:
+                continue
+            bi_a = (a.tau_mask >> idx_i) & 1
+            bj_a = (a.tau_mask >> idx_j) & 1
+            bi_b = (b.tau_mask >> idx_i) & 1
+            bj_b = (b.tau_mask >> idx_j) & 1
+            # σ-τ orientation: A=(0,1), B=(1,0)
+            if (bi_a, bj_a, bi_b, bj_b) == (0, 1, 1, 0):
+                count += 1
+        return ScoreValue(float(count))
+
+    @property
+    def structure(self) -> tuple:
+        return ("scorer", "oracle_boolean_witness_sigma_tau")
 
 
-def scorer_oracle_boolean_witness(state: "State", k_i: "K", k_j: "K") -> float:
-    """Count oracle thing-pairs (A, B) that this K-pair Boolean-earns.
+# Singletons for call-site continuity with prior stages' function names
+scorer_xor_off_diagonal = XorOffDiagonalScorer()
+scorer_xor_off_diagonal_log_pair = XorOffDiagonalLogPairScorer()
+scorer_boolean_earning_corpus = scorer_xor_off_diagonal_log_pair  # alias
+scorer_entropy_of_four_cell = EntropyOfFourCellScorer()
+scorer_oracle_boolean_witness_tau_sigma = OracleBooleanWitnessTauSigmaScorer()
+scorer_oracle_boolean_witness_sigma_tau = OracleBooleanWitnessSigmaTauScorer()
 
-    A thing-pair (A, B) is Boolean-earned by (K_i, K_j) iff one thing
-    fires K_i but not K_j AND the other fires K_j but not K_i — i.e.,
-    (A, B) occupy opposite off-diagonals of the K-pair's joint
-    distribution.  Either orientation counts.
 
-    This scorer directly measures the K-pair's usefulness for
-    discriminating oracle-aligned thing-pairs.  Under d-oracle-
-    calibrates-not-gates this is a signal, not a gate — it weights
-    articulation preference, not commit admission.
+# -- Default objectives (structural dataclass classes + singletons) -------
+
+
+@dataclass(frozen=True)
+class OraclePairsWithWitnessObjective:
+    """Count oracle thing-pairs for which the pool carries ANY witness
+    (some K fires on one thing but not the other).  Under p-alignment-
+    is-distribution this is informational, not a commit threshold.
+    Units: counts.
     """
-    idx_i = state.pool.bit_of(k_i)
-    idx_j = state.pool.bit_of(k_j)
-    if idx_i is None or idx_j is None:
-        return 0.0
-    things_dict = dict(state.things)
-    count = 0
-    for pair in state.oracle_pairs:
-        if len(pair) != 2:
-            continue
-        a_id, b_id = list(pair)
-        a = things_dict.get(a_id)
-        b = things_dict.get(b_id)
-        if a is None or b is None:
-            continue
-        bi_a = (a.tau_mask >> idx_i) & 1
-        bj_a = (a.tau_mask >> idx_j) & 1
-        bi_b = (b.tau_mask >> idx_i) & 1
-        bj_b = (b.tau_mask >> idx_j) & 1
-        # Boolean-earning patterns: A=(1,0) B=(0,1) or A=(0,1) B=(1,0)
-        if (bi_a, bj_a, bi_b, bj_b) in {(1, 0, 0, 1), (0, 1, 1, 0)}:
-            count += 1
-    return float(count)
+    units: str = "count"
+
+    def __call__(self, state: "State") -> ObjectiveValue:
+        things_dict = dict(state.things)
+        count = 0
+        for pair in state.oracle_pairs:
+            if len(pair) != 2:
+                continue
+            a_id, b_id = list(pair)
+            a = things_dict.get(a_id)
+            b = things_dict.get(b_id)
+            if a is None or b is None:
+                continue
+            a_only = a.tau_mask & ~b.tau_mask
+            b_only = ~a.tau_mask & b.tau_mask
+            if a_only and b_only:
+                count += 1
+        return ObjectiveValue(float(count))
+
+    @property
+    def structure(self) -> tuple:
+        return ("objective", "oracle_pairs_with_witness")
 
 
-# -- Default objectives -----------------------------------------------------
-
-
-def objective_oracle_pairs_with_witness(state: "State") -> float:
-    """Count oracle thing-pairs for which ANY K in the pool fires on
-    one thing but not the other.  This is a Boolean-earning existence
-    test against the pool's CURRENT discriminative power.
-
-    Under p-alignment-is-distribution this is an informational
-    read-out, not a commit threshold.  A pair with witness exists =
-    the pool can tell the pair apart on some K.  A pair without
-    witness = the pool can't discriminate — candidates for wedge
-    articulation.
-
-    Implementation: for each oracle pair, compute bitwise
-    (a.tau & ~b.tau) and (~a.tau & b.tau); pair has witness iff
-    both bitmasks are non-zero.
+@dataclass(frozen=True)
+class PoolEntropyMarginalsObjective:
+    """Sum of per-K marginal firing entropies.  Emphasizes
+    configurations where K's fire with balanced frequency across
+    things (p-probes-are-half-spaces — balanced half-spaces carry
+    more discrimination).  Units: bits.
     """
-    things_dict = dict(state.things)
-    count = 0
-    for pair in state.oracle_pairs:
-        if len(pair) != 2:
-            continue
-        a_id, b_id = list(pair)
-        a = things_dict.get(a_id)
-        b = things_dict.get(b_id)
-        if a is None or b is None:
-            continue
-        a_only = a.tau_mask & ~b.tau_mask
-        b_only = ~a.tau_mask & b.tau_mask
-        if a_only and b_only:
-            count += 1
-    return float(count)
+    units: str = "bits"
+
+    def __call__(self, state: "State") -> ObjectiveValue:
+        n_things = len(state.things)
+        if n_things == 0:
+            return ObjectiveValue(0.0)
+        total = 0.0
+        for k in state.pool.ks:
+            idx = state.pool.bit_of(k)
+            if idx is None:
+                continue
+            n_fires = sum(
+                1 for _tid, t in state.things if (t.tau_mask >> idx) & 1
+            )
+            p = n_fires / n_things
+            if 0 < p < 1:
+                total += -p * math.log2(p) - (1 - p) * math.log2(1 - p)
+        return ObjectiveValue(total)
+
+    @property
+    def structure(self) -> tuple:
+        return ("objective", "pool_entropy_marginals")
 
 
-def objective_pool_entropy_marginals(state: "State") -> float:
-    """Sum of per-K marginal entropies (firing-vs-gapping balance).
-
-    For each K in the pool, compute the entropy of its firing
-    distribution across things — a bit that's balanced near 50%
-    contributes near 1 bit; a bit that fires on everyone or no one
-    contributes 0.  Sum across pool.
-
-    Maximizing this objective corresponds to configuring weights
-    toward K's that maximally discriminate — not necessarily the
-    ones closest to an oracle signal.  Contrasts with
-    ``objective_oracle_pairs_with_witness``, which emphasizes the
-    oracle.  Composing them (with weights) lets step() balance
-    general discrimination against oracle-specific discrimination.
-    """
-    import math
-    n_things = len(state.things)
-    if n_things == 0:
-        return 0.0
-    total = 0.0
-    for k in state.pool.ks:
-        idx = state.pool.bit_of(k)
-        if idx is None:
-            continue
-        n_fires = sum(
-            1 for _tid, t in state.things if (t.tau_mask >> idx) & 1
-        )
-        p = n_fires / n_things
-        if 0 < p < 1:
-            total += -p * math.log2(p) - (1 - p) * math.log2(1 - p)
-    return total
+# Singletons for call-site continuity
+objective_oracle_pairs_with_witness = OraclePairsWithWitnessObjective()
+objective_pool_entropy_marginals = PoolEntropyMarginalsObjective()
 
 
-# -- Composite combinator --------------------------------------------------
+# -- Composite combinators (frozen dataclasses with structural identity) --
 
 
-def compose_scorers(*weighted: Tuple[float, Scorer]) -> Scorer:
-    """Build a scorer from (weight, scorer) pairs, weighted sum.
+@dataclass(frozen=True)
+class CompositeScorer:
+    """Weighted sum of component scorers.  Per p-functions-have-
+    structural-identity, this is a frozen dataclass (not a closure)
+    so the composite survives pickling, logging, and cross-session
+    merging.  Its ``structure`` tuple recurses into components'
+    structures — bijective identity across the tree."""
+    components: Tuple[Tuple[float, Scorer], ...]
 
-    Matches d-articulation-scorer-pluggable: 'Multiple scorers can run
-    simultaneously... their gradients can be combined as weighted sums.
-    No single scorer is privileged by the framework.'
-    """
-    def _composite(state: "State", k_i: "K", k_j: "K") -> float:
-        return sum(w * s(state, k_i, k_j) for w, s in weighted)
-    return _composite
+    def __call__(self, state: "State",
+                 k_left: "K", k_right: "K") -> ScoreValue:
+        total = 0.0
+        for w, s in self.components:
+            total += w * s(state, k_left, k_right)
+        return ScoreValue(total)
+
+    @property
+    def structure(self) -> tuple:
+        return ("composite_scorer",
+                tuple((w, s.structure) for w, s in self.components))
 
 
-def compose_objectives(*weighted: Tuple[float, Objective]) -> Objective:
-    """Build an objective from (weight, objective) pairs, weighted sum."""
-    def _composite(state: "State") -> float:
-        return sum(w * f(state) for w, f in weighted)
-    return _composite
+@dataclass(frozen=True)
+class CompositeObjective:
+    """Weighted sum of component objectives; structural identity
+    mirrors CompositeScorer."""
+    components: Tuple[Tuple[float, Objective], ...]
+
+    def __call__(self, state: "State") -> ObjectiveValue:
+        total = 0.0
+        for w, f in self.components:
+            total += w * f(state)
+        return ObjectiveValue(total)
+
+    @property
+    def structure(self) -> tuple:
+        return ("composite_objective",
+                tuple((w, f.structure) for w, f in self.components))
+
+
+def compose_scorers(*weighted: Tuple[float, Scorer]) -> CompositeScorer:
+    """Construct a CompositeScorer from (weight, scorer) pairs.  Kept
+    as a factory function for call-site ergonomics; returns a frozen
+    dataclass, not a closure."""
+    return CompositeScorer(components=tuple(weighted))
+
+
+def compose_objectives(*weighted: Tuple[float, Objective]) -> CompositeObjective:
+    """Construct a CompositeObjective from (weight, objective) pairs."""
+    return CompositeObjective(components=tuple(weighted))
 
 
 # -- Registries (for CLI / discovery; not privileged by the framework) ----
 
 
+# The orientation-union scorer, as a composite of the two orientation
+# scorers, for callers who want Stage 4.5's combined behavior.  Identity
+# is structural (via CompositeScorer) — not anonymous.
+scorer_oracle_boolean_witness_union = compose_scorers(
+    (1.0, scorer_oracle_boolean_witness_tau_sigma),
+    (1.0, scorer_oracle_boolean_witness_sigma_tau),
+)
+
+
 SCORERS: dict = {
-    # Principled default (p-four-cell-xor-score): count of things where
-    # exactly one of the two K's fires.
+    # Principled default (p-four-cell-xor-score).
     "xor_off_diagonal": scorer_xor_off_diagonal,
-    # Boolean-earning (p-boolean-earned-by-both-off-diagonals): nonzero
-    # only when BOTH off-diagonals are populated.
+    # Boolean-earning (p-boolean-earned-by-both-off-diagonals).
     "xor_off_diagonal_log_pair": scorer_xor_off_diagonal_log_pair,
     "boolean_earning_corpus": scorer_boolean_earning_corpus,  # alias
-    # Oracle-directed: discriminating power on oracle thing-pairs.
-    "oracle_boolean_witness": scorer_oracle_boolean_witness,
-    # Diagnostic (NOT principled for ranking): categorical-distribution
-    # entropy including gap and overlap cells.
+    # Oracle orientation-split (p-tau-sigma-not-opposite).
+    "oracle_boolean_witness_tau_sigma": scorer_oracle_boolean_witness_tau_sigma,
+    "oracle_boolean_witness_sigma_tau": scorer_oracle_boolean_witness_sigma_tau,
+    "oracle_boolean_witness_union": scorer_oracle_boolean_witness_union,
+    # Diagnostic only (NOT principled for ranking).
     "entropy_of_four_cell": scorer_entropy_of_four_cell,
 }
 
@@ -2036,8 +2168,72 @@ def _smoke_test() -> None:
                         "before any wedge is registered"
                     )
 
-                print(f"    Stage 4 + 4.5 scorers/objectives: XOR-off-diagonal "
-                      f"scorer + joint-capture check verified on extracted state")
+                # Stage 4.6: structural identity on scorers and objectives
+                # (p-functions-have-structural-identity)
+                for name, s in SCORERS.items():
+                    assert hasattr(s, "structure"), (
+                        f"scorer {name!r} has no structure property"
+                    )
+                    struct = s.structure
+                    assert isinstance(struct, tuple), (
+                        f"scorer {name!r} structure is not a tuple"
+                    )
+                    # Structure must be bijective-round-trippable via JSON
+                    # (though the python nested tuples ≠ json arrays until
+                    # reconstructed; the test is that json.dumps succeeds
+                    # without raising).
+                    try:
+                        json.dumps(struct)
+                    except TypeError:
+                        raise AssertionError(
+                            f"scorer {name!r} structure not JSON-serializable: {struct!r}"
+                        )
+
+                for name, f in OBJECTIVES.items():
+                    assert hasattr(f, "structure")
+                    json.dumps(f.structure)
+
+                # Composite scorer carries nested structural identity
+                cs = compose_scorers(
+                    (0.5, scorer_xor_off_diagonal),
+                    (1.0, scorer_boolean_earning_corpus),
+                )
+                cs_struct = cs.structure
+                assert cs_struct[0] == "composite_scorer"
+                assert len(cs_struct[1]) == 2  # two components
+                # Each component structure is preserved
+                assert cs_struct[1][0][0] == 0.5
+                assert cs_struct[1][0][1] == ("scorer", "xor_off_diagonal")
+
+                # Stage 4.6: split orientation scorers — τ-σ and σ-τ are
+                # distinct per p-tau-sigma-not-opposite.  Their counts
+                # sum to the Stage 4.5 combined count.
+                tau_sigma_count = scorer_oracle_boolean_witness_tau_sigma(
+                    state, k_i, k_j
+                )
+                sigma_tau_count = scorer_oracle_boolean_witness_sigma_tau(
+                    state, k_i, k_j
+                )
+                union_count = scorer_oracle_boolean_witness_union(
+                    state, k_i, k_j
+                )
+                assert abs(
+                    union_count - (tau_sigma_count + sigma_tau_count)
+                ) < 1e-9, (
+                    f"orientation-union scorer should sum to {tau_sigma_count} "
+                    f"+ {sigma_tau_count}, got {union_count}"
+                )
+
+                # Structural identity of the union composite recurses
+                union_struct = scorer_oracle_boolean_witness_union.structure
+                assert union_struct[0] == "composite_scorer"
+
+                # Frozen dataclasses are hashable — can be used as dict keys
+                d = {scorer_xor_off_diagonal: "principled"}
+                assert d[scorer_xor_off_diagonal] == "principled"
+
+                print(f"    Stage 4 + 4.5 + 4.6 scorers/objectives: structural "
+                      f"identity + orientation-split verified on extracted state")
 
         # Pool invariant: every observable appears as an Atom K
         for k in state.pool.ks:
@@ -2050,7 +2246,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1 + 2 + 2.5 + 2.6 + 3 + 3.5 + 3.6 + 4 + 4.5 smoke test: all assertions passed")
+    print("Stage 1 + 2 + 2.5 + 2.6 + 3 + 3.5 + 3.6 + 4 + 4.5 + 4.6 smoke test: all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
