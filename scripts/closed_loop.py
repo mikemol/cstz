@@ -3115,6 +3115,11 @@ def step(
         "pool_size_after": new_state.pool.size(),
         "n_things": n_things,
         "max_articulations_per_step": max_articulations_per_step,
+        # Event-sourcing tag: "step" distinguishes these entries from
+        # orbit-seeding events (source="orbit_seed") appended by
+        # articulate_rotated_from_residue.  A trajectory replayer
+        # dispatches on this field.
+        "source": "step",
     }
     if scorer is not None:
         traj_entry["scorer"] = list(scorer.structure)
@@ -3320,9 +3325,23 @@ def articulate_rotated_from_residue(
     # Articulate Rotated orbit members for each seed candidate.  New
     # mask columns are computed via the S3 axis permutation on the
     # base's tsk tensor — not zero-padded.
+    #
+    # Per-event algebraic record (event-sourcing framing): each added
+    # Rotated K is registered in ``seeded_events`` as (base_bit,
+    # perm.perm).  This is the MINIMAL datum from which a replayer can
+    # deterministically derive the full S3-orbit relation — the rotated
+    # K's firing columns, its intensional key, its orbit_id/parent
+    # metadata, and (via the general combinator) the firing of any
+    # wedge involving it.  Under the p-two-oriented-positives-earn-a-
+    # negation geometry a single (base, perm) record carries 24 latent
+    # (S3 × 4-cell) configurations per thing — one packed node, its
+    # relations dependent on relative orientation.  The trajectory
+    # becomes an event log from which the post-seed state is a
+    # materialized view of fold(events, pre_seed_state).
     new_pool = state.pool
     new_tau_cols: list = []
     new_sig_cols: list = []
+    seeded_events: list = []
     for base_idx, base_k in seed_candidates:
         base_tau_col = state.tau_masks[:, base_idx]
         base_sig_col = state.sigma_masks[:, base_idx]
@@ -3341,6 +3360,10 @@ def articulate_rotated_from_residue(
             new_pool = new_pool.with_k(rotated)
             new_tau_cols.append(tau_col)
             new_sig_cols.append(sig_col)
+            seeded_events.append({
+                "base_bit": int(base_idx),
+                "perm": list(g.perm),
+            })
 
     if new_pool.size() == pool_size:
         return state  # no new orbit members articulated
@@ -3355,6 +3378,32 @@ def articulate_rotated_from_residue(
     )
     merged_tau = np.concatenate([state.tau_masks, tau_stack], axis=1)
     merged_sig = np.concatenate([state.sigma_masks, sig_stack], axis=1)
+
+    # Record the orbit-seeding event in the trajectory + aux under the
+    # event-sourcing framing (closed-loop per p-closed-self-referential-
+    # loop).  A trajectory replayer given the pre-seed state + this
+    # entry can reconstruct the post-seed state exactly: for each
+    # (base_bit, perm), apply rotate(pool.ks[base_bit], S3(perm)) and
+    # add to the pool via with_k; mask columns derive via
+    # _rotated_firing_columns.
+    new_iter = state.iteration + 1
+    traj_row = np.array([(
+        new_iter,                                 # iteration
+        int(len(seed_candidates)),                # demanded_count (K's considered)
+        int(n_added),                             # articulated_count (Rotated K's added)
+        int(pool_size),                           # pool_size_before
+        int(new_pool.size()),                     # pool_size_after
+        int(len(state.thing_ids)),                # n_things
+        int(top_n),                               # max_articulations_per_step (top_n budget)
+    )], dtype=TRAJECTORY_DTYPE)
+    new_trajectory = np.concatenate([state.trajectory, traj_row])
+    new_trajectory.setflags(write=False)
+    new_aux = state.trajectory_aux + ({
+        "source": "orbit_seed",
+        "top_n": int(top_n),
+        "events": seeded_events,
+    },)
+
     return State(
         pool=new_pool,
         thing_ids=state.thing_ids,
@@ -3362,9 +3411,9 @@ def articulate_rotated_from_residue(
         sigma_masks=merged_sig,
         oracle_pairs=state.oracle_pairs,
         weights=state.weights,
-        trajectory=state.trajectory,
-        trajectory_aux=state.trajectory_aux,
-        iteration=state.iteration,
+        trajectory=new_trajectory,
+        trajectory_aux=new_aux,
+        iteration=new_iter,
     )
 
 
@@ -4898,6 +4947,48 @@ def _smoke_test() -> None:
                         f"new Rotated K orbit_id should point at atom_a "
                         f"or atom_b (bits {bit_72a}, {bit_72b}); got {orbit_id}"
                     )
+
+                # Event-sourcing framing (closed-loop per
+                # p-closed-self-referential-loop): the orbit-seeding
+                # event appends ONE trajectory row + aux entry carrying
+                # the minimal algebraic datum — a list of
+                # (base_bit, perm) pairs from which a replayer can
+                # deterministically reconstruct the full post-seed
+                # state.  Each record is a "packed node" carrying 24
+                # (S3 × 4-cell) latent configurations per thing.
+                assert len(seeded_72.trajectory) == len(state_72.trajectory) + 1
+                assert len(seeded_72.trajectory_aux) == len(seeded_72.trajectory)
+                seed_row = seeded_72.trajectory[-1]
+                seed_aux = seeded_72.trajectory_aux[-1]
+                assert int(seed_row["articulated_count"]) == 4
+                assert int(seed_row["pool_size_before"]) == n_pool_72
+                assert int(seed_row["pool_size_after"]) == n_pool_72 + 4
+                assert int(seed_row["iteration"]) == state_72.iteration + 1
+                assert seed_aux["source"] == "orbit_seed"
+                assert len(seed_aux["events"]) == 4
+                # Each event is (base_bit, perm) — the minimal datum
+                for event in seed_aux["events"]:
+                    assert event["base_bit"] in (bit_72a, bit_72b)
+                    assert len(event["perm"]) == 3
+                    assert sorted(event["perm"]) == [0, 1, 2]
+                # Both S3 generators present: (τκ) = (2,1,0) and (σκ) = (0,2,1)
+                perms_logged = {tuple(e["perm"]) for e in seed_aux["events"]}
+                assert (2, 1, 0) in perms_logged
+                assert (0, 2, 1) in perms_logged
+
+                # Event-sourcing deterministic reconstruction: given
+                # the pre-seed state and the seed_aux events, a
+                # replayer can rebuild the post-seed pool exactly.
+                replay_pool = state_72.pool
+                for event in seed_aux["events"]:
+                    base = state_72.pool.ks[event["base_bit"]]
+                    rotated = rotate(base, S3(tuple(event["perm"])))
+                    replay_pool = replay_pool.with_k(rotated)
+                assert replay_pool.size() == seeded_72.pool.size()
+                # Key-by-key equality proves round-trip from events
+                for i in range(replay_pool.size()):
+                    assert replay_pool.keys_array[i]["key"] == \
+                        seeded_72.pool.keys_array[i]["key"]
 
                 # Now step() with extended co-fire finds pair candidates
                 # among Rotated K's; general combinator articulates
