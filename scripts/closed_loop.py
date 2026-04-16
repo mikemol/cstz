@@ -567,24 +567,23 @@ class Thing:
         )
 
     def __hash__(self) -> int:
-        # Cache the hash on first computation.  Thing is frozen, but
-        # object.__setattr__ bypasses the freeze to let us memoize on
-        # an undeclared attribute.  Subsequent __hash__ calls read the
-        # cached value via getattr.  Under p-numpy-is-the-natural-cpu-
-        # representation: hashing .tobytes() of kilobyte-scale masks
-        # shouldn't happen per-call when State.signature() folds
-        # hundreds of Thing hashes into one scalar.
-        cached = getattr(self, "_hash", None)
-        if cached is not None:
-            return cached
-        h = hash((
+        # Pure function of content — no caching.  Stage 7.0.5 added a
+        # _hash cache to optimize what we (incorrectly) thought was
+        # the signature() hot path; Stage 7.0.6 reverted per the
+        # user observation 'we're materializing something that
+        # shouldn't be materialized in the first place'.  Tuple
+        # equality in signature() comparison goes through __eq__,
+        # never __hash__, so the cache solved a phantom problem and
+        # introduced cross-process staleness (hash randomization via
+        # PYTHONHASHSEED) for no benefit.  If someone does use Things
+        # in a hashed collection in the future, the cost is O(mask
+        # bytes) per call, deterministic per-process, and honest.
+        return hash((
             self.id,
             self.tau_mask.shape,
             self.tau_mask.tobytes(),
             self.sigma_mask.tobytes(),
         ))
-        object.__setattr__(self, "_hash", h)
-        return h
 
     @property
     def kappa_mask(self) -> np.ndarray:
@@ -2190,31 +2189,38 @@ def run_to_fixed_point(
     objective: Objective | None = None,
     max_articulations_per_step: int | None = None,
 ) -> "State":
-    """Iterate step() until the state signature stops changing.
+    """Iterate step() until no new wedges are articulated.
 
-    Termination per d-fixed-point-is-termination: when two successive
-    step() invocations produce states with identical signatures, the
-    loop has reached a fixed point and the current state is returned.
+    Termination per d-fixed-point-is-termination: the last iteration's
+    trajectory entry reports ``articulated_count == 0`` — the pool
+    has reached closure under the overlap-demand articulation rule.
+
+    This is a DIRECT read from the trajectory, not a hash or signature
+    comparison.  Stage 7.0.6 replaced the previous signature()-based
+    check per the user observation that signature materialization was
+    solving a problem that didn't exist (tuple == tuple in signature
+    comparison never invokes Thing.__hash__, so the 7.0.5 hash cache
+    was irrelevant; once that was reverted, signature() itself became
+    unnecessary here).  The trajectory signal is cheaper, exact, and
+    matches the principle body of d-fixed-point-is-termination
+    literally: "no productive wedge articulation".
 
     No max_iters (p-iteration-count-unknown).  Callers needing a
-    budget should either bound max_articulations_per_step (slowing
+    budget should either bound ``max_articulations_per_step`` (slowing
     each iteration) or wrap this function in their own bounded loop.
-
-    Parameters are forwarded to step() unchanged.
 
     Pure: does not mutate input state.  Returns the fixed-point state,
     including the full trajectory of every intermediate iteration for
-    inspection / replay / p-bijective-hash-consing round-trips.
+    inspection / replay.
     """
     while True:
-        prev_sig = state.signature()
         state = step(
             state,
             scorer=scorer,
             objective=objective,
             max_articulations_per_step=max_articulations_per_step,
         )
-        if state.signature() == prev_sig:
+        if state.trajectory and state.trajectory[-1].get("articulated_count", 0) == 0:
             return state
 
 
@@ -3056,25 +3062,24 @@ def _smoke_test() -> None:
                     f"scorer slow {score_slow} != fast {score_fast}"
                 )
 
-                # (3) Thing.__hash__ caches via object.__setattr__.
-                # Second hash call is O(1); we can't directly time
-                # without flakiness, but we can verify the cache
-                # attribute exists after the first call.
+                # (3) Thing.__hash__ is a pure function of content.
+                # Stage 7.0.6 reverted the 7.0.5 cache per user
+                # observation that the signature() hot path never
+                # invokes hash() — the cache solved a phantom
+                # problem.  Now __hash__ is stateless; same content
+                # produces same hash.
                 sample_thing = state.things[0][1]
                 assert not hasattr(sample_thing, "_hash"), (
-                    "Thing shouldn't have _hash before first hash() call"
+                    "Thing shouldn't have _hash cache (reverted in 7.0.6)"
                 )
-                _ = hash(sample_thing)
-                assert hasattr(sample_thing, "_hash"), (
-                    "Thing.__hash__ should cache via object.__setattr__"
-                )
-                # Second call returns the same value
                 h1 = hash(sample_thing)
                 h2 = hash(sample_thing)
                 assert h1 == h2
-                assert sample_thing._hash == h1
+                assert not hasattr(sample_thing, "_hash"), (
+                    "Thing.__hash__ shouldn't materialize cache attribute"
+                )
 
-                # Equal Things hash equal (cache is consistent)
+                # Equal Things hash equal (pure function of content)
                 same_thing = Thing(
                     id=sample_thing.id,
                     tau_mask=sample_thing.tau_mask.copy(),
@@ -3083,8 +3088,8 @@ def _smoke_test() -> None:
                 assert sample_thing == same_thing
                 assert hash(sample_thing) == hash(same_thing)
 
-                print(f"    Stage 7.0.5: numpy fast path verified "
-                      f"(_count_four_cell, scorer kwarg, Thing hash cache)")
+                print(f"    Stage 7.0.5+.6: numpy fast path + unmaterialized "
+                      f"hash (pure __hash__, trajectory-based fixed-point)")
 
         # Pool invariant: every observable appears as an Atom K
         for k in state.pool.ks:
@@ -3097,7 +3102,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.0.5 smoke test (eager-numpy + applied numpy): all assertions passed")
+    print("Stage 1–7.0.6 smoke test (eager-numpy + applied numpy + unmaterialized hash): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")

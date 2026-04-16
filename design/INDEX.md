@@ -72,7 +72,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (17)
+## Corrections (18)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -88,6 +88,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-stage-4-6-structural-functions-plus-split-orientations] Stage 4.6: structural scorer/objective classes; split two-orientation oracle scorer; decomposed signatures
 - ● [c-stage-5-5-no-default-budget-remove-weight-updater] Stage 5.5: no-default articulation budget; WeightUpdater removed; σ channel exercised
 - ● [c-stage-7-0-5-apply-numpy-not-just-store] Stage 7.0.5: apply numpy arrays array-natively, not via Python loops
+- ● [c-stage-7-0-6-unmaterialize-hash-and-signature] Stage 7.0.6: unmaterialize Thing._hash and replace signature()-based fixed-point with trajectory signal
 - ● [c-stage-7-0-eager-numpy-refactor] Stage 7.0: eager numpy refactor of internal representation
 - ● [c-stage-7-1-hybrid-jsonl-hdf5-io] Stage 7.1: hybrid JSONL + HDF5 I/O with generator run()
 - ● [c-weight-updater-becomes-new-k-articulation] WeightUpdater stub removed; weight updates reinterpreted as new-K articulation
