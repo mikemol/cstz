@@ -1691,6 +1691,305 @@ OBJECTIVES: dict = {
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# Stage 5 — step() — one closed-loop iteration
+# ---------------------------------------------------------------------------
+#
+# step(state) → state' is the single update rule that together with
+# run_to_fixed_point (Stage 6) constitutes the entire closed loop
+# (p-closed-self-referential-loop).  Pure function; no mutation;
+# merge-compatible (p-embarrassingly-parallel).
+#
+# The update has three phases:
+#
+#   1. Deterministic articulation (p-overlap-demands-wedge-articulation):
+#      enumerate every K-pair (K_i, K_j) in the current pool where
+#      some thing fires both (n_11 > 0) AND the joint Wedge(K_i, K_j)
+#      is not yet extensionally present in the pool.  Each such pair
+#      DEMANDS articulation.  Articulation adds the wedge K to the
+#      pool and extends each thing's τ/σ bitmaps to include the new
+#      bit (set iff both parents fire on that thing, per d-wedge-bit-
+#      and-of-parents).
+#
+#      Scorer PROVIDES ORDERING when demand exceeds per-step budget
+#      — does NOT gate which demands are ever met (the remainder
+#      persists into subsequent steps).
+#
+#   2. Weight update (d-weight-objective-pluggable): a pluggable
+#      updater adjusts per-K weights toward the objective.  Default
+#      is no-op (weight tuning is a separate stage's concern).
+#
+#   3. Trajectory logging: an entry recording the iteration's work
+#      is appended to state.trajectory.  Entries include scorer and
+#      objective structures (p-functions-have-structural-identity)
+#      so any wedge's provenance is recoverable from the log.
+#
+# Performance: per-K firing bitmaps are precomputed ONCE per step,
+# converting _count_four_cell-equivalent work from O(n_things) per
+# call to O(n_things / 64) ≈ O(1) integer-bitwise ops.  The
+# candidate enumeration uses thing-iteration (for each thing, each
+# pair of set bits is a pair with n_11 ≥ 1), bounding the candidate
+# space to pairs that actually co-fire somewhere.
+
+
+class WeightUpdater(Protocol):
+    """Pluggable weight-adjustment strategy.  Accepts the state and
+    an objective; returns the new weights-tuple.  Structural identity
+    required per p-functions-have-structural-identity.
+    """
+    def __call__(self, state: "State",
+                 objective: Objective) -> Tuple[Tuple[KKey, float], ...]: ...
+
+    @property
+    def structure(self) -> tuple: ...
+
+
+@dataclass(frozen=True)
+class NoOpWeightUpdater:
+    """Returns the current weights unchanged.  Stage 5 default — a
+    principled weight-tuning strategy is deferred to a later stage
+    that specifies the gradient semantics per p-maximal-freedom."""
+
+    def __call__(self, state: "State",
+                 objective: Objective) -> Tuple[Tuple[KKey, float], ...]:
+        return state.weights
+
+    @property
+    def structure(self) -> tuple:
+        return ("weight_updater", "noop")
+
+
+weight_updater_noop = NoOpWeightUpdater()
+
+
+# -- Precomputation helpers ------------------------------------------------
+
+
+def _bit_positions(x: int) -> list:
+    """Extract set-bit positions from an integer as a list (in
+    ascending order)."""
+    out = []
+    while x:
+        lsb = x & -x
+        out.append(lsb.bit_length() - 1)
+        x &= x - 1
+    return out
+
+
+def _compute_firing_bitmaps(
+    pool: "Pool",
+    thing_order: list,
+    channel: str = "tau",
+) -> dict:
+    """Per-K-index bitmap over thing-indices.  Inverts the per-thing
+    bitmap-over-K-indices storage.  Called once per step() to enable
+    O(1) n-cell counts via bitwise AND/NOT + popcount.
+
+    Returns: dict[int (pool bit index) → int (bitmap over thing indices)].
+    """
+    bitmaps: dict = {}
+    for k_idx in range(pool.size()):
+        bm = 0
+        for j, (_tid, thing) in enumerate(thing_order):
+            mask = thing.tau_mask if channel == "tau" else thing.sigma_mask
+            if (mask >> k_idx) & 1:
+                bm |= 1 << j
+        bitmaps[k_idx] = bm
+    return bitmaps
+
+
+def _articulate_wedge_into_state(
+    state: "State",
+    wedge: K,
+    firing_bitmaps: dict,
+    pool_index: dict,
+    thing_order: list,
+) -> "State":
+    """Add a single wedge K to the pool and extend each thing's
+    τ/σ bitmaps with the wedge's new bit.
+
+    The wedge's firing on a thing is the AND of its leaf atoms'
+    firings (per d-wedge-bit-and-of-parents; wedge.atoms() returns
+    the Atom leaves of the normalized inductive structure).  At
+    grade ≥ 1 initially, τ = σ for the wedge (d-tau-sigma-symmetric-
+    at-grade-1 extended to articulated K's in their first appearance).
+
+    Mutates ``firing_bitmaps`` and ``pool_index`` in place — these
+    are step()-local caches, so the mutation is private.  Returns a
+    new State.  If the wedge's firing is zero (no thing fires it),
+    returns state unchanged (degenerate — no discrimination added).
+    """
+    # Compute firing as AND of atom-leaf bitmaps
+    fires = None
+    for atom in wedge.atoms():
+        a_idx = state.pool.bit_of(atom)
+        if a_idx is None:
+            return state
+        f = firing_bitmaps[a_idx]
+        fires = f if fires is None else fires & f
+
+    if not fires:
+        return state  # degenerate; no thing fires the wedge
+
+    new_pool = state.pool.with_k(wedge)
+    wedge_idx = new_pool.bit_of(wedge)
+    if wedge_idx is None:
+        return state
+
+    # Extend each thing's bitmaps with the wedge's firing bit
+    new_things = []
+    for j, (tid, thing) in enumerate(thing_order):
+        if (fires >> j) & 1:
+            new_tau = thing.tau_mask | (1 << wedge_idx)
+            new_sigma = thing.sigma_mask | (1 << wedge_idx)
+            new_things.append(
+                (tid, Thing(id=tid, tau_mask=new_tau, sigma_mask=new_sigma))
+            )
+        else:
+            new_things.append((tid, thing))
+
+    # Update step-local caches so subsequent articulations in this
+    # batch see the new wedge
+    firing_bitmaps[wedge_idx] = fires
+    pool_index[wedge.key()] = wedge_idx
+
+    # Also update thing_order (it holds (tid, thing) tuples that need
+    # replacement so the index j maps to the updated thing).  We
+    # rebuild the list; thing_order is a step()-local sequence.
+    thing_order[:] = new_things
+
+    return State(
+        pool=new_pool,
+        things=tuple(sorted(new_things, key=lambda kv: kv[0])),
+        oracle_pairs=state.oracle_pairs,
+        weights=state.weights,
+        trajectory=state.trajectory,
+        iteration=state.iteration,
+    )
+
+
+# -- step() -----------------------------------------------------------------
+
+
+def step(
+    state: "State",
+    *,
+    scorer: Scorer | None = None,
+    objective: Objective | None = None,
+    weight_updater: WeightUpdater = weight_updater_noop,
+    max_articulations_per_step: int = 100,
+) -> "State":
+    """One closed-loop iteration.
+
+    Deterministically identifies demanded wedges (p-overlap-demands-
+    wedge-articulation), orders them by the optional scorer, and
+    articulates up to ``max_articulations_per_step`` of them.  Updates
+    weights via ``weight_updater``.  Appends a trajectory entry.
+    Returns a new State.
+
+    Pure: no mutation of input state; safe to call concurrently on
+    disjoint State shards (p-embarrassingly-parallel).
+
+    ``scorer``: if None, demanded wedges are articulated in
+    deterministic key-order.  If present, demanded wedges are
+    ordered by score descending, ties broken by wedge key.
+
+    ``objective``: handed to ``weight_updater``; unused when the
+    default no-op updater is in effect.
+    """
+    # -- Phase 0: precompute caches -----------------------------------------
+    thing_order = list(sorted(state.things, key=lambda kv: kv[0]))
+    firing_bitmaps = _compute_firing_bitmaps(state.pool, thing_order)
+    pool_index = {key: idx for key, idx in state.pool.by_key}
+    n_things = len(thing_order)
+
+    # -- Phase 1: enumerate candidate K-pairs (n_11 > 0) -------------------
+    # For each thing, each pair of its set bits is a K-pair that co-fires
+    # on at least this thing (n_11 ≥ 1).  Set-dedup across things.
+    candidate_pairs: set = set()
+    for j, (_tid, thing) in enumerate(thing_order):
+        bits = _bit_positions(thing.tau_mask)
+        for a in range(len(bits)):
+            bi = bits[a]
+            for b in range(a + 1, len(bits)):
+                bj = bits[b]
+                candidate_pairs.add((bi, bj))
+
+    # -- Phase 2: filter to uncaptured demands -----------------------------
+    # For each candidate K-pair, form the normalized wedge; check if it's
+    # already in the pool (captured).  Skip ZeroK (nilpotent self-pairs
+    # shouldn't reach here from distinct atoms, but normalize() guards).
+    demanded: list = []  # list of (k_left, k_right, wedge)
+    for (i, j) in candidate_pairs:
+        k_i = state.pool.ks[i]
+        k_j = state.pool.ks[j]
+        wedge = Wedge(k_i, k_j).normalize()
+        if isinstance(wedge, ZeroK):
+            continue
+        if wedge.key() in pool_index:
+            continue  # captured; no demand
+        demanded.append((k_i, k_j, wedge))
+
+    # -- Phase 3: order by scorer (if provided), else by wedge key --------
+    if scorer is not None and len(demanded) > max_articulations_per_step:
+        scored = []
+        for k_i, k_j, wedge in demanded:
+            s = scorer(state, k_i, k_j)
+            scored.append((s, k_i, k_j, wedge))
+        # Descending score, then wedge key ascending for determinism
+        scored.sort(key=lambda x: (-x[0], x[3].key()))
+        ordered = [(k_i, k_j, wedge) for _s, k_i, k_j, wedge in scored]
+    else:
+        demanded.sort(key=lambda x: x[2].key())
+        ordered = demanded
+
+    to_articulate = ordered[:max_articulations_per_step]
+
+    # -- Phase 4: articulate -----------------------------------------------
+    new_state = state
+    articulated_count = 0
+    for k_i, k_j, wedge in to_articulate:
+        before = new_state.pool.size()
+        new_state = _articulate_wedge_into_state(
+            new_state, wedge, firing_bitmaps, pool_index, thing_order
+        )
+        if new_state.pool.size() > before:
+            articulated_count += 1
+
+    # -- Phase 5: weight update --------------------------------------------
+    new_weights = weight_updater(new_state, objective)
+    if new_weights != new_state.weights:
+        new_state = State(
+            pool=new_state.pool,
+            things=new_state.things,
+            oracle_pairs=new_state.oracle_pairs,
+            weights=new_weights,
+            trajectory=new_state.trajectory,
+            iteration=new_state.iteration,
+        )
+
+    # -- Phase 6: trajectory entry -----------------------------------------
+    traj_entry = {
+        "iteration": state.iteration + 1,
+        "demanded_count": len(demanded),
+        "articulated_count": articulated_count,
+        "pool_size_before": state.pool.size(),
+        "pool_size_after": new_state.pool.size(),
+        "n_things": n_things,
+        "max_articulations_per_step": max_articulations_per_step,
+        "weight_updater": weight_updater.structure,
+    }
+    if scorer is not None:
+        traj_entry["scorer"] = list(scorer.structure)
+    if objective is not None:
+        traj_entry["objective"] = list(objective.structure)
+
+    return new_state.appending_trajectory(traj_entry)
+
+
+# ---------------------------------------------------------------------------
+
+
 def _smoke_test() -> None:
     """Exercise the type core; assert the κ = τ ⊕ σ invariant holds
     under S3 action and under TauSigma construction at the boundaries."""
@@ -2235,6 +2534,95 @@ def _smoke_test() -> None:
                 print(f"    Stage 4 + 4.5 + 4.6 scorers/objectives: structural "
                       f"identity + orientation-split verified on extracted state")
 
+                # -- Stage 5: step() -----------------------------------
+                # Run one step on the extracted state with a small
+                # per-step budget to keep the smoke test fast.
+                s0 = state
+                s1 = step(
+                    s0,
+                    scorer=scorer_xor_off_diagonal,
+                    objective=objective_oracle_pairs_with_witness,
+                    weight_updater=weight_updater_noop,
+                    max_articulations_per_step=20,
+                )
+
+                # Pool grew by at most 20 wedges
+                pool_growth = s1.pool.size() - s0.pool.size()
+                assert 0 <= pool_growth <= 20, (
+                    f"step() articulated {pool_growth} wedges; "
+                    f"expected 0..20"
+                )
+
+                # Iteration counter advanced
+                assert s1.iteration == s0.iteration + 1, (
+                    f"iteration {s0.iteration} → {s1.iteration}; expected +1"
+                )
+
+                # Trajectory entry recorded; carries structural identity
+                # of scorer / objective / weight_updater
+                assert len(s1.trajectory) == len(s0.trajectory) + 1
+                last = s1.trajectory[-1]
+                assert last["iteration"] == s0.iteration + 1
+                assert last["pool_size_before"] == s0.pool.size()
+                assert last["pool_size_after"] == s1.pool.size()
+                assert last["articulated_count"] == pool_growth
+                assert "scorer" in last
+                assert last["scorer"][0] == "scorer"
+                assert "objective" in last
+                assert last["weight_updater"][1] == "noop"
+
+                # Signature changed when pool grew
+                if pool_growth > 0:
+                    assert s0.signature() != s1.signature(), (
+                        "signature should change when pool grew"
+                    )
+
+                # Every newly-articulated K is a Wedge (not Atom)
+                for k in s1.pool.ks[s0.pool.size():]:
+                    assert isinstance(k, Wedge), (
+                        f"articulated K {k!r} is not a Wedge"
+                    )
+
+                # Each new wedge's firing respects d-wedge-bit-and-of-parents:
+                # the wedge fires on a thing iff ALL its atoms fire
+                s1_things_dict = dict(s1.things)
+                for k in s1.pool.ks[s0.pool.size():]:
+                    w_idx = s1.pool.bit_of(k)
+                    assert w_idx is not None
+                    for _tid, thing in s1.things:
+                        wedge_fires = bool((thing.tau_mask >> w_idx) & 1)
+                        atoms_fire = all(
+                            bool((thing.tau_mask >> s1.pool.bit_of(atom)) & 1)
+                            for atom in k.atoms()
+                            if s1.pool.bit_of(atom) is not None
+                        )
+                        assert wedge_fires == atoms_fire, (
+                            f"wedge {k.key()[:40]!r} firing ≠ AND of atom firings "
+                            f"on thing {_tid!r}"
+                        )
+
+                # Idempotency under re-articulation: wedges added in s1
+                # are captured in s1's pool, so another step on s1 will
+                # not re-articulate them.  Run a second step and check
+                # the total wedge count does not include duplicates.
+                s2 = step(
+                    s1,
+                    scorer=scorer_xor_off_diagonal,
+                    max_articulations_per_step=20,
+                )
+                # Each wedge key should be unique in the pool
+                keys_seen: set = set()
+                for k in s2.pool.ks:
+                    key = k.key()
+                    assert key not in keys_seen, (
+                        f"duplicate key in pool: {key[:40]!r}"
+                    )
+                    keys_seen.add(key)
+
+                print(f"    Stage 5 step(): articulated {pool_growth} wedges "
+                      f"in iter 1; {s2.pool.size() - s1.pool.size()} more in iter 2; "
+                      f"wedge firing consistent with AND-of-atoms")
+
         # Pool invariant: every observable appears as an Atom K
         for k in state.pool.ks:
             assert isinstance(k, Atom), (
@@ -2246,7 +2634,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1 + 2 + 2.5 + 2.6 + 3 + 3.5 + 3.6 + 4 + 4.5 + 4.6 smoke test: all assertions passed")
+    print("Stage 1 + 2 + 2.5 + 2.6 + 3 + 3.5 + 3.6 + 4 + 4.5 + 4.6 + 5 smoke test: all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
