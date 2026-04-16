@@ -90,7 +90,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (29)
+## Corrections (30)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -117,6 +117,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-stage-7-0-8-oracle-indices-and-shim-cleanup] Stage 7.0.8: oracle_pair_indices + scorer vectorization + dead-code shims retired
 - ● [c-stage-7-0-9-trajectory-structured-dtype-and-thing-docstring] Stage 7.0.9: trajectory → structured-dtype array + aux; Thing docstring realigned with post-7.0.7b role
 - ● [c-stage-7-0-eager-numpy-refactor] Stage 7.0: eager numpy refactor of internal representation
+- ● [c-stage-7-1-1-pool-to-hdf5-chunking-and-algebraic-self-validation] Stage 7.1.1: pool migrated to HDF5; chunked + extensible datasets; algebraic self-validation via K-structure
 - ● [c-stage-7-1-dump-load-enactment] Stage 7.1: hybrid JSONL + HDF5 I/O — dump_state / load_state; enacts l-hdf5-compound-dtypes-mirror-in-memory
 - ● [c-stage-7-1-hybrid-jsonl-hdf5-io] Stage 7.1: hybrid JSONL + HDF5 I/O with generator run()
 - ● [c-type-theory-reframed-via-tensor-shape] p-type-theory-everywhere reframed: primary focus is tensor shape, not class shape

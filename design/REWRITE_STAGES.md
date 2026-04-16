@@ -178,15 +178,35 @@ for Stage 10.  The original "append-only JSONL I/O" target is Stage
 ### Stage 7.1 — hybrid JSONL + HDF5 I/O (LANDED)
 
 dump_state / load_state partitioned per p-storage-matches-data-shape:
-small-algebra authoritative forms to JSONL (pool.jsonl, things.jsonl,
-oracle_pairs.jsonl, weights.jsonl, trajectory_aux.jsonl); bulk tensor
-caches to HDF5 (state.h5 with /masks/tau, optional /masks/sigma,
-/trajectory compound dtype).  Sigma masks conditional on
+small-algebra authoritative forms to JSONL (initially pool.jsonl,
+things.jsonl, oracle_pairs.jsonl, weights.jsonl, trajectory_aux.jsonl);
+bulk tensor caches to HDF5 (state.h5 with /masks/tau, optional
+/masks/sigma, /trajectory compound dtype).  Sigma masks conditional on
 state.sigma_derivable_from_tau; loader reconstructs σ = τ when absent.
 k_from_structure closes the p-bijective-hash-consing round-trip.
 Enacts l-hdf5-compound-dtypes-mirror-in-memory.  Nine of ten lemmas
 enacted; only l-combinator-and-s3-operators-are-equivalent remains
 active (Tier 3 scope).
+
+#### Stage 7.1.1 — pool to HDF5; chunked + extensible; algebraic self-validation
+
+Closes the post-7.1 audit's three Severity-2 + Severity-3 items:
+  - Pool migrates from pool.jsonl to /pool/keys_array as an HDF5
+    compound dataset (POOL_HDF5_DTYPE with S512 'key' bytes).
+    Aligns to l-hdf5-compound-dtypes-mirror-in-memory's "pool and
+    masks share pool_size attribute on parent group" formulation.
+  - All HDF5 datasets are now chunked with maxshape supporting
+    axis-0 growth (axis-1 also for masks); readiness for Stage-10
+    incremental shard accumulation.
+  - Validation via algebra-derived expectations rather than
+    range-checks: orbit_id checked against K-structure-derived
+    expectation (walk Rotated chain → pool.bit_of(root)); trajectory
+    iteration field checked for consecutive monotonicity
+    (np.array_equal vs np.arange(1, n_iter+1)).
+  - JSONL retirement direction ratified: pool.jsonl gone; remaining
+    JSONL files (things, oracle_pairs, weights, trajectory_aux) are
+    transitional, slated for migration.
+  - SCHEMA_VERSION bumped to 7.1.1.
 
 ## Stage 8: CLI (~50 lines)
 
