@@ -591,16 +591,33 @@ class Pool:
 
 
 # ---------------------------------------------------------------------------
-# Thing — a named declaration with τ/σ bitmaps over the Pool
+# Thing — value type for a single declaration's τ/σ bitmap row
 # ---------------------------------------------------------------------------
 
 
 @dataclass(frozen=True, eq=False)
 class Thing:
-    """A pooled object, identified solely by an opaque ThingId.
+    """Value type for a single declaration's identity + τ/σ bitmap row.
 
-    The algebra sees ONLY the identity and the bitmaps.  Under
-    ``p-source-is-a-k`` and ``p-no-bespoke-recognition``, source
+    NOTE on post-7.0.7b role: Thing is NOT the primary storage for
+    τ/σ bitmaps.  Under l-state-things-as-parallel-arrays (enacted
+    Stage 7.0.7b), the authoritative storage is the stacked matrices
+    ``State.tau_masks`` / ``State.sigma_masks`` of shape
+    ``(n_things, pool_size)``.  Thing remains as a value type for:
+
+      - constructing standalone test/extractor fixtures before
+        building a State (``state = State(things=(...))``);
+      - reconstructing a row-view on demand via ``state.things``,
+        ``state.things_dict()``, or ``state.with_thing(thing)``;
+      - external consumers that want a Python-object handle carrying
+        ``(id, tau_mask, sigma_mask, kappa_mask)`` without touching
+        the stacked matrices directly.
+
+    Prefer the direct matrix accessors (``state.row_of(tid)``,
+    ``state.tau_row(tid)``, ``state.sigma_row(tid)``) in hot paths —
+    no Thing reconstruction, no per-row copy.
+
+    Under ``p-source-is-a-k`` and ``p-no-bespoke-recognition``, source
     provenance is not a privileged field of Thing — it is an
     observable K registered in the Pool.  Same for display names,
     paths, line numbers, and anything else an extractor might want
@@ -611,12 +628,6 @@ class Thing:
     the Pool: element i True iff the K at pool position i fires on
     this thing in the respective channel.  ``kappa_mask`` is derived
     as ``tau XOR sigma`` by construction (never stored).
-
-    Under p-numpy-is-the-natural-cpu-representation + p-refactor-debt-
-    paid-eagerly, Stage 7.0 converted these from Python int bitmasks
-    to numpy bool arrays.  This keeps the algebra array-native from
-    end to end, consistent with the upcoming HDF5 I/O (Stage 7.1) and
-    with the general direction of the framework's CPU representation.
 
     Immutability: dataclass is frozen, and bitmasks are marked
     read-only at construction time (setflags(write=False)) so the
@@ -718,6 +729,74 @@ class Thing:
 # ---------------------------------------------------------------------------
 
 
+# Trajectory's on-disk / in-memory shape: one structured-dtype row per
+# step() iteration (l-trajectory-as-structured-dtype-array, enacted
+# Stage 7.0.9).  Under p-types-are-tensor-shape-obligations the field
+# names are part of the type — typos at write sites fail at dtype
+# validation instead of silently returning a default.
+#
+# max_articulations_per_step uses a signed i4 with -1 as the sentinel
+# for None (unbounded budget).  Matches the semantics of the Python-
+# level ``None`` while remaining a pure numeric dtype for HDF5
+# compound-dtype mirroring in Stage 7.1.
+#
+# Optional scorer / objective structural identities are logged in a
+# parallel ``trajectory_aux: Tuple[dict, ...]`` alongside — the lemma's
+# counterexample mitigation: keep one mandatory base dtype for hot-path
+# control fields; optional variable-shape fields go in a separate
+# auxiliary channel.
+TRAJECTORY_DTYPE = np.dtype([
+    ("iteration", "u4"),
+    ("demanded_count", "u4"),
+    ("articulated_count", "u4"),
+    ("pool_size_before", "u4"),
+    ("pool_size_after", "u4"),
+    ("n_things", "u4"),
+    ("max_articulations_per_step", "i4"),
+])
+_TRAJECTORY_NUMERIC_FIELDS = frozenset(TRAJECTORY_DTYPE.names)
+_MAX_ART_UNBOUNDED_SENTINEL = -1
+
+
+def _trajectory_from_dicts(
+    dict_seq: tuple,
+) -> Tuple[np.ndarray, Tuple[dict, ...]]:
+    """Split a sequence of dict trajectory entries into a structured
+    numeric array + a parallel aux-dict tuple.  Used both by
+    appending_trajectory (single entry) and by merge (concatenation).
+    """
+    if len(dict_seq) == 0:
+        return np.empty(0, dtype=TRAJECTORY_DTYPE), ()
+    rows = []
+    auxes: list = []
+    for entry in dict_seq:
+        if isinstance(entry, np.void):
+            # Already a structured-array row; aux field carried separately
+            # (this path shouldn't occur in normal flow, but guard).
+            rows.append(tuple(entry[f] for f in TRAJECTORY_DTYPE.names))
+            auxes.append({})
+            continue
+        max_art = entry.get("max_articulations_per_step")
+        row = (
+            int(entry.get("iteration", 0)),
+            int(entry.get("demanded_count", 0)),
+            int(entry.get("articulated_count", 0)),
+            int(entry.get("pool_size_before", 0)),
+            int(entry.get("pool_size_after", 0)),
+            int(entry.get("n_things", 0)),
+            _MAX_ART_UNBOUNDED_SENTINEL if max_art is None else int(max_art),
+        )
+        rows.append(row)
+        aux = {
+            k: v for k, v in entry.items()
+            if k not in _TRAJECTORY_NUMERIC_FIELDS
+        }
+        auxes.append(aux)
+    arr = np.array(rows, dtype=TRAJECTORY_DTYPE)
+    arr.setflags(write=False)
+    return arr, tuple(auxes)
+
+
 @dataclass(frozen=True, eq=False, init=False)
 class State:
     """Complete state of the closed-loop algorithm.
@@ -774,7 +853,8 @@ class State:
     oracle_pairs: frozenset        # authoritative; frozenset[frozenset[ThingId]]
     oracle_pair_indices: np.ndarray  # dtype=int64, shape (n_pairs, 2); cache
     weights: Tuple[Tuple[KKey, float], ...]
-    trajectory: Tuple
+    trajectory: np.ndarray          # dtype=TRAJECTORY_DTYPE, shape (n_iter,)
+    trajectory_aux: Tuple[dict, ...]  # parallel aux; scorer/objective structure
     iteration: int
 
     def __init__(
@@ -787,7 +867,8 @@ class State:
         sigma_masks: np.ndarray | None = None,
         oracle_pairs: frozenset = frozenset(),
         weights: Tuple[Tuple[KKey, float], ...] = (),
-        trajectory: Tuple = (),
+        trajectory: Tuple | np.ndarray = (),
+        trajectory_aux: Tuple[dict, ...] | None = None,
         iteration: int = 0,
     ) -> None:
         """Accept either the legacy ``things=(id, Thing)...`` form or
@@ -888,6 +969,23 @@ class State:
             pair_indices = np.empty((0, 2), dtype=np.int64)
         pair_indices.setflags(write=False)
 
+        # Normalize trajectory into (structured_array, aux_tuple).
+        if isinstance(trajectory, np.ndarray) and trajectory.dtype == TRAJECTORY_DTYPE:
+            traj_arr = trajectory
+            if not traj_arr.flags.writeable:
+                pass  # already read-only
+            else:
+                traj_arr.setflags(write=False)
+            traj_aux = trajectory_aux if trajectory_aux is not None else ({},) * len(traj_arr)
+            if len(traj_aux) != len(traj_arr):
+                raise ValueError(
+                    f"trajectory_aux length {len(traj_aux)} != trajectory length "
+                    f"{len(traj_arr)}"
+                )
+        else:
+            # Legacy: tuple of dicts.  Split into structured + aux.
+            traj_arr, traj_aux = _trajectory_from_dicts(tuple(trajectory))
+
         object.__setattr__(self, "pool", p)
         object.__setattr__(self, "thing_ids", ids_arr)
         object.__setattr__(self, "tau_masks", tau)
@@ -896,7 +994,8 @@ class State:
         object.__setattr__(self, "oracle_pair_indices", pair_indices)
         object.__setattr__(self, "_id_to_row", id_to_row)
         object.__setattr__(self, "weights", weights)
-        object.__setattr__(self, "trajectory", trajectory)
+        object.__setattr__(self, "trajectory", traj_arr)
+        object.__setattr__(self, "trajectory_aux", traj_aux)
         object.__setattr__(self, "iteration", iteration)
 
     # -- equality / hash (overridden since ndarray fields aren't hashable) ---
@@ -914,7 +1013,8 @@ class State:
             and np.array_equal(self.sigma_masks, other.sigma_masks)
             and self.oracle_pairs == other.oracle_pairs
             and self.weights == other.weights
-            and self.trajectory == other.trajectory
+            and np.array_equal(self.trajectory, other.trajectory)
+            and self.trajectory_aux == other.trajectory_aux
             and self.iteration == other.iteration
         )
 
@@ -926,7 +1026,7 @@ class State:
             self.sigma_masks.tobytes(),
             self.oracle_pairs,
             self.weights,
-            self.trajectory,
+            self.trajectory.tobytes(),
             self.iteration,
         ))
 
@@ -1037,6 +1137,7 @@ class State:
                 oracle_pairs=self.oracle_pairs,
                 weights=self.weights,
                 trajectory=self.trajectory,
+                trajectory_aux=self.trajectory_aux,
                 iteration=self.iteration,
             )
 
@@ -1053,6 +1154,7 @@ class State:
             oracle_pairs=self.oracle_pairs,
             weights=self.weights,
             trajectory=self.trajectory,
+            trajectory_aux=self.trajectory_aux,
             iteration=self.iteration,
         )
 
@@ -1079,6 +1181,7 @@ class State:
             oracle_pairs=self.oracle_pairs,
             weights=self.weights,
             trajectory=self.trajectory,
+            trajectory_aux=self.trajectory_aux,
             iteration=self.iteration,
         )
 
@@ -1093,10 +1196,20 @@ class State:
             oracle_pairs=self.oracle_pairs,
             weights=new,
             trajectory=self.trajectory,
+            trajectory_aux=self.trajectory_aux,
             iteration=self.iteration,
         )
 
     def appending_trajectory(self, entry: dict) -> "State":
+        """Append one entry to the trajectory.
+
+        Splits the entry's mandatory TRAJECTORY_DTYPE fields into a new
+        structured-array row and packs the remaining keys (scorer,
+        objective structural identities) into the parallel aux dict.
+        """
+        new_row_arr, new_aux_tuple = _trajectory_from_dicts((entry,))
+        merged_arr = np.concatenate([self.trajectory, new_row_arr])
+        merged_arr.setflags(write=False)
         return State(
             pool=self.pool,
             thing_ids=self.thing_ids,
@@ -1104,7 +1217,8 @@ class State:
             sigma_masks=self.sigma_masks,
             oracle_pairs=self.oracle_pairs,
             weights=self.weights,
-            trajectory=self.trajectory + (entry,),
+            trajectory=merged_arr,
+            trajectory_aux=self.trajectory_aux + new_aux_tuple,
             iteration=self.iteration + 1,
         )
 
@@ -1205,12 +1319,16 @@ class State:
                 ws[k] = w
 
         oracle = self.oracle_pairs | other.oracle_pairs
-        traj_combined = tuple(
-            sorted(
-                self.trajectory + other.trajectory,
-                key=lambda e: e.get("iteration", 0) if isinstance(e, dict) else 0,
-            )
-        )
+
+        # Trajectory: concatenate structured arrays + aux tuples, then
+        # sort both in lock-step by the 'iteration' field.
+        combined_arr = np.concatenate([self.trajectory, other.trajectory])
+        combined_aux = self.trajectory_aux + other.trajectory_aux
+        if len(combined_arr) > 0:
+            order = np.argsort(combined_arr["iteration"], kind="stable")
+            combined_arr = combined_arr[order]
+            combined_aux = tuple(combined_aux[i] for i in order.tolist())
+        combined_arr.setflags(write=False)
 
         return State(
             pool=merged_pool,
@@ -1219,7 +1337,8 @@ class State:
             sigma_masks=merged_sig,
             oracle_pairs=oracle,
             weights=tuple(sorted(ws.items(), key=lambda kv: kv[0])),
-            trajectory=traj_combined,
+            trajectory=combined_arr,
+            trajectory_aux=combined_aux,
             iteration=max(self.iteration, other.iteration),
         )
 
@@ -1250,6 +1369,7 @@ class State:
             oracle_pairs=kept_oracle,
             weights=self.weights,
             trajectory=self.trajectory,
+            trajectory_aux=self.trajectory_aux,
             iteration=self.iteration,
         )
 
@@ -2389,6 +2509,7 @@ def _articulate_wedges_batch(
         oracle_pairs=state.oracle_pairs,
         weights=state.weights,
         trajectory=state.trajectory,
+        trajectory_aux=state.trajectory_aux,
         iteration=state.iteration,
     )
     return new_state, n_new
@@ -2585,7 +2706,7 @@ def run_to_fixed_point(
             objective=objective,
             max_articulations_per_step=max_articulations_per_step,
         )
-        if state.trajectory and state.trajectory[-1].get("articulated_count", 0) == 0:
+        if len(state.trajectory) > 0 and state.trajectory[-1]["articulated_count"] == 0:
             return state
 
 
@@ -3177,21 +3298,29 @@ def _smoke_test() -> None:
                     f"iteration {s0.iteration} → {s1.iteration}; expected +1"
                 )
 
-                # Trajectory entry recorded; carries structural identity
-                # of scorer / objective / weight_updater
+                # Trajectory entry recorded; structured-dtype numeric
+                # fields in .trajectory[-1], aux fields (scorer /
+                # objective structural identity) in .trajectory_aux[-1]
+                # per l-trajectory-as-structured-dtype-array.
                 assert len(s1.trajectory) == len(s0.trajectory) + 1
-                last = s1.trajectory[-1]
+                assert len(s1.trajectory_aux) == len(s1.trajectory)
+                last = s1.trajectory[-1]           # np.void (structured row)
+                last_aux = s1.trajectory_aux[-1]   # dict
                 assert last["iteration"] == s0.iteration + 1
                 assert last["pool_size_before"] == s0.pool.size()
                 assert last["pool_size_after"] == s1.pool.size()
                 assert last["articulated_count"] == pool_growth
-                assert "scorer" in last
-                assert last["scorer"][0] == "scorer"
-                assert "objective" in last
-                # Stage 5.5: no weight_updater field in trajectory
-                assert "weight_updater" not in last, (
+                assert "scorer" in last_aux
+                assert last_aux["scorer"][0] == "scorer"
+                assert "objective" in last_aux
+                # Stage 5.5: no weight_updater field in trajectory aux
+                assert "weight_updater" not in last_aux, (
                     "weight_updater removed per c-weight-updater-becomes-new-k-articulation"
                 )
+                # TRAJECTORY_DTYPE field names enforce the type at write
+                # time — a typo would fail dtype assignment rather than
+                # silently returning a default (the old .get() contract).
+                assert last.dtype == TRAJECTORY_DTYPE
 
                 # Signature changed when pool grew
                 if pool_growth > 0:
@@ -3271,8 +3400,11 @@ def _smoke_test() -> None:
                 )
                 s_unbounded = step(tiny_state, scorer=scorer_xor_off_diagonal)
                 last_traj = s_unbounded.trajectory[-1]
-                assert last_traj["max_articulations_per_step"] is None, (
-                    "unbounded budget default should appear in trajectory"
+                # Unbounded budget (Python None) is encoded as
+                # _MAX_ART_UNBOUNDED_SENTINEL (-1) in the structured
+                # dtype — pure numeric, HDF5-compatible.
+                assert last_traj["max_articulations_per_step"] == _MAX_ART_UNBOUNDED_SENTINEL, (
+                    "unbounded budget default should appear in trajectory as sentinel -1"
                 )
                 # All demanded wedges in the tiny restricted state were
                 # articulated
@@ -3468,6 +3600,9 @@ def _smoke_test() -> None:
                 print(f"    Stage 7.0.8: oracle pairs Int[n_pairs, 2] cache; "
                       f"oracle scorers vectorized; Thing.remap + "
                       f"_compute_firing_bitmaps shim retired")
+                print(f"    Stage 7.0.9: trajectory is TRAJECTORY_DTYPE "
+                      f"structured array + trajectory_aux for optional "
+                      f"scorer/objective structural identity")
 
         # Pool invariant: every observable appears as an Atom K
         for k in state.pool.ks:
@@ -3480,7 +3615,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.0.8 smoke test (oracle pairs as Int array; scorers vectorized; dead-code shims retired): all assertions passed")
+    print("Stage 1–7.0.9 smoke test (trajectory as structured-dtype array + aux; Thing docstring post-7.0.7b): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
