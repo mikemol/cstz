@@ -3062,91 +3062,60 @@ def step(
 
     # -- Phase 1: enumerate candidate K-pairs (n_11 > 0) -------------------
     #
-    # LAZY S3 orbit expansion (Stage 7.2.2): instead of materializing
-    # Rotated K's in the pool (eager write-path), we compute VIRTUAL
-    # orbit-member firing rows and include them in the co-fire matmul.
-    # Virtual probes exist only during this enumeration; they never
-    # enter the pool.  The virtual firing matrix has 3 sections:
-    #   [0:P]    — base K's τ∪σ union (physical pool entries)
-    #   [P:2P]   — virtual rotate(K, (τκ)) τ∪σ
-    #   [2P:3P]  — virtual rotate(K, (σκ)) τ∪σ
-    # Under symmetric atoms (τ=σ), the 3 sections are identical, so
-    # virtual pairs add no new co-fire above what the base pairs give.
-    # Under asymmetric K's, virtual sections surface additional pairs.
+    # S3 orbit expansion is INFERRED, not materialized (Stage 7.2.2+).
+    # Under the F₂² constraint, (τ⊕σ)|σ = τ|σ and τ|(τ⊕σ) = τ|σ —
+    # so the τ∪σ union firing of any S3-rotated K equals the base K's
+    # τ∪σ.  The virtual 3P×3P matmul is 9 identical copies of the base
+    # P×P block: zero new co-fire pairs from orbit expansion.
     #
-    # When a candidate pair (i, j) maps to a virtual index (i ≥ P or
-    # j ≥ P), the corresponding K is Rotated(pool.ks[i % P], generator).
-    # The demanded wedge is then Wedge(K_physical, Rotated(K_physical, g))
-    # which has a Rotated leaf and triggers the general combinator.
+    # What orbit expansion DOES add: new DEMANDED WEDGES.  For each
+    # base candidate pair (i, j), we also demand Wedge(K_i, Rotated(K_j, g))
+    # for each S3 generator g.  These Rotated-leaf wedges trigger the
+    # general combinator and produce asymmetric firings.  The demands
+    # are inferred from the base co-fire matrix without materializing
+    # virtual firing rows — a syndrome-decoding shortcut where the
+    # algebraic identity IS the syndrome.
     sigma_bitmaps = firing_bitmaps_of(state, "sigma")
+    base_union = firing_bitmaps | sigma_bitmaps
+    fb_int = base_union.astype(np.int32)
+    co_fire_count = fb_int @ fb_int.T  # [P, P]
     pool_size = firing_bitmaps.shape[0]
     n_things = len(state.thing_ids)
-    # Virtual orbit expansion applies to grade-1 K's (atoms) only.
-    # Virtual-rotating grade-2+ K's (wedges) would produce grade-3+
-    # Rotated-leaf wedges that the grade-2-only general combinator
-    # can't handle.  Atoms' orbit members are what breaks symmetry;
-    # wedge orbit members are higher-order and deferred.
-    grade1_mask = np.array(
-        [k.grade == 1 for k in state.pool.ks], dtype=bool
-    ) if pool_size > 0 else np.array([], dtype=bool)
-    if pool_size > 0 and n_things > 0 and np.any(grade1_mask):
-        kappa_bitmaps = firing_bitmaps ^ sigma_bitmaps
-        # Virtual τ∪σ for (τκ)-rotated atoms only (others left as base)
-        virtual_tk = np.where(
-            grade1_mask[:, None],
-            kappa_bitmaps | sigma_bitmaps,       # rotated union
-            firing_bitmaps | sigma_bitmaps,       # base union (non-atoms)
-        )
-        virtual_sk = np.where(
-            grade1_mask[:, None],
-            firing_bitmaps | kappa_bitmaps,       # rotated union
-            firing_bitmaps | sigma_bitmaps,       # base union
-        )
-        base_union = firing_bitmaps | sigma_bitmaps
-        virtual_fb = np.concatenate([base_union, virtual_tk, virtual_sk], axis=0)
-    else:
-        base_union = firing_bitmaps | sigma_bitmaps
-        virtual_fb = base_union
-    fb_int = virtual_fb.astype(np.int32)
-    co_fire_count = fb_int @ fb_int.T
-    # Virtual index space is [0, 3P).  Upper-triangle of the full
-    # [3P, 3P] matrix gives all non-self candidate pairs including
-    # (base, virtual) and (virtual, virtual).
-    vsize = co_fire_count.shape[0]
-    triu = np.triu(np.ones((vsize, vsize), dtype=bool), k=1)
+    # Upper-triangle of the P×P matrix
+    triu = np.triu(np.ones((pool_size, pool_size), dtype=bool), k=1)
     pair_mask = (co_fire_count > 0) & triu
     i_idx, j_idx = np.where(pair_mask)
-
-    # Resolve virtual indices to K objects.  Section layout:
-    # [0:P] = base pool K's;  [P:2P] = rotate by (τκ);  [2P:3P] = rotate by (σκ)
-    _generators = [None, _S3_TAU_KAPPA, _S3_SIGMA_KAPPA]
-
-    def _resolve_virtual(v_idx: int) -> K:
-        section = v_idx // pool_size if pool_size > 0 else 0
-        base_idx = v_idx % pool_size if pool_size > 0 else 0
-        base_k = state.pool.ks[base_idx]
-        g = _generators[section]
-        # Only grade-1 (atoms) are virtually rotated; others stay base
-        if g is None or base_k.grade != 1:
-            return base_k
-        return rotate(base_k, g)
+    base_pairs = list(zip(i_idx.tolist(), j_idx.tolist()))
 
     # -- Phase 2: filter to uncaptured demands -----------------------------
+    # For each base candidate pair (i, j), demand the base wedge AND
+    # its S3-orbit-inferred Rotated-leaf variants (grade-1 parents
+    # only — rotating grade-2+ parents would produce grade-3+
+    # Rotated-leaf wedges the general combinator can't handle yet).
     demanded: list = []  # list of (k_left, k_right, wedge)
     seen_wedge_keys: set = set()
-    for vi, vj in zip(i_idx.tolist(), j_idx.tolist()):
-        k_i = _resolve_virtual(vi)
-        k_j = _resolve_virtual(vj)
-        wedge = Wedge(k_i, k_j).normalize()
-        if isinstance(wedge, ZeroK):
-            continue
-        w_key = wedge.key()
-        if w_key in pool_index:
-            continue  # captured; no demand
-        if w_key in seen_wedge_keys:
-            continue  # duplicate from different virtual pairs
-        seen_wedge_keys.add(w_key)
-        demanded.append((k_i, k_j, wedge))
+    for (i, j) in base_pairs:
+        k_i = state.pool.ks[i]
+        k_j = state.pool.ks[j]
+        # Enumerate: base pair + Rotated-leaf variants for grade-1 K's
+        pairs_to_try = [(k_i, k_j)]
+        if k_j.grade == 1:
+            for g in _ORBIT_SEEDING_GENERATORS:
+                pairs_to_try.append((k_i, rotate(k_j, g)))
+        if k_i.grade == 1:
+            for g in _ORBIT_SEEDING_GENERATORS:
+                pairs_to_try.append((rotate(k_i, g), k_j))
+        for kl, kr in pairs_to_try:
+            wedge = Wedge(kl, kr).normalize()
+            if isinstance(wedge, ZeroK):
+                continue
+            w_key = wedge.key()
+            if w_key in pool_index:
+                continue  # captured; no demand
+            if w_key in seen_wedge_keys:
+                continue  # duplicate from different pairs
+            seen_wedge_keys.add(w_key)
+            demanded.append((kl, kr, wedge))
 
     # -- Phase 3: order by scorer (if provided), else by wedge key --------
     need_scoring = (
