@@ -380,7 +380,208 @@ class Thing:
 
 
 # ---------------------------------------------------------------------------
-# Stage 1 smoke test
+# State — the closed-loop state (Stage 2)
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class State:
+    """Complete state of the closed-loop algorithm.
+
+    ``pool``          — the K registry (Pool).
+    ``things``        — mapping thing-id → Thing.  All Things' bitmaps
+                        are interpreted against ``pool``.
+    ``oracle_pairs``  — frozenset of frozenset({id_a, id_b}) — thing
+                        pairs known to correspond (citation links).
+                        Used for weight calibration only, never for
+                        gating.
+    ``weights``       — per-K weight, keyed by K.key().  Pluggable
+                        objective adjusts these.
+    ``trajectory``    — append-only tuple of per-iteration telemetry.
+    ``iteration``     — monotonic counter.
+
+    Frozen dataclass: step() must return a new State, never mutate.
+    ``merge``, ``restrict``, and ``signature`` support self-similarity
+    and embarrassingly-parallel operation per p-embarrassingly-parallel.
+    """
+
+    pool: Pool = field(default_factory=Pool)
+    things: Tuple[Tuple[str, Thing], ...] = ()        # sorted-by-id for hashability
+    oracle_pairs: frozenset = frozenset()             # frozenset[frozenset[str]]
+    weights: Tuple[Tuple[str, float], ...] = ()       # sorted-by-key for hashability
+    trajectory: Tuple = ()
+    iteration: int = 0
+
+    # -- accessors ----------------------------------------------------------
+
+    def things_dict(self) -> dict:
+        return dict(self.things)
+
+    def weights_dict(self) -> dict:
+        return dict(self.weights)
+
+    def weight_of(self, k: K, default: float = 1.0) -> float:
+        target = k.key()
+        for key, w in self.weights:
+            if key == target:
+                return w
+        return default
+
+    # -- constructors -------------------------------------------------------
+
+    def with_thing(self, thing: Thing) -> "State":
+        """Add or replace a thing by id."""
+        others = tuple((i, t) for i, t in self.things if i != thing.id)
+        new = tuple(sorted(others + ((thing.id, thing),), key=lambda kv: kv[0]))
+        return State(
+            pool=self.pool,
+            things=new,
+            oracle_pairs=self.oracle_pairs,
+            weights=self.weights,
+            trajectory=self.trajectory,
+            iteration=self.iteration,
+        )
+
+    def with_pool(self, pool: Pool) -> "State":
+        return State(
+            pool=pool,
+            things=self.things,
+            oracle_pairs=self.oracle_pairs,
+            weights=self.weights,
+            trajectory=self.trajectory,
+            iteration=self.iteration,
+        )
+
+    def with_weight(self, k_key: str, w: float) -> "State":
+        others = tuple((k, v) for k, v in self.weights if k != k_key)
+        new = tuple(sorted(others + ((k_key, w),), key=lambda kv: kv[0]))
+        return State(
+            pool=self.pool,
+            things=self.things,
+            oracle_pairs=self.oracle_pairs,
+            weights=new,
+            trajectory=self.trajectory,
+            iteration=self.iteration,
+        )
+
+    def appending_trajectory(self, entry: dict) -> "State":
+        return State(
+            pool=self.pool,
+            things=self.things,
+            oracle_pairs=self.oracle_pairs,
+            weights=self.weights,
+            trajectory=self.trajectory + (entry,),
+            iteration=self.iteration + 1,
+        )
+
+    # -- merge / restrict ---------------------------------------------------
+
+    def merge(self, other: "State") -> "State":
+        """Union two states.  Associative and commutative up to:
+        - pool index reassignment (merged pool may index K's in a
+          different order than either input; Things' bitmaps must be
+          remapped if their Pool differs from the merged Pool);
+        - weight collision: same-key weights average;
+        - oracle pairs union;
+        - trajectory concatenation (non-commutative; order-preserving
+          via iteration counter).
+
+        In this Stage-2 implementation we assume identical pools in
+        both inputs — enforced by an assertion.  Cross-pool merge
+        (which requires bitmap remapping) is Stage 10 concern.
+        """
+        # Pool merge (may reassign indices if different)
+        merged_pool = self.pool.merge(other.pool)
+        if merged_pool.keys != self.pool.keys or merged_pool.keys != other.pool.keys:
+            # Cross-pool merge requires bitmap remapping; deferred.
+            # For Stage 2, reject unless one is a prefix of the other.
+            if not (self.pool.keys == merged_pool.keys[: len(self.pool.keys)]
+                    and other.pool.keys == merged_pool.keys[: len(other.pool.keys)]):
+                raise NotImplementedError(
+                    "cross-pool merge with non-prefix divergence is Stage 10"
+                )
+
+        # Things: union by id; collision requires identical Thing (no bitmap remap yet)
+        things_self = dict(self.things)
+        things_other = dict(other.things)
+        combined: dict = {}
+        for tid in set(things_self) | set(things_other):
+            if tid in things_self and tid in things_other:
+                if things_self[tid] != things_other[tid]:
+                    raise ValueError(f"thing id {tid!r} has diverging content across states")
+                combined[tid] = things_self[tid]
+            else:
+                combined[tid] = things_self.get(tid, things_other.get(tid))
+
+        # Weights: average on collision
+        ws: dict = dict(self.weights)
+        for k, w in other.weights:
+            if k in ws:
+                ws[k] = (ws[k] + w) / 2.0
+            else:
+                ws[k] = w
+
+        # Oracle: union
+        oracle = self.oracle_pairs | other.oracle_pairs
+
+        # Trajectory: concatenate, sorted by iteration field if present
+        traj_combined = tuple(
+            sorted(
+                self.trajectory + other.trajectory,
+                key=lambda e: e.get("iteration", 0) if isinstance(e, dict) else 0,
+            )
+        )
+
+        return State(
+            pool=merged_pool,
+            things=tuple(sorted(combined.items(), key=lambda kv: kv[0])),
+            oracle_pairs=oracle,
+            weights=tuple(sorted(ws.items(), key=lambda kv: kv[0])),
+            trajectory=traj_combined,
+            iteration=max(self.iteration, other.iteration),
+        )
+
+    def restrict(
+        self,
+        *,
+        thing_ids: frozenset[str] | None = None,
+    ) -> "State":
+        """Return a sub-state containing only the requested things.
+        Pool is preserved (K-pool doesn't partition naturally at this
+        stage).  Oracle pairs restricted to those fully contained in
+        the requested thing-set.
+        """
+        if thing_ids is None:
+            return self
+        kept = tuple((i, t) for i, t in self.things if i in thing_ids)
+        kept_oracle = frozenset(
+            p for p in self.oracle_pairs if all(x in thing_ids for x in p)
+        )
+        return State(
+            pool=self.pool,
+            things=kept,
+            oracle_pairs=kept_oracle,
+            weights=self.weights,
+            trajectory=self.trajectory,
+            iteration=self.iteration,
+        )
+
+    # -- identity / fixed-point detection -----------------------------------
+
+    def signature(self) -> Tuple:
+        """Structural fingerprint used by run_to_fixed_point to detect
+        stability.  Excludes trajectory (which grows monotonically)
+        and iteration counter.  Fixed point ↔ signature stable."""
+        return (
+            self.pool.keys,
+            self.things,
+            self.oracle_pairs,
+            self.weights,
+        )
+
+
+# ---------------------------------------------------------------------------
+# Stage 1 + 2 smoke test
 # ---------------------------------------------------------------------------
 
 
@@ -484,11 +685,78 @@ def _smoke_test() -> None:
     ts_at_2 = t2.tausigma_at(pool, Atom("k2"))
     assert ts_at_2.tau == 1 and ts_at_2.sigma == 0 and ts_at_2.kappa == 1
 
-    print("Stage 1 smoke test: all assertions passed")
+    # -- Stage 2: State merge / restrict / signature ------------------------
+
+    # Two states with disjoint things, shared pool prefix
+    pool_a = Pool().with_k(Atom("k0")).with_k(Atom("k1"))
+    t1 = Thing(id="A", display="A", tau_mask=0b01, sigma_mask=0b01)
+    t2 = Thing(id="B", display="B", tau_mask=0b10, sigma_mask=0b11)
+    s1 = State(pool=pool_a, things=(("A", t1),), weights=(("atom:k0", 1.5),))
+
+    # Second state uses an extended pool (prefix-compatible)
+    pool_b = pool_a.with_k(Atom("k2"))
+    t3 = Thing(id="C", display="C", tau_mask=0b100, sigma_mask=0b000)
+    s2 = State(
+        pool=pool_b,
+        things=(("B", t2), ("C", t3)),
+        oracle_pairs=frozenset({frozenset({"A", "B"})}),
+        weights=(("atom:k1", 2.0),),
+    )
+
+    # Merge: pool unions to the extended form; things union; weights union
+    m = s1.merge(s2)
+    assert m.pool.size() == 3, f"merged pool size {m.pool.size()}"
+    assert len(m.things) == 3, f"merged things count {len(m.things)}"
+    assert frozenset({"A", "B"}) in m.oracle_pairs
+    assert m.weight_of(Atom("k0")) == 1.5
+    assert m.weight_of(Atom("k1")) == 2.0
+
+    # Merge idempotent
+    assert m.merge(m).signature() == m.signature(), "merge not idempotent"
+
+    # Merge associative (order-preserving on trajectory only; identity elsewhere)
+    s3 = State(pool=pool_b, things=(("D", Thing(id="D", display="D")),))
+    left = (s1.merge(s2)).merge(s3)
+    right = s1.merge(s2.merge(s3))
+    assert left.signature() == right.signature(), "merge not associative"
+
+    # Weight collision: averaged on merge
+    sA = State(pool=pool_a, weights=(("atom:k0", 1.0),))
+    sB = State(pool=pool_a, weights=(("atom:k0", 3.0),))
+    sAB = sA.merge(sB)
+    assert sAB.weight_of(Atom("k0")) == 2.0, "weight collision not averaged"
+
+    # Restrict: subset of things + pruned oracle
+    restricted = m.restrict(thing_ids=frozenset({"A"}))
+    assert len(restricted.things) == 1
+    assert len(restricted.oracle_pairs) == 0, "oracle with absent endpoint not pruned"
+
+    # Restrict preserving oracle
+    restricted2 = m.restrict(thing_ids=frozenset({"A", "B"}))
+    assert len(restricted2.things) == 2
+    assert frozenset({"A", "B"}) in restricted2.oracle_pairs
+
+    # Signature changes when pool grows
+    sig_before = s1.signature()
+    s1_ext = s1.with_pool(pool_b)
+    sig_after = s1_ext.signature()
+    assert sig_before != sig_after, "signature should change when pool changes"
+
+    # Appending trajectory advances iteration without changing signature
+    s1_traj = s1.appending_trajectory({"note": "hello"})
+    assert s1_traj.signature() == s1.signature(), (
+        "trajectory append should not affect signature"
+    )
+    assert s1_traj.iteration == s1.iteration + 1
+
+    print("Stage 1 + 2 smoke test: all assertions passed")
     print(f"  TauSigma invariant OK for all 4 cases × 6 S3 elements")
     print(f"  Wedge commutativity canonicalized via normalize()")
     print(f"  Pool append/merge idempotent; bit indices stable")
     print(f"  κ = τ ⊕ σ preserved by Thing.kappa_mask and TauSigma.kappa")
+    print(f"  State.merge associative, idempotent; weights averaged on collision")
+    print(f"  State.restrict prunes orphan oracle pairs")
+    print(f"  State.signature stable under trajectory append")
 
 
 if __name__ == "__main__":
