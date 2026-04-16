@@ -567,12 +567,24 @@ class Thing:
         )
 
     def __hash__(self) -> int:
-        return hash((
+        # Cache the hash on first computation.  Thing is frozen, but
+        # object.__setattr__ bypasses the freeze to let us memoize on
+        # an undeclared attribute.  Subsequent __hash__ calls read the
+        # cached value via getattr.  Under p-numpy-is-the-natural-cpu-
+        # representation: hashing .tobytes() of kilobyte-scale masks
+        # shouldn't happen per-call when State.signature() folds
+        # hundreds of Thing hashes into one scalar.
+        cached = getattr(self, "_hash", None)
+        if cached is not None:
+            return cached
+        h = hash((
             self.id,
             self.tau_mask.shape,
             self.tau_mask.tobytes(),
             self.sigma_mask.tobytes(),
         ))
+        object.__setattr__(self, "_hash", h)
+        return h
 
     @property
     def kappa_mask(self) -> np.ndarray:
@@ -1367,10 +1379,18 @@ class Scorer(Protocol):
     (trajectory records), and cross-session merging.  The structure
     tuple is bijective: composite scorers recurse into their
     components' structures.
+
+    Optional ``firing_bitmaps`` kwarg (Stage 7.0.5): when step() has
+    precomputed the [pool_size, n_things] 2D bool matrix, it passes
+    it through to scorers that can take the fast array-slicing path
+    for four-cell counting.  Scorers ignore the kwarg if they don't
+    need it.  None default preserves backward-compatible call sites.
     """
 
     def __call__(self, state: "State",
-                 k_left: "K", k_right: "K") -> ScoreValue: ...
+                 k_left: "K", k_right: "K",
+                 *, firing_bitmaps: np.ndarray | None = None
+                 ) -> ScoreValue: ...
 
     @property
     def structure(self) -> tuple: ...
@@ -1417,15 +1437,25 @@ def joint_already_captured(state: "State", k_i: "K", k_j: "K") -> bool:
 
 
 def _count_four_cell(state: "State", k_i: "K", k_j: "K",
-                     channel: str = "tau") -> Tuple[int, int, int, int]:
+                     channel: str = "tau",
+                     firing_bitmaps: np.ndarray | None = None,
+                     ) -> Tuple[int, int, int, int]:
     """Return (n_00, n_01, n_10, n_11): counts of things in each cell of
     the 2×2 (K_i, K_j) joint firing distribution on the given channel.
 
-    Uses numpy bitwise operations on the per-thing τ/σ arrays — each
-    thing's mask is a bool array of length pool_size; extract indices
-    i and j across all things gives two bool arrays of length
-    n_things; cell counts are sums over bitwise AND / AND-NOT
-    combinations.
+    Two paths, same result:
+
+    * Fast path (``firing_bitmaps`` provided): slice two rows of the
+      precomputed [pool_size, n_things] bool matrix and run 3 numpy
+      ops (AND, AND-NOT, SUM).  O(n_things / SIMD_width) per call.
+      Used when step() or a batched scorer has precomputed
+      firing_bitmaps at entry and wants to amortize the per-K row
+      extraction across many scorer calls.
+
+    * Slow path (``firing_bitmaps`` is None): build per-thing
+      fires_i / fires_j arrays from the per-thing masks one-by-one.
+      O(n_things) per call.  Used when a scorer is called in
+      isolation outside step() (diagnostic / ad-hoc queries).
 
     Under d-tau-sigma-symmetric-at-grade-1 and atoms with τ=σ, the
     ``tau`` and ``sigma`` channels produce identical counts at grade 1.
@@ -1434,20 +1464,29 @@ def _count_four_cell(state: "State", k_i: "K", k_j: "K",
     idx_j = state.pool.bit_of(k_j)
     if idx_i is None or idx_j is None:
         return (0, 0, 0, 0)
-    fires_i_list = []
-    fires_j_list = []
-    for _tid, thing in state.things:
-        mask = thing.tau_mask if channel == "tau" else thing.sigma_mask
-        if idx_i < len(mask):
-            fires_i_list.append(bool(mask[idx_i]))
-        else:
-            fires_i_list.append(False)
-        if idx_j < len(mask):
-            fires_j_list.append(bool(mask[idx_j]))
-        else:
-            fires_j_list.append(False)
-    fires_i = np.asarray(fires_i_list, dtype=bool)
-    fires_j = np.asarray(fires_j_list, dtype=bool)
+
+    if firing_bitmaps is not None:
+        # Fast path: firing_bitmaps is [pool_size, n_things] bool
+        if (idx_i >= firing_bitmaps.shape[0]
+                or idx_j >= firing_bitmaps.shape[0]):
+            return (0, 0, 0, 0)
+        fires_i = firing_bitmaps[idx_i]
+        fires_j = firing_bitmaps[idx_j]
+    else:
+        # Slow path: build arrays from per-thing masks
+        fires_i_list = []
+        fires_j_list = []
+        for _tid, thing in state.things:
+            mask = thing.tau_mask if channel == "tau" else thing.sigma_mask
+            fires_i_list.append(
+                bool(mask[idx_i]) if idx_i < len(mask) else False
+            )
+            fires_j_list.append(
+                bool(mask[idx_j]) if idx_j < len(mask) else False
+            )
+        fires_i = np.asarray(fires_i_list, dtype=bool)
+        fires_j = np.asarray(fires_j_list, dtype=bool)
+
     n_11 = int(np.sum(fires_i & fires_j))
     n_10 = int(np.sum(fires_i & ~fires_j))
     n_01 = int(np.sum(~fires_i & fires_j))
@@ -1468,8 +1507,12 @@ class XorOffDiagonalScorer:
     """
     units: str = "count"
 
-    def __call__(self, state: "State", k_left: "K", k_right: "K") -> ScoreValue:
-        _, n_01, n_10, _ = _count_four_cell(state, k_left, k_right)
+    def __call__(self, state: "State", k_left: "K", k_right: "K",
+                 *, firing_bitmaps: np.ndarray | None = None
+                 ) -> ScoreValue:
+        _, n_01, n_10, _ = _count_four_cell(
+            state, k_left, k_right, firing_bitmaps=firing_bitmaps
+        )
         return ScoreValue(float(n_01 + n_10))
 
     @property
@@ -1485,8 +1528,12 @@ class XorOffDiagonalLogPairScorer:
     just summing off-diagonals indifferently.  Units: nats (ln)."""
     units: str = "nats"
 
-    def __call__(self, state: "State", k_left: "K", k_right: "K") -> ScoreValue:
-        _, n_01, n_10, _ = _count_four_cell(state, k_left, k_right)
+    def __call__(self, state: "State", k_left: "K", k_right: "K",
+                 *, firing_bitmaps: np.ndarray | None = None
+                 ) -> ScoreValue:
+        _, n_01, n_10, _ = _count_four_cell(
+            state, k_left, k_right, firing_bitmaps=firing_bitmaps
+        )
         if n_01 == 0 or n_10 == 0:
             return ScoreValue(0.0)
         return ScoreValue(math.log(n_01) + math.log(n_10))
@@ -1506,8 +1553,12 @@ class EntropyOfFourCellScorer:
     """
     units: str = "bits"
 
-    def __call__(self, state: "State", k_left: "K", k_right: "K") -> ScoreValue:
-        cells = _count_four_cell(state, k_left, k_right)
+    def __call__(self, state: "State", k_left: "K", k_right: "K",
+                 *, firing_bitmaps: np.ndarray | None = None
+                 ) -> ScoreValue:
+        cells = _count_four_cell(
+            state, k_left, k_right, firing_bitmaps=firing_bitmaps
+        )
         total = sum(cells)
         if total == 0:
             return ScoreValue(0.0)
@@ -1537,7 +1588,12 @@ class OracleBooleanWitnessTauSigmaScorer:
     """
     units: str = "count"
 
-    def __call__(self, state: "State", k_left: "K", k_right: "K") -> ScoreValue:
+    def __call__(self, state: "State", k_left: "K", k_right: "K",
+                 *, firing_bitmaps: np.ndarray | None = None
+                 ) -> ScoreValue:
+        # firing_bitmaps is unused here (oracle scorers iterate oracle
+        # pairs directly rather than four-cell count over all things)
+        del firing_bitmaps
         idx_i = state.pool.bit_of(k_left)
         idx_j = state.pool.bit_of(k_right)
         if idx_i is None or idx_j is None:
@@ -1575,7 +1631,12 @@ class OracleBooleanWitnessSigmaTauScorer:
     """
     units: str = "count"
 
-    def __call__(self, state: "State", k_left: "K", k_right: "K") -> ScoreValue:
+    def __call__(self, state: "State", k_left: "K", k_right: "K",
+                 *, firing_bitmaps: np.ndarray | None = None
+                 ) -> ScoreValue:
+        # firing_bitmaps is unused here (oracle scorers iterate oracle
+        # pairs directly rather than four-cell count over all things)
+        del firing_bitmaps
         idx_i = state.pool.bit_of(k_left)
         idx_j = state.pool.bit_of(k_right)
         if idx_i is None or idx_j is None:
@@ -1703,10 +1764,13 @@ class CompositeScorer:
     components: Tuple[Tuple[float, Scorer], ...]
 
     def __call__(self, state: "State",
-                 k_left: "K", k_right: "K") -> ScoreValue:
+                 k_left: "K", k_right: "K",
+                 *, firing_bitmaps: np.ndarray | None = None
+                 ) -> ScoreValue:
         total = 0.0
         for w, s in self.components:
-            total += w * s(state, k_left, k_right)
+            total += w * s(state, k_left, k_right,
+                           firing_bitmaps=firing_bitmaps)
         return ScoreValue(total)
 
     @property
@@ -2011,19 +2075,21 @@ def step(
     n_things = len(thing_order)
 
     # -- Phase 1: enumerate candidate K-pairs (n_11 > 0) -------------------
-    # For each thing, each pair of its set bits (positions where the
-    # τ-mask is True) is a K-pair that co-fires on at least this thing
-    # (n_11 ≥ 1).  Set-dedup across things.  Uses np.where to extract
-    # set-bit indices per thing — vectorized over numpy arrays.
-    candidate_pairs: set = set()
-    for j, (_tid, thing) in enumerate(thing_order):
-        bits = np.where(thing.tau_mask)[0]  # indices of True entries
-        n_bits = len(bits)
-        for a in range(n_bits):
-            bi = int(bits[a])
-            for b in range(a + 1, n_bits):
-                bj = int(bits[b])
-                candidate_pairs.add((bi, bj))
+    # Vectorized via co-fire matrix: firing_bitmaps is [P, N] bool;
+    # firing_bitmaps @ firing_bitmaps.T is [P, P] int where [i, j] =
+    # count of things where both K_i and K_j fire.  We only need
+    # (i, j) with i < j and count > 0 — exactly the upper-triangle
+    # of the co-fire matrix.  This is one BLAS matmul + mask +
+    # np.where, replacing Python O(things × C(bits_per_thing, 2))
+    # nested-loop set-adds.
+    fb_int = firing_bitmaps.astype(np.int32)
+    co_fire_count = fb_int @ fb_int.T  # [P, P]
+    pool_size = firing_bitmaps.shape[0]
+    # Upper-triangle (exclude diagonal) mask
+    triu = np.triu(np.ones((pool_size, pool_size), dtype=bool), k=1)
+    pair_mask = (co_fire_count > 0) & triu
+    i_idx, j_idx = np.where(pair_mask)
+    candidate_pairs = list(zip(i_idx.tolist(), j_idx.tolist()))
 
     # -- Phase 2: filter to uncaptured demands -----------------------------
     demanded: list = []  # list of (k_left, k_right, wedge)
@@ -2046,7 +2112,9 @@ def step(
     if need_scoring:
         scored = []
         for k_i, k_j, wedge in demanded:
-            s = scorer(state, k_i, k_j)
+            # Pass precomputed firing_bitmaps so scorers can take the
+            # fast path (p-numpy-is-the-natural-cpu-representation).
+            s = scorer(state, k_i, k_j, firing_bitmaps=firing_bitmaps)
             scored.append((s, k_i, k_j, wedge))
         scored.sort(key=lambda x: (-x[0], x[3].key()))
         ordered = [(k_i, k_j, wedge) for _s, k_i, k_j, wedge in scored]
@@ -2948,6 +3016,76 @@ def _smoke_test() -> None:
                       f"{syn_pool.size()} → {fixed.pool.size()}; "
                       f"fixed-point verified by no-op step()")
 
+                # -- Stage 7.0.5: numpy-application perf fixes ---------
+                # (1) _count_four_cell fast path via firing_bitmaps.
+                # Build firing_bitmaps once; compare fast vs slow path
+                # outputs — they must agree.
+                sample_things = state.restrict(
+                    thing_ids=frozenset(
+                        tid for tid, _ in state.things[:50]
+                    )
+                )
+                sample_order = list(sorted(sample_things.things,
+                                            key=lambda kv: kv[0]))
+                sample_bitmaps = _compute_firing_bitmaps(
+                    sample_things.pool, sample_order
+                )
+                # Pick two atoms that both fire on at least one thing
+                k_a = k_src_candidates[0]
+                k_b = k_kind_candidates[0]
+                slow = _count_four_cell(sample_things, k_a, k_b)
+                fast = _count_four_cell(
+                    sample_things, k_a, k_b,
+                    firing_bitmaps=sample_bitmaps,
+                )
+                assert slow == fast, (
+                    f"fast-path cell counts {fast} disagree with slow {slow}"
+                )
+
+                # (2) Scorer fast path via firing_bitmaps kwarg.
+                # Scorers called with firing_bitmaps produce same score
+                # as without.
+                score_slow = scorer_xor_off_diagonal(
+                    sample_things, k_a, k_b
+                )
+                score_fast = scorer_xor_off_diagonal(
+                    sample_things, k_a, k_b,
+                    firing_bitmaps=sample_bitmaps,
+                )
+                assert abs(score_slow - score_fast) < 1e-9, (
+                    f"scorer slow {score_slow} != fast {score_fast}"
+                )
+
+                # (3) Thing.__hash__ caches via object.__setattr__.
+                # Second hash call is O(1); we can't directly time
+                # without flakiness, but we can verify the cache
+                # attribute exists after the first call.
+                sample_thing = state.things[0][1]
+                assert not hasattr(sample_thing, "_hash"), (
+                    "Thing shouldn't have _hash before first hash() call"
+                )
+                _ = hash(sample_thing)
+                assert hasattr(sample_thing, "_hash"), (
+                    "Thing.__hash__ should cache via object.__setattr__"
+                )
+                # Second call returns the same value
+                h1 = hash(sample_thing)
+                h2 = hash(sample_thing)
+                assert h1 == h2
+                assert sample_thing._hash == h1
+
+                # Equal Things hash equal (cache is consistent)
+                same_thing = Thing(
+                    id=sample_thing.id,
+                    tau_mask=sample_thing.tau_mask.copy(),
+                    sigma_mask=sample_thing.sigma_mask.copy(),
+                )
+                assert sample_thing == same_thing
+                assert hash(sample_thing) == hash(same_thing)
+
+                print(f"    Stage 7.0.5: numpy fast path verified "
+                      f"(_count_four_cell, scorer kwarg, Thing hash cache)")
+
         # Pool invariant: every observable appears as an Atom K
         for k in state.pool.ks:
             assert isinstance(k, Atom), (
@@ -2959,7 +3097,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.0 smoke test (eager-numpy internal representation): all assertions passed")
+    print("Stage 1–7.0.5 smoke test (eager-numpy + applied numpy): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
