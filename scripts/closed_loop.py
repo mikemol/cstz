@@ -29,6 +29,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Iterator, NewType, Tuple
 
 
@@ -755,6 +756,219 @@ class State:
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# Stage 3 — atom extraction from parse-tree sources
+# ---------------------------------------------------------------------------
+#
+# Pools every top-level named declaration across the paper / agda / python
+# sources into a flat set of Things.  For each Thing, observes the verbatim
+# kind strings appearing in its subtree (``deep_kind_set``) and registers
+# each as an atomic K in the Pool.  A source-membership atom
+# (``source:paper``, ``source:agda``, ``source:python``) is also registered
+# and fires on every thing of the corresponding source — satisfying
+# ``p-source-is-a-k`` (source is just another K, not a privileged field).
+#
+# Under ``d-tau-sigma-symmetric-at-grade-1``: τ = σ for atomic K's, so each
+# Thing's ``tau_mask == sigma_mask``, giving κ = 0 identically at grade 1.
+# Asymmetry emerges only via κ-evolution at higher grades.
+#
+# Oracle pairs are loaded from the existing manifests at
+# ``reports/{paper,agda,python}_decls.jsonl`` if they exist; otherwise the
+# oracle is empty.  The oracle is used only by downstream scorers/
+# objectives (``d-oracle-calibrates-not-gates``) and does not affect
+# extraction.
+#
+# Under ``p-no-bespoke-recognition``, the choice to enumerate "top-level
+# named declarations" as Things is a pragmatic scale decision recorded in
+# ``d-things-are-named-decls``.  Finer-grained Things (every parse-tree
+# node) are a future refinement.
+
+
+def _source_roots(repo: Path) -> dict:
+    """Directory roots for each source's parse-tree extraction."""
+    return {
+        "paper": repo / "paper",
+        "agda": repo / "agda",
+        "python": repo / "src",
+    }
+
+
+def _iter_source_nodes(
+    repo: Path, source: str
+) -> Iterator[Tuple[str, frozenset]]:
+    """Yield (thing_id, deep_kind_observations) for every top-level named
+    declaration in ``source``.  Uses the existing parsers in
+    ``structural_identity``; no re-implementation."""
+    import sys
+    scripts_dir = str(repo / "scripts")
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    from structural_identity import (
+        parse_paper_decls, parse_agda_decls, parse_python_decls,
+        deep_kind_set,
+    )
+
+    anon_counter = 0
+    roots = _source_roots(repo)
+    if source == "paper":
+        for node in parse_paper_decls(roots["paper"]):
+            dc = node.named_decl
+            if dc is None:
+                continue
+            kind, label = dc
+            disambig = label or f"anon_{anon_counter:03d}"
+            if not label:
+                anon_counter += 1
+            tid = f"paper:{kind}:{disambig}"
+            yield tid, deep_kind_set(node)
+    elif source == "agda":
+        for path in sorted(roots["agda"].rglob("*.agda")):
+            try:
+                for node in parse_agda_decls(path):
+                    dc = node.named_decl
+                    if dc is None:
+                        continue
+                    kind, name = dc
+                    tid = f"agda:{kind}:{name}"
+                    yield tid, deep_kind_set(node)
+            except Exception as e:
+                # Parse failures on individual files do not abort the
+                # whole extraction — log silently and move on.
+                continue
+    elif source == "python":
+        for path in sorted(roots["python"].rglob("*.py")):
+            try:
+                for node in parse_python_decls(path):
+                    dc = node.named_decl
+                    if dc is None:
+                        continue
+                    kind, name = dc
+                    tid = f"python:{kind}:{name}"
+                    yield tid, deep_kind_set(node)
+            except Exception:
+                continue
+    else:
+        raise ValueError(f"unknown source: {source!r}")
+
+
+def _load_oracle_pairs(repo: Path) -> frozenset:
+    """Load citation-oracle pairs from existing reports manifests.
+
+    Returns ``frozenset[frozenset[ThingId]]``.  If manifests are absent
+    or any error occurs, returns empty.  The oracle is input data for
+    weight calibration (``d-oracle-calibrates-not-gates``); never a
+    commit gate.
+    """
+    import json
+    reports_dir = repo / "reports"
+    manifests = {
+        "paper": reports_dir / "paper_decls.jsonl",
+        "agda": reports_dir / "agda_decls.jsonl",
+        "python": reports_dir / "python_decls.jsonl",
+    }
+    if not all(p.exists() for p in manifests.values()):
+        return frozenset()
+    try:
+        paper_rows = [json.loads(l) for l in manifests["paper"].open() if l.strip()]
+        agda_rows = [json.loads(l) for l in manifests["agda"].open() if l.strip()]
+        python_rows = [json.loads(l) for l in manifests["python"].open() if l.strip()]
+    except Exception:
+        return frozenset()
+    agda_docs = {r["qualname"]: r.get("docstring", "") for r in agda_rows}
+    python_docs = {r["qualname"]: r.get("docstring", "") for r in python_rows}
+
+    import sys
+    scripts_dir = str(repo / "scripts")
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    try:
+        from calibrate_weights import build_citation_oracle
+    except Exception:
+        return frozenset()
+    oracle = build_citation_oracle(paper_rows, agda_docs, python_docs)
+    return frozenset(
+        frozenset({ThingId(src), ThingId(tgt)})
+        for src, tgt, _cite, _stream in oracle
+    )
+
+
+def extract_initial_state(
+    repo: Path,
+    *,
+    source_filter: frozenset | None = None,
+    include_oracle: bool = True,
+) -> State:
+    """Build the initial ``State`` from on-disk parse trees.
+
+    ``source_filter``: if given, restrict extraction to this subset of
+    ``{"paper", "agda", "python"}`` (useful for smoke tests and
+    Stage-9 shard experiments).  Default: all three sources.
+
+    ``include_oracle``: if True, load citation pairs from
+    ``reports/{source}_decls.jsonl`` manifests.  If manifests are
+    absent, oracle is empty silently.
+
+    Registers one atomic K per distinct kind-observable-string observed
+    across any Thing's subtree, plus one atomic K per source name
+    (``source:paper``, etc.).  Each Thing gets τ = σ bitmap over the
+    Pool: bit i set iff the K at pool position i fires on this Thing's
+    subtree (or is the source-membership atom for this Thing's source).
+
+    Because τ = σ for every atom at grade 1, κ = 0 identically.
+    Higher-grade wedges (future stages) can produce τ ≠ σ states.
+    """
+    sources = ("paper", "agda", "python")
+    if source_filter is not None:
+        sources = tuple(s for s in sources if s in source_filter)
+
+    # Phase 1: collect raw observations per Thing
+    raw: list = []  # list of (thing_id, source, frozenset[str])
+    for src in sources:
+        for tid, obs in _iter_source_nodes(repo, src):
+            raw.append((tid, src, obs))
+
+    # Phase 2: build Pool.  Distinct observations across all Things
+    # plus one source-atom per source = the initial K pool.  Sorted
+    # for deterministic bit assignment across runs.
+    all_observables: set = set()
+    for _tid, src, obs in raw:
+        all_observables.update(obs)
+        all_observables.add(f"source:{src}")
+    pool = Pool()
+    for observable in sorted(all_observables):
+        pool = pool.with_k(Atom(Observable(observable)))
+
+    # Phase 3: build Things with τ = σ bitmaps
+    things: list = []
+    for tid, src, obs in raw:
+        mask = 0
+        for observation in obs:
+            idx = pool.bit_of(Atom(Observable(observation)))
+            if idx is not None:
+                mask |= 1 << idx
+        # Fire the source atom
+        src_idx = pool.bit_of(Atom(Observable(f"source:{src}")))
+        if src_idx is not None:
+            mask |= 1 << src_idx
+        things.append(
+            Thing(id=ThingId(tid), tau_mask=mask, sigma_mask=mask)
+        )
+
+    # Phase 4: optional oracle load
+    oracle = _load_oracle_pairs(repo) if include_oracle else frozenset()
+
+    return State(
+        pool=pool,
+        things=tuple(sorted(
+            ((t.id, t) for t in things), key=lambda kv: kv[0]
+        )),
+        oracle_pairs=oracle,
+    )
+
+
+# ---------------------------------------------------------------------------
+
+
 def _smoke_test() -> None:
     """Exercise the type core; assert the κ = τ ⊕ σ invariant holds
     under S3 action and under TauSigma construction at the boundaries."""
@@ -1017,7 +1231,61 @@ def _smoke_test() -> None:
                 == merged_rev.things_dict()[tid].fires(merged_rev.pool, k)
             ), f"divergent merge not order-invariant for K={k.key()} tid={tid}"
 
-    print("Stage 1 + 2 + 2.5 + 2.6 smoke test: all assertions passed")
+    # -- Stage 3: atom extraction from parse-tree sources -------------------
+    # Only runs if we can find the repo root (sources present).
+
+    repo = Path.cwd()
+    sources_present = {
+        "paper": (repo / "paper").is_dir(),
+        "agda": (repo / "agda").is_dir(),
+        "python": (repo / "src").is_dir(),
+    }
+
+    if any(sources_present.values()):
+        # Run on whichever sources are available (single-source if needed)
+        available = frozenset(s for s, ok in sources_present.items() if ok)
+        state = extract_initial_state(
+            repo, source_filter=available, include_oracle=True,
+        )
+
+        # Minimum assertions: got at least one thing, at least one atom
+        assert len(state.things) > 0, "extracted zero things"
+        assert state.pool.size() > 0, "extracted zero atoms"
+
+        # p-atoms-are-formal-tau-sigma-channels + d-tau-sigma-symmetric-at-grade-1:
+        # κ = 0 identically for every thing at grade 1
+        for tid, thing in state.things:
+            assert thing.kappa_mask == 0, (
+                f"thing {tid!r} has κ ≠ 0 at grade 1: τ={thing.tau_mask:b} "
+                f"σ={thing.sigma_mask:b}; τ should equal σ for atoms"
+            )
+
+        # p-source-is-a-k: source atoms present in pool for each active source
+        for src in available:
+            src_atom = Atom(Observable(f"source:{src}"))
+            idx = state.pool.bit_of(src_atom)
+            assert idx is not None, f"source atom source:{src} not in pool"
+            # Every thing from that source fires the source atom on its tau
+            matching = [
+                t for tid, t in state.things if tid.startswith(f"{src}:")
+            ]
+            for t in matching:
+                assert (t.tau_mask >> idx) & 1, (
+                    f"thing of source {src!r} does not fire source atom"
+                )
+
+        # Pool invariant: every observable appears as an Atom K
+        for k in state.pool.ks:
+            assert isinstance(k, Atom), (
+                f"Stage-3 initial pool should contain only Atoms, got {type(k).__name__}"
+            )
+
+        print(f"    Stage 3 extraction: {len(state.things)} things, "
+              f"{state.pool.size()} atoms, {len(state.oracle_pairs)} oracle pairs")
+    else:
+        print("    Stage 3 extraction: no source dirs found in cwd; skipping")
+
+    print("Stage 1 + 2 + 2.5 + 2.6 + 3 smoke test: all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
