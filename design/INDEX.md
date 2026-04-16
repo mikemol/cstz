@@ -68,7 +68,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 
 ## Lemmas (10)
 
-- ● [l-combinator-and-s3-operators-are-equivalent] General exterior-algebra combinator ≡ S3 operators + AND-wedge (two presentations, one structure)
+- ▲ [l-combinator-and-s3-operators-are-equivalent] General exterior-algebra combinator ≡ S3 operators + AND-wedge (two presentations, one structure)
 - ▲ [l-hash-consing-as-np-unique] Hash-consing of K becomes np.unique over the pool's structured-dtype array
 - ▲ [l-hdf5-compound-dtypes-mirror-in-memory] HDF5 compound dtypes on disk should mirror the in-memory structured dtypes 1:1
 - ▲ [l-k-level-s3-operators] S3 lifts from the tsk tensor to K-level operators swap, rotate, compose
@@ -90,12 +90,13 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (30)
+## Corrections (32)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
 - ● [c-bespoke-pattern-recognition-rejected] Even 'elaborate subtree matching for specific axioms' must emerge
 - ● [c-context-externalized-to-sppf] Session context externalized to design/ SPPF
+- ● [c-d-wedge-combinator-typo-fix] d-wedge-combinator-general-exterior-algebra σ-formula: strict GF(2), symmetric-atom degeneration is τ_K=σ_K=0
 - ● [c-division-notation-is-matrix-cell] '/' in (σ/τ) is matrix-cell separator, not ratio
 - ● [c-lowercase-still-hardcoded] Lowercasing is hardcoded equivalence, not a generic transform
 - ● [c-metadata-was-a-smuggled-taxonomy] Metadata class was a smuggled taxonomy, removed in Stage 2.6
@@ -118,6 +119,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-stage-7-0-9-trajectory-structured-dtype-and-thing-docstring] Stage 7.0.9: trajectory → structured-dtype array + aux; Thing docstring realigned with post-7.0.7b role
 - ● [c-stage-7-0-eager-numpy-refactor] Stage 7.0: eager numpy refactor of internal representation
 - ● [c-stage-7-1-1-pool-to-hdf5-chunking-and-algebraic-self-validation] Stage 7.1.1: pool migrated to HDF5; chunked + extensible datasets; algebraic self-validation via K-structure
+- ● [c-stage-7-1-2-tier3-asymmetric-regime-activation] Stage 7.1.2: Tier 3 — general combinator activation on Rotated-parent wedges; final lemma enacted
 - ● [c-stage-7-1-dump-load-enactment] Stage 7.1: hybrid JSONL + HDF5 I/O — dump_state / load_state; enacts l-hdf5-compound-dtypes-mirror-in-memory
 - ● [c-stage-7-1-hybrid-jsonl-hdf5-io] Stage 7.1: hybrid JSONL + HDF5 I/O with generator run()
 - ● [c-type-theory-reframed-via-tensor-shape] p-type-theory-everywhere reframed: primary focus is tensor shape, not class shape

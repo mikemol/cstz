@@ -208,6 +208,36 @@ Closes the post-7.1 audit's three Severity-2 + Severity-3 items:
     transitional, slated for migration.
   - SCHEMA_VERSION bumped to 7.1.1.
 
+#### Stage 7.1.2 — Tier 3 activation: general combinator on Rotated-parent wedges
+
+Enacts l-combinator-and-s3-operators-are-equivalent (10/10 lemmas
+now enacted).  Closes the post-7.1.1 audit's Sev 3 (c) gap and
+activates the asymmetric regime:
+  - Sev 3 (c) fix: smoke-test exercises a Pool containing an Atom +
+    its swap through full dump/load; orbit metadata round-trips,
+    pool_has_trivial_orbits correctly flips False.
+  - _articulate_wedges_batch detects Rotated-parent grade-2 wedges
+    and computes (τ_W, σ_W) via the strict-GF(2) general
+    exterior-algebra combinator (τ_W = (τ_A·σ_B) ⊕ (σ_A·τ_B);
+    σ_W = (τ_A·τ_B) ⊕ (σ_A·σ_B)) instead of AND-of-parents.  All-
+    non-Rotated wedges keep AND semantics.  Higher-grade Rotated-
+    leaf wedges fall back to AND (deferred to future stage).
+  - c-d-wedge-combinator-typo-fix clarifies the σ-formula's
+    strict-GF(2) reading (symmetric atoms degenerate to 0 in BOTH
+    channels, not "σ_K = τ_A·τ_B" as the decision body originally
+    said); meaningful asymmetric wedges require at least one
+    Rotated parent.
+  - Smoke test: rotate two atoms via (τκ) transposition; construct
+    asymmetric State; articulate the wedge; verify σ ≠ τ on the
+    thing; verify /masks/sigma is genuinely written; round-trip
+    preserves the asymmetric firing bit-identically.
+  - SCHEMA_VERSION bumped to 7.2.0 (major stays 7 so 7.1.x dumps
+    still load).
+
+Non-goals: step()-level demand-driven Rotated articulation (future
+stage with a concrete demand-criterion design); grade-3+ recursive
+combinator; further JSONL retirement.
+
 ## Stage 8: CLI (~50 lines)
 
 ```
