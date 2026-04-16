@@ -3036,14 +3036,20 @@ def step(
     n_things = len(state.thing_ids)
 
     # -- Phase 1: enumerate candidate K-pairs (n_11 > 0) -------------------
-    # Vectorized via co-fire matrix: firing_bitmaps is [P, N] bool;
-    # firing_bitmaps @ firing_bitmaps.T is [P, P] int where [i, j] =
-    # count of things where both K_i and K_j fire.  We only need
-    # (i, j) with i < j and count > 0 — exactly the upper-triangle
-    # of the co-fire matrix.  This is one BLAS matmul + mask +
-    # np.where, replacing Python O(things × C(bits_per_thing, 2))
-    # nested-loop set-adds.
-    fb_int = firing_bitmaps.astype(np.int32)
+    # Vectorized via co-fire matrix on the τ∪σ union channel:
+    # a K "participates" in a thing if it fires in τ OR σ.  This
+    # extends the pre-Stage-7.2 τ-only enumeration so Rotated K's
+    # (which may have τ=0 under (τκ)/(σκ) rotations of symmetric
+    # atoms but σ=1) participate in pair discovery.  Under symmetric
+    # regime (τ = σ for all K's) this is identical to τ-only co-fire.
+    # Resolves q-step-co-fire-enumeration-multi-channel via the
+    # "union over τ, σ" choice.  firing_bitmaps passed to
+    # _articulate_wedges_batch stays τ-only — the AND-wedge path
+    # uses τ-firing for symmetric wedge predicates; the general-
+    # combinator path reads σ separately from state.sigma_masks.T.
+    sigma_bitmaps = firing_bitmaps_of(state, "sigma")
+    union_bitmaps = firing_bitmaps | sigma_bitmaps
+    fb_int = union_bitmaps.astype(np.int32)
     co_fire_count = fb_int @ fb_int.T  # [P, P]
     pool_size = firing_bitmaps.shape[0]
     # Upper-triangle (exclude diagonal) mask
@@ -3183,6 +3189,227 @@ def run_to_fixed_point(
             max_articulations_per_step=max_articulations_per_step,
         )
         if len(state.trajectory) > 0 and state.trajectory[-1]["articulated_count"] == 0:
+            return state
+
+
+# ---------------------------------------------------------------------------
+# Stage 7.2 — Post-Tier-3: step()-level asymmetric regime activation
+# ---------------------------------------------------------------------------
+#
+# Resolves q-post-tier3-demand-criterion-for-rotated and
+# q-step-co-fire-enumeration-multi-channel.  Three pieces:
+#
+#   (1) step()'s Phase 1 co-fire enumeration extended to τ ∪ σ
+#       (see the step() body above).  Rotated K's with τ=0 but σ=1
+#       now participate in candidate pair discovery.
+#   (2) articulate_rotated_from_residue: plateau-triggered orbit
+#       seeding.  For oracle pairs whose Boolean-earning witness is
+#       still missing under the current pool, identifies the K's
+#       that discriminate the pair (fire on exactly one of a, b)
+#       and articulates their (τκ) and (σκ) S3-orbit members.  These
+#       rotations introduce asymmetric (τ ≠ σ) firing profiles that
+#       enable the general combinator to produce genuinely new
+#       discrimination patterns in subsequent wedge articulations.
+#   (3) run_to_asymmetric_fixed_point: step() → plateau → orbit-seed
+#       → step() → ... until orbit seeding finds no residue.
+#
+# Under symmetric atoms the first-iteration demand signal has no
+# natural trigger (σ/τ residue identical for all symmetric K's);
+# the orbit seeding's own articulation IS the seed that breaks
+# symmetry, after which the general combinator produces asymmetric
+# wedges in the subsequent step().
+
+
+def _rotated_firing_columns(
+    base_tau: np.ndarray, base_sigma: np.ndarray, perm: "S3",
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Compute (τ, σ) firing columns for ``Rotated(base, perm)``.
+
+    Given the base K's τ and σ columns (each Bool[n_things]), apply
+    the S3 axis permutation to the stacked (τ, σ, κ) tensor and return
+    the new (τ, σ) rows.  κ is derived as τ ⊕ σ (per d-tausigma-type-
+    preserves-constraint) and never stored.
+
+    Used by ``articulate_rotated_from_residue`` to populate the new
+    mask columns when a Rotated K enters the pool — rather than
+    zero-padding via State.with_pool, we compute the mathematically-
+    correct columns from the algebra.
+    """
+    base_kappa = base_tau ^ base_sigma
+    tsk = np.stack([base_tau, base_sigma, base_kappa], axis=0)
+    rotated = perm.act_on_tsk(tsk)
+    return rotated[0].astype(bool), rotated[1].astype(bool)
+
+
+# S3 elements used by the orbit-seeding pass.  (τκ) and (σκ) are the
+# two transpositions that produce asymmetric profiles (τ ≠ σ) from
+# symmetric atoms (tsk = [1, 1, 0]).  The (τσ) swap fixes symmetric
+# profiles (swaps two equal values) so it's NOT in the seeding set —
+# articulating swap(sym_atom) would just intensionally-duplicate the
+# atom without introducing new firing patterns.
+_S3_TAU_KAPPA = S3((2, 1, 0))
+_S3_SIGMA_KAPPA = S3((0, 2, 1))
+_ORBIT_SEEDING_GENERATORS: Tuple[S3, ...] = (_S3_TAU_KAPPA, _S3_SIGMA_KAPPA)
+
+
+def articulate_rotated_from_residue(
+    state: "State", *, top_n: int = 5,
+) -> "State":
+    """Plateau-triggered orbit seeding (Stage 7.2 / q-post-tier3-
+    demand-criterion-for-rotated resolution).
+
+    Identifies K's that discriminate oracle pairs whose Boolean-
+    earning witness is still missing (both off-diagonals populated
+    across pool K's), ranks them by the count of such pairs they
+    discriminate, and articulates the (τκ) and (σκ) S3-orbit members
+    of the top-N K's.  Base K's and already-Rotated K's are skipped
+    from rotation (avoids orbit-tree depth > 1 in this pass).
+
+    The new Rotated K's enter the pool with correct firing columns
+    computed via ``_rotated_firing_columns`` (S3 axis permutation on
+    the base's tsk tensor) — NOT zero-padded.  sigma_derivable_from_tau
+    typically flips to False after this call, since the (τκ) rotation
+    produces τ=0, σ=1 columns where the base fires.
+
+    Returns the enriched state; if there's no residue (all oracle
+    pairs Boolean-earned) or no un-rotated K's to seed, returns the
+    input state unchanged.
+    """
+    pairs = state.oracle_pair_indices
+    pool_size = state.pool.size()
+    if len(pairs) == 0 or pool_size == 0:
+        return state
+
+    # Per-pair per-K off-diagonal cell membership in τ-channel.
+    # a_rows, b_rows are (n_pairs, pool_size) bool.
+    a_rows = state.tau_masks[pairs[:, 0]]
+    b_rows = state.tau_masks[pairs[:, 1]]
+    a_not_b = a_rows & ~b_rows                 # (1, 0) cell
+    b_not_a = ~a_rows & b_rows                 # (0, 1) cell
+    # Boolean-earned: both off-diagonals populated (at least one K in
+    # each cell).  Per-pair boolean over axis-1 of the pool.
+    has_10 = np.any(a_not_b, axis=1)
+    has_01 = np.any(b_not_a, axis=1)
+    earned = has_10 & has_01
+    unearned = ~earned
+    if not np.any(unearned):
+        return state  # all pairs already have a Boolean-earning witness
+
+    # For each unearned pair, count K's that discriminate either way.
+    discriminators = a_not_b | b_not_a
+    unearned_disc = discriminators[unearned]
+    # Per-K: how many unearned pairs does this K discriminate?
+    k_residue_counts = unearned_disc.sum(axis=0)  # (pool_size,)
+
+    # Top-N by residue count, highest first.  Skip K's that are
+    # already Rotated OR that have zero residue count.
+    order = np.argsort(-k_residue_counts, kind="stable")
+    seed_candidates = []
+    for k_idx in order.tolist():
+        if int(k_residue_counts[k_idx]) == 0:
+            break
+        base_k = state.pool.ks[k_idx]
+        if isinstance(base_k, Rotated):
+            continue
+        seed_candidates.append((k_idx, base_k))
+        if len(seed_candidates) >= top_n:
+            break
+    if not seed_candidates:
+        return state
+
+    # Articulate Rotated orbit members for each seed candidate.  New
+    # mask columns are computed via the S3 axis permutation on the
+    # base's tsk tensor — not zero-padded.
+    new_pool = state.pool
+    new_tau_cols: list = []
+    new_sig_cols: list = []
+    for base_idx, base_k in seed_candidates:
+        base_tau_col = state.tau_masks[:, base_idx]
+        base_sig_col = state.sigma_masks[:, base_idx]
+        for g in _ORBIT_SEEDING_GENERATORS:
+            rotated = rotate(base_k, g)
+            # rotate(k, g).normalize() returns base_k if g is identity
+            # (impossible here since our generators exclude identity)
+            # or a Rotated K.  Should not collapse to ZeroK or AtomicK.
+            if not isinstance(rotated, Rotated):
+                continue  # defensive — skip degenerate
+            if new_pool.bit_of(rotated) is not None:
+                continue  # orbit member already in pool
+            tau_col, sig_col = _rotated_firing_columns(
+                base_tau_col, base_sig_col, g,
+            )
+            new_pool = new_pool.with_k(rotated)
+            new_tau_cols.append(tau_col)
+            new_sig_cols.append(sig_col)
+
+    if new_pool.size() == pool_size:
+        return state  # no new orbit members articulated
+
+    # Compose new mask columns into state
+    n_added = new_pool.size() - pool_size
+    tau_stack = np.stack(new_tau_cols, axis=1) if new_tau_cols else np.zeros(
+        (len(state.thing_ids), 0), dtype=bool
+    )
+    sig_stack = np.stack(new_sig_cols, axis=1) if new_sig_cols else np.zeros(
+        (len(state.thing_ids), 0), dtype=bool
+    )
+    merged_tau = np.concatenate([state.tau_masks, tau_stack], axis=1)
+    merged_sig = np.concatenate([state.sigma_masks, sig_stack], axis=1)
+    return State(
+        pool=new_pool,
+        thing_ids=state.thing_ids,
+        tau_masks=merged_tau,
+        sigma_masks=merged_sig,
+        oracle_pairs=state.oracle_pairs,
+        weights=state.weights,
+        trajectory=state.trajectory,
+        trajectory_aux=state.trajectory_aux,
+        iteration=state.iteration,
+    )
+
+
+def run_to_asymmetric_fixed_point(
+    state: "State",
+    *,
+    scorer: "Scorer | None" = None,
+    objective: "Objective | None" = None,
+    max_articulations_per_step: int | None = None,
+    top_n_orbit: int = 5,
+    max_plateau_cycles: int | None = 32,
+) -> "State":
+    """Step to fixed point under the asymmetric regime.
+
+    Iterates step() to a local plateau (articulated_count == 0); when
+    plateau is reached, attempts orbit seeding via
+    articulate_rotated_from_residue.  If seeding adds K's, step()
+    continues (extended τ∪σ co-fire discovers pairs involving the
+    new Rotated K's, the general combinator articulates asymmetric
+    wedges).  If seeding finds no residue (all oracle pairs Boolean-
+    earned), returns the true fixed point.
+
+    ``max_plateau_cycles`` bounds the number of consecutive
+    orbit-seeding attempts after plateaus — a safety valve against
+    pathological pools where seeding always finds something but the
+    state never progresses.  Default 32; set to None to disable.
+    """
+    plateau_cycles = 0
+    while True:
+        state = step(
+            state,
+            scorer=scorer,
+            objective=objective,
+            max_articulations_per_step=max_articulations_per_step,
+        )
+        if len(state.trajectory) == 0 or state.trajectory[-1]["articulated_count"] != 0:
+            plateau_cycles = 0
+            continue
+        # Plateau reached.  Try orbit seeding.
+        seeded = articulate_rotated_from_residue(state, top_n=top_n_orbit)
+        if seeded.pool.size() == state.pool.size():
+            return state  # no residue → true fixed point
+        state = seeded
+        plateau_cycles += 1
+        if max_plateau_cycles is not None and plateau_cycles >= max_plateau_cycles:
             return state
 
 
@@ -4602,6 +4829,110 @@ def _smoke_test() -> None:
                       f"on Rotated-parent wedges produces σ ≠ τ; "
                       f"/masks/sigma genuinely written on dump")
 
+                # -- Stage 7.2: Post-Tier-3 step()-level asymmetric regime
+                # activation.  Resolves q-post-tier3-demand-criterion-
+                # for-rotated (plateau-triggered orbit seeding) and
+                # q-step-co-fire-enumeration-multi-channel (τ ∪ σ union).
+                #
+                # Minimal demonstration: two atoms firing on shared
+                # things; oracle pair where Boolean-earning witness is
+                # missing in τ.  articulate_rotated_from_residue seeds
+                # (τκ) and (σκ) rotations for the discriminator K's.
+                # step() with extended τ∪σ co-fire finds candidate pairs
+                # involving the new Rotated K's; general combinator
+                # articulates asymmetric wedges.
+                atom_72a = Atom(Observable("test:72_a"))
+                atom_72b = Atom(Observable("test:72_b"))
+                # Pool: two atoms; both fire on t_shared only.  Oracle
+                # pair (t_shared, t_empty) has (1,0) populated by both
+                # atoms; (0,1) empty → Boolean-earning witness missing.
+                pool_72 = Pool().with_k(atom_72a).with_k(atom_72b)
+                n_pool_72 = pool_72.size()
+                tid_shared = ThingId("t_shared")
+                tid_empty = ThingId("t_empty")
+                tau_72 = np.zeros((2, n_pool_72), dtype=bool)
+                sig_72 = np.zeros((2, n_pool_72), dtype=bool)
+                bit_72a = pool_72.bit_of(atom_72a)
+                bit_72b = pool_72.bit_of(atom_72b)
+                # t_shared: both fire; t_empty: neither.
+                tau_72[0, bit_72a] = True
+                sig_72[0, bit_72a] = True
+                tau_72[0, bit_72b] = True
+                sig_72[0, bit_72b] = True
+                state_72 = State(
+                    pool=pool_72,
+                    thing_ids=np.array([tid_shared, tid_empty], dtype=object),
+                    tau_masks=tau_72,
+                    sigma_masks=sig_72,
+                    oracle_pairs=frozenset({
+                        frozenset({tid_shared, tid_empty})
+                    }),
+                )
+                # Precondition checks: symmetric regime; un-earned pair.
+                assert state_72.sigma_derivable_from_tau
+                assert state_72.pool_has_trivial_orbits
+
+                # Orbit seeding: articulate (τκ) and (σκ) rotations of
+                # the top discriminator K's.  Both atoms discriminate
+                # (they fire on t_shared but not t_empty), so we expect
+                # rotations of BOTH atoms to enter the pool.
+                seeded_72 = articulate_rotated_from_residue(state_72, top_n=5)
+                # Expect 4 new entries: rot_a_(τκ), rot_a_(σκ),
+                # rot_b_(τκ), rot_b_(σκ)
+                assert seeded_72.pool.size() == n_pool_72 + 4, (
+                    f"orbit seeding should add 4 Rotated K's "
+                    f"(2 atoms × 2 generators); "
+                    f"got {seeded_72.pool.size() - n_pool_72}"
+                )
+                # Non-trivial orbit structure; sigma not derivable
+                assert not seeded_72.pool_has_trivial_orbits
+                assert not seeded_72.sigma_derivable_from_tau, (
+                    "orbit seeding via (τκ) should produce τ≠σ columns"
+                )
+                # Every new K is Rotated with orbit_id pointing at base
+                for i in range(n_pool_72, seeded_72.pool.size()):
+                    row = seeded_72.pool.keys_array[i]
+                    assert isinstance(seeded_72.pool.ks[i], Rotated)
+                    orbit_id = int(row["orbit_id"])
+                    assert orbit_id in (bit_72a, bit_72b), (
+                        f"new Rotated K orbit_id should point at atom_a "
+                        f"or atom_b (bits {bit_72a}, {bit_72b}); got {orbit_id}"
+                    )
+
+                # Now step() with extended co-fire finds pair candidates
+                # among Rotated K's; general combinator articulates
+                # asymmetric wedges.  Use no scorer budget → articulate
+                # every demanded wedge.
+                stepped_72 = step(seeded_72)
+                # Expect at least one asymmetric wedge in the pool
+                # (pair of (τκ)-rotated atoms wedged via general
+                # combinator produces τ=0, σ=1 on t_shared).
+                n_new_wedges = stepped_72.pool.size() - seeded_72.pool.size()
+                assert n_new_wedges > 0, (
+                    f"step() after orbit seeding should articulate "
+                    f"wedges; got 0"
+                )
+                assert not stepped_72.sigma_derivable_from_tau, (
+                    "asymmetric wedges should keep sigma ≠ tau"
+                )
+                # Verify at least one wedge's firing is truly asymmetric
+                # (differs between τ and σ on t_shared)
+                found_asym = False
+                for j in range(seeded_72.pool.size(), stepped_72.pool.size()):
+                    if (bool(stepped_72.tau_masks[0, j]) !=
+                            bool(stepped_72.sigma_masks[0, j])):
+                        found_asym = True
+                        break
+                assert found_asym, (
+                    "at least one newly-articulated wedge should be "
+                    "asymmetric on t_shared"
+                )
+
+                print(f"    Stage 7.2: plateau-triggered orbit seeding + "
+                      f"τ∪σ co-fire: symmetric state → Rotated K's "
+                      f"articulated for residue discriminators → step() "
+                      f"produces asymmetric wedges via general combinator")
+
                 # -- Stage 5 + 5.5: step() -----------------------------
                 # Run one step on the extracted state with a small
                 # per-step budget to keep the smoke test fast.
@@ -4959,7 +5290,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.1.2 smoke test (Tier 3: general combinator on Rotated-parent wedges produces σ ≠ τ; asymmetric regime activated; /masks/sigma genuinely stored): all assertions passed")
+    print("Stage 1–7.2 smoke test (post-Tier-3: plateau-triggered orbit seeding; τ∪σ co-fire; step() articulates asymmetric wedges via general combinator): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
