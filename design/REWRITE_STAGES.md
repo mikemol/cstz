@@ -145,6 +145,12 @@ for Stage 10.  The original "append-only JSONL I/O" target is Stage
            SelectCell(idx)).  Singletons written via functools.partial
            currying (on_things, on_oracle_pairs).  Enacts
            l-scorer-as-shape-contract.  Net LOC: -78.
+- 7.0.11 — _count_four_cell vectorized off state.tau_masks columns;
+           signature takes bit indices (state, i: int, j: int, ...)
+           rather than K objects.  Slow path no longer iterates
+           state.things (no Thing reconstruction).  Resolves post-
+           7.0.10 Stage 7 audit Severity 1 + 2 (K-object roundtrip
+           in _count_four_cell).
 
 ### Stage 7.1 — hybrid JSONL + HDF5 I/O (PENDING)
 

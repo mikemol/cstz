@@ -87,7 +87,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (23)
+## Corrections (24)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -103,6 +103,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-stage-4-6-structural-functions-plus-split-orientations] Stage 4.6: structural scorer/objective classes; split two-orientation oracle scorer; decomposed signatures
 - ● [c-stage-5-5-no-default-budget-remove-weight-updater] Stage 5.5: no-default articulation budget; WeightUpdater removed; σ channel exercised
 - ● [c-stage-7-0-10-scorer-cell-extractor-reducer-factoring] Stage 7.0.10: five scorer classes factored into CellScorer(cells, reduce) compositions
+- ● [c-stage-7-0-11-count-four-cell-vectorized-int-signature] Stage 7.0.11: _count_four_cell vectorized off state.tau_masks; signature takes bit indices
 - ● [c-stage-7-0-5-apply-numpy-not-just-store] Stage 7.0.5: apply numpy arrays array-natively, not via Python loops
 - ● [c-stage-7-0-6-unmaterialize-hash-and-signature] Stage 7.0.6: unmaterialize Thing._hash and replace signature()-based fixed-point with trajectory signal
 - ● [c-stage-7-0-7-three-lemma-bundle] Stage 7.0.7: Pool + State.things + hash-consing refactored to numpy-native shapes (three-lemma bundle)
