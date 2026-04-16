@@ -529,9 +529,21 @@ class Pool:
         """Tuple of (key, bit_index) pairs in bit-index order.
 
         Retained for callers that want the legacy shape; internal
-        lookups use ``_key_to_bit`` directly.
+        lookups use ``key_to_bit`` directly.
         """
         return tuple((str(k), i) for i, k in enumerate(self.keys_array["key"]))
+
+    @property
+    def key_to_bit(self) -> dict:
+        """Public view of the O(1) key→bit-index cache.
+
+        Returns the underlying dict (not a copy) so callers can do
+        fast ``if key in pool.key_to_bit`` / ``pool.key_to_bit[key]``
+        lookups without a method-call roundtrip.  The dict is
+        effectively immutable: Pool is frozen, so no new entries
+        appear on the same instance.  Treat the returned dict as
+        read-only."""
+        return self._key_to_bit
 
     # -- Core API -----------------------------------------------------------
 
@@ -693,29 +705,6 @@ class Thing:
             sigma=int(self.sigma_mask[idx]),
         )
 
-    def remap(self, old_pool: Pool, new_pool: Pool) -> "Thing":
-        """Return this Thing with its bitmaps remapped from old_pool's
-        bit indexing to new_pool's bit indexing.
-
-        Used by ``State.merge`` when two shards have divergent pools:
-        self.pool bit-indices may not match the merged pool's, so
-        Things from self need each bit remapped via K-key lookup.
-        """
-        if old_pool is new_pool and len(self.tau_mask) == new_pool.size():
-            return self
-        new_tau = np.zeros(new_pool.size(), dtype=bool)
-        new_sigma = np.zeros(new_pool.size(), dtype=bool)
-        n_old = len(self.tau_mask)
-        for old_idx, k in enumerate(old_pool.ks):
-            if old_idx >= n_old:
-                break
-            new_idx = new_pool.bit_of(k)
-            if new_idx is None:
-                continue  # K dropped in new pool
-            new_tau[new_idx] = self.tau_mask[old_idx]
-            new_sigma[new_idx] = self.sigma_mask[old_idx]
-        return Thing(id=self.id, tau_mask=new_tau, sigma_mask=new_sigma)
-
     @staticmethod
     def with_empty_masks(tid: "ThingId", pool_size: int) -> "Thing":
         """Helper: construct a Thing with all-False masks of the
@@ -779,10 +768,11 @@ class State:
     """
 
     pool: Pool
-    thing_ids: np.ndarray      # dtype=object, shape (n_things,)
-    tau_masks: np.ndarray      # dtype=bool,   shape (n_things, pool_size)
-    sigma_masks: np.ndarray    # dtype=bool,   shape (n_things, pool_size)
-    oracle_pairs: frozenset
+    thing_ids: np.ndarray          # dtype=object, shape (n_things,)
+    tau_masks: np.ndarray          # dtype=bool,   shape (n_things, pool_size)
+    sigma_masks: np.ndarray        # dtype=bool,   shape (n_things, pool_size)
+    oracle_pairs: frozenset        # authoritative; frozenset[frozenset[ThingId]]
+    oracle_pair_indices: np.ndarray  # dtype=int64, shape (n_pairs, 2); cache
     weights: Tuple[Tuple[KKey, float], ...]
     trajectory: Tuple
     iteration: int
@@ -870,11 +860,41 @@ class State:
         tau.setflags(write=False)
         sig.setflags(write=False)
 
+        # Build the id→row-index cache; used by row_of and by the
+        # oracle_pair_indices resolution below.
+        id_to_row: dict = {str(tid): i for i, tid in enumerate(ids_arr)}
+
+        # Resolve oracle pairs from their string-id authoritative form
+        # into an Int[n_pairs, 2] cache (l-oracle-pairs-as-index-array).
+        # Pairs with dangling ids (not present in thing_ids) are skipped
+        # — matches the existing scorers' per-call guard.  Within-pair
+        # ordering is (min(a, b), max(a, b)) by id-string sort, making
+        # the orientation-sensitive scorers deterministic (previously
+        # they consumed frozenset iteration order, which was arbitrary).
+        resolved_pairs: list = []
+        for pair in oracle_pairs:
+            if len(pair) != 2:
+                continue
+            ids_sorted = sorted(str(x) for x in pair)
+            a_idx = id_to_row.get(ids_sorted[0])
+            b_idx = id_to_row.get(ids_sorted[1])
+            if a_idx is None or b_idx is None:
+                continue
+            resolved_pairs.append((a_idx, b_idx))
+        resolved_pairs.sort()
+        if resolved_pairs:
+            pair_indices = np.array(resolved_pairs, dtype=np.int64)
+        else:
+            pair_indices = np.empty((0, 2), dtype=np.int64)
+        pair_indices.setflags(write=False)
+
         object.__setattr__(self, "pool", p)
         object.__setattr__(self, "thing_ids", ids_arr)
         object.__setattr__(self, "tau_masks", tau)
         object.__setattr__(self, "sigma_masks", sig)
         object.__setattr__(self, "oracle_pairs", oracle_pairs)
+        object.__setattr__(self, "oracle_pair_indices", pair_indices)
+        object.__setattr__(self, "_id_to_row", id_to_row)
         object.__setattr__(self, "weights", weights)
         object.__setattr__(self, "trajectory", trajectory)
         object.__setattr__(self, "iteration", iteration)
@@ -956,8 +976,28 @@ class State:
 
     def _bit_index_of_thing(self, tid: ThingId) -> int | None:
         """Row index for a ThingId in the parallel arrays, or None."""
-        matches = np.where(self.thing_ids == tid)[0]
-        return int(matches[0]) if len(matches) > 0 else None
+        return self._id_to_row.get(str(tid))
+
+    def row_of(self, tid: ThingId) -> int | None:
+        """Public row-index accessor for a ThingId.
+
+        Returns the axis-0 position of ``tid`` in ``thing_ids`` (and
+        thus in ``tau_masks``/``sigma_masks``), or ``None`` if the id
+        is unknown.  O(1) via the ``_id_to_row`` cache built at
+        construction.  Use this instead of ``state.things_dict()[tid]``
+        when you want the mask row directly — no Thing reconstruction,
+        no copy."""
+        return self._id_to_row.get(str(tid))
+
+    def tau_row(self, tid: ThingId) -> np.ndarray | None:
+        """Read-only view of ``tid``'s τ-mask row, or ``None`` if unknown."""
+        i = self._id_to_row.get(str(tid))
+        return self.tau_masks[i] if i is not None else None
+
+    def sigma_row(self, tid: ThingId) -> np.ndarray | None:
+        """Read-only view of ``tid``'s σ-mask row, or ``None`` if unknown."""
+        i = self._id_to_row.get(str(tid))
+        return self.sigma_masks[i] if i is not None else None
 
     # -- constructors -------------------------------------------------------
 
@@ -1960,31 +2000,23 @@ class OracleBooleanWitnessTauSigmaScorer:
     def __call__(self, state: "State", k_left: "K", k_right: "K",
                  *, firing_bitmaps: np.ndarray | None = None
                  ) -> ScoreValue:
-        # firing_bitmaps is unused here (oracle scorers iterate oracle
-        # pairs directly rather than four-cell count over all things)
-        del firing_bitmaps
+        del firing_bitmaps  # unused; vectorized via oracle_pair_indices
         idx_i = state.pool.bit_of(k_left)
         idx_j = state.pool.bit_of(k_right)
         if idx_i is None or idx_j is None:
             return ScoreValue(0.0)
-        things_dict = dict(state.things)
-        count = 0
-        for pair in state.oracle_pairs:
-            if len(pair) != 2:
-                continue
-            a_id, b_id = list(pair)
-            a = things_dict.get(a_id)
-            b = things_dict.get(b_id)
-            if a is None or b is None:
-                continue
-            bi_a = int(a.tau_mask[idx_i]) if idx_i < len(a.tau_mask) else 0
-            bj_a = int(a.tau_mask[idx_j]) if idx_j < len(a.tau_mask) else 0
-            bi_b = int(b.tau_mask[idx_i]) if idx_i < len(b.tau_mask) else 0
-            bj_b = int(b.tau_mask[idx_j]) if idx_j < len(b.tau_mask) else 0
-            # τ-σ orientation: A=(1,0), B=(0,1)
-            if (bi_a, bj_a, bi_b, bj_b) == (1, 0, 0, 1):
-                count += 1
-        return ScoreValue(float(count))
+        pairs = state.oracle_pair_indices
+        if len(pairs) == 0:
+            return ScoreValue(0.0)
+        # Pair orientation: (a_idx, b_idx) = (min, max) by construction,
+        # so "A" = row at pairs[:,0] and "B" = row at pairs[:,1].
+        a_i = state.tau_masks[pairs[:, 0], idx_i]
+        a_j = state.tau_masks[pairs[:, 0], idx_j]
+        b_i = state.tau_masks[pairs[:, 1], idx_i]
+        b_j = state.tau_masks[pairs[:, 1], idx_j]
+        # τ-σ orientation: A=(1,0), B=(0,1)
+        hits = a_i & ~a_j & ~b_i & b_j
+        return ScoreValue(float(int(hits.sum())))
 
     @property
     def structure(self) -> tuple:
@@ -2003,31 +2035,21 @@ class OracleBooleanWitnessSigmaTauScorer:
     def __call__(self, state: "State", k_left: "K", k_right: "K",
                  *, firing_bitmaps: np.ndarray | None = None
                  ) -> ScoreValue:
-        # firing_bitmaps is unused here (oracle scorers iterate oracle
-        # pairs directly rather than four-cell count over all things)
-        del firing_bitmaps
+        del firing_bitmaps  # unused; vectorized via oracle_pair_indices
         idx_i = state.pool.bit_of(k_left)
         idx_j = state.pool.bit_of(k_right)
         if idx_i is None or idx_j is None:
             return ScoreValue(0.0)
-        things_dict = dict(state.things)
-        count = 0
-        for pair in state.oracle_pairs:
-            if len(pair) != 2:
-                continue
-            a_id, b_id = list(pair)
-            a = things_dict.get(a_id)
-            b = things_dict.get(b_id)
-            if a is None or b is None:
-                continue
-            bi_a = int(a.tau_mask[idx_i]) if idx_i < len(a.tau_mask) else 0
-            bj_a = int(a.tau_mask[idx_j]) if idx_j < len(a.tau_mask) else 0
-            bi_b = int(b.tau_mask[idx_i]) if idx_i < len(b.tau_mask) else 0
-            bj_b = int(b.tau_mask[idx_j]) if idx_j < len(b.tau_mask) else 0
-            # σ-τ orientation: A=(0,1), B=(1,0)
-            if (bi_a, bj_a, bi_b, bj_b) == (0, 1, 1, 0):
-                count += 1
-        return ScoreValue(float(count))
+        pairs = state.oracle_pair_indices
+        if len(pairs) == 0:
+            return ScoreValue(0.0)
+        a_i = state.tau_masks[pairs[:, 0], idx_i]
+        a_j = state.tau_masks[pairs[:, 0], idx_j]
+        b_i = state.tau_masks[pairs[:, 1], idx_i]
+        b_j = state.tau_masks[pairs[:, 1], idx_j]
+        # σ-τ orientation: A=(0,1), B=(1,0)
+        hits = ~a_i & a_j & b_i & ~b_j
+        return ScoreValue(float(int(hits.sum())))
 
     @property
     def structure(self) -> tuple:
@@ -2056,27 +2078,15 @@ class OraclePairsWithWitnessObjective:
     units: str = "count"
 
     def __call__(self, state: "State") -> ObjectiveValue:
-        things_dict = dict(state.things)
-        count = 0
-        for pair in state.oracle_pairs:
-            if len(pair) != 2:
-                continue
-            a_id, b_id = list(pair)
-            a = things_dict.get(a_id)
-            b = things_dict.get(b_id)
-            if a is None or b is None:
-                continue
-            # Align mask lengths (in case a, b come from different
-            # pool snapshots — shouldn't happen within a single
-            # State, but defend)
-            n = min(len(a.tau_mask), len(b.tau_mask))
-            ta = a.tau_mask[:n]
-            tb = b.tau_mask[:n]
-            a_only = ta & ~tb
-            b_only = ~ta & tb
-            if np.any(a_only) and np.any(b_only):
-                count += 1
-        return ObjectiveValue(float(count))
+        pairs = state.oracle_pair_indices
+        if len(pairs) == 0:
+            return ObjectiveValue(0.0)
+        ta = state.tau_masks[pairs[:, 0]]   # [n_pairs, pool_size]
+        tb = state.tau_masks[pairs[:, 1]]   # [n_pairs, pool_size]
+        a_only_any = np.any(ta & ~tb, axis=1)   # [n_pairs] bool
+        b_only_any = np.any(~ta & tb, axis=1)   # [n_pairs] bool
+        hits = a_only_any & b_only_any
+        return ObjectiveValue(float(int(hits.sum())))
 
     @property
     def structure(self) -> tuple:
@@ -2093,21 +2103,17 @@ class PoolEntropyMarginalsObjective:
     units: str = "bits"
 
     def __call__(self, state: "State") -> ObjectiveValue:
-        n_things = len(state.things)
-        if n_things == 0:
+        n_things = len(state.thing_ids)
+        if n_things == 0 or state.tau_masks.shape[1] == 0:
             return ObjectiveValue(0.0)
-        total = 0.0
-        for k in state.pool.ks:
-            idx = state.pool.bit_of(k)
-            if idx is None:
-                continue
-            n_fires = 0
-            for _tid, t in state.things:
-                if idx < len(t.tau_mask) and t.tau_mask[idx]:
-                    n_fires += 1
-            p = n_fires / n_things
-            if 0 < p < 1:
-                total += -p * math.log2(p) - (1 - p) * math.log2(1 - p)
+        # Per-K firing count across things: axis-0 reduction on the
+        # (n_things, pool_size) mask matrix.
+        n_fires = state.tau_masks.sum(axis=0)       # [pool_size]
+        p = n_fires / n_things                       # [pool_size] float
+        # Entropy at probabilities {0, 1} is 0; avoid log(0) by masking.
+        nondegenerate = (p > 0.0) & (p < 1.0)
+        pp = p[nondegenerate]
+        total = float(np.sum(-pp * np.log2(pp) - (1 - pp) * np.log2(1 - pp)))
         return ObjectiveValue(total)
 
     @property
@@ -2295,28 +2301,6 @@ def firing_bitmaps_of(state: "State", channel: str = "tau") -> np.ndarray:
         raise ValueError(f"unknown channel {channel!r}")
 
 
-def _compute_firing_bitmaps(
-    pool: "Pool",
-    thing_order: list,
-    channel: str = "tau",
-) -> np.ndarray:
-    """Legacy shim kept for call sites that still build a ``thing_order``
-    list-of-(id, Thing) and expect a ``(pool_size, n_things)`` matrix.
-
-    Prefer ``firing_bitmaps_of(state, channel)`` on a State instance —
-    it's O(1) under the parallel-array representation.  This shim
-    rebuilds the matrix from per-Thing masks, O(n_things · pool_size).
-    """
-    n_pool = pool.size()
-    n_things = len(thing_order)
-    result = np.zeros((n_pool, n_things), dtype=bool)
-    for j, (_tid, thing) in enumerate(thing_order):
-        mask = thing.tau_mask if channel == "tau" else thing.sigma_mask
-        k = min(len(mask), n_pool)
-        result[:k, j] = mask[:k]
-    return result
-
-
 def _articulate_wedges_batch(
     state: "State",
     wedges: list,
@@ -2340,7 +2324,7 @@ def _articulate_wedges_batch(
     """
     n_things = len(state.thing_ids)
 
-    pool_index = state.pool._key_to_bit  # use the O(1) cache directly
+    pool_index = state.pool.key_to_bit  # use the O(1) cache directly
 
     # Phase 1: compute firings for every non-ZeroK candidate whose key
     # is not already in the pool.  Duplicate keys within the batch are
@@ -2451,7 +2435,7 @@ def step(
     # representation (l-state-things-as-parallel-arrays) — an O(1) view,
     # no build step.
     firing_bitmaps = firing_bitmaps_of(state, "tau")
-    pool_index = state.pool._key_to_bit
+    pool_index = state.pool.key_to_bit
     n_things = len(state.thing_ids)
 
     # -- Phase 1: enumerate candidate K-pairs (n_11 > 0) -------------------
@@ -2783,19 +2767,6 @@ def _smoke_test() -> None:
     ts_at_2 = t2.tausigma_at(pool, Atom(Observable("k2")))
     assert ts_at_2.tau == 1 and ts_at_2.sigma == 0 and ts_at_2.kappa == 1
 
-    # Thing.remap: same Thing under a permuted pool produces remapped bitmaps
-    pool_rev = Pool().with_k(Atom(Observable("k2"))).with_k(
-        Atom(Observable("k1"))).with_k(Atom(Observable("k0")))
-    # t2 in original pool has k0 and k2 firing on tau (bits 0 and 2)
-    # In reversed pool, k0 is at bit 2 and k2 is at bit 0
-    t2_remapped = t2.remap(pool, pool_rev)
-    # Original tau_mask = 0b101 (bits 0, 2 set) → after remap, same K's fire
-    # but at new indices: k0 was bit 0, now bit 2; k2 was bit 2, now bit 0
-    # So new tau mask should have bits 0 and 2 set too = 0b101 (coincidence)
-    assert t2_remapped.tausigma_at(pool_rev, Atom(Observable("k0"))) == ts_at_0
-    assert t2_remapped.tausigma_at(pool_rev, Atom(Observable("k1"))) == ts_at_1
-    assert t2_remapped.tausigma_at(pool_rev, Atom(Observable("k2"))) == ts_at_2
-
     # -- Stage 2 + 2.5 + 2.6: State merge / restrict / signature ------------
 
     ak0 = Atom(Observable("k0"))
@@ -2876,7 +2847,7 @@ def _smoke_test() -> None:
     assert s1_traj.signature() == s1.signature()
     assert s1_traj.iteration == s1.iteration + 1
 
-    # -- Stage 2.5 NEW: divergent-pool merge via Thing.remap ----------------
+    # -- Stage 2.5: divergent-pool merge via vectorized column permutation --
 
     # Two shards register different K's for the same thing's observations
     shardA_pool = Pool().with_k(ak0).with_k(ak1)       # bit 0 = k0, bit 1 = k1
@@ -3282,13 +3253,8 @@ def _smoke_test() -> None:
                 # test of p-tau-sigma-separation — the machinery must
                 # exist for σ independently of whether it currently
                 # differs from τ in value.
-                thing_order_local = list(sorted(state.things, key=lambda kv: kv[0]))
-                fires_tau = _compute_firing_bitmaps(
-                    state.pool, thing_order_local, channel="tau"
-                )
-                fires_sigma = _compute_firing_bitmaps(
-                    state.pool, thing_order_local, channel="sigma"
-                )
+                fires_tau = firing_bitmaps_of(state, "tau")
+                fires_sigma = firing_bitmaps_of(state, "sigma")
                 # Under τ=σ atoms, the 2D [pool × things] bitmaps agree
                 assert np.array_equal(fires_tau, fires_sigma), (
                     "τ/σ firing bitmaps disagree under supposedly-symmetric atoms"
@@ -3412,11 +3378,7 @@ def _smoke_test() -> None:
                         tid for tid, _ in state.things[:50]
                     )
                 )
-                sample_order = list(sorted(sample_things.things,
-                                            key=lambda kv: kv[0]))
-                sample_bitmaps = _compute_firing_bitmaps(
-                    sample_things.pool, sample_order
-                )
+                sample_bitmaps = firing_bitmaps_of(sample_things, "tau")
                 # Pick two atoms that both fire on at least one thing
                 k_a = k_src_candidates[0]
                 k_b = k_kind_candidates[0]
@@ -3477,6 +3439,35 @@ def _smoke_test() -> None:
                       f"firing_bitmaps is .tau_masks.T (O(1) view, no build)")
                 print(f"    Stage 7.0.7c: wedge-batch dedup via np.unique on "
                       f"canonical keys; Python seen_in_batch set retired")
+                # Stage 7.0.8: oracle_pair_indices is an Int[n_pairs, 2]
+                # cache built at __init__ from the authoritative
+                # frozenset form; vectorized oracle scorers index
+                # tau_masks directly (l-oracle-pairs-as-index-array).
+                pair_idx = state.oracle_pair_indices
+                assert pair_idx.shape[1] == 2, (
+                    f"oracle_pair_indices must be (n_pairs, 2), "
+                    f"got {pair_idx.shape}"
+                )
+                assert pair_idx.dtype == np.int64, (
+                    f"oracle_pair_indices dtype should be int64, "
+                    f"got {pair_idx.dtype}"
+                )
+                # Pairs' rows point into valid thing_ids positions
+                if len(pair_idx) > 0:
+                    assert pair_idx.min() >= 0 and pair_idx.max() < len(state.thing_ids), (
+                        "oracle_pair_indices outside thing_ids range"
+                    )
+                # row_of accessor round-trips: the id at row i must
+                # resolve back to row i via row_of().
+                if len(state.thing_ids) > 0:
+                    tid_sample = ThingId(str(state.thing_ids[0]))
+                    assert state.row_of(tid_sample) == 0
+                    tau_row = state.tau_row(tid_sample)
+                    assert tau_row is not None
+                    assert np.array_equal(tau_row, state.tau_masks[0])
+                print(f"    Stage 7.0.8: oracle pairs Int[n_pairs, 2] cache; "
+                      f"oracle scorers vectorized; Thing.remap + "
+                      f"_compute_firing_bitmaps shim retired")
 
         # Pool invariant: every observable appears as an Atom K
         for k in state.pool.ks:
@@ -3489,7 +3480,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.0.7c smoke test (Pool + State parallel arrays + np.unique hash-consing): all assertions passed")
+    print("Stage 1–7.0.8 smoke test (oracle pairs as Int array; scorers vectorized; dead-code shims retired): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
@@ -3500,7 +3491,7 @@ def _smoke_test() -> None:
     print(f"  Every observable is a K; reports query the pool, not a metadata dict")
     print(f"  Pool append/merge idempotent; bit indices stable within shard")
     print(f"  State.merge associative, idempotent, handles DIVERGENT pools")
-    print(f"    via Thing.remap (p-embarrassingly-parallel realized)")
+    print(f"    via vectorized column permutation (p-embarrassingly-parallel realized)")
     print(f"  State.restrict prunes orphan oracle pairs")
     print(f"  State.signature stable under trajectory append")
 
