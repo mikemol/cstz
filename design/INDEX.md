@@ -6,12 +6,13 @@ Each node is a line in `design/<type>s.jsonl`.
 Use `python scripts/design_sppf.py show <id>` for full detail.
 Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 
-## Principles (20)
+## Principles (21)
 
 - ● [p-alignment-is-distribution] Alignment is a distribution, not a predicate
 - ● [p-arity-is-grade] Arity = grade; arity N is not tracked, it emerges
 - ● [p-atoms-are-formal-tau-sigma-channels] Atoms carry two independent formal channels; their content is a population choice
 - ● [p-atoms-gap-preserving] Atoms are gap-preserving
+- ● [p-bijective-hash-consing] All hash-consing encoding schemes must be bijective
 - ● [p-boolean-earned-by-both-off-diagonals] Boolean is earned when both off-diagonal cells are populated
 - ● [p-chirality-only-for-higher-valence] Chirality semantics are optional at pair level
 - ● [p-closed-self-referential-loop] Pipeline loop must be closed and self-referential
@@ -60,7 +61,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (8)
+## Corrections (9)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -70,6 +71,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-lowercase-still-hardcoded] Lowercasing is hardcoded equivalence, not a generic transform
 - ● [c-metadata-was-a-smuggled-taxonomy] Metadata class was a smuggled taxonomy, removed in Stage 2.6
 - ● [c-question-resolution-via-maximal-freedom] Open questions resolve via maximal freedom, not specific picks
+- ● [c-stage-3-5-bijective-keys-and-stable-anon-ids] Stage 3.5: bijective K keys; stable position-based anon-thing-IDs; surfaced parse errors
 
 ## Questions (6)
 

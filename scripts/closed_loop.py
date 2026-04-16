@@ -27,6 +27,8 @@ No I/O, no extraction, no step(), no scoring.  Those are Stages 3-7.
 
 from __future__ import annotations
 
+import json
+import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -188,16 +190,39 @@ class K(ABC):
         ...
 
     @abstractmethod
-    def key(self) -> KKey:
-        """Stable string key reflecting INTENSIONAL structure.
+    def structure(self) -> tuple:
+        """Bijective structured representation of this K.
 
-        Atoms: the verbatim observation string.
-        Wedges: derived from parents in the order given (not sorted);
-                intensionally distinct ``Wedge(a, b)`` and ``Wedge(b, a)``
-                have distinct keys.  Extensional canonicalization is
-                the job of ``normalize()``.
+        The structure IS the intensional identity of the K, encoded as
+        a nested tuple whose first element is a type tag:
+          - ``("atom", observable)``
+          - ``("wedge", a.structure(), b.structure())``
+          - ``("zero",)``
+
+        Two K instances have equal structure iff they are intensionally
+        identical.  ``structure`` is the canonical basis for ``key()``
+        (derived via JSON serialization, which is round-trippable so
+        bijectivity holds for any observable string content, including
+        those containing commas, parentheses, or other would-be
+        separators).  Under ``p-bijective-hash-consing``, this is the
+        framework's commitment to injective key encoding.
         """
         ...
+
+    def key(self) -> KKey:
+        """Bijective string key reflecting INTENSIONAL structure.
+
+        Derived from ``structure()`` via ``json.dumps``; decoded via
+        ``json.loads``.  The round-trip identity holds for any
+        observable content — escape-safety comes from JSON's string
+        quoting, not from hand-chosen separator characters.
+
+        Extensional canonicalization (wedge commutativity, associativity,
+        nilpotency) is the job of ``normalize()``, not ``key()``.
+        Intensionally distinct ``Wedge(a, b)`` and ``Wedge(b, a)`` have
+        distinct keys; their ``normalize().key()`` agree.
+        """
+        return KKey(json.dumps(self.structure()))
 
     @abstractmethod
     def normalize(self) -> "K":
@@ -247,8 +272,8 @@ class Atom(K):
     def grade(self) -> int:
         return 1
 
-    def key(self) -> KKey:
-        return KKey(f"atom:{self.observable}")
+    def structure(self) -> tuple:
+        return ("atom", self.observable)
 
     def normalize(self) -> "Atom":
         return self  # atoms are already canonical
@@ -274,8 +299,8 @@ class ZeroK(K):
     def grade(self) -> int:
         return 0
 
-    def key(self) -> KKey:
-        return KKey("zero")
+    def structure(self) -> tuple:
+        return ("zero",)
 
     def normalize(self) -> "ZeroK":
         return self
@@ -309,11 +334,13 @@ class Wedge(K):
     def grade(self) -> int:
         return max(self.a.grade, self.b.grade) + 1
 
-    def key(self) -> KKey:
-        # INTENSIONAL key: parents in given order.  Two wedges whose
-        # parents differ in structure or order get distinct keys;
-        # normalize() collapses them extensionally.
-        return KKey(f"wedge({self.a.key()},{self.b.key()})")
+    def structure(self) -> tuple:
+        # INTENSIONAL structure: parents in given order.  JSON-encoding
+        # guarantees bijectivity — commas/parens inside observable
+        # strings cannot create ambiguity at this level.  normalize()
+        # produces the canonical (sorted) structure for extensional
+        # comparison.
+        return ("wedge", self.a.structure(), self.b.structure())
 
     def normalize(self) -> K:
         """Flatten nested wedges, collect atoms, dedupe (→ ZeroK on
@@ -359,6 +386,18 @@ def _flatten_wedge_leaves(k: K) -> Tuple[Atom, ...]:
     if isinstance(k, Wedge):
         return _flatten_wedge_leaves(k.a) + _flatten_wedge_leaves(k.b)
     raise TypeError(f"unknown K constructor: {type(k).__name__}")
+
+
+def _tuples_eq_lists(a, b) -> bool:
+    """Compare a tuple (possibly nested) against a list (possibly nested)
+    for element-wise equality, accepting the tuple/list type asymmetry
+    that comes from ``json.loads`` returning lists where the originals
+    were tuples.  Used only in Stage-3.5 bijectivity smoke tests."""
+    if isinstance(a, (tuple, list)) and isinstance(b, (tuple, list)):
+        if len(a) != len(b):
+            return False
+        return all(_tuples_eq_lists(x, y) for x, y in zip(a, b))
+    return a == b
 
 
 def _build_right_leaning(atoms: list) -> K:
@@ -793,13 +832,48 @@ def _source_roots(repo: Path) -> dict:
     }
 
 
+def _make_thing_id(source: str, kind: str, name: str | None,
+                   source_path: str, source_line: int,
+                   in_file_seq: int) -> str:
+    """Build a bijective ThingId.
+
+    Paper (LaTeX labels are globally unique within a document):
+      labeled:   ``paper:{kind}:{label}``
+      unlabeled: ``paper:{kind}:@{source_path}#n{in_file_seq}``
+
+    Agda / Python (identifiers collide across modules/classes, so
+    path is required for uniqueness):
+      always: ``{source}:{kind}:@{source_path}#{name_or_seq}``
+
+    Both branches are bijective:
+      - Paper labels are LaTeX-enforced unique (\\label{} must be
+        distinct); unlabeled decls get path+seq disambiguation.
+      - Agda/Python names are unique within a file's scope; path
+        is the globally-unique disambiguator.
+
+    Stability: parser traversal is deterministic; in_file_seq comes
+    from a per-file counter, never global; results are shard-stable.
+
+    Under ``p-bijective-hash-consing`` the asymmetry between paper
+    and code sources is accepted because the uniqueness guarantees
+    differ (paper is corpus-globally unique by label; code is
+    per-file-unique by identifier).  Both schemes remain injective.
+    """
+    if source == "paper":
+        if name:
+            return f"paper:{kind}:{name}"
+        return f"paper:{kind}:@{source_path}#n{in_file_seq}"
+    name_part = name if name else f"n{in_file_seq}"
+    return f"{source}:{kind}:@{source_path}#{name_part}"
+
+
 def _iter_source_nodes(
     repo: Path, source: str
 ) -> Iterator[Tuple[str, frozenset]]:
     """Yield (thing_id, deep_kind_observations) for every top-level named
     declaration in ``source``.  Uses the existing parsers in
-    ``structural_identity``; no re-implementation."""
-    import sys
+    ``structural_identity``; no re-implementation.  Parse failures are
+    logged to stderr rather than silently swallowed."""
     scripts_dir = str(repo / "scripts")
     if scripts_dir not in sys.path:
         sys.path.insert(0, scripts_dir)
@@ -808,58 +882,157 @@ def _iter_source_nodes(
         deep_kind_set,
     )
 
-    anon_counter = 0
     roots = _source_roots(repo)
+    # Per-file unlabeled-decl counters give stable, shard-safe IDs
+    # for anonymous things without a global counter.
+    anon_seq: dict = {}  # source_path → next index
+
+    def _next_anon(path_str: str) -> int:
+        i = anon_seq.get(path_str, 0)
+        anon_seq[path_str] = i + 1
+        return i
+
+    def _rel(p) -> str:
+        """Normalize a path to a repo-relative POSIX string.  Stable
+        across absolute/relative input forms so that Thing IDs match
+        oracle-loader remap IDs (which use manifest-stored relative
+        paths)."""
+        s = str(p)
+        if not s:
+            return s
+        pp = Path(s)
+        if pp.is_absolute():
+            try:
+                pp = pp.relative_to(repo)
+            except ValueError:
+                pass
+        return str(pp)
+
     if source == "paper":
         for node in parse_paper_decls(roots["paper"]):
             dc = node.named_decl
             if dc is None:
                 continue
             kind, label = dc
-            disambig = label or f"anon_{anon_counter:03d}"
-            if not label:
-                anon_counter += 1
-            tid = f"paper:{kind}:{disambig}"
+            path_str = _rel(getattr(node, "source_path", ""))
+            in_file_seq = 0 if label else _next_anon(path_str)
+            tid = _make_thing_id(
+                source="paper", kind=kind, name=label,
+                source_path=path_str,
+                source_line=getattr(node, "source_line", 0),
+                in_file_seq=in_file_seq,
+            )
             yield tid, deep_kind_set(node)
     elif source == "agda":
         for path in sorted(roots["agda"].rglob("*.agda")):
+            rel_path = _rel(path)
             try:
                 for node in parse_agda_decls(path):
                     dc = node.named_decl
                     if dc is None:
                         continue
                     kind, name = dc
-                    tid = f"agda:{kind}:{name}"
+                    in_file_seq = 0 if name else _next_anon(rel_path)
+                    tid = _make_thing_id(
+                        source="agda", kind=kind, name=name,
+                        source_path=rel_path,
+                        source_line=getattr(node, "source_line", 0),
+                        in_file_seq=in_file_seq,
+                    )
                     yield tid, deep_kind_set(node)
             except Exception as e:
-                # Parse failures on individual files do not abort the
-                # whole extraction — log silently and move on.
+                print(
+                    f"closed_loop: parse failure in {path}: "
+                    f"{type(e).__name__}: {e}",
+                    file=sys.stderr,
+                )
                 continue
     elif source == "python":
         for path in sorted(roots["python"].rglob("*.py")):
+            rel_path = _rel(path)
             try:
                 for node in parse_python_decls(path):
                     dc = node.named_decl
                     if dc is None:
                         continue
                     kind, name = dc
-                    tid = f"python:{kind}:{name}"
+                    in_file_seq = 0 if name else _next_anon(rel_path)
+                    tid = _make_thing_id(
+                        source="python", kind=kind, name=name,
+                        source_path=rel_path,
+                        source_line=getattr(node, "source_line", 0),
+                        in_file_seq=in_file_seq,
+                    )
                     yield tid, deep_kind_set(node)
-            except Exception:
+            except Exception as e:
+                print(
+                    f"closed_loop: parse failure in {path}: "
+                    f"{type(e).__name__}: {e}",
+                    file=sys.stderr,
+                )
                 continue
     else:
         raise ValueError(f"unknown source: {source!r}")
 
 
-def _load_oracle_pairs(repo: Path) -> frozenset:
+def _qn_candidate_ids(row: dict) -> list:
+    """Generate candidate closed_loop ThingIds for a manifest row.
+
+    Returns multiple candidates because the old-pipeline manifests
+    use slightly different naming conventions than the closed_loop
+    extractor — in particular, agda module records store the short
+    name (``All``) while the closed_loop extractor uses the full
+    dotted name (``CSTZ.All``) derived from tree-sitter-agda.  The
+    loader tries each candidate and keeps whichever is present in
+    the actual extracted things dict.
+
+    Under ``p-bijective-hash-consing``, the closed_loop format
+    itself is bijective; the candidates here are only compensation
+    for the naming-convention mismatch at the interface boundary
+    between two systems, not an ambiguity in the ID format.
+    """
+    source = row.get("source")
+    kind = row.get("kind")
+    name = row.get("name") or row.get("label") or ""
+    qualname = row.get("qualname") or ""
+    path = row.get("path") or ""
+    if not (source and kind and path):
+        return []
+
+    candidates: list = []
+    label = row.get("label")
+    if source == "paper":
+        # Paper uses label-only IDs (LaTeX labels are corpus-globally
+        # unique).  ``name`` is the paper decl's human-readable title
+        # which doesn't match the extractor's ID convention.
+        if label:
+            candidates.append(f"paper:{kind}:{label}")
+        if name and name != label:
+            candidates.append(f"paper:{kind}:{name}")
+    else:
+        # agda/python: path-prefixed IDs.
+        if name:
+            candidates.append(f"{source}:{kind}:@{path}#{name}")
+        if qualname and qualname != name:
+            candidates.append(f"{source}:{kind}:@{path}#{qualname}")
+        if label and label != name and label != qualname:
+            candidates.append(f"{source}:{kind}:@{path}#{label}")
+    return candidates
+
+
+def _load_oracle_pairs(repo: Path, extracted_ids: set | None = None) -> frozenset:
     """Load citation-oracle pairs from existing reports manifests.
 
     Returns ``frozenset[frozenset[ThingId]]``.  If manifests are absent
     or any error occurs, returns empty.  The oracle is input data for
     weight calibration (``d-oracle-calibrates-not-gates``); never a
     commit gate.
+
+    ``extracted_ids``: if provided, remap candidates are filtered to
+    those actually present in the extracted state.  This handles
+    naming-convention drift between the old pipeline's manifest
+    format and the closed_loop's extraction format.
     """
-    import json
     reports_dir = repo / "reports"
     manifests = {
         "paper": reports_dir / "paper_decls.jsonl",
@@ -874,10 +1047,32 @@ def _load_oracle_pairs(repo: Path) -> frozenset:
         python_rows = [json.loads(l) for l in manifests["python"].open() if l.strip()]
     except Exception:
         return frozenset()
+
+    # Build lookup-qualname → new-ThingId remap.  The lookup qualname
+    # is what build_citation_oracle emits, which for paper rows is
+    # ``f"paper:{kind}:{label}"`` and for agda/python is the manifest
+    # ``qualname`` field unchanged.
+    remap: dict = {}
+    for r in paper_rows:
+        lookup_qn = f"paper:{r.get('kind')}:{r.get('label')}" if r.get('label') else None
+        if not lookup_qn:
+            continue
+        for cand in _qn_candidate_ids(r):
+            if extracted_ids is None or cand in extracted_ids:
+                remap[lookup_qn] = cand
+                break
+    for r in agda_rows + python_rows:
+        qn = r.get("qualname")
+        if not qn:
+            continue
+        for cand in _qn_candidate_ids(r):
+            if extracted_ids is None or cand in extracted_ids:
+                remap[qn] = cand
+                break
+
     agda_docs = {r["qualname"]: r.get("docstring", "") for r in agda_rows}
     python_docs = {r["qualname"]: r.get("docstring", "") for r in python_rows}
 
-    import sys
     scripts_dir = str(repo / "scripts")
     if scripts_dir not in sys.path:
         sys.path.insert(0, scripts_dir)
@@ -886,10 +1081,15 @@ def _load_oracle_pairs(repo: Path) -> frozenset:
     except Exception:
         return frozenset()
     oracle = build_citation_oracle(paper_rows, agda_docs, python_docs)
-    return frozenset(
-        frozenset({ThingId(src), ThingId(tgt)})
-        for src, tgt, _cite, _stream in oracle
-    )
+
+    pairs = set()
+    for src, tgt, _cite, _stream in oracle:
+        src_new = remap.get(src)
+        tgt_new = remap.get(tgt)
+        if src_new is None or tgt_new is None:
+            continue
+        pairs.add(frozenset({ThingId(src_new), ThingId(tgt_new)}))
+    return frozenset(pairs)
 
 
 def extract_initial_state(
@@ -923,8 +1123,22 @@ def extract_initial_state(
 
     # Phase 1: collect raw observations per Thing
     raw: list = []  # list of (thing_id, source, frozenset[str])
+    seen_ids: set = set()
     for src in sources:
         for tid, obs in _iter_source_nodes(repo, src):
+            if tid in seen_ids:
+                # Bijectivity violation: two things claimed the same ID.
+                # Under p-bijective-hash-consing this is a hard error —
+                # our positional disambiguation assumed uniqueness of
+                # (file, line) for unlabeled decls or globally-unique
+                # labels for labeled decls.  If this fires, upgrade to
+                # byte-offset-level positioning.
+                raise ValueError(
+                    f"thing-id collision: {tid!r} extracted twice "
+                    f"(violates p-bijective-hash-consing; upgrade to "
+                    f"byte-level positional disambiguation)"
+                )
+            seen_ids.add(tid)
             raw.append((tid, src, obs))
 
     # Phase 2: build Pool.  Distinct observations across all Things
@@ -954,8 +1168,13 @@ def extract_initial_state(
             Thing(id=ThingId(tid), tau_mask=mask, sigma_mask=mask)
         )
 
-    # Phase 4: optional oracle load
-    oracle = _load_oracle_pairs(repo) if include_oracle else frozenset()
+    # Phase 4: optional oracle load (remap uses extracted IDs to
+    # resolve naming-convention drift between old and new formats)
+    if include_oracle:
+        extracted_ids = {t.id for t in things}
+        oracle = _load_oracle_pairs(repo, extracted_ids=extracted_ids)
+    else:
+        oracle = frozenset()
 
     return State(
         pool=pool,
@@ -1058,10 +1277,35 @@ def _smoke_test() -> None:
 
     # Canonical wedge is right-leaning, sorted by atom key
     canon = Wedge(c, Wedge(b, a)).normalize()  # grade-3 built differently
-    # Canonical form should have atoms in sorted order: a, b, c (by key "atom:expr", "atom:function", "atom:module")
-    # (sort is by K.key() which is "atom:<observable>", so alphabetical on observable)
     flat = _flatten_wedge_leaves(canon)
     assert flat == tuple(sorted(flat, key=lambda x: x.key())), "canonical form not sorted"
+
+    # p-bijective-hash-consing: K.key() round-trips via JSON
+    # for atoms, wedges of atoms, nested wedges, and ZeroK
+    tricky = Atom(Observable("has,comma)and(parens:too"))
+    assert tricky.key() == json.dumps(tricky.structure())
+    # Round-trip: decode → compare structure
+    assert json.loads(tricky.key()) == list(tricky.structure())
+
+    # Wedges with tricky observables do not collide:
+    #   Wedge(Atom("a,b"), Atom("c"))  vs  Wedge(Atom("a"), Atom("b,c"))
+    # Previously (legacy pre-bijective encoding):
+    #   "wedge(atom:a,b,atom:c)" vs "wedge(atom:a,atom:b,c)"
+    # could be mis-parsed.  Bijective encoding makes them distinct.
+    t1 = Wedge(Atom(Observable("a,b")), Atom(Observable("c")))
+    t2 = Wedge(Atom(Observable("a")), Atom(Observable("b,c")))
+    assert t1.key() != t2.key(), (
+        "bijective encoding must distinguish Wedge(Atom('a,b'), Atom('c')) "
+        "from Wedge(Atom('a'), Atom('b,c'))"
+    )
+    # And each round-trips:
+    assert json.loads(t1.key()) == list(t1.structure()) or (
+        # JSON arrays decode to lists, our structure is tuples — normalize for comparison
+        _tuples_eq_lists(t1.structure(), json.loads(t1.key()))
+    )
+    assert _tuples_eq_lists(t2.structure(), json.loads(t2.key()))
+    # ZeroK round-trips
+    assert _tuples_eq_lists(ZeroK().structure(), json.loads(ZeroK().key()))
 
     # Pool: append, idempotency, merge
     p = Pool()
