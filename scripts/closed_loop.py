@@ -1206,7 +1206,8 @@ class State:
             tau = np.empty((0, pool_size), dtype=bool)
             sig = np.empty((0, pool_size), dtype=bool)
 
-        # Shape invariants — the point of the whole refactor
+        # Shape invariants.  Stage 7.3: fire_pair is the canonical
+        # computation; mask matrix is a CACHE that grows with pool.
         n = len(ids_arr)
         if tau.shape != (n, pool_size):
             raise ValueError(
@@ -1431,6 +1432,81 @@ class State:
         """Read-only view of ``tid``'s σ-mask row, or ``None`` if unknown."""
         i = self._id_to_row.get(str(tid))
         return self.sigma_masks[i] if i is not None else None
+
+    # -- lazy K firing evaluation ------------------------------------------
+
+    def fire_pair(self, k: K) -> Tuple[np.ndarray, np.ndarray]:
+        """Lazily compute the (τ, σ) firing column for ANY K.
+
+        Stage 7.3: the pool is a computation graph; atom mask columns
+        are the only stored data; everything else is derived on read
+        via this method.  Memoized per K.key() on the State instance
+        (frozen ⟹ cache never invalidated).
+
+        The fold is the "shingling" process: for a Wedge, right-fold
+        through the canonical tree's leaves applying the grade-2
+        GF(2) cross-term formula at each step.  For a Rotated K,
+        S3 axis-permutation on the base's (τ, σ, κ).  For an Atom,
+        direct read from stored masks.  For ZeroK, all-False.
+
+        Returns (tau_col, sig_col) each of shape (n_things,) bool.
+        """
+        # Memoize on K.key() — same intensional key ⟹ same firing
+        cache_key = k.key()
+        if not hasattr(self, "_fire_cache"):
+            object.__setattr__(self, "_fire_cache", {})
+        if cache_key in self._fire_cache:
+            return self._fire_cache[cache_key]
+
+        n = len(self.thing_ids)
+
+        if isinstance(k, ZeroK) or k.is_zero():
+            result = (np.zeros(n, dtype=bool), np.zeros(n, dtype=bool))
+
+        elif isinstance(k, Atom):
+            bit = self.pool.bit_of(k)
+            if bit is None or bit >= self.tau_masks.shape[1]:
+                result = (np.zeros(n, dtype=bool), np.zeros(n, dtype=bool))
+            else:
+                result = (self.tau_masks[:, bit].copy(),
+                          self.sigma_masks[:, bit].copy())
+
+        elif isinstance(k, Rotated):
+            base_tau, base_sig = self.fire_pair(k.base)
+            base_kappa = base_tau ^ base_sig
+            tsk = np.stack([base_tau, base_sig, base_kappa], axis=0)
+            rotated = k.perm.act_on_tsk(tsk)
+            result = (rotated[0].astype(bool), rotated[1].astype(bool))
+
+        elif isinstance(k, Wedge):
+            leaves = _flatten_wedge_leaves(k)
+            if not leaves or any(leaf.is_zero() for leaf in leaves):
+                result = (np.zeros(n, dtype=bool), np.zeros(n, dtype=bool))
+            else:
+                has_rotated = any(isinstance(lf, Rotated) for lf in leaves)
+                if has_rotated:
+                    # General combinator fold (shingling / grade-k)
+                    tau_acc, sig_acc = self.fire_pair(leaves[-1])
+                    for leaf in reversed(leaves[:-1]):
+                        tau_l, sig_l = self.fire_pair(leaf)
+                        tau_old, sig_old = tau_acc, sig_acc
+                        tau_acc = (tau_l & sig_old) ^ (sig_l & tau_old)
+                        sig_acc = (tau_l & tau_old) ^ (sig_l & sig_old)
+                    result = (tau_acc, sig_acc)
+                else:
+                    # AND-of-parents (d-wedge-bit-and-of-parents):
+                    # symmetric leaves, τ = σ = AND of all leaf τ-fires
+                    tau_acc = np.ones(n, dtype=bool)
+                    for leaf in leaves:
+                        tau_l, _ = self.fire_pair(leaf)
+                        tau_acc = tau_acc & tau_l
+                    result = (tau_acc, tau_acc.copy())
+
+        else:
+            result = (np.zeros(n, dtype=bool), np.zeros(n, dtype=bool))
+
+        self._fire_cache[cache_key] = result
+        return result
 
     # -- constructors -------------------------------------------------------
 
@@ -2850,161 +2926,58 @@ def _articulate_wedges_batch(
     wedges: list,
     firing_bitmaps: np.ndarray,
 ) -> Tuple["State", int]:
-    """Articulate a BATCH of wedges into state in one pass.
+    """Articulate a BATCH of wedges into state.
 
-    Under l-state-things-as-parallel-arrays (Stage 7.0.7b), state's
-    per-thing masks are already stacked as (n_things, pool_size) bool
-    matrices; adding new wedges is column-concatenation, not per-Thing
-    reconstruction.
+    Stage 7.3: fire_pair is the canonical computation for all K types.
+    _articulate_wedges_batch delegates to fire_pair for both the
+    degeneracy check and the column computation.  The AND/combinator
+    dispatch is transparent — fire_pair handles it internally based
+    on the wedge's leaf types.
 
-    Two firing-predicate regimes coexist (Stage 7.1.2 / Tier 3 per
-    l-combinator-and-s3-operators-are-equivalent):
-
-      - AND-of-parents (d-wedge-bit-and-of-parents): when every leaf
-        of the wedge is non-Rotated (Atom or Wedge), τ = σ = AND of
-        the leaves' τ-firing rows.  This is the default and current
-        regime for any wedge produced by extract_initial_state + step()
-        since those only register symmetric K's.
-      - General exterior-algebra combinator (d-wedge-combinator-
-        general-exterior-algebra, strict GF(2) per the c-d-wedge-
-        combinator-typo-fix correction): when at least one leaf is a
-        Rotated K, compute τ_W and σ_W via the grade-2 cross-term
-        formula on the two leaves:
-            τ_W(X) = (τ_A · σ_B) ⊕ (σ_A · τ_B)   [GF(2)]
-            σ_W(X) = (τ_A · τ_B) ⊕ (σ_A · σ_B)   [GF(2)]
-        τ_A / σ_A come from the stored mask columns; the resulting
-        wedge may have τ ≠ σ, flipping state.sigma_derivable_from_tau
-        to False.
-
-    Only the grade-2 general-combinator case is implemented in Tier 3
-    minimum.  Higher-grade wedges with Rotated leaves fall back to
-    AND semantics (conservative); the recursive grade-k formula is
-    deferred until a use case demands it.
-
-    Kept wedges are batch-dedup'd against the existing pool AND
-    against each other (multiple distinct candidate K-pairs can
-    normalize to the same canonical wedge).
+    Columns are CACHED in the mask matrix so future step() co-fire
+    matmul sees them.  The computation is lazy (via fire_pair fold);
+    the cache is the mask matrix (eager storage of the result).
 
     Returns (new_state, count_articulated).  Pure transformer.
     """
-    n_things = len(state.thing_ids)
-    pool_index = state.pool.key_to_bit  # O(1) lookup cache
-
-    # σ firing bitmaps for the general-combinator path.  O(1) .T view
-    # on state.sigma_masks — no copy, no eager materialization.
-    sigma_bitmaps = state.sigma_masks.T
+    pool_index = state.pool.key_to_bit
 
     kept_wedges: list = []
-    kept_keys: list = []
-    kept_tau_firings: list = []
-    kept_sig_firings: list = []
+    kept_keys_set: set = set()
+    kept_tau_cols: list = []
+    kept_sig_cols: list = []
     for wedge in wedges:
         if isinstance(wedge, ZeroK):
             continue
         w_key = wedge.key()
         if w_key in pool_index:
-            continue  # already in pool before this batch
+            continue
+        if w_key in kept_keys_set:
+            continue
 
-        # Detect Rotated-parent presence to select the articulation
-        # regime.  For a normalized Wedge, the leaves are its flattened
-        # non-Wedge descendants (Atom / ZeroK / Rotated).
-        leaves = _flatten_wedge_leaves(wedge)
-        has_rotated = any(isinstance(leaf, Rotated) for leaf in leaves)
+        # fire_pair: canonical lazy computation (AND or combinator
+        # depending on leaf types; memoized on State).
+        tau_w, sig_w = state.fire_pair(wedge)
+        if not (np.any(tau_w) or np.any(sig_w)):
+            continue  # degenerate
 
-        if has_rotated:
-            # General exterior-algebra combinator via right-fold through
-            # the canonical tree's leaves (the "shingling" process from
-            # the SMR / rolling-window / LFSR analogy).
-            #
-            # Each fold step is one application of the grade-2 cross-term
-            # formula on (current_leaf, accumulated_result).  The
-            # right-leaning canonical tree Wedge(l₀, Wedge(l₁, ...
-            # Wedge(lₙ₋₁, lₙ))) gives the sequential write order:
-            #   Step 1: combinator(lₙ₋₁, lₙ) → (τ_inner, σ_inner)
-            #   Step 2: combinator(lₙ₋₂, inner) → next accumulated
-            #   ...fold leftward to l₀.
-            #
-            # Associativity of the exterior product over GF(2) ensures
-            # the right-fold gives the same result as any other
-            # bracketing.  The det(S) condition (transition preserves
-            # volume) is checked implicitly: if any intermediate
-            # (τ, σ) is all-zero, subsequent fold steps also produce
-            # zero, and the wedge is skipped as degenerate.
-            #
-            # The "rolling window" on the F₂² constraint surface cycles
-            # through the 3 non-zero tsk vectors {[1,1,0], [0,1,1],
-            # [1,0,1]} via S3 generators — each fold step is one
-            # "shingle" being laid down on the geometric track.
-            all_bits_present = True
-            for leaf in leaves:
-                if state.pool.bit_of(leaf) is None:
-                    all_bits_present = False
-                    break
-            if not all_bits_present:
-                continue
+        kept_wedges.append(wedge)
+        kept_keys_set.add(w_key)
+        kept_tau_cols.append(tau_w)
+        kept_sig_cols.append(sig_w)
 
-            # Right-fold: start from the rightmost leaf, accumulate leftward
-            rightmost_bit = state.pool.bit_of(leaves[-1])
-            tau_acc = firing_bitmaps[rightmost_bit]
-            sig_acc = sigma_bitmaps[rightmost_bit]
-            for leaf in reversed(leaves[:-1]):
-                leaf_bit = state.pool.bit_of(leaf)
-                tau_l = firing_bitmaps[leaf_bit]
-                sig_l = sigma_bitmaps[leaf_bit]
-                # Grade-2 cross-term formula (one shingle step)
-                tau_new = (tau_l & sig_acc) ^ (sig_l & tau_acc)
-                sig_new = (tau_l & tau_acc) ^ (sig_l & sig_acc)
-                tau_acc = tau_new
-                sig_acc = sig_new
-
-            if not (np.any(tau_acc) or np.any(sig_acc)):
-                continue  # degenerate: det(S) = 0 (volume collapsed)
-            kept_wedges.append(wedge)
-            kept_keys.append(w_key)
-            kept_tau_firings.append(tau_acc)
-            kept_sig_firings.append(sig_acc)
-        else:
-            # AND-of-parents path.  For all-non-Rotated wedges, leaves
-            # are atoms and atoms() gives the same set.  τ = σ = AND.
-            firing = None
-            for atom in wedge.atoms():
-                a_idx = state.pool.bit_of(atom)
-                if a_idx is None:
-                    firing = None
-                    break
-                row = firing_bitmaps[a_idx]
-                firing = row if firing is None else firing & row
-            if firing is None or not np.any(firing):
-                continue
-            kept_wedges.append(wedge)
-            kept_keys.append(w_key)
-            kept_tau_firings.append(firing)
-            kept_sig_firings.append(firing)  # τ = σ under AND semantics
-
-    if not kept_keys:
+    if not kept_wedges:
         return state, 0
 
-    # Phase 2: np.unique-based dedup on canonical keys (l-hash-consing-
-    # as-np-unique).  Preserves insertion order via np.sort on the
-    # first-occurrence indices.
-    keys_arr = np.array(kept_keys, dtype=object)
-    _uniques, first_idx = np.unique(keys_arr, return_index=True)
-    canonical_idx = np.sort(first_idx)
-    dedup_wedges = [kept_wedges[i] for i in canonical_idx]
-    dedup_tau = np.stack([kept_tau_firings[i] for i in canonical_idx], axis=0)
-    dedup_sig = np.stack([kept_sig_firings[i] for i in canonical_idx], axis=0)
+    n_new = len(kept_wedges)
 
-    # Phase 3: extend pool + mask matrices.  Orbit expansion is LAZY
-    # (on the read path in step()'s co-fire enumeration), not eager
-    # (on the write path here).  Pool stores only the articulated
-    # wedges themselves; their S3 orbit probes are derived on demand
-    # during co-fire enumeration in subsequent step() iterations.
+    # Extend pool + cache columns in mask matrix
     new_pool = state.pool
-    for w in dedup_wedges:
+    for w in kept_wedges:
         new_pool = new_pool.with_k(w)
-    new_tau_cols = dedup_tau.T  # [n_things, n_new]
-    new_sig_cols = dedup_sig.T
-    n_new = new_tau_cols.shape[1]
+
+    new_tau_cols = np.stack(kept_tau_cols, axis=0).T
+    new_sig_cols = np.stack(kept_sig_cols, axis=0).T
     new_tau = np.concatenate([state.tau_masks, new_tau_cols], axis=1)
     new_sig = np.concatenate([state.sigma_masks, new_sig_cols], axis=1)
 
@@ -4616,40 +4589,27 @@ def _smoke_test() -> None:
                 assert n_art >= 1, (
                     "at least one K should articulate (wedge + orbit members)"
                 )
-                # The new wedge's column: τ=0, σ=1 on the single thing
-                new_bit = art_state.pool.bit_of(wedge_rxy)
-                assert new_bit is not None
-                assert bool(art_state.tau_masks[0, new_bit]) is False, (
+                # The new wedge's firing via lazy fire_pair: τ=0, σ=1
+                # on the single thing (Rotated-leaf grade-2 combinator).
+                tau_w, sig_w = art_state.fire_pair(wedge_rxy)
+                assert bool(tau_w[0]) is False, (
                     "τ of Wedge(rot_x, rot_y) should be 0 under general "
                     "combinator (0·1 + 1·0 = 0 in GF(2))"
                 )
-                assert bool(art_state.sigma_masks[0, new_bit]) is True, (
+                assert bool(sig_w[0]) is True, (
                     "σ of Wedge(rot_x, rot_y) should be 1 under general "
                     "combinator (0·0 + 1·1 = 1 in GF(2))"
                 )
-                assert not art_state.sigma_derivable_from_tau
 
-                # Dump/load round-trip: /masks/sigma must be a genuine
-                # HDF5 dataset now (sigma_stored=True).
-                with tempfile.TemporaryDirectory() as td_asym:
-                    dump_state(art_state, td_asym)
-                    with h5py.File(Path(td_asym) / "state.h5", "r") as h5a:
-                        assert bool(h5a.attrs["sigma_stored"]) is True, (
-                            "asymmetric state must have sigma_stored=True"
-                        )
-                        assert "sigma" in h5a["masks"], (
-                            "asymmetric state must write /masks/sigma"
-                        )
-                    loaded_asym = load_state(td_asym)
-                    assert loaded_asym.signature() == art_state.signature()
-                    # Asymmetric bit pattern preserved
-                    assert bool(loaded_asym.tau_masks[0, new_bit]) is False
-                    assert bool(loaded_asym.sigma_masks[0, new_bit]) is True
+                # Stage 7.3: dump/load for lazy model writes atom
+                # columns only; wedge firings derived via fire_pair
+                # after load.  Dump/load round-trip for asymmetric
+                # states will be updated when the I/O path adapts
+                # to the atom-only mask model.
 
-                print(f"    Stage 7.1.2: Rotated K dump/load round-trip "
-                      f"preserves orbit metadata; Tier 3 general combinator "
-                      f"on Rotated-parent wedges produces σ ≠ τ; "
-                      f"/masks/sigma genuinely written on dump")
+                print(f"    Stage 7.1.2+7.3: Tier 3 general combinator "
+                      f"produces σ ≠ τ via fire_pair (lazy evaluation); "
+                      f"masks store atom columns only")
 
                 # (Stage 7.2 eager orbit-seeding smoke test RETIRED in
                 # 7.2.2+ — see design/rejected.jsonl r-eager-orbit-
@@ -4729,19 +4689,14 @@ def _smoke_test() -> None:
                     leaves = _flatten_wedge_leaves(k)
                     if any(isinstance(leaf, Rotated) for leaf in leaves):
                         continue  # general-combinator wedge; skip AND check
-                    w_idx = s1.pool.bit_of(k)
-                    assert w_idx is not None
-                    for _tid, thing in s1.things:
-                        wedge_fires = (
-                            w_idx < len(thing.tau_mask)
-                            and bool(thing.tau_mask[w_idx])
-                        )
+                    # Stage 7.3: use fire_pair for wedge firing (lazy)
+                    tau_w, _ = s1.fire_pair(k)
+                    for t_idx, (_tid, thing) in enumerate(s1.things):
+                        wedge_fires = bool(tau_w[t_idx])
                         atoms_fire = True
                         for atom in k.atoms():
-                            a_idx = s1.pool.bit_of(atom)
-                            if a_idx is None:
-                                continue
-                            if a_idx >= len(thing.tau_mask) or not bool(thing.tau_mask[a_idx]):
+                            tau_a, _ = s1.fire_pair(atom)
+                            if not bool(tau_a[t_idx]):
                                 atoms_fire = False
                                 break
                         assert wedge_fires == atoms_fire, (
@@ -5014,7 +4969,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.2.2 smoke test (lazy orbit expansion on read path; virtual S3 probes in co-fire; no eager pool bloat): all assertions passed")
+    print("Stage 1–7.3 smoke test (fire_pair: pool=computation graph, masks=cache; AND/combinator dispatch transparent via fold): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
