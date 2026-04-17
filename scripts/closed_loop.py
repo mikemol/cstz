@@ -1752,13 +1752,12 @@ class State:
 
         oracle = self.oracle_pairs | other.oracle_pairs
 
-        # Trajectory: concatenate structured arrays + aux tuples, then
-        # sort both in lock-step by the 'iteration' field.
+        # Trajectory: concatenate structured arrays, sort by iteration.
+        # (trajectory_aux retired in Stage 7.4; source in TRAJECTORY_DTYPE)
         combined_arr = np.concatenate([self.trajectory, other.trajectory])
         if len(combined_arr) > 0:
             order = np.argsort(combined_arr["iteration"], kind="stable")
             combined_arr = combined_arr[order]
-            combined_aux = tuple(combined_aux[i] for i in order.tolist())
         combined_arr.setflags(write=False)
 
         return State(
@@ -4994,7 +4993,64 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.4 smoke test (JSONL fully retired; state.h5 is sole output; source in TRAJECTORY_DTYPE; trajectory_aux purged): all assertions passed")
+    # -- Stage 10: parallel-shard POC -----------------------------------------
+    if any(sources_present.values()) and state is not None:
+        import tempfile
+
+        # Split things into two shards by source prefix
+        shard_a_ids = frozenset(
+            ThingId(str(tid)) for tid in state.thing_ids
+            if str(tid).startswith("paper:")
+        )
+        shard_b_ids = frozenset(
+            ThingId(str(tid)) for tid in state.thing_ids
+            if not str(tid).startswith("paper:")
+        )
+        if shard_a_ids and shard_b_ids:
+            shard_a = state.restrict(thing_ids=shard_a_ids)
+            shard_b = state.restrict(thing_ids=shard_b_ids)
+
+            # Run each shard to fixed point independently
+            fp_a = run_to_fixed_point(shard_a, max_articulations_per_step=20)
+            fp_b = run_to_fixed_point(shard_b, max_articulations_per_step=20)
+
+            # Dump each shard independently
+            with tempfile.TemporaryDirectory() as td_a, \
+                 tempfile.TemporaryDirectory() as td_b, \
+                 tempfile.TemporaryDirectory() as td_merged:
+                dump_state(fp_a, td_a)
+                dump_state(fp_b, td_b)
+
+                # Load both and merge
+                loaded_a = load_state(td_a)
+                loaded_b = load_state(td_b)
+                merged = loaded_a.merge(loaded_b)
+
+                # Merged state has ALL things from both shards
+                assert len(merged.thing_ids) == len(shard_a_ids) + len(shard_b_ids)
+
+                # Merged pool is superset of both
+                assert merged.pool.size() >= max(
+                    loaded_a.pool.size(), loaded_b.pool.size()
+                )
+
+                # Reconcile: one more step on the merged state to
+                # settle any cross-shard articulations
+                reconciled = step(merged, max_articulations_per_step=20)
+
+                # Dump merged result
+                dump_state(reconciled, td_merged)
+                reloaded = load_state(td_merged)
+                assert reloaded.signature() == reconciled.signature()
+
+            print(f"    Stage 10: parallel-shard POC: "
+                  f"shard_a ({len(shard_a_ids)} things) + "
+                  f"shard_b ({len(shard_b_ids)} things) → "
+                  f"merged ({merged.pool.size()} K's) → "
+                  f"reconciled ({reconciled.pool.size()} K's); "
+                  f"dump/load/merge round-trip verified")
+
+    print("Stage 1–10 smoke test (parallel-shard POC + CLI): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
@@ -5009,6 +5065,160 @@ def _smoke_test() -> None:
     print(f"  State.restrict prunes orphan oracle pairs")
     print(f"  State.signature stable under trajectory append")
 
+# ---------------------------------------------------------------------------
+# Stage 8 + 10 — CLI + parallel-shard support
+# ---------------------------------------------------------------------------
+
+
+_DEFAULT_OUT_DIR = "reports/closed_loop"
+
+
+def _cli_init(args) -> None:
+    """Extract atoms from the repo, dump initial state."""
+    repo = Path(args.repo)
+    out = Path(args.out_dir)
+    sources = frozenset(args.sources.split(",")) if args.sources else None
+    state = extract_initial_state(
+        repo, source_filter=sources, include_oracle=True,
+    )
+    dump_state(state, out)
+    print(f"init: {len(state.thing_ids)} things, {state.pool.size()} K's "
+          f"→ {out / 'state.h5'}")
+
+
+def _cli_step(args) -> None:
+    """Load state, run one step, dump."""
+    d = Path(args.out_dir)
+    state = load_state(d)
+    state = step(
+        state,
+        max_articulations_per_step=args.budget,
+    )
+    dump_state(state, d)
+    last = state.trajectory[-1]
+    print(f"step: iteration {int(last['iteration'])}, "
+          f"articulated {int(last['articulated_count'])}, "
+          f"pool {int(last['pool_size_before'])} → {int(last['pool_size_after'])}")
+
+
+def _cli_run(args) -> None:
+    """Load state, run to fixed point, dump."""
+    d = Path(args.out_dir)
+    state = load_state(d)
+    # Optional shard restriction
+    if args.things_glob:
+        import fnmatch
+        keep = frozenset(
+            ThingId(str(tid)) for tid in state.thing_ids
+            if fnmatch.fnmatch(str(tid), args.things_glob)
+        )
+        state = state.restrict(thing_ids=keep)
+        print(f"restricted to {len(state.thing_ids)} things "
+              f"matching '{args.things_glob}'")
+    state = run_to_fixed_point(
+        state,
+        max_articulations_per_step=args.budget,
+    )
+    dump_state(state, d)
+    print(f"run: converged at iteration {state.iteration}, "
+          f"pool {state.pool.size()} K's")
+
+
+def _cli_merge(args) -> None:
+    """Load states from multiple dirs, merge, dump."""
+    out = Path(args.out_dir)
+    states = [load_state(Path(d)) for d in args.dirs]
+    merged = states[0]
+    for s in states[1:]:
+        merged = merged.merge(s)
+    dump_state(merged, out)
+    print(f"merge: {len(args.dirs)} shards → {len(merged.thing_ids)} things, "
+          f"{merged.pool.size()} K's → {out / 'state.h5'}")
+
+
+def _cli_show(args) -> None:
+    """Show a K or Thing by id."""
+    d = Path(args.out_dir)
+    state = load_state(d)
+    target = args.id
+    # Try as a Thing id first
+    row = state.row_of(ThingId(target))
+    if row is not None:
+        print(f"Thing: {target}")
+        print(f"  row_index: {row}")
+        n_fires_tau = int(state.tau_masks[row].sum())
+        n_fires_sig = int(state.sigma_masks[row].sum())
+        print(f"  τ-fires: {n_fires_tau} / {state.pool.size()}")
+        print(f"  σ-fires: {n_fires_sig} / {state.pool.size()}")
+        return
+    # Try as a K key (partial match)
+    for i, k in enumerate(state.pool.ks):
+        if target in k.key():
+            print(f"K bit {i}: {k.key()[:120]}")
+            print(f"  grade: {k.grade}")
+            print(f"  type: {type(k).__name__}")
+            oid = int(state.pool.keys_array[i]["orbit_id"])
+            if oid != i:
+                print(f"  orbit_id: {oid} (Rotated)")
+            tau_col, sig_col = state.fire_pair(k)
+            print(f"  τ-fires on {int(tau_col.sum())} / {len(state.thing_ids)} things")
+            print(f"  σ-fires on {int(sig_col.sum())} / {len(state.thing_ids)} things")
+            return
+    print(f"not found: {target!r}")
+
+
+def _cli_test(args) -> None:
+    """Run the smoke test suite."""
+    _smoke_test()
+
+
+def main() -> None:
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Closed-loop alignment via iterated κ-evolution.",
+    )
+    sub = parser.add_subparsers(dest="cmd")
+
+    p_init = sub.add_parser("init", help="extract atoms + dump initial state")
+    p_init.add_argument("--repo", default=".", help="repo root")
+    p_init.add_argument("--out-dir", default=_DEFAULT_OUT_DIR)
+    p_init.add_argument("--sources", default=None,
+                        help="comma-separated source filter (paper,agda,python)")
+    p_init.set_defaults(func=_cli_init)
+
+    p_step = sub.add_parser("step", help="one step on current state")
+    p_step.add_argument("--out-dir", default=_DEFAULT_OUT_DIR)
+    p_step.add_argument("--budget", type=int, default=None,
+                        help="max articulations per step (None=unlimited)")
+    p_step.set_defaults(func=_cli_step)
+
+    p_run = sub.add_parser("run", help="step to fixed point")
+    p_run.add_argument("--out-dir", default=_DEFAULT_OUT_DIR)
+    p_run.add_argument("--budget", type=int, default=None)
+    p_run.add_argument("--things-glob", default=None,
+                        help="restrict to things matching this glob pattern")
+    p_run.set_defaults(func=_cli_run)
+
+    p_merge = sub.add_parser("merge", help="merge shard outputs")
+    p_merge.add_argument("dirs", nargs="+", help="shard directories to merge")
+    p_merge.add_argument("--out-dir", default=_DEFAULT_OUT_DIR)
+    p_merge.set_defaults(func=_cli_merge)
+
+    p_show = sub.add_parser("show", help="show a K or Thing by id")
+    p_show.add_argument("id", help="ThingId or K key substring")
+    p_show.add_argument("--out-dir", default=_DEFAULT_OUT_DIR)
+    p_show.set_defaults(func=_cli_show)
+
+    p_test = sub.add_parser("test", help="run smoke test suite")
+    p_test.set_defaults(func=_cli_test)
+
+    args = parser.parse_args()
+    if args.cmd is None:
+        # Default: run smoke test (backward compat)
+        _smoke_test()
+    else:
+        args.func(args)
+
 
 if __name__ == "__main__":
-    _smoke_test()
+    main()
