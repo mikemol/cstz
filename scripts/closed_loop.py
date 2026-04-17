@@ -1866,6 +1866,91 @@ def _make_thing_id(source: str, kind: str, name: str | None,
     return f"{source}:{kind}:@{source_path}#{name_part}"
 
 
+def _tree_shape_stats(j) -> Tuple[int, int, int, int]:
+    """Compute (depth, leaf_count, fanout, n_distinct_child_kinds) from
+    a raw parse-tree JSON node.  Source-independent structural probes."""
+    if isinstance(j, dict):
+        children = j.get("c", [])
+        if isinstance(children, list):
+            child_json = [c for c in children if isinstance(c, (dict, list))]
+        else:
+            child_json = []
+    elif isinstance(j, list):
+        child_json = [c for c in j if isinstance(c, (dict, list))]
+    else:
+        return (0, 1, 0, 0)
+    if not child_json:
+        return (1, 1, 0, 0)
+    sub = [_tree_shape_stats(c) for c in child_json]
+    depth = 1 + max(s[0] for s in sub)
+    leaves = sum(s[1] for s in sub)
+    fanout = len(child_json)
+    child_kinds = len(set(
+        c.get("t", "") if isinstance(c, dict) else ""
+        for c in child_json
+    ) - {""})
+    return (depth, leaves, fanout, child_kinds)
+
+
+def _structural_observables(node) -> frozenset:
+    """Compute source-independent structural probes from a parse-tree node.
+
+    These fire CROSS-SOURCE: a paper Definition with depth 5 and
+    fanout 3 fires the same probes as an agda module with depth 5
+    and fanout 3.  Works with PandocNode (_json), tree-sitter/ast
+    nodes (_node.children), or gracefully degrades to empty.
+    """
+    # Get the raw tree for shape computation
+    if hasattr(node, "_json"):
+        depth, leaves, fanout, child_kinds = _tree_shape_stats(node._json)
+    elif hasattr(node, "_node"):
+        # tree-sitter or ast node: use children attribute
+        depth, leaves, fanout, child_kinds = _ts_shape_stats(node._node)
+    else:
+        return frozenset()
+
+    probes = {
+        f"depth:{depth}",
+        f"leaf_count:{leaves}",
+        f"fanout:{fanout}",
+        f"child_kinds:{child_kinds}",
+    }
+    for bucket_val, bucket_name in [
+        (depth, "depth_bucket"),
+        (leaves, "leaf_bucket"),
+        (fanout, "fanout_bucket"),
+    ]:
+        if bucket_val <= 2:
+            probes.add(f"{bucket_name}:tiny")
+        elif bucket_val <= 10:
+            probes.add(f"{bucket_name}:small")
+        elif bucket_val <= 50:
+            probes.add(f"{bucket_name}:medium")
+        elif bucket_val <= 200:
+            probes.add(f"{bucket_name}:large")
+        else:
+            probes.add(f"{bucket_name}:huge")
+    return frozenset(probes)
+
+
+def _ts_shape_stats(node) -> Tuple[int, int, int, int]:
+    """Structural stats from a tree-sitter or Python AST node."""
+    children = getattr(node, "children", None) or getattr(node, "body", None) or []
+    if not children:
+        return (1, 1, 0, 0)
+    if not isinstance(children, (list, tuple)):
+        children = list(children)
+    sub = [_ts_shape_stats(c) for c in children]
+    depth = 1 + max(s[0] for s in sub)
+    leaves = sum(s[1] for s in sub) or 1
+    fanout = len(children)
+    child_kinds = len(set(
+        getattr(c, "type", getattr(c, "__class__", "").__name__ if hasattr(c, "__class__") else "")
+        for c in children
+    ) - {""})
+    return (depth, leaves, fanout, child_kinds)
+
+
 def _iter_source_nodes(
     repo: Path, source: str
 ) -> Iterator[Tuple[str, frozenset, dict]]:
@@ -1944,7 +2029,7 @@ def _iter_source_nodes(
                 source_line=getattr(node, "source_line", 0),
                 in_file_seq=in_file_seq,
             )
-            yield tid, deep_kind_set(node), _identity(kind, label, path_str)
+            yield tid, deep_kind_set(node) | _structural_observables(node), _identity(kind, label, path_str)
     elif source == "agda":
         for path in sorted(roots["agda"].rglob("*.agda")):
             rel_path = _rel(path)
@@ -1961,7 +2046,7 @@ def _iter_source_nodes(
                         source_line=getattr(node, "source_line", 0),
                         in_file_seq=in_file_seq,
                     )
-                    yield tid, deep_kind_set(node), _identity(kind, name, rel_path)
+                    yield tid, deep_kind_set(node) | _structural_observables(node), _identity(kind, name, rel_path)
             except Exception as e:
                 print(
                     f"closed_loop: parse failure in {path}: "
@@ -1985,7 +2070,7 @@ def _iter_source_nodes(
                         source_line=getattr(node, "source_line", 0),
                         in_file_seq=in_file_seq,
                     )
-                    yield tid, deep_kind_set(node), _identity(kind, name, rel_path)
+                    yield tid, deep_kind_set(node) | _structural_observables(node), _identity(kind, name, rel_path)
             except Exception as e:
                 print(
                     f"closed_loop: parse failure in {path}: "
