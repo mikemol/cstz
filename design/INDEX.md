@@ -66,8 +66,9 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [d-wedge-combinator-general-exterior-algebra] Wedge combinator is the general exterior-algebra form
 - ● [d-weight-objective-pluggable] Weight-adjustment objective is pluggable
 
-## Lemmas (10)
+## Lemmas (11)
 
+- ● [l-belnap-encoded-mask-matrix] Mask matrix cells use Belnap encoding: gap vs fires vs doesn't-fire vs contradiction
 - ▲ [l-combinator-and-s3-operators-are-equivalent] General exterior-algebra combinator ≡ S3 operators + AND-wedge (two presentations, one structure)
 - ▲ [l-hash-consing-as-np-unique] Hash-consing of K becomes np.unique over the pool's structured-dtype array
 - ▲ [l-hdf5-compound-dtypes-mirror-in-memory] HDF5 compound dtypes on disk should mirror the in-memory structured dtypes 1:1
@@ -91,7 +92,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (35)
+## Corrections (36)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -126,6 +127,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-stage-7-2-1-orbit-seed-trajectory-events] Stage 7.2.1: orbit-seed events recorded as minimal (base_bit, perm) algebraic datum in trajectory
 - ● [c-stage-7-2-2-syndrome-decoded-orbit-demands] Stage 7.2.2: lazy syndrome-decoded orbit demands; (τ⊕σ)|σ = τ|σ eliminates virtual matmul
 - ● [c-stage-7-2-post-tier3-step-asymmetric-activation] Stage 7.2: post-Tier-3 step()-level asymmetric regime activation; closes two planning questions
+- ● [c-stage-7-3-fire-pair-pool-as-computation-graph] Stage 7.3: fire_pair as canonical computation; pool = computation graph; masks = cache
 - ● [c-type-theory-reframed-via-tensor-shape] p-type-theory-everywhere reframed: primary focus is tensor shape, not class shape
 - ● [c-weight-updater-becomes-new-k-articulation] WeightUpdater stub removed; weight updates reinterpreted as new-K articulation
 
