@@ -92,7 +92,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 -   [r-source-qualified-kinds] Source-qualified kind keys (kind/agda/module)
 -   [r-triples-output-format] triples.jsonl with (agda, paper, python) columns
 
-## Corrections (37)
+## Corrections (38)
 
 - ● [c-alignment-is-distribution-not-gate] Alignment is the evidence distribution itself, not a Boolean gate
 - ● [c-arity-not-a-feature] Arity is grade, not a counted feature
@@ -102,6 +102,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [c-division-notation-is-matrix-cell] '/' in (σ/τ) is matrix-cell separator, not ratio
 - ● [c-lowercase-still-hardcoded] Lowercasing is hardcoded equivalence, not a generic transform
 - ● [c-metadata-was-a-smuggled-taxonomy] Metadata class was a smuggled taxonomy, removed in Stage 2.6
+- ● [c-parallel-arrays-reframed-as-cache] l-state-things-as-parallel-arrays evolved: stacked mask matrix is a cache, not THE primary representation
 - ● [c-question-resolution-via-maximal-freedom] Open questions resolve via maximal freedom, not specific picks
 - ● [c-stage-3-5-bijective-keys-and-stable-anon-ids] Stage 3.5: bijective K keys; stable position-based anon-thing-IDs; surfaced parse errors
 - ● [c-stage-3-6-identity-as-probes] Stage 3.6: surface all identity components as probes, not just as ID-string text

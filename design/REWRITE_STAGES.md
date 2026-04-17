@@ -267,8 +267,38 @@ Current (7.2.2+ canonical) model:
 
 Eager model REJECTED: see r-eager-orbit-seeding in rejected.jsonl.
 
-Non-goals (deferred): grade-3+ recursive combinator; σ-channel-
-aware scorer invocation; further JSONL retirement.
+Non-goals (deferred): σ-channel-aware scorer invocation; further
+JSONL retirement.
+
+### Stage 7.3 — fire_pair: pool as computation graph; masks as cache
+
+Fundamental architectural shift: the K-pool is a computation graph;
+atom mask columns are the primary stored data; all derived K firings
+(Wedge, Rotated) are computed lazily via State.fire_pair(k).
+
+  - fire_pair dispatches on K type: Atom → stored column read;
+    Rotated → S3 on fire_pair(base); Wedge (all-atom) → AND;
+    Wedge (Rotated leaves) → grade-k right-fold / shingling via
+    GF(2) cross-term formula.  Memoized per k.key() on State.
+  - _articulate_wedges_batch delegates entirely to fire_pair for
+    degeneracy checks and column computation.  AND/combinator
+    dispatch transparent to callers.
+  - Grade-k recursive combinator: right-fold through canonical
+    tree's leaves.  Each fold step = one "shingle" from the
+    SMR / LFSR framework.  Associativity of exterior product over
+    GF(2) ensures right-fold = any bracketing.  det(S) = 0
+    collapse = all-zero check (degenerate).
+
+#### Stage 7.3.1 — Belnap-encoded mask matrix
+
+Enacts l-belnap-encoded-mask-matrix: each mask cell carries a 2-bit
+Belnap value (populated + fires).  with_pool marks new columns as
+gap (⊥); fire_pair-computed columns are populated (T/F).  The type
+system distinguishes gap from known-False per p-atoms-gap-preserving.
+_count_four_cell migrated to fire_pair (eliminates dual access path).
+
+Non-goals (deferred): ⊤ (contradiction) detection at merge time;
+atom-only mask storage (shrinking masks to n_atoms columns).
 
 ## Stage 8: CLI (~50 lines)
 

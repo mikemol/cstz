@@ -4645,15 +4645,34 @@ def _smoke_test() -> None:
                     "combinator (0·0 + 1·1 = 1 in GF(2))"
                 )
 
-                # Stage 7.3: dump/load for lazy model writes atom
-                # columns only; wedge firings derived via fire_pair
-                # after load.  Dump/load round-trip for asymmetric
-                # states will be updated when the I/O path adapts
-                # to the atom-only mask model.
+                # Dump/load round-trip for the asymmetric state.
+                # Under 7.3, masks are a cache (wedge columns cached
+                # on articulation).  sigma_derivable_from_tau checks
+                # the STORED masks — which include the asymmetric wedge
+                # column cached by _articulate_wedges_batch.  So
+                # /masks/sigma IS written for asymmetric states.
+                with tempfile.TemporaryDirectory() as td_asym:
+                    dump_state(art_state, td_asym)
+                    with h5py.File(Path(td_asym) / "state.h5", "r") as h5a:
+                        assert bool(h5a.attrs["sigma_stored"]) is True, (
+                            "asymmetric state must have sigma_stored=True"
+                        )
+                        assert "sigma" in h5a["masks"], (
+                            "asymmetric state must write /masks/sigma"
+                        )
+                    loaded_asym = load_state(td_asym)
+                    # fire_pair on loaded state produces same result
+                    lt, ls = loaded_asym.fire_pair(wedge_rxy)
+                    assert bool(lt[0]) is False, (
+                        "loaded asymmetric wedge τ should be 0"
+                    )
+                    assert bool(ls[0]) is True, (
+                        "loaded asymmetric wedge σ should be 1"
+                    )
 
-                print(f"    Stage 7.1.2+7.3: Tier 3 general combinator "
-                      f"produces σ ≠ τ via fire_pair (lazy evaluation); "
-                      f"masks store atom columns only")
+                print(f"    Stage 7.3.1: Tier 3 general combinator via "
+                      f"fire_pair; Belnap-encoded masks; asymmetric "
+                      f"dump/load round-trip verified")
 
                 # (Stage 7.2 eager orbit-seeding smoke test RETIRED in
                 # 7.2.2+ — see design/rejected.jsonl r-eager-orbit-
