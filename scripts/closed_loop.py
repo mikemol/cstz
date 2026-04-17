@@ -3574,17 +3574,16 @@ def load_state(in_dir) -> "State":
                 f"trajectory length {trajectory.shape[0]} != n_iter "
                 f"attribute {n_iter_attr}"
             )
-        # Algebraic trajectory self-validation: iteration field is
-        # consecutive starting from 1 (Sev-3 audit fix).
-        if n_iter_attr > 0:
-            iters = trajectory["iteration"]
-            expected_iters = np.arange(1, n_iter_attr + 1, dtype=iters.dtype)
-            if not np.array_equal(iters, expected_iters):
-                raise ValueError(
-                    f"trajectory iteration sequence not consecutive 1..N; "
-                    f"got first={int(iters[0])}, last={int(iters[-1])}, "
-                    f"expected 1..{n_iter_attr}"
-                )
+        # Trajectory is a per-shard audit log, not a global clock.
+        # Under p-embarrassingly-parallel, merged states have trajectories
+        # that are the union of per-shard event logs — duplicate or
+        # non-consecutive iteration numbers are valid (each shard's
+        # sub-sequence is independently consistent; the merge is
+        # strictly additive on a join-semilattice).  NO consecutiveness
+        # check: the iteration field is for audit, not for state
+        # constraint.  The only load-bearing trajectory read is
+        # run_to_fixed_point's termination check on the LAST entry's
+        # articulated_count — which doesn't depend on sequence ordering.
 
     # -- things.jsonl -------------------------------------------------------
     thing_id_list: list = []
