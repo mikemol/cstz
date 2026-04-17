@@ -975,34 +975,6 @@ class Thing:
         Returned array is fresh; caller owns mutation rights."""
         return np.logical_xor(self.tau_mask, self.sigma_mask)
 
-    def fires(self, pool: Pool, k: K, channel: str = "tau") -> bool:
-        idx = pool.bit_of(k)
-        if idx is None:
-            return False
-        mask = self.tau_mask if channel == "tau" else (
-            self.sigma_mask if channel == "sigma" else self.kappa_mask
-        )
-        if idx >= len(mask):
-            return False
-        return bool(mask[idx])
-
-    def tausigma_at(self, pool: Pool, k: K) -> TauSigma:
-        """Read the TauSigma state of a specific K on this thing."""
-        idx = pool.bit_of(k)
-        if idx is None or idx >= len(self.tau_mask):
-            return TauSigma(0, 0)
-        return TauSigma(
-            tau=int(self.tau_mask[idx]),
-            sigma=int(self.sigma_mask[idx]),
-        )
-
-    @staticmethod
-    def with_empty_masks(tid: "ThingId", pool_size: int) -> "Thing":
-        """Helper: construct a Thing with all-False masks of the
-        requested length.  Used in tests and as a default form."""
-        empty = np.zeros(pool_size, dtype=bool)
-        return Thing(id=tid, tau_mask=empty.copy(), sigma_mask=empty.copy())
-
 
 # ---------------------------------------------------------------------------
 # State — the closed-loop state (Stage 2)
@@ -3818,19 +3790,13 @@ def _smoke_test() -> None:
     assert not hasattr(t, "display"), "Thing should not carry display"
     assert not hasattr(t, "line"), "Thing should not carry line"
 
-    # tausigma_at reads correctly
+    # Direct mask reads (tausigma_at retired; use fire_pair or raw masks)
     t2 = Thing(id=ThingId("y"),
                tau_mask=_int_mask(0b101, 3),
                sigma_mask=_int_mask(0b011, 3))
-    # Pool with 3 atoms at bit indices 0, 1, 2
-    pool = Pool().with_k(Atom(Observable("k0"))).with_k(
-        Atom(Observable("k1"))).with_k(Atom(Observable("k2")))
-    ts_at_0 = t2.tausigma_at(pool, Atom(Observable("k0")))
-    assert ts_at_0.tau == 1 and ts_at_0.sigma == 1 and ts_at_0.kappa == 0
-    ts_at_1 = t2.tausigma_at(pool, Atom(Observable("k1")))
-    assert ts_at_1.tau == 0 and ts_at_1.sigma == 1 and ts_at_1.kappa == 1
-    ts_at_2 = t2.tausigma_at(pool, Atom(Observable("k2")))
-    assert ts_at_2.tau == 1 and ts_at_2.sigma == 0 and ts_at_2.kappa == 1
+    assert bool(t2.tau_mask[0]) and bool(t2.sigma_mask[0])  # k0: τ=1, σ=1
+    assert not bool(t2.tau_mask[1]) and bool(t2.sigma_mask[1])  # k1: τ=0, σ=1
+    assert bool(t2.tau_mask[2]) and not bool(t2.sigma_mask[2])  # k2: τ=1, σ=0
 
     # -- Stage 2 + 2.5 + 2.6: State merge / restrict / signature ------------
 
@@ -3880,7 +3846,9 @@ def _smoke_test() -> None:
     assert m.merge(m).signature() == m.signature(), "merge not idempotent"
 
     # Merge associative
-    d_thing = Thing.with_empty_masks(ThingId("D"), pool_b.size())
+    d_thing = Thing(id=ThingId("D"),
+                    tau_mask=np.zeros(pool_b.size(), dtype=bool),
+                    sigma_mask=np.zeros(pool_b.size(), dtype=bool))
     s3 = State(pool=pool_b, things=((ThingId("D"), d_thing),))
     left = (s1.merge(s2)).merge(s3)
     right = s1.merge(s2.merge(s3))
@@ -3935,30 +3903,25 @@ def _smoke_test() -> None:
     # Merged pool has 3 K's: k0, k1, k2 (in some order)
     assert merged.pool.size() == 3
 
-    # X still fires on k0 and k1 after remap
-    assert merged.things_dict()[ThingId("X")].fires(merged.pool, ak0), "X should fire k0"
-    assert merged.things_dict()[ThingId("X")].fires(merged.pool, ak1), "X should fire k1"
-    assert not merged.things_dict()[ThingId("X")].fires(merged.pool, ak2), (
-        "X should NOT fire k2 (not in shard A's observation)"
-    )
-    # Y still fires on k1 and k2 after remap
-    assert merged.things_dict()[ThingId("Y")].fires(merged.pool, ak1), "Y should fire k1"
-    assert merged.things_dict()[ThingId("Y")].fires(merged.pool, ak2), "Y should fire k2"
-    assert not merged.things_dict()[ThingId("Y")].fires(merged.pool, ak0), (
-        "Y should NOT fire k0 (not in shard B's observation)"
-    )
+    # X still fires on k0 and k1 after remap (via fire_pair)
+    def _fires(st, tid, k):
+        tau, _ = st.fire_pair(k)
+        r = st.row_of(tid)
+        return bool(tau[r]) if r is not None else False
+    assert _fires(merged, ThingId("X"), ak0), "X should fire k0"
+    assert _fires(merged, ThingId("X"), ak1), "X should fire k1"
+    assert not _fires(merged, ThingId("X"), ak2), "X should NOT fire k2"
+    assert _fires(merged, ThingId("Y"), ak1), "Y should fire k1"
+    assert _fires(merged, ThingId("Y"), ak2), "Y should fire k2"
+    assert not _fires(merged, ThingId("Y"), ak0), "Y should NOT fire k0"
 
-    # Divergent merge is associative + commutative too
-    # Order should not matter: shardA.merge(shardB) ≡ shardB.merge(shardA) extensionally
+    # Divergent merge is associative + commutative
     merged_rev = shardB.merge(shardA)
-    # Pool key sets should match (order may differ due to append-only)
     assert set(merged.pool.keys) == set(merged_rev.pool.keys)
-    # Bit-by-bit firing sets should match for every K
     for k in [ak0, ak1, ak2]:
         for tid in [ThingId("X"), ThingId("Y")]:
             assert (
-                merged.things_dict()[tid].fires(merged.pool, k)
-                == merged_rev.things_dict()[tid].fires(merged_rev.pool, k)
+                _fires(merged, tid, k) == _fires(merged_rev, tid, k)
             ), f"divergent merge not order-invariant for K={k.key()} tid={tid}"
 
     # -- Stage 3: atom extraction from parse-tree sources -------------------
@@ -3979,28 +3942,37 @@ def _smoke_test() -> None:
         )
 
         # Minimum assertions: got at least one thing, at least one atom
-        assert len(state.things) > 0, "extracted zero things"
+        assert len(state.thing_ids) > 0, "extracted zero things"
         assert state.pool.size() > 0, "extracted zero atoms"
 
         # p-atoms-are-formal-tau-sigma-channels + d-tau-sigma-symmetric-at-grade-1:
         # Under lazy orbit expansion (Stage 7.2.2), the pool after
         # extract contains only base atoms (no Rotated K's).  All K's
         # are symmetric (τ = σ), so κ = 0 identically.
-        for tid, thing in state.things:
-            assert not np.any(thing.kappa_mask), (
-                f"thing {tid!r} has κ ≠ 0 at grade 1; τ should equal σ for atoms"
-            )
+        for i, tid in enumerate(state.thing_ids):
+            # κ = τ ⊕ σ; for symmetric atoms, κ should be 0 at all atom bits
+            kappa_row = state.tau_masks[i] ^ state.sigma_masks[i]
+            base_atom_bits = [
+                b for b, k in enumerate(state.pool.ks) if isinstance(k, Atom)
+            ]
+            for b in base_atom_bits:
+                if b < len(kappa_row):
+                    assert not kappa_row[b], (
+                        f"thing {tid!r} has κ ≠ 0 at base-atom bit {b}"
+                    )
 
         # p-source-is-a-k: source atoms present in pool for each active source
         for src in available:
             src_atom = Atom(Observable(f"source:{src}"))
             idx = state.pool.bit_of(src_atom)
             assert idx is not None, f"source atom source:{src} not in pool"
-            matching = [
-                t for tid, t in state.things if tid.startswith(f"{src}:")
+            matching_ids = [
+                tid for tid in state.thing_ids if str(tid).startswith(f"{src}:")
             ]
-            for t in matching:
-                assert idx < len(t.tau_mask) and bool(t.tau_mask[idx]), (
+            for tid in matching_ids:
+                r = state.row_of(ThingId(str(tid)))
+                assert r is not None
+                assert idx < state.tau_masks.shape[1] and bool(state.tau_masks[r, idx]), (
                     f"thing of source {src!r} does not fire source atom"
                 )
 
@@ -4008,13 +3980,13 @@ def _smoke_test() -> None:
         # A thing whose top-level kind is K fires kind_at_root:K but things
         # that only CONTAIN K in their subtree do not fire it.
         for src in available:
-            things_of_src = [t for tid, t in state.things if tid.startswith(f"{src}:")]
+            things_of_src = [tid for tid in state.thing_ids if str(tid).startswith(f"{src}:")]
             if not things_of_src:
                 continue
             # Pick a sample thing; verify kind_at_root matches its ThingId
             sample = things_of_src[0]
             # Extract kind from tid like "agda:module:CSTZ.All..." → "module"
-            parts = sample.id.split(":", 3)
+            parts = str(sample).split(":", 3)
             if len(parts) >= 2:
                 expected_kind = parts[1]
                 kr_atom = Atom(Observable(f"kind_at_root:{expected_kind}"))
@@ -4022,7 +3994,9 @@ def _smoke_test() -> None:
                 assert kr_idx is not None, (
                     f"kind_at_root:{expected_kind} atom not in pool"
                 )
-                assert kr_idx < len(sample.tau_mask) and bool(sample.tau_mask[kr_idx]), (
+                r = state.row_of(ThingId(str(sample)))
+                assert r is not None
+                assert kr_idx < state.tau_masks.shape[1] and bool(state.tau_masks[r, kr_idx]), (
                     f"sample thing does not fire its kind_at_root probe"
                 )
 
@@ -4748,7 +4722,7 @@ def _smoke_test() -> None:
                 # restricted state this is fast even without budget).
                 tiny_state = state.restrict(
                     thing_ids=frozenset(
-                        tid for tid, _ in state.things[:5]
+                        ThingId(str(tid)) for tid in state.thing_ids[:5]
                     )
                 )
                 # Under orbit expansion, unbounded articulation on even
@@ -4856,7 +4830,7 @@ def _smoke_test() -> None:
                 # outputs — they must agree.
                 sample_things = state.restrict(
                     thing_ids=frozenset(
-                        tid for tid, _ in state.things[:50]
+                        ThingId(str(tid)) for tid in state.thing_ids[:50]
                     )
                 )
                 sample_bitmaps = firing_bitmaps_of(sample_things, "tau")
@@ -4902,14 +4876,11 @@ def _smoke_test() -> None:
                 )
 
                 # (3) Thing.__hash__ is a pure function of content.
-                # Stage 7.0.6 reverted the 7.0.5 cache per user
-                # observation that the signature() hot path never
-                # invokes hash() — the cache solved a phantom
-                # problem.  Now __hash__ is stateless; same content
-                # produces same hash.
-                sample_thing = state.things[0][1]
-                assert not hasattr(sample_thing, "_hash"), (
-                    "Thing shouldn't have _hash cache (reverted in 7.0.6)"
+                sample_tid = ThingId(str(state.thing_ids[0]))
+                sample_thing = Thing(
+                    id=sample_tid,
+                    tau_mask=state.tau_masks[0].copy(),
+                    sigma_mask=state.sigma_masks[0].copy(),
                 )
                 h1 = hash(sample_thing)
                 h2 = hash(sample_thing)
@@ -4974,7 +4945,7 @@ def _smoke_test() -> None:
                 f"Stage-3 initial pool should contain only Atoms, got {type(k).__name__}"
             )
 
-        print(f"    Stage 3 extraction: {len(state.things)} things, "
+        print(f"    Stage 3 extraction: {len(state.thing_ids)} things, "
               f"{state.pool.size()} atoms, {len(state.oracle_pairs)} oracle pairs")
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
