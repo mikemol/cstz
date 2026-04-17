@@ -2911,35 +2911,58 @@ def _articulate_wedges_batch(
         leaves = _flatten_wedge_leaves(wedge)
         has_rotated = any(isinstance(leaf, Rotated) for leaf in leaves)
 
-        if has_rotated and len(leaves) == 2:
-            # General exterior-algebra combinator (Tier 3, grade-2).
-            bit_a = state.pool.bit_of(leaves[0])
-            bit_b = state.pool.bit_of(leaves[1])
-            if bit_a is None or bit_b is None:
-                continue  # at least one leaf not in pool; can't derive firing
-            tau_a = firing_bitmaps[bit_a]
-            sig_a = sigma_bitmaps[bit_a]
-            tau_b = firing_bitmaps[bit_b]
-            sig_b = sigma_bitmaps[bit_b]
-            tau_w = (tau_a & sig_b) ^ (sig_a & tau_b)
-            sig_w = (tau_a & tau_b) ^ (sig_a & sig_b)
-            # Skip wedges with zero firing in both channels
-            if not (np.any(tau_w) or np.any(sig_w)):
+        if has_rotated:
+            # General exterior-algebra combinator via right-fold through
+            # the canonical tree's leaves (the "shingling" process from
+            # the SMR / rolling-window / LFSR analogy).
+            #
+            # Each fold step is one application of the grade-2 cross-term
+            # formula on (current_leaf, accumulated_result).  The
+            # right-leaning canonical tree Wedge(l₀, Wedge(l₁, ...
+            # Wedge(lₙ₋₁, lₙ))) gives the sequential write order:
+            #   Step 1: combinator(lₙ₋₁, lₙ) → (τ_inner, σ_inner)
+            #   Step 2: combinator(lₙ₋₂, inner) → next accumulated
+            #   ...fold leftward to l₀.
+            #
+            # Associativity of the exterior product over GF(2) ensures
+            # the right-fold gives the same result as any other
+            # bracketing.  The det(S) condition (transition preserves
+            # volume) is checked implicitly: if any intermediate
+            # (τ, σ) is all-zero, subsequent fold steps also produce
+            # zero, and the wedge is skipped as degenerate.
+            #
+            # The "rolling window" on the F₂² constraint surface cycles
+            # through the 3 non-zero tsk vectors {[1,1,0], [0,1,1],
+            # [1,0,1]} via S3 generators — each fold step is one
+            # "shingle" being laid down on the geometric track.
+            all_bits_present = True
+            for leaf in leaves:
+                if state.pool.bit_of(leaf) is None:
+                    all_bits_present = False
+                    break
+            if not all_bits_present:
                 continue
+
+            # Right-fold: start from the rightmost leaf, accumulate leftward
+            rightmost_bit = state.pool.bit_of(leaves[-1])
+            tau_acc = firing_bitmaps[rightmost_bit]
+            sig_acc = sigma_bitmaps[rightmost_bit]
+            for leaf in reversed(leaves[:-1]):
+                leaf_bit = state.pool.bit_of(leaf)
+                tau_l = firing_bitmaps[leaf_bit]
+                sig_l = sigma_bitmaps[leaf_bit]
+                # Grade-2 cross-term formula (one shingle step)
+                tau_new = (tau_l & sig_acc) ^ (sig_l & tau_acc)
+                sig_new = (tau_l & tau_acc) ^ (sig_l & sig_acc)
+                tau_acc = tau_new
+                sig_acc = sig_new
+
+            if not (np.any(tau_acc) or np.any(sig_acc)):
+                continue  # degenerate: det(S) = 0 (volume collapsed)
             kept_wedges.append(wedge)
             kept_keys.append(w_key)
-            kept_tau_firings.append(tau_w)
-            kept_sig_firings.append(sig_w)
-        elif has_rotated:
-            # Grade-3+ wedges with Rotated leaves: the recursive grade-k
-            # cross-term formula isn't implemented yet.  Under lazy orbit
-            # expansion (Stage 7.2.2), these appear naturally when a
-            # prior-step Rotated-leaf wedge pairs with another K.  Skip
-            # them as uncapturable demand — they're not articulated but
-            # also don't crash.  Convergence under Tarski is preserved
-            # because skipping a demand doesn't remove existing pool
-            # entries; the pool is still a monotone join-semilattice.
-            continue
+            kept_tau_firings.append(tau_acc)
+            kept_sig_firings.append(sig_acc)
         else:
             # AND-of-parents path.  For all-non-Rotated wedges, leaves
             # are atoms and atoms() gives the same set.  τ = σ = AND.
