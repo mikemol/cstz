@@ -1128,8 +1128,10 @@ class State:
 
     pool: Pool
     thing_ids: np.ndarray          # dtype=object, shape (n_things,)
-    tau_masks: np.ndarray          # dtype=bool,   shape (n_things, pool_size)
-    sigma_masks: np.ndarray        # dtype=bool,   shape (n_things, pool_size)
+    tau_masks: np.ndarray          # dtype=bool,   shape (n_things, pool_size) — fires bit
+    sigma_masks: np.ndarray        # dtype=bool,   shape (n_things, pool_size) — fires bit
+    tau_populated: np.ndarray      # dtype=bool,   shape (n_things, pool_size) — computed bit
+    sigma_populated: np.ndarray    # dtype=bool,   shape (n_things, pool_size) — computed bit
     oracle_pairs: frozenset        # authoritative; frozenset[frozenset[ThingId]]
     oracle_pair_indices: np.ndarray  # dtype=int64, shape (n_pairs, 2); cache
     weights: Tuple[Tuple[KKey, float], ...]
@@ -1145,6 +1147,8 @@ class State:
         thing_ids: np.ndarray | None = None,
         tau_masks: np.ndarray | None = None,
         sigma_masks: np.ndarray | None = None,
+        tau_populated: np.ndarray | None = None,
+        sigma_populated: np.ndarray | None = None,
         oracle_pairs: frozenset = frozenset(),
         weights: Tuple[Tuple[KKey, float], ...] = (),
         trajectory: Tuple | np.ndarray = (),
@@ -1218,9 +1222,23 @@ class State:
                 f"sigma_masks shape {sig.shape} != expected {(n, pool_size)}"
             )
 
-        # Freeze arrays (matching Thing-mask and Pool-keys discipline)
+        # Belnap populated arrays (l-belnap-encoded-mask-matrix).
+        # If not provided, default to all-True (all cells computed —
+        # backward compat with callers that provide pre-computed masks).
+        if tau_populated is not None:
+            tau_pop = np.ascontiguousarray(tau_populated, dtype=bool)
+        else:
+            tau_pop = np.ones_like(tau, dtype=bool)
+        if sigma_populated is not None:
+            sig_pop = np.ascontiguousarray(sigma_populated, dtype=bool)
+        else:
+            sig_pop = np.ones_like(sig, dtype=bool)
+
+        # Freeze arrays
         tau.setflags(write=False)
         sig.setflags(write=False)
+        tau_pop.setflags(write=False)
+        sig_pop.setflags(write=False)
 
         # Build the id→row-index cache; used by row_of and by the
         # oracle_pair_indices resolution below.
@@ -1271,6 +1289,8 @@ class State:
         object.__setattr__(self, "thing_ids", ids_arr)
         object.__setattr__(self, "tau_masks", tau)
         object.__setattr__(self, "sigma_masks", sig)
+        object.__setattr__(self, "tau_populated", tau_pop)
+        object.__setattr__(self, "sigma_populated", sig_pop)
         object.__setattr__(self, "oracle_pairs", oracle_pairs)
         object.__setattr__(self, "oracle_pair_indices", pair_indices)
         object.__setattr__(self, "_id_to_row", id_to_row)
@@ -1467,9 +1487,16 @@ class State:
             bit = self.pool.bit_of(k)
             if bit is None or bit >= self.tau_masks.shape[1]:
                 result = (np.zeros(n, dtype=bool), np.zeros(n, dtype=bool))
-            else:
+            elif (bit < self.tau_populated.shape[1]
+                  and self.tau_populated[:, bit].all()):
+                # Belnap: all cells populated → cache hit
                 result = (self.tau_masks[:, bit].copy(),
                           self.sigma_masks[:, bit].copy())
+            else:
+                # Belnap ⊥: gap — atom column not yet populated
+                # (shouldn't happen for atoms from extract_initial_state
+                # but can happen for atoms added via with_pool padding)
+                result = (np.zeros(n, dtype=bool), np.zeros(n, dtype=bool))
 
         elif isinstance(k, Rotated):
             base_tau, base_sig = self.fire_pair(k.base)
@@ -1569,24 +1596,37 @@ class State:
 
     def with_pool(self, pool: Pool) -> "State":
         """Replace the pool.  Masks are repadded/truncated to the new
-        pool size so the shape invariant is preserved."""
+        pool size.  New columns are Belnap ⊥ (gap): zero-padded
+        in both fires and populated arrays."""
         new_size = pool.size()
         cur_size = self.tau_masks.shape[1] if self.tau_masks.size else 0
         if new_size == cur_size:
             new_tau = self.tau_masks
             new_sig = self.sigma_masks
+            new_tau_pop = self.tau_populated
+            new_sig_pop = self.sigma_populated
         elif new_size > cur_size:
-            pad = np.zeros((len(self.thing_ids), new_size - cur_size), dtype=bool)
+            n_things = len(self.thing_ids)
+            pad_cols = new_size - cur_size
+            pad = np.zeros((n_things, pad_cols), dtype=bool)
             new_tau = np.concatenate([self.tau_masks, pad], axis=1)
             new_sig = np.concatenate([self.sigma_masks, pad], axis=1)
+            # New columns are GAP (⊥): populated = False
+            gap_pop = np.zeros((n_things, pad_cols), dtype=bool)
+            new_tau_pop = np.concatenate([self.tau_populated, gap_pop], axis=1)
+            new_sig_pop = np.concatenate([self.sigma_populated, gap_pop], axis=1)
         else:
             new_tau = np.ascontiguousarray(self.tau_masks[:, :new_size])
             new_sig = np.ascontiguousarray(self.sigma_masks[:, :new_size])
+            new_tau_pop = np.ascontiguousarray(self.tau_populated[:, :new_size])
+            new_sig_pop = np.ascontiguousarray(self.sigma_populated[:, :new_size])
         return State(
             pool=pool,
             thing_ids=self.thing_ids,
             tau_masks=new_tau,
             sigma_masks=new_sig,
+            tau_populated=new_tau_pop,
+            sigma_populated=new_sig_pop,
             oracle_pairs=self.oracle_pairs,
             weights=self.weights,
             trajectory=self.trajectory,
@@ -2384,39 +2424,37 @@ def _count_four_cell(state: "State", i: int, j: int,
     """Return (n_00, n_01, n_10, n_11): counts of things in each cell of
     the 2×2 (bit i, bit j) joint firing distribution on the given channel.
 
-    Signature takes bit INDICES (not K objects) under the Stage 7.0.11
-    tensor-native revision (l-scorer-as-shape-contract).  Caller
-    resolves K → bit via pool.bit_of() once, upstream.  Bit indices
-    are assumed valid (< pool_size); the caller's Protocol-level
-    guard handles the missing-K case.
+    Stage 7.3: delegates to fire_pair for column retrieval.  Under the
+    Belnap-encoded mask model (l-belnap-encoded-mask-matrix), fire_pair
+    respects the populated flag and computes lazily for gap columns.
+    This eliminates the dual-access-path issue (direct mask read vs
+    fire_pair) identified in the post-7.3 audit.
 
-    Two paths, same result:
-
-    * Fast path (``firing_bitmaps`` provided): slice two rows of the
-      precomputed [pool_size, n_things] bool matrix.  O(n_things /
-      SIMD_width) per call.  Used from step()'s hot loop where
-      firing_bitmaps is the .T view on state.tau_masks (post-7.0.7b).
-
-    * Slow path (``firing_bitmaps`` is None): slice two columns of
-      state.tau_masks directly — O(1) view, no iteration, no Thing
-      reconstruction.  Stage 7.0.11 replaced the pre-7.0.7b loop
-      over ``state.things`` which under the parallel-array State was
-      rebuilding n_things Thing objects with per-row mask copies.
-
-    Under d-tau-sigma-symmetric-at-grade-1 and atoms with τ=σ, the
-    ``tau`` and ``sigma`` channels produce identical counts at grade 1.
+    Two acceleration paths:
+    * If ``firing_bitmaps`` is provided AND both indices are within
+      the bitmaps' axis-0, the precomputed rows are used directly
+      (fast path — these are the cached mask columns transposed).
+    * Otherwise, fire_pair is called on the K at each index.
     """
     if firing_bitmaps is not None:
-        if i >= firing_bitmaps.shape[0] or j >= firing_bitmaps.shape[0]:
-            return (0, 0, 0, 0)
-        fires_i = firing_bitmaps[i]
-        fires_j = firing_bitmaps[j]
+        if i < firing_bitmaps.shape[0] and j < firing_bitmaps.shape[0]:
+            fires_i = firing_bitmaps[i]
+            fires_j = firing_bitmaps[j]
+        else:
+            # Fall through to fire_pair for out-of-range bits
+            k_i = state.pool.ks[i] if i < len(state.pool.ks) else ZeroK()
+            k_j = state.pool.ks[j] if j < len(state.pool.ks) else ZeroK()
+            tau_i, sig_i = state.fire_pair(k_i)
+            tau_j, sig_j = state.fire_pair(k_j)
+            fires_i = tau_i if channel == "tau" else sig_i
+            fires_j = tau_j if channel == "tau" else sig_j
     else:
-        mat = state.tau_masks if channel == "tau" else state.sigma_masks
-        if i >= mat.shape[1] or j >= mat.shape[1]:
-            return (0, 0, 0, 0)
-        fires_i = mat[:, i]
-        fires_j = mat[:, j]
+        k_i = state.pool.ks[i] if i < len(state.pool.ks) else ZeroK()
+        k_j = state.pool.ks[j] if j < len(state.pool.ks) else ZeroK()
+        tau_i, sig_i = state.fire_pair(k_i)
+        tau_j, sig_j = state.fire_pair(k_j)
+        fires_i = tau_i if channel == "tau" else sig_i
+        fires_j = tau_j if channel == "tau" else sig_j
 
     n_11 = int(np.sum(fires_i & fires_j))
     n_10 = int(np.sum(fires_i & ~fires_j))
@@ -2980,12 +3018,18 @@ def _articulate_wedges_batch(
     new_sig_cols = np.stack(kept_sig_cols, axis=0).T
     new_tau = np.concatenate([state.tau_masks, new_tau_cols], axis=1)
     new_sig = np.concatenate([state.sigma_masks, new_sig_cols], axis=1)
+    # New columns are fire_pair-computed → Belnap T or F (populated)
+    pop_cols = np.ones_like(new_tau_cols, dtype=bool)
+    new_tau_pop = np.concatenate([state.tau_populated, pop_cols], axis=1)
+    new_sig_pop = np.concatenate([state.sigma_populated, pop_cols], axis=1)
 
     new_state = State(
         pool=new_pool,
         thing_ids=state.thing_ids,
         tau_masks=new_tau,
         sigma_masks=new_sig,
+        tau_populated=new_tau_pop,
+        sigma_populated=new_sig_pop,
         oracle_pairs=state.oracle_pairs,
         weights=state.weights,
         trajectory=state.trajectory,
