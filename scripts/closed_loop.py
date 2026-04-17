@@ -3076,28 +3076,37 @@ def step(
     is_atom = frozenset(i for i, k in enumerate(state.pool.ks) if isinstance(k, Atom))
 
     # -- Phase 1: enumerate candidate K-pairs (n_11 > 0) -------------------
+    #
+    # RECTANGULAR matmul: only compute co-fire for frontier+atom rows
+    # against the full pool.  Cost: O(n_active × pool_size × n_things)
+    # vs O(pool_size² × n_things) for the full square matmul.
+    # "Topologically adjacent to the frontier" = any pool K that
+    # co-fires with a frontier/atom K, discovered via this rectangular
+    # matmul.  Settled × settled pairs (both endpoints are non-atom,
+    # non-frontier) are structurally excluded — they can't appear in
+    # the output because neither endpoint has a row in the matmul.
     sigma_bitmaps = firing_bitmaps_of(state, "sigma")
     base_union = firing_bitmaps | sigma_bitmaps
-    fb_int = base_union.astype(np.int32)
-    co_fire_count = fb_int @ fb_int.T  # [P, P]
-    # Upper-triangle; filter to frontier-involving pairs.
-    # A pair is "frontier-involving" if at least one endpoint is in
-    # the frontier OR is an atom (atoms always participate — they're
-    # the permanent co-fire base).  Settled × settled pairs (both
-    # endpoints are non-atom, non-frontier wedges) are skipped.
-    triu = np.triu(np.ones((pool_size, pool_size), dtype=bool), k=1)
-    pair_mask = (co_fire_count > 0) & triu
-    i_idx, j_idx = np.where(pair_mask)
-    # On first call (empty frontier), all pairs participate
-    if frontier:
-        frontier_or_atom = frontier | is_atom
-        base_pairs = [
-            (int(i), int(j))
-            for i, j in zip(i_idx.tolist(), j_idx.tolist())
-            if i in frontier_or_atom or j in frontier_or_atom
-        ]
+    frontier_or_atom = frontier | is_atom
+    active_bits = sorted(frontier_or_atom) if frontier_or_atom else list(range(pool_size))
+    n_active = len(active_bits)
+    if n_active > 0 and pool_size > 0 and n_things > 0:
+        active_fb = base_union[active_bits]  # (n_active, n_things)
+        full_fb = base_union                 # (pool_size, n_things)
+        # Rectangular: active rows × all pool columns
+        co_fire_rect = active_fb.astype(np.int32) @ full_fb.astype(np.int32).T
+        # Extract pairs: for each active row ai, find pool columns pj
+        # where co_fire > 0 and pool_i != pj.  Canonical ordering i < j.
+        pair_set: set = set()
+        for ai_local in range(n_active):
+            pool_i = active_bits[ai_local]
+            nonzero_cols = np.where(co_fire_rect[ai_local] > 0)[0]
+            for pj in nonzero_cols.tolist():
+                if pj != pool_i:
+                    pair_set.add((min(pool_i, pj), max(pool_i, pj)))
+        base_pairs = sorted(pair_set)
     else:
-        base_pairs = list(zip(i_idx.tolist(), j_idx.tolist()))
+        base_pairs = []
 
     # -- Phase 2: filter to uncaptured demands -----------------------------
     # For each base candidate pair (i, j), demand the base wedge AND
