@@ -1036,7 +1036,6 @@ TRAJECTORY_DTYPE = np.dtype([
     ("source", "u1"),  # 0 = step; future extensibility for other event types
 ])
 _SOURCE_STEP = 0
-_TRAJECTORY_NUMERIC_FIELDS = frozenset(TRAJECTORY_DTYPE.names)
 _MAX_ART_UNBOUNDED_SENTINEL = -1
 
 
@@ -1351,9 +1350,6 @@ class State:
             )
             for i, tid in enumerate(self.thing_ids)
         }
-
-    def weights_dict(self) -> dict:
-        return dict(self.weights)
 
     def weight_of(self, k: K, default: float = 1.0) -> float:
         target = k.key()
@@ -2905,16 +2901,6 @@ OBJECTIVES: dict = {
 
 # -- Precomputation helpers ------------------------------------------------
 
-
-def _bit_positions(x: int) -> list:
-    """Extract set-bit positions from an integer as a list (in
-    ascending order)."""
-    out = []
-    while x:
-        lsb = x & -x
-        out.append(lsb.bit_length() - 1)
-        x &= x - 1
-    return out
 
 
 def firing_bitmaps_of(state: "State", channel: str = "tau") -> np.ndarray:
