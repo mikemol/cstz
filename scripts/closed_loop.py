@@ -1128,6 +1128,7 @@ class State:
     sigma_masks: np.ndarray        # dtype=bool,   shape (n_things, pool_size) — fires bit
     tau_populated: np.ndarray      # dtype=bool,   shape (n_things, pool_size) — computed bit
     sigma_populated: np.ndarray    # dtype=bool,   shape (n_things, pool_size) — computed bit
+    frontier_bits: frozenset       # pool bit indices articulated in the latest step
     oracle_pairs: frozenset        # authoritative; frozenset[frozenset[ThingId]]
     oracle_pair_indices: np.ndarray  # dtype=int64, shape (n_pairs, 2); cache
     weights: Tuple[Tuple[KKey, float], ...]
@@ -1144,6 +1145,7 @@ class State:
         sigma_masks: np.ndarray | None = None,
         tau_populated: np.ndarray | None = None,
         sigma_populated: np.ndarray | None = None,
+        frontier_bits: frozenset | None = None,
         oracle_pairs: frozenset = frozenset(),
         weights: Tuple[Tuple[KKey, float], ...] = (),
         trajectory: Tuple | np.ndarray = (),
@@ -1279,6 +1281,7 @@ class State:
         object.__setattr__(self, "sigma_masks", sig)
         object.__setattr__(self, "tau_populated", tau_pop)
         object.__setattr__(self, "sigma_populated", sig_pop)
+        object.__setattr__(self, "frontier_bits", frontier_bits if frontier_bits is not None else frozenset())
         object.__setattr__(self, "oracle_pairs", oracle_pairs)
         object.__setattr__(self, "oracle_pair_indices", pair_indices)
         object.__setattr__(self, "_id_to_row", id_to_row)
@@ -3000,6 +3003,10 @@ def _articulate_wedges_batch(
     new_tau_pop = np.concatenate([state.tau_populated, pop_cols], axis=1)
     new_sig_pop = np.concatenate([state.sigma_populated, pop_cols], axis=1)
 
+    # Frontier = the newly-articulated bits (wavefront propagation).
+    # Prior frontier K's become settled; new K's are the active frontier.
+    old_pool_size = state.pool.size()
+    new_frontier = frozenset(range(old_pool_size, new_pool.size()))
     new_state = State(
         pool=new_pool,
         thing_ids=state.thing_ids,
@@ -3007,6 +3014,7 @@ def _articulate_wedges_batch(
         sigma_masks=new_sig,
         tau_populated=new_tau_pop,
         sigma_populated=new_sig_pop,
+        frontier_bits=new_frontier,
         oracle_pairs=state.oracle_pairs,
         weights=state.weights,
         trajectory=state.trajectory,
@@ -3052,39 +3060,44 @@ def step(
     framework does not pick a budget; callers do.
     """
     # -- Phase 0: precompute caches -----------------------------------------
-    # firing_bitmaps is state.tau_masks.T under the parallel-array
-    # representation (l-state-things-as-parallel-arrays) — an O(1) view,
-    # no build step.
     firing_bitmaps = firing_bitmaps_of(state, "tau")
     pool_index = state.pool.key_to_bit
     n_things = len(state.thing_ids)
+    pool_size = state.pool.size()
+
+    # Wavefront (l-wavefront-frontier-matmul): full-pool matmul for
+    # co-fire discovery, but DEMAND FILTER restricts to pairs where at
+    # least one endpoint is in the frontier or is an atom.  Settled
+    # pairs (both endpoints are non-atom, non-frontier) are skipped —
+    # their wedges are already captured from prior steps.
+    # "Topologically adjacent to the frontier" = any K that co-fires
+    # with a frontier K, discovered via the matmul.
+    frontier = state.frontier_bits
+    is_atom = frozenset(i for i, k in enumerate(state.pool.ks) if isinstance(k, Atom))
 
     # -- Phase 1: enumerate candidate K-pairs (n_11 > 0) -------------------
-    #
-    # S3 orbit expansion is INFERRED, not materialized (Stage 7.2.2+).
-    # Under the F₂² constraint, (τ⊕σ)|σ = τ|σ and τ|(τ⊕σ) = τ|σ —
-    # so the τ∪σ union firing of any S3-rotated K equals the base K's
-    # τ∪σ.  The virtual 3P×3P matmul is 9 identical copies of the base
-    # P×P block: zero new co-fire pairs from orbit expansion.
-    #
-    # What orbit expansion DOES add: new DEMANDED WEDGES.  For each
-    # base candidate pair (i, j), we also demand Wedge(K_i, Rotated(K_j, g))
-    # for each S3 generator g.  These Rotated-leaf wedges trigger the
-    # general combinator and produce asymmetric firings.  The demands
-    # are inferred from the base co-fire matrix without materializing
-    # virtual firing rows — a syndrome-decoding shortcut where the
-    # algebraic identity IS the syndrome.
     sigma_bitmaps = firing_bitmaps_of(state, "sigma")
     base_union = firing_bitmaps | sigma_bitmaps
     fb_int = base_union.astype(np.int32)
     co_fire_count = fb_int @ fb_int.T  # [P, P]
-    pool_size = firing_bitmaps.shape[0]
-    n_things = len(state.thing_ids)
-    # Upper-triangle of the P×P matrix
+    # Upper-triangle; filter to frontier-involving pairs.
+    # A pair is "frontier-involving" if at least one endpoint is in
+    # the frontier OR is an atom (atoms always participate — they're
+    # the permanent co-fire base).  Settled × settled pairs (both
+    # endpoints are non-atom, non-frontier wedges) are skipped.
     triu = np.triu(np.ones((pool_size, pool_size), dtype=bool), k=1)
     pair_mask = (co_fire_count > 0) & triu
     i_idx, j_idx = np.where(pair_mask)
-    base_pairs = list(zip(i_idx.tolist(), j_idx.tolist()))
+    # On first call (empty frontier), all pairs participate
+    if frontier:
+        frontier_or_atom = frontier | is_atom
+        base_pairs = [
+            (int(i), int(j))
+            for i, j in zip(i_idx.tolist(), j_idx.tolist())
+            if i in frontier_or_atom or j in frontier_or_atom
+        ]
+    else:
+        base_pairs = list(zip(i_idx.tolist(), j_idx.tolist()))
 
     # -- Phase 2: filter to uncaptured demands -----------------------------
     # For each base candidate pair (i, j), demand the base wedge AND
