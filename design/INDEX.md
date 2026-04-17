@@ -66,7 +66,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ● [d-wedge-combinator-general-exterior-algebra] Wedge combinator is the general exterior-algebra form
 - ● [d-weight-objective-pluggable] Weight-adjustment objective is pluggable
 
-## Lemmas (11)
+## Lemmas (12)
 
 - ▲ [l-belnap-encoded-mask-matrix] Mask matrix cells use Belnap encoding: gap vs fires vs doesn't-fire vs contradiction
 - ▲ [l-combinator-and-s3-operators-are-equivalent] General exterior-algebra combinator ≡ S3 operators + AND-wedge (two presentations, one structure)
@@ -79,6 +79,7 @@ Use `python scripts/design_sppf.py deps <id>` for a minimal slice.
 - ▲ [l-scorer-as-shape-contract] Scorer is a shape contract: (tsk: Bool[3, P], firing: Bool[P, N], i: int, j: int) -> Float[Array, '']
 - ▲ [l-state-things-as-parallel-arrays] State.things should become parallel arrays (ids + stacked masks) rather than dict-of-dataclasses
 - ▲ [l-trajectory-as-structured-dtype-array] Trajectory should become a structured-dtype numpy array, not a tuple of dicts
+- ● [l-wavefront-frontier-matmul] Co-fire matmul operates on atoms + frontier only; settled grades excluded
 
 ## Rejecteds (9)
 
