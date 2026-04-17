@@ -1021,7 +1021,7 @@ class Thing:
 # compound-dtype mirroring in Stage 7.1.
 #
 # Optional scorer / objective structural identities are logged in a
-# parallel ``trajectory_aux: Tuple[dict, ...]`` alongside — the lemma's
+# (Stage 7.4: trajectory_aux retired — source field moved into
 # counterexample mitigation: keep one mandatory base dtype for hot-path
 # control fields; optional variable-shape fields go in a separate
 # auxiliary channel.
@@ -1033,30 +1033,30 @@ TRAJECTORY_DTYPE = np.dtype([
     ("pool_size_after", "u4"),
     ("n_things", "u4"),
     ("max_articulations_per_step", "i4"),
+    ("source", "u1"),  # 0 = step; future extensibility for other event types
 ])
+_SOURCE_STEP = 0
 _TRAJECTORY_NUMERIC_FIELDS = frozenset(TRAJECTORY_DTYPE.names)
 _MAX_ART_UNBOUNDED_SENTINEL = -1
 
 
 def _trajectory_from_dicts(
     dict_seq: tuple,
-) -> Tuple[np.ndarray, Tuple[dict, ...]]:
-    """Split a sequence of dict trajectory entries into a structured
-    numeric array + a parallel aux-dict tuple.  Used both by
-    appending_trajectory (single entry) and by merge (concatenation).
+) -> np.ndarray:
+    """Convert a sequence of dict trajectory entries into a structured
+    numpy array.  Stage 7.4: aux dicts retired — all fields are in
+    TRAJECTORY_DTYPE (including ``source`` as u1).
     """
     if len(dict_seq) == 0:
-        return np.empty(0, dtype=TRAJECTORY_DTYPE), ()
+        return np.empty(0, dtype=TRAJECTORY_DTYPE)
     rows = []
-    auxes: list = []
     for entry in dict_seq:
         if isinstance(entry, np.void):
-            # Already a structured-array row; aux field carried separately
-            # (this path shouldn't occur in normal flow, but guard).
             rows.append(tuple(entry[f] for f in TRAJECTORY_DTYPE.names))
-            auxes.append({})
             continue
         max_art = entry.get("max_articulations_per_step")
+        source_str = entry.get("source", "step")
+        source_val = _SOURCE_STEP if source_str == "step" else 0
         row = (
             int(entry.get("iteration", 0)),
             int(entry.get("demanded_count", 0)),
@@ -1065,16 +1065,12 @@ def _trajectory_from_dicts(
             int(entry.get("pool_size_after", 0)),
             int(entry.get("n_things", 0)),
             _MAX_ART_UNBOUNDED_SENTINEL if max_art is None else int(max_art),
+            int(source_val),
         )
         rows.append(row)
-        aux = {
-            k: v for k, v in entry.items()
-            if k not in _TRAJECTORY_NUMERIC_FIELDS
-        }
-        auxes.append(aux)
     arr = np.array(rows, dtype=TRAJECTORY_DTYPE)
     arr.setflags(write=False)
-    return arr, tuple(auxes)
+    return arr
 
 
 @dataclass(frozen=True, eq=False, init=False)
@@ -1136,7 +1132,6 @@ class State:
     oracle_pair_indices: np.ndarray  # dtype=int64, shape (n_pairs, 2); cache
     weights: Tuple[Tuple[KKey, float], ...]
     trajectory: np.ndarray          # dtype=TRAJECTORY_DTYPE, shape (n_iter,)
-    trajectory_aux: Tuple[dict, ...]  # parallel aux; scorer/objective structure
     iteration: int
 
     def __init__(
@@ -1152,7 +1147,6 @@ class State:
         oracle_pairs: frozenset = frozenset(),
         weights: Tuple[Tuple[KKey, float], ...] = (),
         trajectory: Tuple | np.ndarray = (),
-        trajectory_aux: Tuple[dict, ...] | None = None,
         iteration: int = 0,
     ) -> None:
         """Accept either the legacy ``things=(id, Thing)...`` form or
@@ -1275,15 +1269,9 @@ class State:
                 pass  # already read-only
             else:
                 traj_arr.setflags(write=False)
-            traj_aux = trajectory_aux if trajectory_aux is not None else ({},) * len(traj_arr)
-            if len(traj_aux) != len(traj_arr):
-                raise ValueError(
-                    f"trajectory_aux length {len(traj_aux)} != trajectory length "
-                    f"{len(traj_arr)}"
-                )
         else:
             # Legacy: tuple of dicts.  Split into structured + aux.
-            traj_arr, traj_aux = _trajectory_from_dicts(tuple(trajectory))
+            traj_arr = _trajectory_from_dicts(tuple(trajectory))
 
         object.__setattr__(self, "pool", p)
         object.__setattr__(self, "thing_ids", ids_arr)
@@ -1296,7 +1284,6 @@ class State:
         object.__setattr__(self, "_id_to_row", id_to_row)
         object.__setattr__(self, "weights", weights)
         object.__setattr__(self, "trajectory", traj_arr)
-        object.__setattr__(self, "trajectory_aux", traj_aux)
         object.__setattr__(self, "iteration", iteration)
 
     # -- equality / hash (overridden since ndarray fields aren't hashable) ---
@@ -1315,7 +1302,6 @@ class State:
             and self.oracle_pairs == other.oracle_pairs
             and self.weights == other.weights
             and np.array_equal(self.trajectory, other.trajectory)
-            and self.trajectory_aux == other.trajectory_aux
             and self.iteration == other.iteration
         )
 
@@ -1573,8 +1559,7 @@ class State:
                 oracle_pairs=self.oracle_pairs,
                 weights=self.weights,
                 trajectory=self.trajectory,
-                trajectory_aux=self.trajectory_aux,
-                iteration=self.iteration,
+                    iteration=self.iteration,
             )
 
         # Insert at sorted position
@@ -1590,7 +1575,6 @@ class State:
             oracle_pairs=self.oracle_pairs,
             weights=self.weights,
             trajectory=self.trajectory,
-            trajectory_aux=self.trajectory_aux,
             iteration=self.iteration,
         )
 
@@ -1630,7 +1614,6 @@ class State:
             oracle_pairs=self.oracle_pairs,
             weights=self.weights,
             trajectory=self.trajectory,
-            trajectory_aux=self.trajectory_aux,
             iteration=self.iteration,
         )
 
@@ -1645,18 +1628,16 @@ class State:
             oracle_pairs=self.oracle_pairs,
             weights=new,
             trajectory=self.trajectory,
-            trajectory_aux=self.trajectory_aux,
             iteration=self.iteration,
         )
 
     def appending_trajectory(self, entry: dict) -> "State":
         """Append one entry to the trajectory.
 
-        Splits the entry's mandatory TRAJECTORY_DTYPE fields into a new
-        structured-array row and packs the remaining keys (scorer,
-        objective structural identities) into the parallel aux dict.
+        Stage 7.4: all fields live in TRAJECTORY_DTYPE (including
+        ``source`` as u1).  No separate aux dict.
         """
-        new_row_arr, new_aux_tuple = _trajectory_from_dicts((entry,))
+        new_row_arr = _trajectory_from_dicts((entry,))
         merged_arr = np.concatenate([self.trajectory, new_row_arr])
         merged_arr.setflags(write=False)
         return State(
@@ -1667,7 +1648,6 @@ class State:
             oracle_pairs=self.oracle_pairs,
             weights=self.weights,
             trajectory=merged_arr,
-            trajectory_aux=self.trajectory_aux + new_aux_tuple,
             iteration=self.iteration + 1,
         )
 
@@ -1772,7 +1752,6 @@ class State:
         # Trajectory: concatenate structured arrays + aux tuples, then
         # sort both in lock-step by the 'iteration' field.
         combined_arr = np.concatenate([self.trajectory, other.trajectory])
-        combined_aux = self.trajectory_aux + other.trajectory_aux
         if len(combined_arr) > 0:
             order = np.argsort(combined_arr["iteration"], kind="stable")
             combined_arr = combined_arr[order]
@@ -1787,7 +1766,6 @@ class State:
             oracle_pairs=oracle,
             weights=tuple(sorted(ws.items(), key=lambda kv: kv[0])),
             trajectory=combined_arr,
-            trajectory_aux=combined_aux,
             iteration=max(self.iteration, other.iteration),
         )
 
@@ -1818,7 +1796,6 @@ class State:
             oracle_pairs=kept_oracle,
             weights=self.weights,
             trajectory=self.trajectory,
-            trajectory_aux=self.trajectory_aux,
             iteration=self.iteration,
         )
 
@@ -3033,7 +3010,6 @@ def _articulate_wedges_batch(
         oracle_pairs=state.oracle_pairs,
         weights=state.weights,
         trajectory=state.trajectory,
-        trajectory_aux=state.trajectory_aux,
         iteration=state.iteration,
     )
     return new_state, n_new
@@ -3291,12 +3267,11 @@ def run_to_fixed_point(
 #     supports future incremental growth (Stage 10 parallel shards)
 #     without re-dumping.
 #
-# Remaining JSONL files (transitional, slated for migration):
-#   - things.jsonl / oracle_pairs.jsonl / weights.jsonl /
-#     trajectory_aux.jsonl  — small-algebra authoritative forms;
-#     migration to HDF5 awaits a satisfying handling of variable-
-#     shape aux dicts (trajectory_aux) and per-record string fields.
-#     Direction is full JSONL retirement; no new JSONL files added.
+# Stage 7.4: ALL JSONL retired.  things → /things/ids (S256);
+# oracle_pairs → /oracle/pair_indices (Int[n,2] de Bruijn indices
+# into thing_ids rows; frozenset reconstructed on load via global
+# names / merge currency).  weights.jsonl retired (weight mechanism
+# retired per c-weight-updater-becomes-new-k-articulation).
 #
 # Sigma masks are serialized conditionally: if
 # state.sigma_derivable_from_tau is True, /masks/sigma is omitted and
@@ -3314,7 +3289,7 @@ def run_to_fixed_point(
 #
 # Round-trip invariant: state.signature() == load_state(dump_state(state)).signature().
 
-SCHEMA_VERSION = "7.2.0"
+SCHEMA_VERSION = "7.4.0"
 
 # Compound dtype for pool storage in HDF5: key field as fixed-width
 # bytes (UTF-8 encoded).  S512 accepts keys up to 512 bytes; dump
@@ -3384,10 +3359,9 @@ def dump_state(state: "State", out_dir) -> None:
           /masks group attribute: pool_size (asserts on load that
               axis-1 of masks == axis-0 of pool).
 
-      ``things.jsonl``            — one line per thing (row_index, id)
-      ``oracle_pairs.jsonl``      — one line per unordered pair
-      ``weights.jsonl``           — one line per (k_key, weight)
-      ``trajectory_aux.jsonl``    — one line per iteration's aux dict
+      ``trajectory_aux.jsonl (RETIRED Stage 7.4)``    — one line per iteration's aux dict
+                                    (last remaining JSONL; variable-shape
+                                    aux dicts that resist static dtype)
     """
     import h5py
     out_dir = Path(out_dir)
@@ -3404,34 +3378,6 @@ def dump_state(state: "State", out_dir) -> None:
                 f"'key' field width {_POOL_HDF5_KEY_WIDTH}; key decomposition "
                 f"or wider field needed"
             )
-
-    # -- things.jsonl -------------------------------------------------------
-    with (out_dir / "things.jsonl").open("w") as f:
-        for i, tid in enumerate(state.thing_ids):
-            entry = {"row_index": i, "id": str(tid)}
-            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-
-    # -- oracle_pairs.jsonl -------------------------------------------------
-    # Canonical within-pair ordering: (min, max) by id string.
-    with (out_dir / "oracle_pairs.jsonl").open("w") as f:
-        for pair in state.oracle_pairs:
-            if len(pair) != 2:
-                continue
-            a_id, b_id = sorted(str(x) for x in pair)
-            f.write(json.dumps({"a_id": a_id, "b_id": b_id},
-                               ensure_ascii=False) + "\n")
-
-    # -- weights.jsonl ------------------------------------------------------
-    with (out_dir / "weights.jsonl").open("w") as f:
-        for k_key, w in state.weights:
-            f.write(json.dumps({"k_key": str(k_key), "weight": float(w)},
-                               ensure_ascii=False) + "\n")
-
-    # -- trajectory_aux.jsonl -----------------------------------------------
-    with (out_dir / "trajectory_aux.jsonl").open("w") as f:
-        for i, aux in enumerate(state.trajectory_aux):
-            f.write(json.dumps({"iteration": i, "aux": aux},
-                               ensure_ascii=False) + "\n")
 
     # -- state.h5 -----------------------------------------------------------
     sigma_stored = not state.sigma_derivable_from_tau
@@ -3467,6 +3413,37 @@ def dump_state(state: "State", out_dir) -> None:
             dtype=POOL_HDF5_DTYPE,
             chunks=True,
             maxshape=(None,),
+        )
+
+        # Things: thing ids as fixed-width S256 byte strings.
+        # De Bruijn / Gödel numbering: row index IS the local name;
+        # the string id is the global name (merge currency).
+        things_group = h5.create_group("things")
+        things_group.attrs["n_things"] = n_things
+        if n_things > 0:
+            encoded_ids = np.array(
+                [str(tid).encode("utf-8") for tid in state.thing_ids],
+                dtype="S256",
+            )
+        else:
+            encoded_ids = np.empty(0, dtype="S256")
+        things_group.create_dataset(
+            "ids", data=encoded_ids, dtype="S256",
+            chunks=True, maxshape=(None,),
+        )
+
+        # Oracle pairs: Int[n_pairs, 2] de Bruijn indices into
+        # thing_ids rows.  Frozenset reconstructed on load via
+        # thing_ids[pair_indices[i, 0/1]].  Merge operates on the
+        # reconstructed frozenset (global names); merged state
+        # rebuilds local indices.
+        oracle_group = h5.create_group("oracle")
+        oracle_group.create_dataset(
+            "pair_indices",
+            data=state.oracle_pair_indices,
+            dtype=np.int64,
+            chunks=True,
+            maxshape=(None, 2),
         )
 
         # Masks: chunked, extensible on both axes (axis-0 = n_things;
@@ -3625,69 +3602,38 @@ def load_state(in_dir) -> "State":
         # run_to_fixed_point's termination check on the LAST entry's
         # articulated_count — which doesn't depend on sequence ordering.
 
-    # -- things.jsonl -------------------------------------------------------
-    thing_id_list: list = []
-    with (in_dir / "things.jsonl").open() as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            entry = json.loads(line)
-            idx = int(entry["row_index"])
-            if idx != len(thing_id_list):
-                raise ValueError(
-                    f"things.jsonl row_index {idx} out of order at row "
-                    f"{len(thing_id_list)}"
-                )
-            thing_id_list.append(entry["id"])
+    # -- things (from HDF5 /things/ids) ------------------------------------
+    # Thing ids stored as S256 fixed-width byte strings; decode to
+    # Python strings.  Row index = de Bruijn local name.
+    with h5py.File(in_dir / "state.h5", "r") as h5_things:
+        raw_ids = h5_things["things/ids"][()]
+        thing_id_list = [tid.decode("utf-8") for tid in raw_ids]
     if len(thing_id_list) != n_things_attr:
         raise ValueError(
-            f"things.jsonl row count {len(thing_id_list)} != n_things "
+            f"/things/ids length {len(thing_id_list)} != n_things "
             f"attribute {n_things_attr}"
         )
     thing_ids = np.array(thing_id_list, dtype=object)
 
-    # -- oracle_pairs.jsonl -------------------------------------------------
-    oracle_pair_set = []
-    pairs_path = in_dir / "oracle_pairs.jsonl"
-    if pairs_path.exists():
-        with pairs_path.open() as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                entry = json.loads(line)
-                oracle_pair_set.append(
-                    frozenset({ThingId(entry["a_id"]),
-                               ThingId(entry["b_id"])})
-                )
+    # -- oracle pairs (from HDF5 /oracle/pair_indices) --------------------
+    # De Bruijn indices into thing_ids rows.  Reconstruct the
+    # frozenset (global names / merge currency) by looking up
+    # thing_ids[idx].
+    with h5py.File(in_dir / "state.h5", "r") as h5_oracle:
+        pair_idx_raw = h5_oracle["oracle/pair_indices"][()]
+    oracle_pair_set: list = []
+    for row in pair_idx_raw:
+        a_idx, b_idx = int(row[0]), int(row[1])
+        if a_idx < len(thing_id_list) and b_idx < len(thing_id_list):
+            oracle_pair_set.append(
+                frozenset({ThingId(thing_id_list[a_idx]),
+                           ThingId(thing_id_list[b_idx])})
+            )
     oracle_pairs = frozenset(oracle_pair_set)
 
-    # -- weights.jsonl ------------------------------------------------------
-    weights_list: list = []
-    weights_path = in_dir / "weights.jsonl"
-    if weights_path.exists():
-        with weights_path.open() as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                entry = json.loads(line)
-                weights_list.append((KKey(entry["k_key"]), float(entry["weight"])))
-    weights = tuple(sorted(weights_list, key=lambda kv: kv[0]))
+    # -- weights (retired per c-weight-updater-becomes-new-k-articulation) --
+    weights: Tuple[Tuple[KKey, float], ...] = ()
 
-    # -- trajectory_aux.jsonl -----------------------------------------------
-    aux_list: list = []
-    aux_path = in_dir / "trajectory_aux.jsonl"
-    if aux_path.exists():
-        with aux_path.open() as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                entry = json.loads(line)
-                aux_list.append(entry["aux"])
-    trajectory_aux = tuple(aux_list)
 
     return State(
         pool=pool,
@@ -3697,7 +3643,6 @@ def load_state(in_dir) -> "State":
         oracle_pairs=oracle_pairs,
         weights=weights,
         trajectory=trajectory,
-        trajectory_aux=trajectory_aux,
         iteration=iteration,
     )
 
@@ -4465,16 +4410,13 @@ def _smoke_test() -> None:
                 import tempfile
                 with tempfile.TemporaryDirectory() as td:
                     dump_state(state, td)
-                    # Remaining JSONL files (transitional; pool.jsonl
-                    # retired in 7.1.1)
-                    for fname in ("things.jsonl", "oracle_pairs.jsonl",
-                                  "weights.jsonl", "trajectory_aux.jsonl"):
-                        assert (Path(td) / fname).exists(), (
-                            f"dump_state should produce {fname}"
+                    # Stage 7.4: only trajectory_aux.jsonl (RETIRED Stage 7.4) remains as JSONL.
+                    # things, oracle_pairs, weights all migrated or retired.
+                    for retired in ("pool.jsonl", "things.jsonl",
+                                    "oracle_pairs.jsonl", "weights.jsonl"):
+                        assert not (Path(td) / retired).exists(), (
+                            f"{retired} should be retired"
                         )
-                    assert not (Path(td) / "pool.jsonl").exists(), (
-                        "pool.jsonl was retired in 7.1.1 (pool now in HDF5)"
-                    )
                     assert (Path(td) / "state.h5").exists()
                     import h5py
                     with h5py.File(Path(td) / "state.h5", "r") as h5:
@@ -4487,6 +4429,14 @@ def _smoke_test() -> None:
                         assert h5["pool/keys_array"].maxshape == (None,), (
                             "pool keys_array should be axis-0-extensible"
                         )
+                        # Things ids in HDF5 (S256, chunked)
+                        assert "things" in h5
+                        assert "ids" in h5["things"]
+                        assert h5["things/ids"].shape == (len(state.thing_ids),)
+                        # Oracle pair indices in HDF5 (Int[n,2], chunked)
+                        assert "oracle" in h5
+                        assert "pair_indices" in h5["oracle"]
+                        assert h5["oracle/pair_indices"].shape[1] == 2
                         # Mask datasets chunked + extensible
                         assert h5["masks/tau"].chunks is not None
                         assert h5["masks/tau"].maxshape == (None, None)
@@ -4506,7 +4456,6 @@ def _smoke_test() -> None:
                         "round-trip should preserve state.signature()"
                     )
                     assert np.array_equal(loaded.trajectory, state.trajectory)
-                    assert loaded.trajectory_aux == state.trajectory_aux
                     assert loaded.iteration == state.iteration
                     assert loaded.pool_has_trivial_orbits == state.pool_has_trivial_orbits
                     assert loaded.sigma_derivable_from_tau == state.sigma_derivable_from_tau
@@ -4705,25 +4654,16 @@ def _smoke_test() -> None:
                     f"iteration {s0.iteration} → {s1.iteration}; expected +1"
                 )
 
-                # Trajectory entry recorded; structured-dtype numeric
-                # fields in .trajectory[-1], aux fields (scorer /
-                # objective structural identity) in .trajectory_aux[-1]
-                # per l-trajectory-as-structured-dtype-array.
+                # Trajectory entry recorded as structured-dtype row.
+                # Stage 7.4: all fields in TRAJECTORY_DTYPE (including
+                # source as u1).  No separate aux dict.
                 assert len(s1.trajectory) == len(s0.trajectory) + 1
-                assert len(s1.trajectory_aux) == len(s1.trajectory)
-                last = s1.trajectory[-1]           # np.void (structured row)
-                last_aux = s1.trajectory_aux[-1]   # dict
+                last = s1.trajectory[-1]
                 assert last["iteration"] == s0.iteration + 1
                 assert last["pool_size_before"] == s0.pool.size()
                 assert last["pool_size_after"] == s1.pool.size()
                 assert last["articulated_count"] == pool_growth
-                assert "scorer" in last_aux
-                assert last_aux["scorer"][0] == "scorer"
-                assert "objective" in last_aux
-                # Stage 5.5: no weight_updater field in trajectory aux
-                assert "weight_updater" not in last_aux, (
-                    "weight_updater removed per c-weight-updater-becomes-new-k-articulation"
-                )
+                assert int(last["source"]) == _SOURCE_STEP
                 # TRAJECTORY_DTYPE field names enforce the type at write
                 # time — a typo would fail dtype assignment rather than
                 # silently returning a default (the old .get() contract).
@@ -5018,7 +4958,7 @@ def _smoke_test() -> None:
                       f"oracle scorers vectorized; Thing.remap + "
                       f"_compute_firing_bitmaps shim retired")
                 print(f"    Stage 7.0.9: trajectory is TRAJECTORY_DTYPE "
-                      f"structured array + trajectory_aux for optional "
+                      f"structured array (source field in dtype; aux retired in "
                       f"scorer/objective structural identity")
 
         # Pool invariant: every observable appears as an Atom K
@@ -5032,7 +4972,7 @@ def _smoke_test() -> None:
     else:
         print("    Stage 3 extraction: no source dirs found in cwd; skipping")
 
-    print("Stage 1–7.3 smoke test (fire_pair: pool=computation graph, masks=cache; AND/combinator dispatch transparent via fold): all assertions passed")
+    print("Stage 1–7.4 smoke test (JSONL fully retired; state.h5 is sole output; source in TRAJECTORY_DTYPE; trajectory_aux purged): all assertions passed")
     print(f"  TauSigma invariant κ = τ ⊕ σ holds for all 4 cases × 6 S3 elements")
     print(f"  K inductive type: Atom, Wedge, ZeroK all conform")
     print(f"  Wedge extensional quotient: commutativity + associativity + nilpotency")
